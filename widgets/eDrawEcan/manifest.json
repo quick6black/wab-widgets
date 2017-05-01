@@ -1,0 +1,25 @@
+{
+  "name": "eDrawEcan",
+  "label": "eDraw",
+  "2D": true,
+  "3D": false,
+  "platform": "HTML",
+  "version": "0.0.1",
+  "wabVersion": "2.4",
+  "author": "Esri R&D Center Beijing modified by MAGIS NC and Environment Canterbury GIS Team",
+  "description": "Enhanced draw widget for Web AppBuilder for ArcGIS. Modified from eDraw widget https://github.com/magis-nc/esri-webappbuilder-widget-eDraw",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "inPanel": true,
+    "hasLocale": true,
+    "hasStyle": true,
+    "hasConfig": true,
+    "hasUIFile": true,
+    "hasSettingPage": true,
+    "hasSettingUIFile": true,
+    "hasSettingLocale": true,
+    "hasSettingStyle": true,
+    "IsController": false
+  }
+}

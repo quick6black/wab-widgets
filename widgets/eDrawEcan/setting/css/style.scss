@@ -1,0 +1,62 @@
+.jimu-widget-draw-setting {
+    .add-with-icon {
+        margin-top: 8px;
+        margin-bottom: 3px;
+    }
+
+    .jimu-tab {
+        position: static;
+
+        > .jimu-viewstack {
+            position: static;
+            top: auto;
+            left: auto;
+            right: auto;
+            bottom: auto;
+            height: auto;
+        }
+    }
+
+    .jimu-viewstack {
+        > .view {
+            height: auto;
+        }
+    }
+
+    .tip {
+        color: #596679;
+        font-size: 14px;
+    }
+
+    .add-with-icon.jimu-state-disabled {
+        color: #ccc;
+        cursor: default;
+    }
+
+    .settings {
+        list-style-type: none;
+        display: table;
+        width: 98%;
+
+        li {
+            display: table-row;
+        }
+
+        .input {
+            display: table-cell;
+            width: 49%;
+            text-align: right;
+        }
+
+        .label {
+            display: table-cell;
+            width: 49%;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        .jimu-input {
+            width: 100%;
+        }
+    }
+}
