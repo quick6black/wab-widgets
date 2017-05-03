@@ -1295,9 +1295,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 }
 
                 //Add graphics
-                for (var i = 0, nb = graphics.length; i < nb; i++) {
-                    if (graphics[i]) this.drawBox.drawLayer.add(graphics[i]);
-                }
+                this._pushAddOperation(graphics);
+                //for (var i=0, nb = graphics.length; i < nb; i++){
+                //    if(graphics[i])
+
+                //this.drawBox.drawLayer.add(graphics[i]);
+                //}
 
                 //Show list
                 this.setMode("list");
@@ -1488,28 +1491,147 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                 graphic.setGeometry(polygon);
 
-                var layer = graphic.getLayer();
-                layer.remove(graphic);
-                layer.add(graphic);
+                ///var layer = graphic.getLayer();
+                ///layer.remove(graphic);
+                ///layer.add(graphic);
 
                 commontype = 'polygon';
             }
 
-            if (commontype != 'text' && this.showMeasure.checked) {
-                if (geometry.type == 'point') this._addPointMeasure(geometry, graphic);else if (geometry.type == 'polyline') this._addLineMeasure(geometry, graphic);else if (geometry.type == 'polygon') this._addPolygonMeasure(geometry, graphic);else console.log("Erreur de type : " + geometry.type);
+            if (commontype === 'point') {
+                if (this.showMeasure.checked) {
+                    this._addPointMeasure(geometry, graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
             }
-            if (commontype == 'text' && this.editorSymbolChooser.inputText.value.trim() == "") {
+
+            if (commontype === 'polyline') {
+                if (this.showMeasure.checked) {
+                    this._addLineMeasure(geometry, graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            if (commontype === 'polygon') {
+                if (this.showMeasure.checked) {
+                    this._addPolygonMeasure(geometry, graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            if (commontype === 'text') {
+                if (this.editorSymbolChooser.inputText.value.trim() == "") {
+                    //Message
+                    this.showMessage(this.nls.textWarningMessage, 'warning');
+
+                    //Remove empty feature (text symbol without text)
+                    // graphic.getLayer().remove(graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            /*
+              if (commontype != 'text' && this.showMeasure.checked) {
+                if(geometry.type=='point')
+                    this._addPointMeasure(geometry, graphic);
+                else if(geometry.type=='polyline')
+                    this._addLineMeasure(geometry, graphic);
+                else if(geometry.type=='polygon')
+                    this._addPolygonMeasure(geometry, graphic);
+                else
+                    console.log("Erreur de type : " + geometry.type);
+            }
+              if (commontype == 'text' && this.editorSymbolChooser.inputText.value.trim() == "") {
                 //Message
                 this.showMessage(this.nls.textWarningMessage, 'warning');
-
-                //Remove empty feature (text symbol without text)
+                  //Remove empty feature (text symbol without text)
                 graphic.getLayer().remove(graphic);
             }
+                  */
 
-            this.saveInLocalStorage();
+            //this.saveInLocalStorage();
             this._editorConfig["graphicCurrent"] = graphic;
             this._editorConfig["defaultSymbols"][this._editorConfig['commontype']] = graphic.symbol;
             this.setMode("list");
+        },
+
+        _syncGraphicsToLayers: function _syncGraphicsToLayers() {
+            /*global isRTL*/
+            this._pointLayer.clear();
+            this._polylineLayer.clear();
+            this._polygonLayer.clear();
+            this._labelLayer.clear();
+            var graphics = this._getAllGraphics();
+            array.forEach(graphics, lang.hitch(this, function (g) {
+                var graphicJson = g.toJson();
+                var clonedGraphic = new Graphic(graphicJson);
+                var geoType = clonedGraphic.geometry.type;
+                var layer = null;
+                var isNeedRTL = false;
+
+                if (geoType === 'point') {
+                    if (clonedGraphic.symbol && clonedGraphic.symbol.type === 'textsymbol') {
+                        layer = this._labelLayer;
+                        isNeedRTL = isRTL;
+                    } else {
+                        layer = this._pointLayer;
+                    }
+                } else if (geoType === 'polyline') {
+                    layer = this._polylineLayer;
+                } else if (geoType === 'polygon' || geoType === 'extent') {
+                    layer = this._polygonLayer;
+                }
+
+                if (layer) {
+                    var graphic = layer.add(clonedGraphic);
+                    if (true === isNeedRTL && graphic.getNode) {
+                        var node = graphic.getNode();
+                        if (node) {
+                            //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
+                            //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
+                            domStyle.set(node, "direction", "rtl");
+                        }
+                    }
+                }
+            }));
+        },
+
+        _pushAddOperation: function _pushAddOperation(graphics) {
+            array.forEach(graphics, lang.hitch(this, function (g) {
+                var attrs = g.attributes || {};
+                attrs[this._objectIdName] = this._objectIdCounter++;
+                g.setAttributes(attrs);
+                this._graphicsLayer.add(g);
+            }));
+            //var addOperation = new customOp.Add({
+            //  graphicsLayer: this._graphicsLayer,
+            //  addedGraphics: graphics
+            //});
+            //this._undoManager.add(addOperation);
+            //
+
+
+            // Sync graphics to layers (temp)
+            this._syncGraphicsToLayers();
+        },
+
+        _pushDeleteOperation: function _pushDeleteOperation(graphics) {
+            //var deleteOperation = new customOp.Delete({
+            //    graphicsLayer: this._graphicsLayer,
+            //    deletedGraphics: graphics
+            //});
+            //this._undoManager.add(deleteOperation);
+        },
+
+        _getAllGraphics: function _getAllGraphics() {
+            //return a new array
+            return array.map(this._graphicsLayer.graphics, lang.hitch(this, function (g) {
+                return g;
+            }));
         },
 
         editorEnableMapPreview: function editorEnableMapPreview(bool) {
@@ -2488,6 +2610,29 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this.editorSymbolChooser.destroy();
                 this.editorSymbolChooser = null;
             }
+
+            if (this._graphicsLayer) {
+                this._graphicsLayer.clear();
+                this.map.removeLayer(this._graphicsLayer);
+                this._graphicsLayer = null;
+            }
+            if (this._pointLayer) {
+                this.map.removeLayer(this._pointLayer);
+                this._pointLayer = null;
+            }
+            if (this._polylineLayer) {
+                this.map.removeLayer(this._polylineLayer);
+                this._polylineLayer = null;
+            }
+            if (this._polygonLayer) {
+                this.map.removeLayer(this._polygonLayer);
+                this._polygonLayer = null;
+            }
+            if (this._labelLayer) {
+                this.map.removeLayer(this._labelLayer);
+                this._labelLayer = null;
+            }
+
             this.inherited(arguments);
         },
 
