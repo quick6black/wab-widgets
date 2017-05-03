@@ -6,8 +6,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-sass');
-    var appDir = 'TODO - AFTER CREATING AN APP, PLEASE PUT PATH HERE AND INSERT ENTRY IN SYNC.MAIN.FILES BELOW.';
-    var stemappDir = 'c:/development/WAB-2.4/client/stemapp';
+    var appDir = '[PATH TO WAB APPLICATION USED FOR TESTING e.g. C:/Development/WAB-2.4/server/apps/5]';
+    var stemappDir = '[PATH TO WAB STEMAPP FOLDER e.g. c:/development/WAB-2.4/client/stemapp';
     grunt.initConfig({
         sync: {
             main: {
@@ -16,7 +16,13 @@ module.exports = function (grunt) {
                         cwd: 'dist/',
                         src: '**',
                         dest: stemappDir
-                    }]
+                    },
+                    {
+                        cwd: 'dist/',
+                        src: '**',
+                        dest: appDir
+                    }
+                    ]
             }
         },
         babel: {

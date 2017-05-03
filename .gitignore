@@ -172,4 +172,7 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
-LLUR Application/ECAN.LLUR/App_Data/
+
+# Client tools not required to be tracked
+# Sample files included for equivalent functions 
+Gruntfile.js

@@ -1091,106 +1091,28 @@ name : 'eDraw',
         
         migrateGISmoDrawings : function(json){
             console.log('migrateGISmoDrawings');
-                //then if true corect by adding feature object ahead.
-                        var t = {};
-                        t.features = json;
-                        json = t;
+                //then if true correct by adding feature object ahead.
+                var t = {};
+                t.features = json;
+                json = t;
+
                 //then correct the colors
                 //for every symbol
-                //get background color change to rgb, add as color[rgb]
-                // array.forEach(arrayObject, callback, fromIndex);
+                // get background color change to rgb, add as color[rgb]
                  dojo.forEach(json.features , lang.hitch(this,function(graphic){
                     //console.log('test existence of symbol');
-                    if(graphic.symbol){
-                        if(graphic.symbol.color){
-                            graphic.symbol.color = this.convertDecimalColor2RGB(graphic.symbol.color);
-                        }
-                        if(graphic.symbol.backgroundColor && !graphic.symbol.textFormat){
-                            //console.log('change to color');
-                            graphic.symbol.color = this.convertDecimalColor2RGB(graphic.symbol.backgroundColor);
-                        }
-                        if(graphic.symbol.outline && graphic.symbol.outline.color){
-                            //console.log('change to color');
-                            graphic.symbol.outline.color = this.convertDecimalColor2RGB(graphic.symbol.outline.color);
-                        }
-                        if(graphic.symbol.borderColor){
-                            console.log('change to color');
-                            graphic.symbol.outline = {};
-                            graphic.symbol.outline.color = this.convertDecimalColor2RGB(graphic.symbol.borderColor);
-                            //graphic.symbol.outline.width = 
-                            //graphic.symbol.outline.type =graphic.symbol.symboltype;
-                            //graphic.symbol.outline.style =    
-                        }
-
-                        //check types
-                        if(graphic.symbol.symboltype){
-                            if(graphic.symbol.symboltype=="SimpleFillSymbol"){
-                            graphic.symbol.type = "esriSFS";    
-                            graphic.symbol.style = "esriSFSSolid";
-                            }
-                        }
-
-
-                        if(graphic.symbol.symboltype){
-                            if(graphic.symbol.symboltype=="SimpleLineSymbol"){
-                            graphic.symbol.outline = {};
-                            if(graphic.symbol.color)
-                            graphic.symbol.outline.color = this.convertDecimalColor2RGB(graphic.symbol.color);
-                            graphic.symbol.outline.type = "esriSLS";
-                            graphic.symbol.outline.style = "esriSLSSolid";
-                            }
-                        }
-
-                        if(graphic.symbol.outline){
-                            if(graphic.symbol.outline.symboltype=="SimpleLineSymbol"){
-                            if(graphic.symbol.color)
-                            graphic.symbol.outline.color = this.convertDecimalColor2RGB(graphic.symbol.color);
-                            graphic.symbol.outline.type = "esriSLS";
-                            graphic.symbol.outline.style = "esriSLSSolid";
-                            }
-                        }
-
-                        //check for text and convert
-                        if(graphic.symbol.textFormat){
-                            graphic.symbol.type = "esriTS";
-                            graphic.symbol.verticalAlignment = "middle";
-                            graphic.symbol.horizontalAlignment = "center";
-                            graphic.symbol.angle = 0;
-                            graphic.symbol.xoffset = 0;
-                            graphic.symbol.yoffset = 0;
-                            graphic.symbol.rotated = false;
-                            graphic.symbol.kerning = true;
-                            graphic.symbol.font ={};
-                            graphic.symbol.font.size=graphic.symbol.textFormat.size;
-                            graphic.symbol.font.style="normal";
-                            graphic.symbol.font.variant= "normal";
-                            graphic.symbol.font.decoration= "none";
-                            graphic.symbol.font.weight="normal";
-                            graphic.symbol.font.family=graphic.symbol.textFormat.font;
-                            if(graphic.symbol.color)
-                            graphic.symbol.color = this.convertDecimalColor2RGB(graphic.symbol.color);
-                        }
-
-                    //alpha
-                    if(graphic.symbol.alpha){
-                        if (graphic.symbol.color){
-                            graphic.symbol.color[3] = 255*graphic.symbol.alpha;
-                        }else
-                        {
-                            graphic.symbol.color = [0,0,0,0];
-                            graphic.symbol.color[3] = 255*graphic.symbol.alpha;
-                        }
-                        }   
+                    if(graphic.symbol) {
+                        graphic.symbol = this.convertGISMoSymbol(graphic.symbol);
                     } //end symbol
 
                     if(graphic.attributes._title){
                         //add title
                         graphic.attributes.name = graphic.attributes._title;
                     }
+
                     if(graphic.attributes._content){
                         graphic.attributes.description = graphic.attributes._content;
                     }
-                    
 
                 }));
             
@@ -1198,24 +1120,241 @@ name : 'eDraw',
             return json;
         },
 
-        convertDecimalColor2RGB : function (decimalColor){
-                console.log('convertDecimalColor2RGB color',decimalColor);
+        convertDecimalColor2RGB : function (decimalColor, alpha){
+            console.log('convertDecimalColor2RGB color',decimalColor);
 
-                //'Convert LONG to RGB:
-                var b = decimalColor / 65536;
-                var g = (decimalColor - b * 65536) / 256;
-                var r = decimalColor - b * 65536 - g * 256;
+            var a = Math.round((alpha || 1) * 255);
+            if (decimalColor === undefined) {
+                console.log('convertDecimalColor2RGB default to black');
+                return [0,0,0,a];
+            }
 
-                //create array
-                colorarray = [];
-                colorarray[0] = r;
-                colorarray[1] = g;
-                colorarray[2] = b;
-                colorarray[3] = 255;
+            //'Convert HEX to RGB:
+            var hex = decimalColor.toString(16);
+            if (hex.length < 6) {
+                hex = "000000" + hex;
+                hex = hex.substr(hex.length - 6);
+            }
 
-                console.log('converted DecimalColor2RGB color',decimalColor,colorarray);
-                return colorarray;
- 
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+            var r = parseInt(result[1], 16);
+            var g = parseInt(result[2], 16);
+            var b = parseInt(result[3], 16);
+
+            //create array
+            var colorarray = [];
+            colorarray[0] = r || 0;
+            colorarray[1] = g || 0;
+            colorarray[2] = b || 0;
+            colorarray[3] = a;
+
+            console.log('converted DecimalColor2RGB color',decimalColor,colorarray);
+            return colorarray;
+        },
+
+        convertStyleType : function (symbolType, styleType) {
+            console.log('convertStyleType symboltype styletype',symbolType, styleType);
+
+            switch (symbolType) {
+                case 'SimpleMarkerSymbol':
+                    switch (styleType) {
+                        case 'cross':
+                            return 'esriSMSCross'
+                            break;
+
+                        case 'diamond':
+                            return 'esriSMSDiamond'
+                            break;
+
+                        case 'square':
+                            return 'esriSMSSquare'
+                            break;
+
+                        case 'x':
+                            return 'esriSMSX'
+                            break;
+
+                        case 'circle':
+                        case 'triangle':
+                        default:
+                            return 'esriSMSCircle'
+                            break;
+                    }
+                    break;
+
+                case 'SimpleLineSymbol':
+                    switch (styleType) {
+                        case 'dash':
+                            return 'esriSLSDash'
+                            break;
+
+                        case 'dashdot':
+                        case 'dashdotdot':
+                            return 'esriSLSDashDotDot'
+                            break;
+
+                        case 'dot':
+                            return 'esriSLSDot'
+                            break;
+
+                        case 'none':
+                            return 'esriSLSNull'
+                            break;
+
+                        case 'solid':
+                        default:
+                            return 'esriSLSSolid'
+                            break;
+                    }
+                    break;
+
+                case 'SimpleFillSymbol':
+                    switch (styleType) {
+                        case 'backwarddiagonal':
+                            return 'esriSFSBackwardDiagonal'
+                            break;
+
+                        case 'cross':
+                            return 'esriSFSCross'
+                            break;
+
+                        case 'diagonalcross':
+                            return 'esriSFSDiagonalCross'
+                            break;
+
+                        case 'forwarddiagonal':
+                            return 'esriSFSForwardDiagonal'
+                            break;
+
+                        case 'horizontal':
+                            return 'esriSFSHorizontal'
+                            break;
+
+                        case 'null':
+                            return 'esriSFSNull'
+                            break;
+
+                        case 'vertical':
+                            return 'esriSFSVertical'
+                            break;
+
+                        case 'solid':
+                        default:
+                            return 'esriSFSSolid'
+                            break;
+                    }
+                    break;
+
+                default:
+                    return null;
+                    break;
+            }
+        },
+
+        convertGISMoSymbol : function (json) {
+            var symbol = {};
+
+            switch (json.symboltype) {
+                case 'SimpleMarkerSymbol':
+                    symbol.type = 'esriSMS';
+                    symbol.style = this.convertStyleType(json.symboltype,json.style);
+                    symbol.color = this.convertDecimalColor2RGB(json.color, json.alpha);
+                    symbol.size = json.size || 10;
+                    symbol.angle = 0;
+                    symbol.xoffset = 0;
+                    symbol.yoffset = 0;
+                    symbol.outline = {};
+
+                    if (json.outline.color) {
+                        symbol.outline.color = this.convertDecimalColor2RGB(json.outline.color, json.outline.alpha);
+                    } else {
+                        symbol.outline.color = [0,0,0,255];
+                    }
+                    symbol.outline.width = json.outline.width;
+                    symbol.outline.style = this.convertStyleType(json.symboltype,json.outline.symboltype);
+
+
+                    break;
+
+                case 'SimpleLineSymbol':
+                    symbol.type = 'esriSLS';
+                    symbol.style = this.convertStyleType(json.symboltype,json.style);
+                    symbol.color = this.convertDecimalColor2RGB(json.color, json.alpha);
+                    symbol.width = json.width || 10;
+
+                    break;
+
+                case 'SimpleFillSymbol':
+                    symbol.type = 'esriSFS';
+                    symbol.style = this.convertStyleType(json.symboltype,json.style);
+                    symbol.color = this.convertDecimalColor2RGB(json.color, json.alpha);
+                    symbol.outline = this.convertGISMoSymbol(json.outline);
+
+                    break;
+
+                case 'TextSymbol':
+                    symbol.type = 'esriTS';
+
+                    symbol.text = json.text;
+
+                    if (json.textFormat.color !== undefined) {
+                        symbol.color = this.convertDecimalColor2RGB(json.textFormat.color, json.alpha);
+                    } else {
+                        symbol.color = [0,0,0,json.alpha * 255];
+                    }
+
+                    // Parse background / borders as halos
+                    if (json.border === 'true' && json.backgroundColor)  {
+                        symbol.haloSize = 5;
+                        symbol.haloColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
+                    }
+
+                    //if (json.border === 'true' && json.backgroundColor) 
+                    //    symbol.backgroundColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
+
+                    //if (json.border === 'true' && json.borderColor) 
+                    //    symbol.borderLineColor = this.convertDecimalColor2RGB(json.borderColor, json.alpha);
+
+                    //symbol.verticalAlignment = json.placement || 'middle';
+                    //symbol.horizontalAlignment = json.textFormat.align || 'center';
+                    symbol.angle = 0;
+                    symbol.xoffset = 0;
+                    symbol.yoffset = 0;
+                    symbol.kerning = true;
+
+                    symbol.font = {};
+                    symbol.font.size = json.textFormat.size;
+
+                    if (json.textFormat.italic === true) {
+                        symbol.font.style = "italic";
+                    } else  {
+                        symbol.font.style = "normal";
+                    }
+
+                    if (json.textFormat.underline === true) {
+                        symbol.font.decoration = "underline";
+                    } else  {
+                        symbol.font.decoration = "none";
+                    }
+
+
+                    if (json.textFormat.bold === true) {
+                        symbol.font.weight = "bold";
+                    } else  {
+                        symbol.font.weight = "normal";
+                    }
+
+                    symbol.font.family = json.textFormat.font;
+
+                    break;
+
+                default:
+                    // Do Nothing
+                    break;
+            }
+
+            return symbol;
         },
 
         importJsonContent : function (json, nameField, descriptionField) {
@@ -1227,11 +1366,11 @@ name : 'eDraw',
                 if (!json.features) {
                     //TEST FOR OLD GISmo FILE Structure i.e. no feature array , just array of objects with graphics,symbols and attributes
                     if (json[0].geometry && json[0].symbol && json[0].attributes ) {
-                    json = this.migrateGISmoDrawings(json);
+                        json = this.migrateGISmoDrawings(json);
                     }
-                    else {
-                    this.showMessage(this.nls.importErrorFileStructure, 'error');
-                    return false;
+                        else {
+                        this.showMessage(this.nls.importErrorFileStructure, 'error');
+                        return false;
                     }
                 }
 
