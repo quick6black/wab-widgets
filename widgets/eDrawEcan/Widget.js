@@ -18,6 +18,7 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidget',
         'esri/config',
+        'dojo/on',
         'dojo/Deferred',
         'jimu/exportUtils',
         'esri/graphic',
@@ -41,7 +42,6 @@ define([
         'esri/geometry/geodesicUtils',
         'esri/geometry/geometryEngine',
         'dojo/_base/lang',
-        'dojo/on',
         'dojo/_base/html',
         'dojo/sniff',
         'dojo/_base/Color',
@@ -54,11 +54,14 @@ define([
         'jimu/dijit/SymbolChooser',
         'jimu/dijit/DrawBox',
         'jimu/dijit/Message',
+        'jimu/dijit/LoadingIndicator',        
         'jimu/utils',
         'jimu/symbolUtils',
         'libs/storejs/store',
         'esri/InfoTemplate',
         'esri/layers/GraphicsLayer',
+        'esri/layers/FeatureLayer',
+        'jimu/LayerInfos/LayerInfos',        
         './proj4',
         'jimu/featureActions/SaveToMyContent' ///ECAN
     ],
@@ -67,6 +70,7 @@ function(
     _WidgetsInTemplateMixin, 
     BaseWidget, 
     esriConfig, 
+    on,
     Deferred, 
     exportUtils, 
     Graphic, 
@@ -90,7 +94,6 @@ function(
     geodesicUtils, 
     geometryEngine, 
     lang, 
-    on,
     html, 
     has, 
     Color, 
@@ -103,11 +106,14 @@ function(
     SymbolChooser, 
     DrawBox, 
     Message, 
+    LoadingIndicator,
     jimuUtils, 
     jimuSymbolUtils, 
     localStore, 
     InfoTemplate, 
     GraphicsLayer, 
+    FeatureLayer,
+    LayerInfos,
     proj4js,
     SaveToMyContent,
     LayerLoader
@@ -116,11 +122,20 @@ function(
   /*jshint unused: false*/
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
-name : 'eDraw',
+        name : 'eDraw',
         baseClass : 'jimu-widget-edraw-ecan',
 
         _gs : null,
         _defaultGsUrl : '//tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer',
+
+        _graphicsLayer: null,
+        _objectIdCounter: 1,
+        _objectIdName: 'OBJECTID',
+        _objectIdType: 'esriFieldTypeOID',
+        _pointLayer: null,
+        _polylineLayer: null,
+        _polygonLayer: null,
+        _labelLayer: null,
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -253,7 +268,6 @@ name : 'eDraw',
 
             this.map.infoWindow.setFeatures([graphic]);
             this.map.infoWindow.show(center);
-
         },
 
         _clickHandler : false,
@@ -1016,9 +1030,11 @@ name : 'eDraw',
         },
 
         ///////////////////////// IMPORT/EXPORT METHODS ///////////////////////////////////////////////////////////
-        importMessage:false,
-        importInput:false,
-        launchImportFile:function(){
+        importMessage : false,
+        
+        importInput : false,
+
+        launchImportFile : function(){
             if (!window.FileReader) {
                 this.showMessage(this.nls.importErrorMessageNavigator, 'error');
                 return false;
@@ -1310,14 +1326,6 @@ name : 'eDraw',
                         symbol.haloColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
                     }
 
-                    //if (json.border === 'true' && json.backgroundColor) 
-                    //    symbol.backgroundColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
-
-                    //if (json.border === 'true' && json.borderColor) 
-                    //    symbol.borderLineColor = this.convertDecimalColor2RGB(json.borderColor, json.alpha);
-
-                    //symbol.verticalAlignment = json.placement || 'middle';
-                    //symbol.horizontalAlignment = json.textFormat.align || 'center';
                     symbol.angle = 0;
                     symbol.xoffset = 0;
                     symbol.yoffset = 0;
@@ -1520,7 +1528,6 @@ name : 'eDraw',
             var savetomycontent = new SaveToMyContent();
             savetomycontent.onExecute(ds.featureSet, null);
             //this.launchExport(true);
-
         },
 
         launchExport : function (only_graphics_checked) {
@@ -1573,11 +1580,13 @@ name : 'eDraw',
 
             this.setMode("list");
         },
+
         editorOnClickEditCancelButon : function () {
             this.editorResetGraphic();
             this.editorActivateGeometryEdit(false);
             this.setMode("list");
         },
+
         editorOnClickResetCancelButon : function () {
             this.editorResetGraphic();
             this.setMode("edit");
@@ -1776,7 +1785,6 @@ name : 'eDraw',
                             }
                         }));
             }
-
         },
 
         editorUpdateMapPreview : function (symbol) {
@@ -1788,7 +1796,6 @@ name : 'eDraw',
                 this._editorConfig["phantom"]["symbol"] = symbol;
                 this._editorConfig["phantom"]["point"].setSymbol(symbol);
             }
-
         },
 
         editorOnClickAddCancelButon : function () {
@@ -2461,7 +2468,6 @@ name : 'eDraw',
                     widget.showMessage(widget.nls.localLoading);
                 }, 200);
             })(this);
-
         },
 
         _initDrawingPopupAndClick : function () {
@@ -2480,7 +2486,6 @@ name : 'eDraw',
 
             //Allow click
             this.allowPopup(true);
-
         },
 
         _initListDragAndDrop : function () {
@@ -2586,15 +2591,102 @@ name : 'eDraw',
                 }));
         },
 
+
+        //////////////////////////
+        /// ECAN CODE
+        
+        _initLayers : function () {
+            this._graphicsLayer = new GraphicsLayer();
+
+            if(this.config.isOperationalLayer){
+                var layerDefinition = {
+                    "name": "",
+                    "geometryType": "",
+                    "fields": [{
+                    "name": this._objectIdName,
+                    "type": this._objectIdType,
+                    "alias": this._objectIdName
+                    }]
+                };
+
+                var pointDefinition = lang.clone(layerDefinition);
+                pointDefinition.name = this.nls.points;//this.label + "_" +
+                pointDefinition.geometryType = "esriGeometryPoint";
+                this._pointLayer = new FeatureLayer({
+                    layerDefinition: pointDefinition,
+                    featureSet: null
+                });
+
+                var polylineDefinition = lang.clone(layerDefinition);
+                polylineDefinition.name = this.nls.lines;
+                polylineDefinition.geometryType = "esriGeometryPolyline";
+                this._polylineLayer = new FeatureLayer({
+                    layerDefinition: polylineDefinition,
+                    featureSet: null
+                });
+
+                var polygonDefinition = lang.clone(layerDefinition);
+                polygonDefinition.name = this.nls.areas;
+                polygonDefinition.geometryType = "esriGeometryPolygon";
+                this._polygonLayer = new FeatureLayer({
+                    layerDefinition: polygonDefinition,
+                    featureSet: null
+                });
+
+                var labelDefinition = lang.clone(layerDefinition);
+                labelDefinition.name = this.nls.text;
+                labelDefinition.geometryType = "esriGeometryPoint";
+                this._labelLayer = new FeatureLayer({
+                    layerDefinition: labelDefinition,
+                    featureSet: null
+                });
+
+                var loading = new LoadingIndicator();
+                loading.placeAt(this.domNode);
+
+                LayerInfos
+                    .getInstance(this.map, this.map.itemInfo)
+                    .then(lang.hitch(this, function(layerInfos){
+                        if(!this.domNode){
+                          return;
+                        }
+
+                        loading.destroy();
+                        var layers = [this._polygonLayer, this._polylineLayer,
+                            this._pointLayer, this._labelLayer];
+                        layerInfos.addFeatureCollection(layers, this.nls.drawingCollectionName);
+                    }), lang.hitch(this, function(err){
+                        loading.destroy();
+                    console.error("Can not get LayerInfos instance", err);
+                    }));
+            } else {
+                this._pointLayer = new GraphicsLayer();
+                this._polylineLayer = new GraphicsLayer();
+                this._polygonLayer = new GraphicsLayer();
+                this._labelLayer = new GraphicsLayer();
+                this.map.addLayer(this._polygonLayer);
+                this.map.addLayer(this._polylineLayer);
+                this.map.addLayer(this._pointLayer);
+                this.map.addLayer(this._labelLayer);
+            }
+        },
+
         //////////////////////////// WIDGET CORE METHODS ///////////////////////////////////////////////////////////////////////////////////////
 
         postMixInProperties : function () {
             this.inherited(arguments);
+
+            // ADD in check for is operational layer
+            this.config.isOperationalLayer = !!this.config.isOperationalLayer;
+
             this._resetUnitsArrays();
         },
 
         postCreate : function () {
             this.inherited(arguments);
+
+            // Set up the data layers
+            this._initLayers();
 
             //Create symbol chooser
             this.editorSymbolChooser = new SymbolChooser({
@@ -2602,7 +2694,7 @@ name : 'eDraw',
                     "type" : "text",
                     "symbol" : new SimpleMarkerSymbol()
                 },
-                    this.editorSymbolChooserDiv);
+                this.editorSymbolChooserDiv);
 
             this.drawBox.setMap(this.map);
 
@@ -2644,7 +2736,6 @@ name : 'eDraw',
                     this.editorTextPlusFontFamilyNode.set("options", this.config.drawPlus.fontFamilies).reset();
                 }
             }
-
         },
 
         onOpen : function () {

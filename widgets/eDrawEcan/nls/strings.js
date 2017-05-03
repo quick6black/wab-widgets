@@ -102,7 +102,12 @@ define({
 		west:'W',
 		east:'E',
 		north:'N',
-		south:'S'
+		south:'S',
+		drawingCollectionName: "Drawing Features",
+    	results: "Results",
+        points: "Points",
+	    lines: "Lines",
+	    areas: "Areas"				
 	}),
 	"ar" : 1,
 	"cs" : 1,
