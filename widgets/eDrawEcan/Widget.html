@@ -4,10 +4,10 @@
         <img title="${nls.editDrawTitle}" data-dojo-attach-point="menuEditButton" class="menu-item-active hidden" src="${folderUrl}images/edit.png" />
         <img title="${nls.listDrawTitle}" data-dojo-attach-point="menuListButton" class="menu-item" src="${folderUrl}images/list.png" data-dojo-attach-event="onclick:menuOnClickList" />
     </div>
-    <span class="hide-box">
+    <!--<span class="hide-box">
         ${nls.hideOption}
         <input type="checkbox" data-dojo-attach-point="hideCheckbox" data-dojo-attach-event="onclick:onHideCheckboxClick"/>
-  </span>
+  </span>-->
     <div data-dojo-attach-point="settingAllContent">
 
         <div data-dojo-attach-point="addSection">
@@ -146,15 +146,33 @@
                         <span title="${nls.zoomAllLabel}" class="zoom blue-button" data-dojo-attach-event="onclick:zoomAll">&nbsp;</span>
                         <span title="${nls.copyLabel}" class="copy blue-button" data-dojo-attach-event="onclick:copy">&nbsp;</span>
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
-                        <span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionInFile">&nbsp;</span>
+                        <span title="${nls.exportLabel}" class="save blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
+
                         <!-- ECAN -->
-                       <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
+                        <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
                     </div>
-                    <!-- ECAN -->
-                  <!--   <span title="Load from My Content" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span> -->
+                        <!-- ECAN -->
+                        <!--   <span title="Load from My Content" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span> -->
 					<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>
                 </div>
             </div>
         </div>
+
+        <div data-dojo-attach-point="saveSection">
+            <h2>${nls.saveDialogTitle}</h2>
+            <div class="content">
+                <label for="fileNameField">File Name:</label> 
+                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" class="jimu-input" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" /><span>.json</span>
+            </div>
+            <div class="footer">
+                <div>
+                    <input type="button" class="jimu-input blue-button" value="${nls.saveButton}" data-dojo-attach-event="onclick:saveDialogSave" />
+                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:saveDialogCancel" />
+                    <input type="button" class="jimu-input grey-button" value="${nls.resetButton}" data-dojo-attach-event="onclick:saveDialogReset" />
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </div>

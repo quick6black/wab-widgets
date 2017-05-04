@@ -18,6 +18,7 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidget',
         'esri/config',
+        'dojo/on',
         'dojo/Deferred',
         'jimu/exportUtils',
         'esri/graphic',
@@ -41,7 +42,6 @@ define([
         'esri/geometry/geodesicUtils',
         'esri/geometry/geometryEngine',
         'dojo/_base/lang',
-        'dojo/on',
         'dojo/_base/html',
         'dojo/sniff',
         'dojo/_base/Color',
@@ -50,15 +50,21 @@ define([
         'dojo/dom',
         'dijit/form/Select',
         'dijit/form/NumberSpinner',
+        'dijit/form/TextBox', 
+        'dijit/form/ValidationTextBox',
+        'dijit/form/Button',
         'jimu/dijit/ViewStack',
         'jimu/dijit/SymbolChooser',
         'jimu/dijit/DrawBox',
         'jimu/dijit/Message',
+        'jimu/dijit/LoadingIndicator',        
         'jimu/utils',
         'jimu/symbolUtils',
         'libs/storejs/store',
         'esri/InfoTemplate',
         'esri/layers/GraphicsLayer',
+        'esri/layers/FeatureLayer',
+        'jimu/LayerInfos/LayerInfos',        
         './proj4',
         'jimu/featureActions/SaveToMyContent' ///ECAN
     ],
@@ -67,6 +73,7 @@ function(
     _WidgetsInTemplateMixin, 
     BaseWidget, 
     esriConfig, 
+    on,
     Deferred, 
     exportUtils, 
     Graphic, 
@@ -90,7 +97,6 @@ function(
     geodesicUtils, 
     geometryEngine, 
     lang, 
-    on,
     html, 
     has, 
     Color, 
@@ -99,28 +105,45 @@ function(
     dom, 
     Select, 
     NumberSpinner, 
+    TextBox,
+    ValidationTextBox,
+    Button,
     ViewStack, 
     SymbolChooser, 
     DrawBox, 
     Message, 
+    LoadingIndicator,
     jimuUtils, 
     jimuSymbolUtils, 
     localStore, 
     InfoTemplate, 
     GraphicsLayer, 
+    FeatureLayer,
+    LayerInfos,
     proj4js,
     SaveToMyContent,
     LayerLoader
 ) {
+    /*jshint unused: false*/
+    return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
-  /*jshint unused: false*/
-  return declare([BaseWidget, _WidgetsInTemplateMixin], {
-
-name : 'eDraw',
+        name : 'eDraw',
         baseClass : 'jimu-widget-edraw-ecan',
 
         _gs : null,
         _defaultGsUrl : '//tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer',
+
+        _graphicsLayer: null,
+        _objectIdCounter: 1,
+        _objectIdName: 'OBJECTID',
+        _objectIdType: 'esriFieldTypeOID',
+
+        _pointLayer: null,
+        _polylineLayer: null,
+        _polygonLayer: null,
+        _labelLayer: null,
+
+        exportFileName: null,
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -185,7 +208,7 @@ name : 'eDraw',
 
                 //Generate list and
                 this.listGenerateDrawTable();
-                var nb_draws = this.drawBox.drawLayer.graphics.length;
+                var nb_draws = this._graphicsLayer.graphics.length;
                 var display = (nb_draws > 0) ? 'block' : 'none';
                 html.setStyle(this.allActionsNode, 'display', display);
                 this.tableTH.innerHTML = nb_draws + ' ' + this.nls.draws;
@@ -196,6 +219,13 @@ name : 'eDraw',
                 this.TabViewStack.switchView(this.listSection);
 
                 break;
+
+            case 'save':
+
+                this.TabViewStack.switchView(this.saveSection);
+
+                break;
+
             }
         },
 
@@ -253,17 +283,26 @@ name : 'eDraw',
 
             this.map.infoWindow.setFeatures([graphic]);
             this.map.infoWindow.show(center);
-
         },
 
-        _clickHandler : false,
+        _clickPointHandler : false,
+        _clickPolylineHandler : false,
+        _clickPolygonHandler : false,
+        _clickLabelHandler : false,
+
         allowPopup : function (bool) {
             this.map.setInfoWindowOnClick(bool);
 
-            if (!bool && this._clickHandler) {
-                dojo.disconnect(this._clickHandler);
+            if (!bool && this._clickPointHandler) {
+                dojo.disconnect(this._clickPointHandler);
+                dojo.disconnect(this._clickPolylineHandler);
+                dojo.disconnect(this._clickPolygonHandler);
+                dojo.disconnect(this._clickLabelHandler);
             } else {
-                this._clickHandler = this.drawBox.drawLayer.on("click", this._onDrawClick);
+                this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
+                this._clickPolylineHandler = this._polylineLayer.on("click", this._onDrawClick);
+                this._clickPolygonHandler = this._polygonLayer.on("click", this._onDrawClick);
+                this._clickLabelHandler = this._labelLayer.on("click", this._onDrawClick);
             }
         },
 
@@ -275,12 +314,12 @@ name : 'eDraw',
 
         getCheckedGraphics : function (returnAllIfNoneChecked) {
             var graphics = [];
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++)
-                if (this.drawBox.drawLayer.graphics[i].checked)
-                    graphics.push(this.drawBox.drawLayer.graphics[i]);
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++)
+                if (this._graphicsLayer.graphics[i].checked)
+                    graphics.push(this._graphicsLayer.graphics[i]);
 
             if (returnAllIfNoneChecked && graphics.length == 0)
-                return this.drawBox.drawLayer.graphics;
+                return this._graphicsLayer.graphics;
             return graphics;
         },
 
@@ -309,7 +348,9 @@ name : 'eDraw',
             for(var i=0;i<nb;i++){              
                 var g = new Graphic(graphics[i].toJson()); //Get graphic clone
                 g.attributes.name += this.nls.copySuffix; //Suffix name
-                this.drawBox.drawLayer.add(g);
+
+                this._pushAddOperation([g]);
+                
                 if(graphics[i].measure && graphics[i].measure.graphic){
                     if (g.geometry.type=='polygon')
                         this._addPolygonMeasure(g.geometry, g);
@@ -387,16 +428,16 @@ name : 'eDraw',
 
         _removeGraphic : function (graphic) {
             if (graphic.measure && graphic.measure.graphic) {
-                // graphic.measure.graphic.measureParent = false; //Remove link between graphic and it's measure label
-                this.drawBox.drawLayer.remove(graphic.measure.graphic); //Delete measure label
+                this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
                 graphic.measureParent.measure = false;
             }
-            this.drawBox.drawLayer.remove(graphic);
+            this._graphicsLayer.remove(graphic);
+            this._syncGraphicsToLayers();
         },
 
         drawingsGetJson : function (asString, onlyChecked) {
-            var graphics = (onlyChecked) ? this.getCheckedGraphics(false) : this.drawBox.drawLayer.graphics;
+            var graphics = (onlyChecked) ? this.getCheckedGraphics(false) : this._graphicsLayer.graphics;
             
             var nb_graphics = graphics.length;
             
@@ -408,7 +449,8 @@ name : 'eDraw',
                 "displayFieldName" : "",
                 "fieldAliases" : {},
                 "spatialReference" : this.map.spatialReference.toJson(),
-                "fields" : []
+                "fields" : [
+                ]
             };
 
             var features_with_measure = [];
@@ -451,10 +493,13 @@ name : 'eDraw',
         menuOnClickAdd : function () {
             this.setMode("add1");
         },
+
         menuOnClickList : function () {
             this.setMode("list");
         },
 
+        /*        
+        /// SORT THIS - REMOVE THIS FUNCTION AS NO LONGER NEEDED
         onHideCheckboxClick : function () {
             var display = (this.hideCheckbox.checked) ? 'none' : 'block';
 
@@ -467,11 +512,12 @@ name : 'eDraw',
             else
                 this.onOpen();
         },
+        */
 
         ///////////////////////// LIST METHODS ///////////////////////////////////////////////////////////
         listGenerateDrawTable : function () {
             //Generate draw features table
-            var graphics = this.drawBox.drawLayer.graphics;
+            var graphics = this._graphicsLayer.graphics;
             var nb_graphics = graphics.length;
 
             //Table
@@ -572,15 +618,15 @@ name : 'eDraw',
         },
 
         switch2DrawingGraphics : function (i1, i2) {
-            var g1 = this.drawBox.drawLayer.graphics[i1];
-            var g2 = this.drawBox.drawLayer.graphics[i2];
+            var g1 = this._graphicsLayer.graphics[i1];
+            var g2 = this._graphicsLayer.graphics[i2];
 
             if (!g1 || !g2)
                 return false;
 
             //Switch graphics
-            this.drawBox.drawLayer.graphics[i1] = g2;
-            this.drawBox.drawLayer.graphics[i2] = g1;
+            this._graphicsLayer.graphics[i1] = g2;
+            this._graphicsLayer.graphics[i2] = g1;
 
             //Redraw in good order
             var start_i = (i1 < i2) ? i1 : i2;
@@ -596,19 +642,19 @@ name : 'eDraw',
                 return;
 
             //get from graphic
-            var from_graphic = this.drawBox.drawLayer.graphics[from_i];
+            var from_graphic = this._graphicsLayer.graphics[from_i];
 
             //Move graphics up or down
             if (from_i < to_i) {
-                for (var i = from_i, nb = this.drawBox.drawLayer.graphics.length; i < to_i && i < nb; i++)
-                    this.drawBox.drawLayer.graphics[i] = this.drawBox.drawLayer.graphics[i + 1];
+                for (var i = from_i, nb = this._graphicsLayer.graphics.length; i < to_i && i < nb; i++)
+                    this._graphicsLayer.graphics[i] = this._graphicsLayer.graphics[i + 1];
             } else {
                 for (var i = from_i, nb = this.drawBox.drawLayer.graphics.length; i > to_i && i > 0; i--)
-                    this.drawBox.drawLayer.graphics[i] = this.drawBox.drawLayer.graphics[i - 1];
+                    this._graphicsLayer.graphics[i] = this._graphicsLayer.graphics[i - 1];
             }
 
             //Copy from graphic in destination
-            this.drawBox.drawLayer.graphics[to_i] = from_graphic;
+            this._graphicsLayer.graphics[to_i] = from_graphic;
 
             //Redraw in good order
             var start_i = (from_i < to_i) ? from_i : to_i;
@@ -619,16 +665,17 @@ name : 'eDraw',
         _redrawGraphics : function (start_i) {
             if (!start_i)
                 start_i = 0;
-            var nb = this.drawBox.drawLayer.graphics.length;
+            var nb = this._graphicsLayer.graphics.length;
             for (var i = 0; i < nb; i++) {
                 if (i >= start_i) {
-                    var g = this.drawBox.drawLayer.graphics[i];
+                    var g = this._graphicsLayer.graphics[i];
                     var shape = g.getShape();
                     if (shape)
                         shape.moveToFront();
                 }
             }
 
+            this._syncGraphicsToLayers();
         },
 
         listUpdateAllCheckbox : function (evt) {
@@ -637,8 +684,8 @@ name : 'eDraw',
                 var all_checked = true;
                 var all_unchecked = true;
 
-                for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                    if (this.drawBox.drawLayer.graphics[i].checked)
+                for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                    if (this._graphicsLayer.graphics[i].checked)
                         all_unchecked = false;
                     else
                         all_checked = false;
@@ -667,8 +714,8 @@ name : 'eDraw',
             var cb = evt.target;
             var check = evt.target.checked;
 
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                this.drawBox.drawLayer.graphics[i].checked = check;
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                this._graphicsLayer.graphics[i].checked = check;
                 dom.byId('draw-action-checkclick--' + i).checked = check;
             }
             this.listCheckboxAll.checked = check;
@@ -685,7 +732,7 @@ name : 'eDraw',
             var type = tab[0];
             var i = parseInt(tab[1]);
 
-            var g = this.drawBox.drawLayer.graphics[i];
+            var g = this._graphicsLayer.graphics[i];
             this._editorConfig["graphicCurrent"] = g;
 
             switch (type) {
@@ -1016,9 +1063,11 @@ name : 'eDraw',
         },
 
         ///////////////////////// IMPORT/EXPORT METHODS ///////////////////////////////////////////////////////////
-        importMessage:false,
-        importInput:false,
-        launchImportFile:function(){
+        importMessage : false,
+        
+        importInput : false,
+
+        launchImportFile : function(){
             if (!window.FileReader) {
                 this.showMessage(this.nls.importErrorMessageNavigator, 'error');
                 return false;
@@ -1113,7 +1162,6 @@ name : 'eDraw',
                     if(graphic.attributes._content){
                         graphic.attributes.description = graphic.attributes._content;
                     }
-
                 }));
             
             console.log('converted GISmo drawings',json);
@@ -1310,14 +1358,6 @@ name : 'eDraw',
                         symbol.haloColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
                     }
 
-                    //if (json.border === 'true' && json.backgroundColor) 
-                    //    symbol.backgroundColor = this.convertDecimalColor2RGB(json.backgroundColor, json.alpha);
-
-                    //if (json.border === 'true' && json.borderColor) 
-                    //    symbol.borderLineColor = this.convertDecimalColor2RGB(json.borderColor, json.alpha);
-
-                    //symbol.verticalAlignment = json.placement || 'middle';
-                    //symbol.horizontalAlignment = json.textFormat.align || 'center';
                     symbol.angle = 0;
                     symbol.xoffset = 0;
                     symbol.yoffset = 0;
@@ -1384,7 +1424,7 @@ name : 'eDraw',
                     var fields_possible = ["name", "title", "label"];
                     if (g.attributes) {
                         for (var i in fields_possible) {
-                            if (g.attributes[fields_possible[i]]) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
                                 nameField = fields_possible[i];
                                 break;
                             }
@@ -1396,7 +1436,7 @@ name : 'eDraw',
                     var fields_possible = ["description", "descript", "desc","comment","comm"];
                     if (g.attributes) {
                         for (var i =0, len = fields_possible.length; i< len; i++) {
-                            if (g.attributes[fields_possible[i]]) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
                                 descriptionField = fields_possible[i];
                                 break;
                             }
@@ -1439,6 +1479,7 @@ name : 'eDraw',
                             g.setSymbol(symbol);
                         }
                     }
+                    g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
 
                     //If is with measure
                     if (json_feat.measure) {
@@ -1463,10 +1504,7 @@ name : 'eDraw',
                 }
 
                 //Add graphics
-                for (var i=0, nb = graphics.length; i < nb; i++){
-                    if(graphics[i])
-                        this.drawBox.drawLayer.add(graphics[i]);
-                }
+                this._pushAddOperation(graphics);
 
                 //Show list
                 this.setMode("list");
@@ -1474,6 +1512,40 @@ name : 'eDraw',
                 this.showMessage(this.nls.importErrorFileStructure, 'error');
                 return false;
             }
+        },
+
+        showSaveDialog : function () {
+            var graphics = this.getCheckedGraphics(false);
+
+            if (graphics.length == 0) {
+                this.showMessage(this.nls.noSelection, 'error');
+                return false;
+            }
+
+            if (this.fileNameField.value === '')
+                this.saveDialogReset();
+
+            this.setMode("save");
+        },
+
+        saveDialogCancel : function () {
+            this.setMode("list");
+        },
+
+        saveDialogSave : function () {
+            if (!this.fileNameField.isValid()) {
+                this.showMessage(this.nls.importErrorFileName, 'error');
+                return false;
+            }
+
+            this.exportFileName = this.fileNameField.value;
+            this.exportSelectionInFile();
+            this.setMode("list");
+        },
+
+        saveDialogReset : function () {
+            var val = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
+            this.fileNameField.set('value',val);
         },
 
         exportInFile : function () {
@@ -1512,7 +1584,7 @@ name : 'eDraw',
             var ds = exportUtils.createDataSource({
                 "type" : exportUtils.TYPE_FEATURESET,
                 "data": drawing_seems_featureset,
-                "filename" : (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings'
+                "filename" : (this.exportFileName) ? (this.exportFileName) : 'myDrawings'
             });
             ds.setFormat(exportUtils.FORMAT_FEATURESET)
 
@@ -1520,7 +1592,6 @@ name : 'eDraw',
             var savetomycontent = new SaveToMyContent();
             savetomycontent.onExecute(ds.featureSet, null);
             //this.launchExport(true);
-
         },
 
         launchExport : function (only_graphics_checked) {
@@ -1543,7 +1614,7 @@ name : 'eDraw',
             var ds = exportUtils.createDataSource({
                 "type" : exportUtils.TYPE_FEATURESET,
                 "data": drawing_seems_featureset,
-                "filename" : (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings'
+                "filename" : (this.exportFileName) ? (this.exportFileName) : ((this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings')
             });
             ds.setFormat(exportUtils.FORMAT_FEATURESET)
             ds.download();
@@ -1559,7 +1630,7 @@ name : 'eDraw',
 
             this._editorConfig["graphicCurrent"].attributes["name"] = this.nameField.value;
             this._editorConfig["graphicCurrent"].attributes["description"] = this.descriptionField.value;
-
+            this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
 
             if (this.editorSymbolChooser.type != "text") {
                 var geom = this._editorConfig["graphicCurrent"].geometry;
@@ -1571,13 +1642,19 @@ name : 'eDraw',
                     this._addPolygonMeasure(geom, this._editorConfig["graphicCurrent"]);
             }
 
+            // Update the display graphics
+            this._syncGraphicsToLayers();
+
+            // Go back to the list
             this.setMode("list");
         },
+
         editorOnClickEditCancelButon : function () {
             this.editorResetGraphic();
             this.editorActivateGeometryEdit(false);
             this.setMode("list");
         },
+
         editorOnClickResetCancelButon : function () {
             this.editorResetGraphic();
             this.setMode("edit");
@@ -1661,14 +1738,18 @@ name : 'eDraw',
         },
 
         drawBoxOnDrawEnd : function (graphic, geotype, commontype) {
+            /*jshint unused: false*/
+            this.drawBox.clear();
+
             var geometry = graphic.geometry;
 
             this.editorEnableMapPreview(false);
 
             graphic.attributes = {
                 "name" : this.nameField.value,
-                "description" : this.descriptionField.value
-            }
+                "description" : this.descriptionField.value,
+                "symbol": JSON.stringify(graphic.symbol.toJson())
+            };
 
             if (geometry.type === 'extent') {
                 var a = geometry;
@@ -1692,28 +1773,121 @@ name : 'eDraw',
                 commontype = 'polygon';
             }
 
-            if (commontype != 'text' && this.showMeasure.checked) {
-                if(geometry.type=='point')
+            if (commontype === 'point') {
+                if (this.showMeasure.checked) {
                     this._addPointMeasure(geometry, graphic);
-                else if(geometry.type=='polyline')
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            if (commontype === 'polyline') {
+                if (this.showMeasure.checked) {
                     this._addLineMeasure(geometry, graphic);
-                else if(geometry.type=='polygon')
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            if (commontype === 'polygon') {
+                if (this.showMeasure.checked) {
                     this._addPolygonMeasure(geometry, graphic);
-                else
-                    console.log("Erreur de type : "+geometry.type);
-            }
-            if (commontype == 'text' && this.editorSymbolChooser.inputText.value.trim() == "") {
-                //Message
-                this.showMessage(this.nls.textWarningMessage, 'warning');
-
-                //Remove empty feature (text symbol without text)
-                graphic.getLayer().remove(graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
             }
 
-            this.saveInLocalStorage();
+            if (commontype === 'text') {
+                if (this.editorSymbolChooser.inputText.value.trim() == "") {
+                    //Message
+                    this.showMessage(this.nls.textWarningMessage, 'warning');
+
+                    //Remove empty feature (text symbol without text)
+                    // graphic.getLayer().remove(graphic);
+                } else {
+                    this._pushAddOperation([graphic]);
+                }
+            }
+
+            //this.saveInLocalStorage();
             this._editorConfig["graphicCurrent"] = graphic;
             this._editorConfig["defaultSymbols"][this._editorConfig['commontype']] = graphic.symbol;
             this.setMode("list");
+        },
+
+        _syncGraphicsToLayers: function(){
+            /*global isRTL*/
+            this._pointLayer.clear();
+            this._polylineLayer.clear();
+            this._polygonLayer.clear();
+            this._labelLayer.clear();
+            var graphics = this._getAllGraphics();
+            array.forEach(graphics, lang.hitch(this, function(g){
+                var graphicJson = g.toJson();
+                var clonedGraphic = new Graphic(graphicJson);
+                var geoType = clonedGraphic.geometry.type;
+                var layer = null;
+                var isNeedRTL = false;
+
+                if(geoType === 'point'){
+                    if(clonedGraphic.symbol && clonedGraphic.symbol.type === 'textsymbol'){
+                        layer = this._labelLayer;
+                        isNeedRTL = isRTL;
+                    } else {
+                        layer = this._pointLayer;
+                    }
+                } else if(geoType === 'polyline') {
+                    layer = this._polylineLayer;
+                } else if(geoType === 'polygon' || geoType === 'extent') {
+                    layer = this._polygonLayer;
+                }
+
+                if (layer) {
+                    var graphic = layer.add(clonedGraphic);
+                    if (true === isNeedRTL && graphic.getNode) {
+                        var node = graphic.getNode();
+                        if (node) {
+                            //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
+                            //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
+                            domStyle.set(node, "direction", "rtl");
+                        }
+                    }
+                }
+            }));
+        },
+
+        _pushAddOperation: function(graphics){
+            array.forEach(graphics, lang.hitch(this, function(g){
+                var attrs = g.attributes || {};
+                attrs[this._objectIdName] = this._objectIdCounter++;
+                g.setAttributes(attrs);
+                this._graphicsLayer.add(g);
+            }));
+            //var addOperation = new customOp.Add({
+            //  graphicsLayer: this._graphicsLayer,
+            //  addedGraphics: graphics
+            //});
+            //this._undoManager.add(addOperation);
+            //
+            
+
+            // Sync graphics to layers (temp)
+            this._syncGraphicsToLayers();
+        },
+
+        _pushDeleteOperation: function(graphics){
+            //var deleteOperation = new customOp.Delete({
+            //    graphicsLayer: this._graphicsLayer,
+            //    deletedGraphics: graphics
+            //});
+            //this._undoManager.add(deleteOperation);
+        },
+
+        _getAllGraphics: function(){
+            //return a new array
+            return array.map(this._graphicsLayer.graphics, lang.hitch(this, function(g){
+                return g;
+            }));
         },
 
         editorEnableMapPreview : function (bool) {
@@ -1753,30 +1927,29 @@ name : 'eDraw',
             //Track mouse on map
             if (!this._editorConfig["phantom"]["handle"]) {
                 this._editorConfig["phantom"]["handle"] = on(this.map, 'mouse-move, mouse-out', lang.hitch(this, function (evt) {
-                            if (this.state === 'opened' || this.state === 'active') {
-                                switch (evt.type) {
-                                case 'mousemove':
-                                    if (this._editorConfig["phantom"]["point"]) {
-                                        this._editorConfig["phantom"]["point"].setGeometry(evt.mapPoint);
-                                        this._editorConfig["phantom"]["point"].show();
-                                    }
-                                    break;
-                                case 'mouseout':
-                                    if (this._editorConfig["phantom"]["point"]) {
-                                        this._editorConfig["phantom"]["point"].hide();
-                                    }
-                                    break;
-                                case 'mouseover':
-                                    if (this._editorConfig["phantom"]["point"]) {
-                                        this._editorConfig["phantom"]["point"].setGeometry(evt.mapPoint);
-                                        this._editorConfig["phantom"]["point"].show();
-                                    }
-                                    break;
-                                }
+                    if (this.state === 'opened' || this.state === 'active') {
+                        switch (evt.type) {
+                        case 'mousemove':
+                            if (this._editorConfig["phantom"]["point"]) {
+                                this._editorConfig["phantom"]["point"].setGeometry(evt.mapPoint);
+                                this._editorConfig["phantom"]["point"].show();
                             }
-                        }));
+                            break;
+                        case 'mouseout':
+                            if (this._editorConfig["phantom"]["point"]) {
+                                this._editorConfig["phantom"]["point"].hide();
+                            }
+                            break;
+                        case 'mouseover':
+                            if (this._editorConfig["phantom"]["point"]) {
+                                this._editorConfig["phantom"]["point"].setGeometry(evt.mapPoint);
+                                this._editorConfig["phantom"]["point"].show();
+                            }
+                            break;
+                        }
+                    }
+                }));
             }
-
         },
 
         editorUpdateMapPreview : function (symbol) {
@@ -1788,7 +1961,6 @@ name : 'eDraw',
                 this._editorConfig["phantom"]["symbol"] = symbol;
                 this._editorConfig["phantom"]["point"].setSymbol(symbol);
             }
-
         },
 
         editorOnClickAddCancelButon : function () {
@@ -2085,8 +2257,8 @@ name : 'eDraw',
         },
 
         _getGraphicIndex : function (g) {
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                if (this.drawBox.drawLayer.graphics[i] == g)
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                if (this._graphicsLayer.graphics[i] == g)
                     return parseInt(i);
             }
             return false;
@@ -2103,7 +2275,7 @@ name : 'eDraw',
             //If no measure
             if (!this.showMeasure.checked) {
                 if (graphic.measure && graphic.measure && graphic.measure.graphic) {
-                    this.drawBox.drawLayer.remove(graphic.measure.graphic) //Remove measure's label
+                    this._graphicsLayer.remove(graphic.measure.graphic) //Remove measure's label
                 }
                 graphic.measure = false;
                 return false;
@@ -2162,7 +2334,9 @@ name : 'eDraw',
                         "name" : text,
                         "description" : ""
                     }, null);
-                this.drawBox.drawLayer.add(labelGraphic);
+
+                this._pushAddOperation([labelGraphic]);
+                //this.drawBox.drawLayer.add(labelGraphic);
 
                 //Replace measure label on top of measured graphic
                 var measure_index = this._getGraphicIndex(graphic);
@@ -2339,20 +2513,20 @@ name : 'eDraw',
 
             //Bind symbol chooser change
             this.own(on(this.editorSymbolChooser, 'change', lang.hitch(this, function () {
-                        this.editorSetDefaultSymbols();
+                this.editorSetDefaultSymbols();
                         
-                        //If text plus
-                        if (this.editorSymbolChooser.type == "text") {
-                            this.editorUpdateTextPlus();
-                        } else if (this._editorConfig["graphicCurrent"]) {
-                            //If in modification, update graphic symbology
-                            this._editorConfig["graphicCurrent"].setSymbol(this.editorSymbolChooser.getSymbol());
-                        }
+                //If text plus
+                if (this.editorSymbolChooser.type == "text") {
+                    this.editorUpdateTextPlus();
+                } else if (this._editorConfig["graphicCurrent"]) {
+                    //If in modification, update graphic symbology
+                    this._editorConfig["graphicCurrent"].setSymbol(this.editorSymbolChooser.getSymbol());
+                }
 
-                        //Phantom for marker
-                        if (this.editorSymbolChooser.type == "marker")
-                            this.editorUpdateMapPreview(this.editorSymbolChooser.getSymbol());
-                    })));
+                //Phantom for marker
+                if (this.editorSymbolChooser.type == "marker")
+                   this.editorUpdateMapPreview(this.editorSymbolChooser.getSymbol());
+            })));
 
             //bind unit events
             this.own(on(this.showMeasure, 'click', lang.hitch(this, this._setMeasureVisibility)));
@@ -2421,7 +2595,6 @@ name : 'eDraw',
             ];
             for (var i = 0, len = this._editorTextPlusPlacements.length ; i < len ; i++)
                 on(this._editorTextPlusPlacements[i], "click", this.onEditorTextPlusPlacementClick);
-
         },
 
         _menuInit : function () {
@@ -2432,7 +2605,7 @@ name : 'eDraw',
                 "importExport" : this.menuListImportExport
             };
 
-            var views = [this.addSection, this.editorSection, this.listSection];
+            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection];
 
             this.TabViewStack = new ViewStack({
                     viewType : 'dom',
@@ -2461,13 +2634,17 @@ name : 'eDraw',
                     widget.showMessage(widget.nls.localLoading);
                 }, 200);
             })(this);
-
         },
 
         _initDrawingPopupAndClick : function () {
             //Set popup template
             var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
-            this.drawBox.drawLayer.setInfoTemplate(infoTemplate);
+
+            this._graphicsLayer.setInfoTemplate(infoTemplate);
+            this._pointLayer.setInfoTemplate(infoTemplate);
+            this._polylineLayer.setInfoTemplate(infoTemplate);
+            this._polygonLayer.setInfoTemplate(infoTemplate);
+            this._labelLayer.setInfoTemplate(infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
@@ -2476,11 +2653,11 @@ name : 'eDraw',
 
                     this._editorConfig["graphicCurrent"] = evt.graphic;
                     this.setMode("list");
+                    this.setInfoWindow(evt.graphic);
                 });
 
             //Allow click
             this.allowPopup(true);
-
         },
 
         _initListDragAndDrop : function () {
@@ -2586,15 +2763,121 @@ name : 'eDraw',
                 }));
         },
 
+        //////////////////////////
+        /// ECAN CODE
+        
+        _initLayers : function () {
+            this._graphicsLayer = new GraphicsLayer();
+
+            if(this.config.isOperationalLayer){
+                var layerDefinition = {
+                    "name": "",
+                    "geometryType": "",
+                    "fields": [
+                        {
+                            "name": this._objectIdName,
+                            "type": this._objectIdType,
+                            "alias": this._objectIdName
+                        },
+
+                        {
+                            "name": "name",
+                            "type": "esriFieldTypeString",
+                            "alias": this.nls.nameField
+                        },
+
+                        {
+                            "name": "description",
+                            "type": "esriFieldTypeString",
+                            "alias": this.nls.descriptionField
+                        },
+
+                        {
+                            "name": "symbol",
+                            "type": "esriFieldTypeString",
+                            "alias": this.nls.symbolField
+                        }
+                    ]
+                };
+
+                var pointDefinition = lang.clone(layerDefinition);
+                pointDefinition.name = this.nls.points;//this.label + "_" +
+                pointDefinition.geometryType = "esriGeometryPoint";
+                this._pointLayer = new FeatureLayer({
+                    layerDefinition: pointDefinition,
+                    featureSet: null
+                });
+
+                var polylineDefinition = lang.clone(layerDefinition);
+                polylineDefinition.name = this.nls.lines;
+                polylineDefinition.geometryType = "esriGeometryPolyline";
+                this._polylineLayer = new FeatureLayer({
+                    layerDefinition: polylineDefinition,
+                    featureSet: null
+                });
+
+                var polygonDefinition = lang.clone(layerDefinition);
+                polygonDefinition.name = this.nls.areas;
+                polygonDefinition.geometryType = "esriGeometryPolygon";
+                this._polygonLayer = new FeatureLayer({
+                    layerDefinition: polygonDefinition,
+                    featureSet: null
+                });
+
+                var labelDefinition = lang.clone(layerDefinition);
+                labelDefinition.name = this.nls.text;
+                labelDefinition.geometryType = "esriGeometryPoint";
+                this._labelLayer = new FeatureLayer({
+                    layerDefinition: labelDefinition,
+                    featureSet: null
+                });
+
+                var loading = new LoadingIndicator();
+                loading.placeAt(this.domNode);
+
+                LayerInfos
+                    .getInstance(this.map, this.map.itemInfo)
+                    .then(lang.hitch(this, function(layerInfos){
+                        if(!this.domNode){
+                          return;
+                        }
+
+                        loading.destroy();
+                        var layers = [this._polygonLayer, this._polylineLayer,
+                            this._pointLayer, this._labelLayer];
+                        layerInfos.addFeatureCollection(layers, this.nls.drawingCollectionName);
+                    }), lang.hitch(this, function(err){
+                        loading.destroy();
+                    console.error("Can not get LayerInfos instance", err);
+                    }));
+            } else {
+                this._pointLayer = new GraphicsLayer();
+                this._polylineLayer = new GraphicsLayer();
+                this._polygonLayer = new GraphicsLayer();
+                this._labelLayer = new GraphicsLayer();
+                this.map.addLayer(this._polygonLayer);
+                this.map.addLayer(this._polylineLayer);
+                this.map.addLayer(this._pointLayer);
+                this.map.addLayer(this._labelLayer);
+            }
+        },
+
         //////////////////////////// WIDGET CORE METHODS ///////////////////////////////////////////////////////////////////////////////////////
 
         postMixInProperties : function () {
             this.inherited(arguments);
+
+            // ADD in check for is operational layer
+            this.config.isOperationalLayer = !!this.config.isOperationalLayer;
+
             this._resetUnitsArrays();
         },
 
         postCreate : function () {
             this.inherited(arguments);
+
+            // Set up the data layers
+            this._initLayers();
 
             //Create symbol chooser
             this.editorSymbolChooser = new SymbolChooser({
@@ -2602,7 +2885,7 @@ name : 'eDraw',
                     "type" : "text",
                     "symbol" : new SimpleMarkerSymbol()
                 },
-                    this.editorSymbolChooserDiv);
+                this.editorSymbolChooserDiv);
 
             this.drawBox.setMap(this.map);
 
@@ -2630,6 +2913,9 @@ name : 'eDraw',
             //Init list Drag & Drop
             this._initListDragAndDrop();
 
+            // initialise the export file name
+            this.exportFileName = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
+
             //Load ressources
             SRUtils.loadResource();
         },
@@ -2644,11 +2930,10 @@ name : 'eDraw',
                     this.editorTextPlusFontFamilyNode.set("options", this.config.drawPlus.fontFamilies).reset();
                 }
             }
-
         },
 
         onOpen : function () {
-            if (this.drawBox.drawLayer.graphics.length > 0)
+            if (this._graphicsLayer.graphics.length > 0)
                 this.setMode("list");
             else
                 this.setMode("add1");
@@ -2673,6 +2958,29 @@ name : 'eDraw',
                 this.editorSymbolChooser.destroy();
                 this.editorSymbolChooser = null;
             }
+
+            if(this._graphicsLayer){
+                this._graphicsLayer.clear();
+                this.map.removeLayer(this._graphicsLayer);
+                this._graphicsLayer = null;
+            }
+            if(this._pointLayer){
+                this.map.removeLayer(this._pointLayer);
+                this._pointLayer = null;
+            }
+            if(this._polylineLayer){
+                this.map.removeLayer(this._polylineLayer);
+                this._polylineLayer = null;
+            }
+            if(this._polygonLayer){
+                this.map.removeLayer(this._polygonLayer);
+                this._polygonLayer = null;
+            }
+            if(this._labelLayer){
+                this.map.removeLayer(this._labelLayer);
+                this._labelLayer = null;
+            }
+
             this.inherited(arguments);
         },
 
