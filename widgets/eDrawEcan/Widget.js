@@ -143,6 +143,8 @@ function(
         _polygonLayer: null,
         _labelLayer: null,
 
+        exportFileName: null,
+
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
          * Set widget mode :add1 (type choice), add2 (symbology and attributes choice), edit, list
@@ -1520,6 +1522,9 @@ function(
                 return false;
             }
 
+            if (this.fileNameField.value === '')
+                this.saveDialogReset();
+
             this.setMode("save");
         },
 
@@ -1529,8 +1534,7 @@ function(
 
         saveDialogSave : function () {
             if (!this.fileNameField.isValid()) {
-                alert('test');
-
+                this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
 
@@ -1540,7 +1544,8 @@ function(
         },
 
         saveDialogReset : function () {
-            this.fileNameField.value = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
+            var val = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
+            this.fileNameField.set('value',val);
         },
 
         exportInFile : function () {
@@ -1579,7 +1584,7 @@ function(
             var ds = exportUtils.createDataSource({
                 "type" : exportUtils.TYPE_FEATURESET,
                 "data": drawing_seems_featureset,
-                "filename" : (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings'
+                "filename" : (this.exportFileName) ? (this.exportFileName) : 'myDrawings'
             });
             ds.setFormat(exportUtils.FORMAT_FEATURESET)
 
@@ -2907,6 +2912,9 @@ function(
 
             //Init list Drag & Drop
             this._initListDragAndDrop();
+
+            // initialise the export file name
+            this.exportFileName = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
 
             //Load ressources
             SRUtils.loadResource();

@@ -219,6 +219,14 @@
         background-image: url("images/upload.png");
     }
 
+    .list-draw-actions span.save {
+        background-image: url("images/save.png");
+    }
+
+    .list-draw-actions span.open {
+        background-image: url("images/open.png");
+    }
+
     .list-draw-actions span:hover {
         border: 1px solid rgb(72, 85, 102);
         cursor: pointer;
@@ -275,7 +283,7 @@
         text-align: center;
         vertical-align: middle;
         width: 30px;
-        background-image: url("images/upload.png");
+        background-image: url("images/open.png");
         margin-top: 4px;
     }
 

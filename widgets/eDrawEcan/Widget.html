@@ -146,14 +146,13 @@
                         <span title="${nls.zoomAllLabel}" class="zoom blue-button" data-dojo-attach-event="onclick:zoomAll">&nbsp;</span>
                         <span title="${nls.copyLabel}" class="copy blue-button" data-dojo-attach-event="onclick:copy">&nbsp;</span>
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
-                        <span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
+                        <span title="${nls.exportLabel}" class="save blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
 
-                        <!--<span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionInFile">&nbsp;</span>-->
                         <!-- ECAN -->
-                       <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
+                        <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
                     </div>
-                    <!-- ECAN -->
-                  <!--   <span title="Load from My Content" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span> -->
+                        <!-- ECAN -->
+                        <!--   <span title="Load from My Content" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span> -->
 					<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>
                 </div>
             </div>
@@ -163,8 +162,7 @@
             <h2>${nls.saveDialogTitle}</h2>
             <div class="content">
                 <label for="fileNameField">File Name:</label> 
-                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" value="${config.exportFileName}" class="jimu-input" required="true" 
-data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" /><span>.json</span>
+                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" class="jimu-input" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" /><span>.json</span>
             </div>
             <div class="footer">
                 <div>

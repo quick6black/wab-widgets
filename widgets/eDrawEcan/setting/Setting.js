@@ -219,6 +219,7 @@ function(
       this.listShowUpAndDownButtons.checked = (config.listShowUpAndDownButtons) ? true : false;
       this.allowLocalStorageInput.checked = (config.allowLocalStorage) ? true : false;
       this.localStorageKeyInput.value = (config.localStorageKey) ? config.localStorageKey : '';
+      this.isOperationalLayerInput.checked = (config.isOperationalLayer) ? true : false;
 
       //Text plus FontFamily
       this._setTextPlusFontFamilyTable(config);
@@ -291,6 +292,7 @@ function(
       config.confirmOnDelete = this.confirmOnDeleteInput.checked;
       config.listShowUpAndDownButtons = this.listShowUpAndDownButtons.checked;
       config.allowLocalStorage = this.allowLocalStorageInput.checked;
+      config.isOperationalLayer = this.isOperationalLayerInput.checked;
       var key = this.localStorageKeyInput.value.trim();
       config.localStorageKey = (key == "") ? false : key;
 
