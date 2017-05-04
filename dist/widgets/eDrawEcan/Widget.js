@@ -29,6 +29,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         _objectIdCounter: 1,
         _objectIdName: 'OBJECTID',
         _objectIdType: 'esriFieldTypeOID',
+
         _pointLayer: null,
         _polylineLayer: null,
         _polygonLayer: null,
@@ -97,7 +98,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                     //Generate list and
                     this.listGenerateDrawTable();
-                    var nb_draws = this.drawBox.drawLayer.graphics.length;
+                    var nb_draws = this._graphicsLayer.graphics.length;
                     var display = nb_draws > 0 ? 'block' : 'none';
                     html.setStyle(this.allActionsNode, 'display', display);
                     this.tableTH.innerHTML = nb_draws + ' ' + this.nls.draws;
@@ -156,14 +157,24 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.map.infoWindow.show(center);
         },
 
-        _clickHandler: false,
+        _clickPointHandler: false,
+        _clickPolylineHandler: false,
+        _clickPolygonHandler: false,
+        _clickLabelHandler: false,
+
         allowPopup: function allowPopup(bool) {
             this.map.setInfoWindowOnClick(bool);
 
-            if (!bool && this._clickHandler) {
-                dojo.disconnect(this._clickHandler);
+            if (!bool && this._clickPointHandler) {
+                dojo.disconnect(this._clickPointHandler);
+                dojo.disconnect(this._clickPolylineHandler);
+                dojo.disconnect(this._clickPolygonHandler);
+                dojo.disconnect(this._clickLabelHandler);
             } else {
-                this._clickHandler = this.drawBox.drawLayer.on("click", this._onDrawClick);
+                this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
+                this._clickPolylineHandler = this._polylineLayer.on("click", this._onDrawClick);
+                this._clickPolygonHandler = this._polygonLayer.on("click", this._onDrawClick);
+                this._clickLabelHandler = this._labelLayer.on("click", this._onDrawClick);
             }
         },
 
@@ -174,9 +185,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         getCheckedGraphics: function getCheckedGraphics(returnAllIfNoneChecked) {
             var graphics = [];
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                if (this.drawBox.drawLayer.graphics[i].checked) graphics.push(this.drawBox.drawLayer.graphics[i]);
-            }if (returnAllIfNoneChecked && graphics.length == 0) return this.drawBox.drawLayer.graphics;
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                if (this._graphicsLayer.graphics[i].checked) graphics.push(this._graphicsLayer.graphics[i]);
+            }if (returnAllIfNoneChecked && graphics.length == 0) return this._graphicsLayer.graphics;
             return graphics;
         },
 
@@ -204,7 +215,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             for (var i = 0; i < nb; i++) {
                 var g = new Graphic(graphics[i].toJson()); //Get graphic clone
                 g.attributes.name += this.nls.copySuffix; //Suffix name
-                this.drawBox.drawLayer.add(g);
+
+                this._pushAddOperation([g]);
+
                 if (graphics[i].measure && graphics[i].measure.graphic) {
                     if (g.geometry.type == 'polygon') this._addPolygonMeasure(g.geometry, g);else if (g.geometry.type == 'polyline') this._addLineMeasure(g.geometry, g);else this._addPointMeasure(g.geometry, g);
                 }
@@ -270,16 +283,16 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         _removeGraphic: function _removeGraphic(graphic) {
             if (graphic.measure && graphic.measure.graphic) {
-                // graphic.measure.graphic.measureParent = false; //Remove link between graphic and it's measure label
-                this.drawBox.drawLayer.remove(graphic.measure.graphic); //Delete measure label
+                this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
                 graphic.measureParent.measure = false;
             }
-            this.drawBox.drawLayer.remove(graphic);
+            this._graphicsLayer.remove(graphic);
+            this._syncGraphicsToLayers();
         },
 
         drawingsGetJson: function drawingsGetJson(asString, onlyChecked) {
-            var graphics = onlyChecked ? this.getCheckedGraphics(false) : this.drawBox.drawLayer.graphics;
+            var graphics = onlyChecked ? this.getCheckedGraphics(false) : this._graphicsLayer.graphics;
 
             var nb_graphics = graphics.length;
 
@@ -333,24 +346,29 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         menuOnClickAdd: function menuOnClickAdd() {
             this.setMode("add1");
         },
+
         menuOnClickList: function menuOnClickList() {
             this.setMode("list");
         },
 
-        onHideCheckboxClick: function onHideCheckboxClick() {
-            var display = this.hideCheckbox.checked ? 'none' : 'block';
-
-            this.drawBox.drawLayer.setVisibility(!this.hideCheckbox.checked);
+        /*        
+        /// SORT THIS - REMOVE THIS FUNCTION AS NO LONGER NEEDED
+        onHideCheckboxClick : function () {
+            var display = (this.hideCheckbox.checked) ? 'none' : 'block';
+              this.drawBox.drawLayer.setVisibility(!this.hideCheckbox.checked);
             this.menu.style.display = display;
             this.settingAllContent.style.display = display;
-
-            if (this.hideCheckbox.checked) this.onClose();else this.onOpen();
+              if (this.hideCheckbox.checked)
+                this.onClose();
+            else
+                this.onOpen();
         },
+        */
 
         ///////////////////////// LIST METHODS ///////////////////////////////////////////////////////////
         listGenerateDrawTable: function listGenerateDrawTable() {
             //Generate draw features table
-            var graphics = this.drawBox.drawLayer.graphics;
+            var graphics = this._graphicsLayer.graphics;
             var nb_graphics = graphics.length;
 
             //Table
@@ -444,14 +462,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         switch2DrawingGraphics: function switch2DrawingGraphics(i1, i2) {
-            var g1 = this.drawBox.drawLayer.graphics[i1];
-            var g2 = this.drawBox.drawLayer.graphics[i2];
+            var g1 = this._graphicsLayer.graphics[i1];
+            var g2 = this._graphicsLayer.graphics[i2];
 
             if (!g1 || !g2) return false;
 
             //Switch graphics
-            this.drawBox.drawLayer.graphics[i1] = g2;
-            this.drawBox.drawLayer.graphics[i2] = g1;
+            this._graphicsLayer.graphics[i1] = g2;
+            this._graphicsLayer.graphics[i2] = g1;
 
             //Redraw in good order
             var start_i = i1 < i2 ? i1 : i2;
@@ -466,21 +484,21 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (from_i == to_i) return;
 
             //get from graphic
-            var from_graphic = this.drawBox.drawLayer.graphics[from_i];
+            var from_graphic = this._graphicsLayer.graphics[from_i];
 
             //Move graphics up or down
             if (from_i < to_i) {
-                for (var i = from_i, nb = this.drawBox.drawLayer.graphics.length; i < to_i && i < nb; i++) {
-                    this.drawBox.drawLayer.graphics[i] = this.drawBox.drawLayer.graphics[i + 1];
+                for (var i = from_i, nb = this._graphicsLayer.graphics.length; i < to_i && i < nb; i++) {
+                    this._graphicsLayer.graphics[i] = this._graphicsLayer.graphics[i + 1];
                 }
             } else {
                 for (var i = from_i, nb = this.drawBox.drawLayer.graphics.length; i > to_i && i > 0; i--) {
-                    this.drawBox.drawLayer.graphics[i] = this.drawBox.drawLayer.graphics[i - 1];
+                    this._graphicsLayer.graphics[i] = this._graphicsLayer.graphics[i - 1];
                 }
             }
 
             //Copy from graphic in destination
-            this.drawBox.drawLayer.graphics[to_i] = from_graphic;
+            this._graphicsLayer.graphics[to_i] = from_graphic;
 
             //Redraw in good order
             var start_i = from_i < to_i ? from_i : to_i;
@@ -490,14 +508,16 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         _redrawGraphics: function _redrawGraphics(start_i) {
             if (!start_i) start_i = 0;
-            var nb = this.drawBox.drawLayer.graphics.length;
+            var nb = this._graphicsLayer.graphics.length;
             for (var i = 0; i < nb; i++) {
                 if (i >= start_i) {
-                    var g = this.drawBox.drawLayer.graphics[i];
+                    var g = this._graphicsLayer.graphics[i];
                     var shape = g.getShape();
                     if (shape) shape.moveToFront();
                 }
             }
+
+            this._syncGraphicsToLayers();
         },
 
         listUpdateAllCheckbox: function listUpdateAllCheckbox(evt) {
@@ -506,8 +526,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 var all_checked = true;
                 var all_unchecked = true;
 
-                for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                    if (this.drawBox.drawLayer.graphics[i].checked) all_unchecked = false;else all_checked = false;
+                for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                    if (this._graphicsLayer.graphics[i].checked) all_unchecked = false;else all_checked = false;
                 }
 
                 if (all_checked) {
@@ -533,8 +553,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             var cb = evt.target;
             var check = evt.target.checked;
 
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                this.drawBox.drawLayer.graphics[i].checked = check;
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                this._graphicsLayer.graphics[i].checked = check;
                 dom.byId('draw-action-checkclick--' + i).checked = check;
             }
             this.listCheckboxAll.checked = check;
@@ -550,7 +570,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             var type = tab[0];
             var i = parseInt(tab[1]);
 
-            var g = this.drawBox.drawLayer.graphics[i];
+            var g = this._graphicsLayer.graphics[i];
             this._editorConfig["graphicCurrent"] = g;
 
             switch (type) {
@@ -1221,7 +1241,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     var fields_possible = ["name", "title", "label"];
                     if (g.attributes) {
                         for (var i in fields_possible) {
-                            if (g.attributes[fields_possible[i]]) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
                                 nameField = fields_possible[i];
                                 break;
                             }
@@ -1233,7 +1253,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     var fields_possible = ["description", "descript", "desc", "comment", "comm"];
                     if (g.attributes) {
                         for (var i = 0, len = fields_possible.length; i < len; i++) {
-                            if (g.attributes[fields_possible[i]]) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
                                 descriptionField = fields_possible[i];
                                 break;
                             }
@@ -1273,6 +1293,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                             g.setSymbol(symbol);
                         }
                     }
+                    g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
 
                     //If is with measure
                     if (json_feat.measure) {
@@ -1296,11 +1317,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                 //Add graphics
                 this._pushAddOperation(graphics);
-                //for (var i=0, nb = graphics.length; i < nb; i++){
-                //    if(graphics[i])
-
-                //this.drawBox.drawLayer.add(graphics[i]);
-                //}
 
                 //Show list
                 this.setMode("list");
@@ -1390,12 +1406,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this._editorConfig["graphicCurrent"].attributes["name"] = this.nameField.value;
             this._editorConfig["graphicCurrent"].attributes["description"] = this.descriptionField.value;
+            this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
 
             if (this.editorSymbolChooser.type != "text") {
                 var geom = this._editorConfig["graphicCurrent"].geometry;
                 if (geom.type == 'point') this._addPointMeasure(geom, this._editorConfig["graphicCurrent"]);else if (geom.type == 'polyline') this._addLineMeasure(geom, this._editorConfig["graphicCurrent"]);else if (geom.type == 'polygon') this._addPolygonMeasure(geom, this._editorConfig["graphicCurrent"]);
             }
 
+            // Update the display graphics
+            this._syncGraphicsToLayers();
+
+            // Go back to the list
             this.setMode("list");
         },
 
@@ -1473,13 +1494,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         drawBoxOnDrawEnd: function drawBoxOnDrawEnd(graphic, geotype, commontype) {
+            /*jshint unused: false*/
+            this.drawBox.clear();
+
             var geometry = graphic.geometry;
 
             this.editorEnableMapPreview(false);
 
             graphic.attributes = {
                 "name": this.nameField.value,
-                "description": this.descriptionField.value
+                "description": this.descriptionField.value,
+                "symbol": JSON.stringify(graphic.symbol.toJson())
             };
 
             if (geometry.type === 'extent') {
@@ -1491,9 +1516,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                 graphic.setGeometry(polygon);
 
-                ///var layer = graphic.getLayer();
-                ///layer.remove(graphic);
-                ///layer.add(graphic);
+                var layer = graphic.getLayer();
+                layer.remove(graphic);
+                layer.add(graphic);
 
                 commontype = 'polygon';
             }
@@ -1533,25 +1558,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     this._pushAddOperation([graphic]);
                 }
             }
-
-            /*
-              if (commontype != 'text' && this.showMeasure.checked) {
-                if(geometry.type=='point')
-                    this._addPointMeasure(geometry, graphic);
-                else if(geometry.type=='polyline')
-                    this._addLineMeasure(geometry, graphic);
-                else if(geometry.type=='polygon')
-                    this._addPolygonMeasure(geometry, graphic);
-                else
-                    console.log("Erreur de type : " + geometry.type);
-            }
-              if (commontype == 'text' && this.editorSymbolChooser.inputText.value.trim() == "") {
-                //Message
-                this.showMessage(this.nls.textWarningMessage, 'warning');
-                  //Remove empty feature (text symbol without text)
-                graphic.getLayer().remove(graphic);
-            }
-                  */
 
             //this.saveInLocalStorage();
             this._editorConfig["graphicCurrent"] = graphic;
@@ -1993,8 +1999,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _getGraphicIndex: function _getGraphicIndex(g) {
-            for (var i = 0, nb = this.drawBox.drawLayer.graphics.length; i < nb; i++) {
-                if (this.drawBox.drawLayer.graphics[i] == g) return parseInt(i);
+            for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                if (this._graphicsLayer.graphics[i] == g) return parseInt(i);
             }
             return false;
         },
@@ -2010,7 +2016,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             //If no measure
             if (!this.showMeasure.checked) {
                 if (graphic.measure && graphic.measure && graphic.measure.graphic) {
-                    this.drawBox.drawLayer.remove(graphic.measure.graphic); //Remove measure's label
+                    this._graphicsLayer.remove(graphic.measure.graphic); //Remove measure's label
                 }
                 graphic.measure = false;
                 return false;
@@ -2065,7 +2071,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     "name": text,
                     "description": ""
                 }, null);
-                this.drawBox.drawLayer.add(labelGraphic);
+
+                this._pushAddOperation([labelGraphic]);
+                //this.drawBox.drawLayer.add(labelGraphic);
 
                 //Replace measure label on top of measured graphic
                 var measure_index = this._getGraphicIndex(graphic);
@@ -2330,7 +2338,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         _initDrawingPopupAndClick: function _initDrawingPopupAndClick() {
             //Set popup template
             var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
-            this.drawBox.drawLayer.setInfoTemplate(infoTemplate);
+
+            this._graphicsLayer.setInfoTemplate(infoTemplate);
+            this._pointLayer.setInfoTemplate(infoTemplate);
+            this._polylineLayer.setInfoTemplate(infoTemplate);
+            this._polygonLayer.setInfoTemplate(infoTemplate);
+            this._labelLayer.setInfoTemplate(infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
@@ -2338,6 +2351,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                 this._editorConfig["graphicCurrent"] = evt.graphic;
                 this.setMode("list");
+                this.setInfoWindow(evt.graphic);
             });
 
             //Allow click
@@ -2459,6 +2473,18 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         "name": this._objectIdName,
                         "type": this._objectIdType,
                         "alias": this._objectIdName
+                    }, {
+                        "name": "name",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.nameField
+                    }, {
+                        "name": "description",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.descriptionField
+                    }, {
+                        "name": "symbol",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.symbolField
                     }]
                 };
 
@@ -2588,7 +2614,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         onOpen: function onOpen() {
-            if (this.drawBox.drawLayer.graphics.length > 0) this.setMode("list");else this.setMode("add1");
+            if (this._graphicsLayer.graphics.length > 0) this.setMode("list");else this.setMode("add1");
         },
 
         onClose: function onClose() {
