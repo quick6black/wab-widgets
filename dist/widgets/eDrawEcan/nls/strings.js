@@ -2,7 +2,6 @@ define({
 	root : ({
 		_widgetLabel : "Draw",
 		yes:"Yes",
-		yes:"Yes",
 		no:"No",
 		selectDrawMode : "Select drawing mode",
 		clear : "Clear",
@@ -69,6 +68,7 @@ define({
 		symbolField : "Symbol",
 		nameFieldDefaultValue : "My drawing",
 		descriptionField : "Description",
+		symbolField : "Symbol",
 		localLoading : "Your last drawings were loaded",
 		editLabel : "Update this drawing",
 		deleteLabel : "Delete this drawing",
@@ -81,6 +81,7 @@ define({
 		deleteAllLabel : "Delete selected drawings",
 		exportLabel : "Export selected drawings",
 		noSelection : "No drawings selected",
+		saveDialogTitle : "Export Drawings to File",
 		saveButton : "Save",
 		resetButton : "Reset",
 		cancelButton : "Cancel",

@@ -6,8 +6,8 @@
     </div>
     <!--<span class="hide-box">
         ${nls.hideOption}
-        <input type="checkbox" data-dojo-attach-point="hideCheckbox" data-dojo-attach-event="onclick:onHideCheckboxClick"/>-->
-  </span>
+        <input type="checkbox" data-dojo-attach-point="hideCheckbox" data-dojo-attach-event="onclick:onHideCheckboxClick"/>
+  </span>-->
     <div data-dojo-attach-point="settingAllContent">
 
         <div data-dojo-attach-point="addSection">
@@ -146,7 +146,9 @@
                         <span title="${nls.zoomAllLabel}" class="zoom blue-button" data-dojo-attach-event="onclick:zoomAll">&nbsp;</span>
                         <span title="${nls.copyLabel}" class="copy blue-button" data-dojo-attach-event="onclick:copy">&nbsp;</span>
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
-                        <span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionInFile">&nbsp;</span>
+                        <span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
+
+                        <!--<span title="${nls.exportLabel}" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionInFile">&nbsp;</span>-->
                         <!-- ECAN -->
                        <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
                     </div>
@@ -156,5 +158,23 @@
                 </div>
             </div>
         </div>
+
+        <div data-dojo-attach-point="saveSection">
+            <h2>${nls.saveDialogTitle}</h2>
+            <div class="content">
+                <label for="fileNameField">File Name:</label> 
+                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" value="${config.exportFileName}" class="jimu-input" required="true" 
+data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" /><span>.json</span>
+            </div>
+            <div class="footer">
+                <div>
+                    <input type="button" class="jimu-input blue-button" value="${nls.saveButton}" data-dojo-attach-event="onclick:saveDialogSave" />
+                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:saveDialogCancel" />
+                    <input type="button" class="jimu-input grey-button" value="${nls.resetButton}" data-dojo-attach-event="onclick:saveDialogReset" />
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </div>

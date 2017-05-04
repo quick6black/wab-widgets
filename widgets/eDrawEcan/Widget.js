@@ -50,6 +50,9 @@ define([
         'dojo/dom',
         'dijit/form/Select',
         'dijit/form/NumberSpinner',
+        'dijit/form/TextBox', 
+        'dijit/form/ValidationTextBox',
+        'dijit/form/Button',
         'jimu/dijit/ViewStack',
         'jimu/dijit/SymbolChooser',
         'jimu/dijit/DrawBox',
@@ -102,6 +105,9 @@ function(
     dom, 
     Select, 
     NumberSpinner, 
+    TextBox,
+    ValidationTextBox,
+    Button,
     ViewStack, 
     SymbolChooser, 
     DrawBox, 
@@ -118,9 +124,8 @@ function(
     SaveToMyContent,
     LayerLoader
 ) {
-
-  /*jshint unused: false*/
-  return declare([BaseWidget, _WidgetsInTemplateMixin], {
+    /*jshint unused: false*/
+    return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
         name : 'eDraw',
         baseClass : 'jimu-widget-edraw-ecan',
@@ -212,6 +217,13 @@ function(
                 this.TabViewStack.switchView(this.listSection);
 
                 break;
+
+            case 'save':
+
+                this.TabViewStack.switchView(this.saveSection);
+
+                break;
+
             }
         },
 
@@ -1148,7 +1160,6 @@ function(
                     if(graphic.attributes._content){
                         graphic.attributes.description = graphic.attributes._content;
                     }
-
                 }));
             
             console.log('converted GISmo drawings',json);
@@ -1501,6 +1512,37 @@ function(
             }
         },
 
+        showSaveDialog : function () {
+            var graphics = this.getCheckedGraphics(false);
+
+            if (graphics.length == 0) {
+                this.showMessage(this.nls.noSelection, 'error');
+                return false;
+            }
+
+            this.setMode("save");
+        },
+
+        saveDialogCancel : function () {
+            this.setMode("list");
+        },
+
+        saveDialogSave : function () {
+            if (!this.fileNameField.isValid()) {
+                alert('test');
+
+                return false;
+            }
+
+            this.exportFileName = this.fileNameField.value;
+            this.exportSelectionInFile();
+            this.setMode("list");
+        },
+
+        saveDialogReset : function () {
+            this.fileNameField.value = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
+        },
+
         exportInFile : function () {
             this.launchExport(false);
         },
@@ -1567,7 +1609,7 @@ function(
             var ds = exportUtils.createDataSource({
                 "type" : exportUtils.TYPE_FEATURESET,
                 "data": drawing_seems_featureset,
-                "filename" : (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings'
+                "filename" : (this.exportFileName) ? (this.exportFileName) : ((this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings')
             });
             ds.setFormat(exportUtils.FORMAT_FEATURESET)
             ds.download();
@@ -2558,7 +2600,7 @@ function(
                 "importExport" : this.menuListImportExport
             };
 
-            var views = [this.addSection, this.editorSection, this.listSection];
+            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection];
 
             this.TabViewStack = new ViewStack({
                     viewType : 'dom',
@@ -2715,7 +2757,6 @@ function(
                     }
                 }));
         },
-
 
         //////////////////////////
         /// ECAN CODE
