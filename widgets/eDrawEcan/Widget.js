@@ -127,7 +127,7 @@ function(
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
-        name : 'eDraw',
+        name : 'eDrawEcan',
         baseClass : 'jimu-widget-edraw-ecan',
 
         _gs : null,
@@ -285,6 +285,7 @@ function(
             this.map.infoWindow.show(center);
         },
 
+        _clickHandler : false,
         _clickPointHandler : false,
         _clickPolylineHandler : false,
         _clickPolygonHandler : false,
@@ -294,11 +295,13 @@ function(
             this.map.setInfoWindowOnClick(bool);
 
             if (!bool && this._clickPointHandler) {
+                dojo.disconnect(this._clickHandler);
                 dojo.disconnect(this._clickPointHandler);
                 dojo.disconnect(this._clickPolylineHandler);
                 dojo.disconnect(this._clickPolygonHandler);
                 dojo.disconnect(this._clickLabelHandler);
             } else {
+                this._clickHandler = this._graphicsLayer.on("click", this._onDrawClick);
                 this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
                 this._clickPolylineHandler = this._polylineLayer.on("click", this._onDrawClick);
                 this._clickPolygonHandler = this._polygonLayer.on("click", this._onDrawClick);
@@ -1642,6 +1645,9 @@ function(
                     this._addPolygonMeasure(geom, this._editorConfig["graphicCurrent"]);
             }
 
+            // Clear the drawing graphics layer
+            this.drawBox.drawLayer.clear();
+
             // Update the display graphics
             this._syncGraphicsToLayers();
 
@@ -1674,6 +1680,7 @@ function(
 
             if (!graphic && this._editorConfig["editToolbar"]) {
                 this._editorConfig["editToolbar"].deactivate();
+                this._syncGraphicsToLayers();
                 return;
             }
 
@@ -1688,6 +1695,10 @@ function(
                 allowDeleteVertices : true,
                 uniformScaling : true
             };
+
+            this.drawBox.drawLayer.add(graphic);
+            this._hideOperationalGraphic(graphic);
+
             this._editorConfig["editToolbar"].activate(tool, graphic, options);
         },
 
@@ -1854,6 +1865,41 @@ function(
                     }
                 }
             }));
+        },
+
+        _hideOperationalGraphic : function (graphic) {
+            if (!graphic) return;
+
+            var geoType = graphic.geometry.type;
+            var layer = null;         
+
+            if(geoType === 'point'){
+                if(graphic.symbol && graphic.symbol.type === 'textsymbol'){
+                    layer = this._labelLayer;
+                } else {
+                    layer = this._pointLayer;
+                }
+            } else if(geoType === 'polyline') {
+                layer = this._polylineLayer;
+            } else if(geoType === 'polygon' || geoType === 'extent') {
+                layer = this._polygonLayer;
+            }
+
+            if (layer) { 
+                // Find the specific graphic
+                var drawing = null;
+                for(var i = 0,il = layer.graphics.length; i < il; i++) {
+                    var g = layer.graphics[i];
+                    if (g.attributes[this._objectIdName] === graphic.attributes[this._objectIdName]) {
+                        drawing = g;
+                        break;
+                    }
+                }
+
+                if (drawing) {
+                    layer.remove(drawing);
+                }
+            }
         },
 
         _pushAddOperation: function(graphics){

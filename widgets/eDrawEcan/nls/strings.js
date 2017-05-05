@@ -1,6 +1,6 @@
 define({
 	root : ({
-		_widgetLabel : "Draw",
+		_widgetLabel : "Draw (ECAN)",
 		yes:"Yes",
 		no:"No",
 		selectDrawMode : "Select drawing mode",

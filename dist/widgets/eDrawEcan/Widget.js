@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
-        name: 'eDraw',
+        name: 'eDrawEcan',
         baseClass: 'jimu-widget-edraw-ecan',
 
         _gs: null,
@@ -165,6 +165,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.map.infoWindow.show(center);
         },
 
+        _clickHandler: false,
         _clickPointHandler: false,
         _clickPolylineHandler: false,
         _clickPolygonHandler: false,
@@ -174,11 +175,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.map.setInfoWindowOnClick(bool);
 
             if (!bool && this._clickPointHandler) {
+                dojo.disconnect(this._clickHandler);
                 dojo.disconnect(this._clickPointHandler);
                 dojo.disconnect(this._clickPolylineHandler);
                 dojo.disconnect(this._clickPolygonHandler);
                 dojo.disconnect(this._clickLabelHandler);
             } else {
+                this._clickHandler = this._graphicsLayer.on("click", this._onDrawClick);
                 this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
                 this._clickPolylineHandler = this._polylineLayer.on("click", this._onDrawClick);
                 this._clickPolygonHandler = this._polygonLayer.on("click", this._onDrawClick);
@@ -1454,6 +1457,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 if (geom.type == 'point') this._addPointMeasure(geom, this._editorConfig["graphicCurrent"]);else if (geom.type == 'polyline') this._addLineMeasure(geom, this._editorConfig["graphicCurrent"]);else if (geom.type == 'polygon') this._addPolygonMeasure(geom, this._editorConfig["graphicCurrent"]);
             }
 
+            // Clear the drawing graphics layer
+            this.drawBox.drawLayer.clear();
+
             // Update the display graphics
             this._syncGraphicsToLayers();
 
@@ -1485,6 +1491,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             if (!graphic && this._editorConfig["editToolbar"]) {
                 this._editorConfig["editToolbar"].deactivate();
+                this._syncGraphicsToLayers();
                 return;
             }
 
@@ -1498,6 +1505,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 allowDeleteVertices: true,
                 uniformScaling: true
             };
+
+            this.drawBox.drawLayer.add(graphic);
+            this._hideOperationalGraphic(graphic);
+
             this._editorConfig["editToolbar"].activate(tool, graphic, options);
         },
 
@@ -1645,6 +1656,41 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     }
                 }
             }));
+        },
+
+        _hideOperationalGraphic: function _hideOperationalGraphic(graphic) {
+            if (!graphic) return;
+
+            var geoType = graphic.geometry.type;
+            var layer = null;
+
+            if (geoType === 'point') {
+                if (graphic.symbol && graphic.symbol.type === 'textsymbol') {
+                    layer = this._labelLayer;
+                } else {
+                    layer = this._pointLayer;
+                }
+            } else if (geoType === 'polyline') {
+                layer = this._polylineLayer;
+            } else if (geoType === 'polygon' || geoType === 'extent') {
+                layer = this._polygonLayer;
+            }
+
+            if (layer) {
+                // Find the specific graphic
+                var drawing = null;
+                for (var i = 0, il = layer.graphics.length; i < il; i++) {
+                    var g = layer.graphics[i];
+                    if (g.attributes[this._objectIdName] === graphic.attributes[this._objectIdName]) {
+                        drawing = g;
+                        break;
+                    }
+                }
+
+                if (drawing) {
+                    layer.remove(drawing);
+                }
+            }
         },
 
         _pushAddOperation: function _pushAddOperation(graphics) {
