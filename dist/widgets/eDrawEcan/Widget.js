@@ -279,7 +279,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             var nb = graphics.length;
             for (var i = 0; i < nb; i++) {
-                this._removeGraphic(graphics[i]);
+                this._removeGraphic(graphics[i], true);
             }
 
             if (this._confirmDeleteMessage && this._confirmDeleteMessage.close) {
@@ -288,17 +288,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
 
             this.setInfoWindow(false);
+
+            this._syncGraphicsToLayers();
             this.setMode("list");
         },
 
-        _removeGraphic: function _removeGraphic(graphic) {
+        _removeGraphic: function _removeGraphic(graphic, holdSyncGraphics) {
             if (graphic.measure && graphic.measure.graphic) {
                 this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
                 graphic.measureParent.measure = false;
             }
             this._graphicsLayer.remove(graphic);
-            this._syncGraphicsToLayers();
+
+            if (holdSyncGraphics === undefined || holdSyncGraphics === false) this._syncGraphicsToLayers();
         },
 
         drawingsGetJson: function drawingsGetJson(asString, onlyChecked) {
