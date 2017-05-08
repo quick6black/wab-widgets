@@ -147,7 +147,7 @@
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
                         <span title="${nls.exportLabel}" class="save blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
                     </div>
-					<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>
+                    <span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:showLoadDialog">&nbsp;</span>
                 </div>
             </div>
         </div>
@@ -168,12 +168,30 @@
             </div>
         </div>
 
-    </div>
-
-                <div id="portalLogin" style="display:none;">
-                    <hr/>
-                    <span>Logged into Portal :)</span>
+        <div data-dojo-attach-point="loadSection">
+            <h2>${nls.loadDialogTitle}</h2>
+            <div class="content">
+                <table class="jimu-table load-table">
+                    <thead>
+                        <tr>
+                            <th>${nls.drawingName}</th>
+                            <th>${nls.drawingDate}</th>
+                            <th data-dojo-attach-point="loadtableTH"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-dojo-attach-point="drawingsTableBody"></tbody>
+                </table>                
+            </div>
+            <div class="footer">
+                <div>
+                    <input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />
+                    <input id="portalLoadBtn" type="button" class="jimu-input blue-button" value="${nls.loadButtonPortal}" data-dojo-attach-event="onclick:loadDialogLoadPortal" style="display:none;" />
+                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />
+                    <!--<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>-->
                 </div>
+            </div>
 
+        </div>
 
+    </div>
 </div>

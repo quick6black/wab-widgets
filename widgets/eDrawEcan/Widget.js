@@ -18,6 +18,7 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidget',
         'esri/config',
+        'esri/request',
         'dojo/on',
         'dojo/Deferred',
         'jimu/exportUtils',
@@ -75,7 +76,8 @@ function(
     declare, 
     _WidgetsInTemplateMixin, 
     BaseWidget, 
-    esriConfig, 
+    esriConfig,
+    esriRequest, 
     on,
     Deferred, 
     exportUtils, 
@@ -176,8 +178,8 @@ function(
 
                 this.setInfoWindow(false);
                 this.allowPopup(false);
-
                 break;
+
             case 'add2':
                 this.setMenuState('add', ['add']);
 
@@ -189,8 +191,8 @@ function(
 
                 this.setInfoWindow(false);
                 this.allowPopup(false);
-
                 break;
+
             case 'edit':
                 this.setMenuState('edit', ['edit']);
                 if (this._editorConfig["graphicCurrent"]) {
@@ -205,8 +207,8 @@ function(
                 this.TabViewStack.switchView(this.editorSection);
 
                 this.setInfoWindow(false);
-
                 break;
+
             case 'list':
                 this.setMenuState('list');
                 this.allowPopup(true);
@@ -222,15 +224,15 @@ function(
                 this._editorConfig["graphicCurrent"] = false;
 
                 this.TabViewStack.switchView(this.listSection);
-
                 break;
 
             case 'save':
-
                 this.TabViewStack.switchView(this.saveSection);
-
                 break;
 
+            case 'load':
+                this.TabViewStack.switchView(this.loadSection);
+                break;
             }
         },
 
@@ -1536,7 +1538,6 @@ function(
             this.setMode("save");
             if (this.portalSaveAllowed) {
                 domStyle.set(dojo.byId('portalSaveBtn'),'display','inline-block');
-                //domStyle.set(dojo.byId('portalLogin'),'display','block');
             }
         },
 
@@ -1624,6 +1625,83 @@ function(
             return false;
         },
 
+        showLoadDialog : function() {
+            // update the drawings list
+            if (this.portalSaveAllowed) {
+                this._generateDrawingsList();
+                domStyle.set(dojo.byId('portalLoadBtn'),'display','inline-block');
+            }
+            this.setMode("load");
+        },
+
+        loadDialogLoadPortal : function () {
+            // TO BE COMPLETED...
+        },
+
+        loadDialogCancel : function () {
+            this.setMode("list");
+        },
+
+        _refreshDrawingsList : function () {
+            if (this.drawingFolder !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var portal = portalUtils.getPortal(portalUrl);
+
+                this._getDrawingFolderContent(portal).then(lang.hitch(this, function(content) {
+                    //Instantiate the currentDrawings collection
+                    if (this.currentDrawings === undefined) {
+                        this.currentDrawings = [];
+                    } else {
+                        this.currentDrawings.length = 0;
+                    }
+
+                    for(var i=0,il=content.items.length;i<il;i++) {
+                        this.currentDrawings.push(content.items[i]);
+                    }
+                }));
+            } else {
+                this.showMessage("Error loading drawings saved in portal list","error");
+            }
+        },
+
+        _generateDrawingsList : function () {
+            //Table
+            this.drawingsTableBody.innerHTML = "";
+
+            // CHeck for drawings
+            if (this.currentDrawings === undefined || this.currentDrawings.length === 0) {
+                 this.drawingsTableBody.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
+            } else {
+                for(var i=0,il=this.currentDrawings.length; i<il;i++) {
+                    var drawing = this.currentDrawings[i];
+                    var name = drawing.title;
+
+                    var options = {  
+                        year: "numeric", month: "short",  
+                        day: "numeric", hour: "2-digit", minute: "2-digit"  
+                    };  
+
+                    var modified = new Date(drawing.modified).toLocaleTimeString('en-NZ',options);
+
+                    var actions = '';
+                    var actions_class = "list-draw-actions light";
+
+                    var html = '<td>' + name + '</td>'
+                         + '<td>' + modified + '</td>'
+                         + '<td class="' + actions_class + '">' + actions + '</td>';
+
+                    var tr = domConstruct.create(
+                        "tr", 
+                        {
+                            id : 'draw-tr--' + i,
+                            innerHTML : html
+                        },
+                        this.drawingsTableBody);
+                }
+            }
+        },
+
+
         ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
 
         checkPrivilege: function () {
@@ -1666,7 +1744,6 @@ function(
                 this.portalUser = user;
                 return user.getContent();
             })).then(lang.hitch(this, function(res) {
-
                 this.drawFolder = null;
                 for(var i=0,il=res.folders.length; i<il; i++) {
                     if(res.folders[i].title === 'drawings') {
@@ -1735,11 +1812,35 @@ function(
             this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function(res) {
                 this.showMessage("Drawing has been saved", 'info');
                 this.setMode('list');
+                this._refreshDrawingsList();
             }), function (err) {
                 this.showMessage("There was a problem saving the drawing", 'error');
                 this.setMode('list');
             });
         },
+
+        _getDrawingFolderContent : function (portal) {
+            if (this.drawingFolder !== undefined && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);                
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl,this.portalUser.username, this.drawingFolder.id);
+
+                var args = {
+                    url: contentUrl,
+                    handleAs: 'json',
+                    content: {
+                        f: 'json'
+                    },
+                    callbackParamName: 'callback'
+                };
+
+                if (portal.isValidCredential) {
+                    args.content.token = portal.credential.token;
+                }
+
+                return esriRequest(args);
+            }
+        },
+
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
         editorOnClickEditSaveButon : function () {
@@ -2767,7 +2868,7 @@ function(
                 "importExport" : this.menuListImportExport
             };
 
-            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection];
+            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection, this.loadSection];
 
             this.TabViewStack = new ViewStack({
                     viewType : 'dom',
@@ -2809,8 +2910,10 @@ function(
                     if (this.drawingFolder === undefined) {
                         var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                         var portal = portalUtils.getPortal(portalUrl);
+                        
                         this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
                             this.drawingFolder = res;
+                            this._refreshDrawingsList();
                         }));
                     }
                 }

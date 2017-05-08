@@ -65,6 +65,13 @@ define({
 		importWarningNoExport0Draw : "No export of the file (No drawing to export).",
 		importErrorFileName : "The filename you have selected is not supported.",
 		importCloseButton:"Close",
+
+		loadDialogTitle:"Load Saved Drawing",
+		loadButtonPortal:"Load Drawing",
+
+		drawingName:"Drawing Name",
+		drawingDate:"Date Last Modified",
+
 		nameField : "Name",
 		symbolField : "Symbol",
 		nameFieldDefaultValue : "My drawing",
