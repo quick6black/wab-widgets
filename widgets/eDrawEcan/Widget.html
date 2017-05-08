@@ -141,18 +141,12 @@
             <div class="footer">
                 <div>
                     <div style="width: calc(100% - 35px);" class="list-draw-actions" data-dojo-attach-point="allActionsNode">
-                        <!--<span class="text">${nls.all} :</span>-->
                         <span class="text"><input type="checkbox" data-dojo-attach-event="onclick:listUpdateAllCheckbox" data-dojo-attach-point="listCheckboxAll2" /></span>
                         <span title="${nls.zoomAllLabel}" class="zoom blue-button" data-dojo-attach-event="onclick:zoomAll">&nbsp;</span>
                         <span title="${nls.copyLabel}" class="copy blue-button" data-dojo-attach-event="onclick:copy">&nbsp;</span>
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
                         <span title="${nls.exportLabel}" class="save blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
-
-                        <!-- ECAN -->
-                        <!--  <span title="Save to My Content" class="export blue-button" data-dojo-attach-event="onclick:exportSelectionMyContent">&nbsp;</span> -->
                     </div>
-                        <!-- ECAN -->
-                        <!--   <span title="Load from My Content" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span> -->
 					<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>
                 </div>
             </div>
@@ -161,11 +155,12 @@
         <div data-dojo-attach-point="saveSection">
             <h2>${nls.saveDialogTitle}</h2>
             <div class="content">
-                <label for="fileNameField">File Name:</label> 
-                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" class="jimu-input" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" /><span>.json</span>
+                <label for="fileNameField">${nls.drawingNameLabel}</label> 
+                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" class="jimu-input" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" />
             </div>
             <div class="footer">
                 <div>
+                    <input id="portalSaveBtn" type="button" class="jimu-input blue-button" value="${nls.saveButtonPortal}" data-dojo-attach-event="onclick:saveDialogSavePortal" style="display:none;" />
                     <input type="button" class="jimu-input blue-button" value="${nls.saveButton}" data-dojo-attach-event="onclick:saveDialogSave" />
                     <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:saveDialogCancel" />
                     <input type="button" class="jimu-input grey-button" value="${nls.resetButton}" data-dojo-attach-event="onclick:saveDialogReset" />
@@ -174,5 +169,11 @@
         </div>
 
     </div>
+
+                <div id="portalLogin" style="display:none;">
+                    <hr/>
+                    <span>Logged into Portal :)</span>
+                </div>
+
 
 </div>

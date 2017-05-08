@@ -13,8 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'dojo/on', 'dojo/Deferred', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', "esri/toolbars/edit", 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/featureActions/SaveToMyContent' ///ECAN
-], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, on, Deferred, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, SaveToMyContent, LayerLoader) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'dojo/on', 'dojo/Deferred', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, on, Deferred, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -1348,6 +1347,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (this.fileNameField.value === '') this.saveDialogReset();
 
             this.setMode("save");
+            if (this.portalSaveAllowed) {
+                domStyle.set(dojo.byId('portalSaveBtn'), 'display', 'inline-block');
+                //domStyle.set(dojo.byId('portalLogin'),'display','block');
+            }
         },
 
         saveDialogCancel: function saveDialogCancel() {
@@ -1370,20 +1373,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.fileNameField.set('value', val);
         },
 
-        exportInFile: function exportInFile() {
-            this.launchExport(false);
-        },
+        saveDialogSavePortal: function saveDialogSavePortal() {
+            if (!this.fileNameField.isValid()) {
+                this.showMessage(this.nls.importErrorFileName, 'error');
+                return false;
+            }
 
-        exportSelectionInFile: function exportSelectionInFile(evt) {
-            if (evt && evt.preventDefault) evt.preventDefault();
-            this.launchExport(true);
-        },
-
-        // NEW ECAN 
-        exportSelectionMyContent: function exportSelectionMyContent(evt) {
-            if (evt && evt.preventDefault) evt.preventDefault();
-
-            ///get drawings / layers
             var only_graphics_checked = true;
             var drawing_json = this.drawingsGetJson(false, only_graphics_checked);
 
@@ -1400,18 +1395,16 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 }
             };
 
-            //Create datasource and download !
-            var ds = exportUtils.createDataSource({
-                "type": exportUtils.TYPE_FEATURESET,
-                "data": drawing_seems_featureset,
-                "filename": this.exportFileName ? this.exportFileName : 'myDrawings'
-            });
-            ds.setFormat(exportUtils.FORMAT_FEATURESET);
+            this._addPortalDrawingItem(drawing_seems_featureset);
+        },
 
-            ///SaveToMyContent.onExecute(ds.data, layer);
-            var savetomycontent = new SaveToMyContent();
-            savetomycontent.onExecute(ds.featureSet, null);
-            //this.launchExport(true);
+        exportInFile: function exportInFile() {
+            this.launchExport(false);
+        },
+
+        exportSelectionInFile: function exportSelectionInFile(evt) {
+            if (evt && evt.preventDefault) evt.preventDefault();
+            this.launchExport(true);
         },
 
         launchExport: function launchExport(only_graphics_checked) {
@@ -1440,6 +1433,118 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             ds.download();
 
             return false;
+        },
+
+        ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
+
+        checkPrivilege: function checkPrivilege() {
+            var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = portalUtils.getPortal(portalUrl);
+
+            if (!portal || !portal.haveSignIn()) {
+                var def = new Deferred();
+                def.resolve(false);
+                return def;
+            } else {
+                return this._hasPrivilege(portal);
+            }
+        },
+
+        _hasPrivilege: function _hasPrivilege(portal) {
+            return portal.loadSelfInfo().then(lang.hitch(this, function (res) {
+                if (res && res.user) {
+                    var userRole = new Role({
+                        id: res.user.roleId ? res.user.roleId : res.user.role,
+                        role: res.user.role
+                    });
+
+                    if (res.user.privileges) {
+                        userRole.setPrivileges(res.user.privileges);
+                    }
+
+                    // Check whether user can create item of type feature collection
+                    return userRole.canCreateItem() && userRole.canPublishFeatures();
+                } else {
+                    return false;
+                }
+            }), function () {
+                return false;
+            });
+        },
+
+        _getDrawingFolder: function _getDrawingFolder(portal) {
+            return portal.getUser().then(lang.hitch(this, function (user) {
+                this.portalUser = user;
+                return user.getContent();
+            })).then(lang.hitch(this, function (res) {
+
+                this.drawFolder = null;
+                for (var i = 0, il = res.folders.length; i < il; i++) {
+                    if (res.folders[i].title === 'drawings') {
+                        this.drawFolder = res.folders[i];
+                        break;
+                    }
+                }
+                return this.drawFolder;
+            }));
+        },
+
+        _addPortalDrawingItem: function _addPortalDrawingItem(featureSet) {
+            //Create datasource and download !
+            //var ds = exportUtils.createDataSource({
+            //    "type" : exportUtils.TYPE_FEATURESET,
+            //    "data": featureSet,
+            //    "filename" : (this.exportFileName) ? (this.exportFileName) : ((this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings')
+            //});
+            //ds.setFormat(exportUtils.FORMAT_FEATURESET)
+
+            var layerDefinition = {
+                "name": "",
+                "geometryType": "",
+                "fields": [{
+                    "name": this._objectIdName,
+                    "type": this._objectIdType,
+                    "alias": this._objectIdName
+                }, {
+                    "name": "name",
+                    "type": "esriFieldTypeString",
+                    "alias": this.nls.nameField
+                }, {
+                    "name": "description",
+                    "type": "esriFieldTypeString",
+                    "alias": this.nls.descriptionField
+                }, {
+                    "name": "symbol",
+                    "type": "esriFieldTypeString",
+                    "alias": this.nls.symbolField
+                }]
+            };
+
+            var featureCollection = {
+                layers: [{
+                    layerDefinition: layerDefinition,
+                    featureSet: featureSet.toJson()
+                }]
+            };
+
+            var itemContent = {
+                name: this.fileNameField.value,
+                title: this.fileNameField.value,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: 'PUT USER SNIPPET HERE',
+                description: 'PUT USER DESCRIPTION HERE',
+                text: JSON.stringify(featureCollection)
+            };
+
+            this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function (res) {
+                this.showMessage("Drawing has been saved", 'info');
+                this.setMode('list');
+            }), function (err) {
+                this.showMessage("There was a problem saving the drawing", 'error');
+                this.setMode('list');
+            });
         },
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
@@ -2422,6 +2527,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             })(this);
         },
 
+        _initPortal: function _initPortal() {
+            // Put check in for config settings to see if portal should be enabled
+
+            // Check if user logged in / has prvileges save to portal
+            this.checkPrivilege().then(lang.hitch(this, function (res) {
+                this.portalSaveAllowed = res;
+                if (this.portalSaveAllowed) {
+                    // get the drawing folder
+                    if (this.drawingFolder === undefined) {
+                        var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                        var portal = portalUtils.getPortal(portalUrl);
+                        this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                            this.drawingFolder = res;
+                        }));
+                    }
+                }
+            }));
+        },
+
         _initDrawingPopupAndClick: function _initDrawingPopupAndClick() {
             //Set popup template
             var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
@@ -2683,6 +2807,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             //Init list Drag & Drop
             this._initListDragAndDrop();
+
+            //Init the portal functionality
+            this._initPortal();
 
             // initialise the export file name
             this.exportFileName = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';

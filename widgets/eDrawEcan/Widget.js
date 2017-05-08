@@ -31,7 +31,7 @@ define([
         'esri/symbols/TextSymbol',
         'esri/symbols/Font',
         'esri/units',
-        "esri/toolbars/edit",
+        'esri/toolbars/edit',
         'esri/geometry/webMercatorUtils',
         'esri/tasks/GeometryService',
         'esri/tasks/AreasAndLengthsParameters',
@@ -48,6 +48,7 @@ define([
         'dojo/_base/array',
         'dojo/dom-construct',
         'dojo/dom',
+        'dojo/dom-style',
         'dijit/form/Select',
         'dijit/form/NumberSpinner',
         'dijit/form/TextBox', 
@@ -66,7 +67,9 @@ define([
         'esri/layers/FeatureLayer',
         'jimu/LayerInfos/LayerInfos',        
         './proj4',
-        'jimu/featureActions/SaveToMyContent' ///ECAN
+        'jimu/portalUtils',
+        'jimu/portalUrlUtils',
+        'jimu/Role'
     ],
 function(
     declare, 
@@ -103,6 +106,7 @@ function(
     array, 
     domConstruct, 
     dom, 
+    domStyle,
     Select, 
     NumberSpinner, 
     TextBox,
@@ -121,8 +125,9 @@ function(
     FeatureLayer,
     LayerInfos,
     proj4js,
-    SaveToMyContent,
-    LayerLoader
+    portalUtils,
+    portalUrlUtils,
+    Role
 ) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -1529,6 +1534,10 @@ function(
                 this.saveDialogReset();
 
             this.setMode("save");
+            if (this.portalSaveAllowed) {
+                domStyle.set(dojo.byId('portalSaveBtn'),'display','inline-block');
+                //domStyle.set(dojo.byId('portalLogin'),'display','block');
+            }
         },
 
         saveDialogCancel : function () {
@@ -1551,22 +1560,12 @@ function(
             this.fileNameField.set('value',val);
         },
 
-        exportInFile : function () {
-            this.launchExport(false);
-        },
+        saveDialogSavePortal : function () {
+            if (!this.fileNameField.isValid()) {
+                this.showMessage(this.nls.importErrorFileName, 'error');
+                return false;
+            }
 
-        exportSelectionInFile : function (evt) {
-            if(evt && evt.preventDefault)
-                evt.preventDefault();
-            this.launchExport(true);
-        },
-
-        // NEW ECAN 
-        exportSelectionMyContent : function (evt) {
-            if(evt && evt.preventDefault)
-                evt.preventDefault();
-
-            ///get drawings / layers
             var only_graphics_checked = true;
             var drawing_json = this.drawingsGetJson(false, only_graphics_checked);
 
@@ -1583,18 +1582,18 @@ function(
                 }
             };
 
-            //Create datasource and download !
-            var ds = exportUtils.createDataSource({
-                "type" : exportUtils.TYPE_FEATURESET,
-                "data": drawing_seems_featureset,
-                "filename" : (this.exportFileName) ? (this.exportFileName) : 'myDrawings'
-            });
-            ds.setFormat(exportUtils.FORMAT_FEATURESET)
 
-            ///SaveToMyContent.onExecute(ds.data, layer);
-            var savetomycontent = new SaveToMyContent();
-            savetomycontent.onExecute(ds.featureSet, null);
-            //this.launchExport(true);
+            this._addPortalDrawingItem(drawing_seems_featureset);
+        },
+
+        exportInFile : function () {
+            this.launchExport(false);
+        },
+
+        exportSelectionInFile : function (evt) {
+            if(evt && evt.preventDefault)
+                evt.preventDefault();
+            this.launchExport(true);
         },
 
         launchExport : function (only_graphics_checked) {
@@ -1623,6 +1622,123 @@ function(
             ds.download();
 
             return false;
+        },
+
+        ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
+
+        checkPrivilege: function () {
+            var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = portalUtils.getPortal(portalUrl);
+
+            if(!portal || !portal.haveSignIn()) {
+                var def = new Deferred();
+                def.resolve(false);
+                return def;
+            } else {
+                return this._hasPrivilege(portal);
+            }
+        },
+
+        _hasPrivilege: function(portal){
+            return portal.loadSelfInfo().then(lang.hitch(this, function(res){
+                if(res && res.user) {
+                    var userRole = new Role({
+                        id: (res.user.roleId) ? res.user.roleId : res.user.role,
+                        role: res.user.role
+                    });
+
+                    if(res.user.privileges) {
+                        userRole.setPrivileges(res.user.privileges);
+                    }
+              
+                    // Check whether user can create item of type feature collection
+                    return userRole.canCreateItem() && userRole.canPublishFeatures();
+                } else {
+                    return false;
+                }
+            }), function() {
+                return false;
+            });
+        },
+
+        _getDrawingFolder: function(portal) {
+            return portal.getUser().then(lang.hitch(this, function(user) {
+                this.portalUser = user;
+                return user.getContent();
+            })).then(lang.hitch(this, function(res) {
+
+                this.drawFolder = null;
+                for(var i=0,il=res.folders.length; i<il; i++) {
+                    if(res.folders[i].title === 'drawings') {
+                        this.drawFolder = res.folders[i];
+                        break;
+                    }
+                }
+                return this.drawFolder;
+            }));
+        },
+
+        _addPortalDrawingItem: function(featureSet) {
+            //Create datasource and download !
+            //var ds = exportUtils.createDataSource({
+            //    "type" : exportUtils.TYPE_FEATURESET,
+            //    "data": featureSet,
+            //    "filename" : (this.exportFileName) ? (this.exportFileName) : ((this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings')
+            //});
+            //ds.setFormat(exportUtils.FORMAT_FEATURESET)
+
+            var layerDefinition = {
+                "name": "",
+                "geometryType": "",
+                "fields": [
+                    {
+                        "name": this._objectIdName,
+                        "type": this._objectIdType,
+                        "alias": this._objectIdName
+                    },
+                    {
+                        "name": "name",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.nameField
+                    },
+                    {
+                        "name": "description",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.descriptionField
+                    },
+                    {
+                        "name": "symbol",
+                        "type": "esriFieldTypeString",
+                        "alias": this.nls.symbolField
+                    }
+                ]
+            };
+
+            var featureCollection = {
+                layers: [{
+                  layerDefinition: layerDefinition,
+                  featureSet: featureSet.toJson()
+                }]
+            };
+
+            var itemContent = {
+                name: this.fileNameField.value,
+                title: this.fileNameField.value,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: 'PUT USER SNIPPET HERE',
+                description: 'PUT USER DESCRIPTION HERE',
+                text: JSON.stringify(featureCollection)
+            };
+
+            this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function(res) {
+                this.showMessage("Drawing has been saved", 'info');
+                this.setMode('list');
+            }), function (err) {
+                this.showMessage("There was a problem saving the drawing", 'error');
+                this.setMode('list');
+            });
         },
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
@@ -2682,6 +2798,25 @@ function(
             })(this);
         },
 
+        _initPortal : function () {
+            // Put check in for config settings to see if portal should be enabled
+
+            // Check if user logged in / has prvileges save to portal
+            this.checkPrivilege().then(lang.hitch(this, function (res) {
+                this.portalSaveAllowed = res;
+                if (this.portalSaveAllowed) {
+                    // get the drawing folder
+                    if (this.drawingFolder === undefined) {
+                        var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                        var portal = portalUtils.getPortal(portalUrl);
+                        this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
+                            this.drawingFolder = res;
+                        }));
+                    }
+                }
+            }));
+        },
+
         _initDrawingPopupAndClick : function () {
             //Set popup template
             var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
@@ -2958,6 +3093,10 @@ function(
 
             //Init list Drag & Drop
             this._initListDragAndDrop();
+
+
+            //Init the portal functionality
+            this._initPortal();
 
             // initialise the export file name
             this.exportFileName = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
