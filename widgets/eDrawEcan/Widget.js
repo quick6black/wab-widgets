@@ -2993,8 +2993,6 @@ function(
         },
 
         _initPortal : function () {
-            // Put check in for config settings to see if portal should be enabled
-
             // Check if user logged in / has prvileges save to portal
             this.checkPrivilege().then(lang.hitch(this, function (res) {
                 console.log("_initPortal Check Privileges: ", res);
@@ -3015,10 +3013,12 @@ function(
                                 this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
                                     console.log("_initPortal Get Drawing Folder After Create: ", res);
                                     this._refreshDrawingsList();
+                                    domStyle.set(this.loadTable,'display','block');
                                 }));
                             }));
                         } else {
                             this._refreshDrawingsList();
+                            domStyle.set(this.loadTable,'display','block');
                         }
                     }));
                 }
@@ -3302,7 +3302,9 @@ function(
             this._initListDragAndDrop();
 
             //Init the portal functionality
-            this._initPortal();
+            if (this.config.allowSaveToPortal) {
+                this._initPortal(); 
+            } 
 
             // initialise the export file name
             this.exportFileName = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';

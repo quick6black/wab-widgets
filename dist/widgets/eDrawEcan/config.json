@@ -2,6 +2,7 @@
  	"exportFileName" : "myDrawing",
 	"confirmOnDelete" : true,
 	"allowLocalStorage" : true,
+	"allowSaveToPortal" : true,
 	"portalDrawingFolderName" : "My Drawings",
 	"localStorageKey" : false,
 	"isOperationalLayer": true,

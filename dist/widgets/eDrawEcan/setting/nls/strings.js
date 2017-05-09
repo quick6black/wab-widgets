@@ -47,7 +47,10 @@ define({
 		squareFeetAbbreviation : "sq ft",
 		squareYardsAbbreviation : "sq yd",
 		defineUnits : "Define the measurement units.",
-		operationalLayer : "Add the drawing as an operational layer of the map."
+		operationalLayer : "Add the drawing as an operational layer of the map.",
+		allowSaveToPortalLabel : "Save drawings to Portal?",
+		portalDrawingFolderNameLabel: "Drawings folder name in Portal",
+		portalDrawingFolderName: "My Drawings"
 	}),
 	"ar" : 1,
 	"cs" : 1,

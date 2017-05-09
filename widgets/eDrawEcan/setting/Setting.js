@@ -221,6 +221,10 @@ function(
       this.localStorageKeyInput.value = (config.localStorageKey) ? config.localStorageKey : '';
       this.isOperationalLayerInput.checked = (config.isOperationalLayer) ? true : false;
 
+      // Portal Save Functions       
+      this.allowSaveToPortalInput.checked = (config.allowSaveToPortal) ? true : false;
+      this.portalDrawingFolderNameInput.value = (config.portalDrawingFolderName) ? config.portalDrawingFolderName : this.nls.portalDrawingFolderName;
+
       //Text plus FontFamily
       this._setTextPlusFontFamilyTable(config);
       
@@ -293,6 +297,10 @@ function(
       config.listShowUpAndDownButtons = this.listShowUpAndDownButtons.checked;
       config.allowLocalStorage = this.allowLocalStorageInput.checked;
       config.isOperationalLayer = this.isOperationalLayerInput.checked;
+
+      config.allowSaveToPortal = this.allowSaveToPortalInput.checked;
+      config.portalDrawingFolderName = (this.portalDrawingFolderNameInput.value.trim() != "") ? this.portalDrawingFolderNameInput.value.trim() : this.nls.portalDrawingFolderName;
+
       var key = this.localStorageKeyInput.value.trim();
       config.localStorageKey = (key == "") ? false : key;
 
