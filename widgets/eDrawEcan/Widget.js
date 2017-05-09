@@ -21,6 +21,7 @@ define([
         'esri/request',
         'dojo/on',
         'dojo/Deferred',
+        'dojo/query',
         'jimu/exportUtils',
         'esri/graphic',
         'esri/symbols/SimpleMarkerSymbol',
@@ -50,6 +51,8 @@ define([
         'dojo/dom-construct',
         'dojo/dom',
         'dojo/dom-style',
+        'dojo/dom-attr',
+        'dojo/promise/all',
         'dijit/form/Select',
         'dijit/form/NumberSpinner',
         'dijit/form/TextBox', 
@@ -80,6 +83,7 @@ function(
     esriRequest, 
     on,
     Deferred, 
+    dojoQuery,
     exportUtils, 
     Graphic, 
     SimpleMarkerSymbol, 
@@ -109,6 +113,8 @@ function(
     domConstruct, 
     dom, 
     domStyle,
+    domAttr,
+    all,
     Select, 
     NumberSpinner, 
     TextBox,
@@ -511,22 +517,6 @@ function(
         menuOnClickList : function () {
             this.setMode("list");
         },
-
-        /*        
-        /// SORT THIS - REMOVE THIS FUNCTION AS NO LONGER NEEDED
-        onHideCheckboxClick : function () {
-            var display = (this.hideCheckbox.checked) ? 'none' : 'block';
-
-            this.drawBox.drawLayer.setVisibility(!this.hideCheckbox.checked);
-            this.menu.style.display = display;
-            this.settingAllContent.style.display = display;
-
-            if (this.hideCheckbox.checked)
-                this.onClose();
-            else
-                this.onOpen();
-        },
-        */
 
         ///////////////////////// LIST METHODS ///////////////////////////////////////////////////////////
         listGenerateDrawTable : function () {
@@ -1150,7 +1140,11 @@ function(
             this.importMessage.close();
         },
 
-        ///// ECAN
+        importPortalData : function () {
+
+        },
+
+        //////////////////////// ECAN ////////////////////////////
         
         migrateGISmoDrawings : function(json){
             console.log('migrateGISmoDrawings');
@@ -1566,29 +1560,62 @@ function(
         },
 
         saveDialogSavePortal : function () {
+            // Validate drawing name
             if (!this.fileNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
 
-            var only_graphics_checked = true;
-            var drawing_json = this.drawingsGetJson(false, only_graphics_checked);
+            // Set whether to only pull in selected graphics - currently defaults to true (future development here)
+            var only_graphics_checked = true, selectedGraphics = null;
 
-            // Control if there are drawings
-            if (!drawing_json) {
-                this.showMessage(this.nls.importWarningNoExport0Draw, 'warning');
-                return false;
+            // Extract the required graphics from the feature layers 
+            if (only_graphics_checked) {
+                selectedGraphics = this.getCheckedGraphics(false);
+            } else {
+                selectedGraphics = this._getAllGraphics();
             }
 
-            //We could use FeatureSet (which is required) but this workaround keeps symbols !
-            var drawing_seems_featureset = {
-                toJson:function(){
-                    return drawing_json;
+            // Build save layers list
+            var layers = [];
+            layers.push(this._generateLayerForPortal(this._polygonLayer,selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._polylineLayer,selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._pointLayer,selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._labelLayer,selectedGraphics));
+
+            this._addPortalDrawingItem(layers);            
+        },
+
+        _generateLayerForPortal : function (layer, selectedGraphics) {
+            // Get the json equivalent of the layer
+            var layerDef = layer.toJson();
+
+            // Ensure only the selected graphics included in the layer
+            var removes = [], found = false, graphic = null, index = null;
+            for (var i=0,il=layerDef.featureSet.features.length;i<il;i++) {
+                graphic = layerDef.featureSet.features[i];
+                found = false;
+
+                for (var j=0,jl=selectedGraphics.length;j<jl;j++) {
+                    var selected = selectedGraphics[j];
+
+                    if (selected.geometry.geometryType === graphic.geometry.geometryType && selected.attributes[this._objectIdName] === graphic.attributes[this._objectIdName]) {
+                        found = true;
+                        break;
+                    }
                 }
-            };
 
+                if (!found) {
+                    removes.push(graphic);
+                }
+            }
 
-            this._addPortalDrawingItem(drawing_seems_featureset);
+            for (var i=0,il=removes.length;i<il;i++) { 
+                index = layerDef.featureSet.features.findIndex(x => x.attributes[this._objectIdName] == removes[i].attributes[this._objectIdName]);
+                layerDef.featureSet.features.splice(index,1);
+            }
+
+            return layerDef;
         },
 
         exportInFile : function () {
@@ -1598,6 +1625,7 @@ function(
         exportSelectionInFile : function (evt) {
             if(evt && evt.preventDefault)
                 evt.preventDefault();
+
             this.launchExport(true);
         },
 
@@ -1639,7 +1667,18 @@ function(
         },
 
         loadDialogLoadPortal : function () {
-            // TO BE COMPLETED...
+            var selDrawings = this._getCheckedDrawings();
+            if (selDrawings.length > 0) {
+                var dataCalls = [];
+                for(var i=0,il=selDrawings.length;i<il;i++) {
+                    dataCalls.push(this._getPortalDrawingItem(selDrawings[i]));
+                }
+
+                var promises = all(dataCalls);
+                promises.then(lang.hitch(this, this._processPortalDrawings));
+            } else {
+                this.showMessage("No selected drawings", "warning");
+            }
         },
 
         loadDialogCancel : function () {
@@ -1679,6 +1718,7 @@ function(
                 for(var i=0,il=this.currentDrawings.length; i<il;i++) {
                     var drawing = this.currentDrawings[i];
                     var name = drawing.title;
+                    var itemId = drawing.id;
 
                     var options = {  
                         year: "numeric", month: "short",  
@@ -1690,7 +1730,8 @@ function(
                     var actions = '';
                     var actions_class = "list-draw-actions light";
 
-                    var html = '<td>' + name + '</td>'
+                    var html = '<td class="draw-td-checkbox"><input type="checkbox" class="td-checkbox" /></td>'
+                         + '<td>' + name + '</td>'
                          + '<td>' + modified + '</td>'
                          + '<td class="' + actions_class + '">' + actions + '</td>';
 
@@ -1701,14 +1742,46 @@ function(
                             innerHTML : html
                         },
                         this.drawingsTableBody);
+                    domAttr.set(tr,'data-itemid', itemId);
                 }
             }
         },
 
+        _getCheckedDrawings : function () {
+            var selDrawings = [];
+            dojoQuery('.draw-td-checkbox > input[type=checkbox]:checked').forEach(function(node, index, arr) { 
+                selDrawings.push(node.parentNode.parentNode.dataset["itemid"]);
+            });
+            return selDrawings;
+        },
+
+        _processPortalDrawings : function (results) {
+            console.log("portal calls finished: ", results);
+            array.forEach(results, lang.hitch(this, function(result) {
+               this._loadPortalDrawing(result);
+            }));
+            this._syncGraphicsToLayers();
+            this.setMode('list');
+        },
+
+        _loadPortalDrawing : function (drawingData) {
+            var layer = null, graphics = [];
+            array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
+                // Check for drawings in layer
+                if (drawingLayer.featureSet.features.length > 0) {
+                    // Build the graphics
+                    array.forEach(drawingLayer.featureSet.features, lang.hitch(this, function (graphicJson) {
+                        var graphic = new Graphic(graphicJson);
+                        graphics.push(graphic);
+                    }));
+                }
+            }));
+            this._pushAddOperation(graphics, true);
+        },
 
         ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
 
-        checkPrivilege: function () {
+        checkPrivilege : function () {
             var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = portalUtils.getPortal(portalUrl);
 
@@ -1721,7 +1794,7 @@ function(
             }
         },
 
-        _hasPrivilege: function(portal){
+        _hasPrivilege : function(portal){
             return portal.loadSelfInfo().then(lang.hitch(this, function(res){
                 if(res && res.user) {
                     var userRole = new Role({
@@ -1743,7 +1816,7 @@ function(
             });
         },
 
-        _getDrawingFolder: function(portal) {
+        _getDrawingFolder : function(portal) {
             return portal.getUser().then(lang.hitch(this, function(user) {
                 this.portalUser = user;
                 return user.getContent();
@@ -1757,70 +1830,6 @@ function(
                 }
                 return this.drawFolder;
             }));
-        },
-
-        _addPortalDrawingItem: function(featureSet) {
-            //Create datasource and download !
-            //var ds = exportUtils.createDataSource({
-            //    "type" : exportUtils.TYPE_FEATURESET,
-            //    "data": featureSet,
-            //    "filename" : (this.exportFileName) ? (this.exportFileName) : ((this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings')
-            //});
-            //ds.setFormat(exportUtils.FORMAT_FEATURESET)
-
-            var layerDefinition = {
-                "name": "",
-                "geometryType": "",
-                "fields": [
-                    {
-                        "name": this._objectIdName,
-                        "type": this._objectIdType,
-                        "alias": this._objectIdName
-                    },
-                    {
-                        "name": "name",
-                        "type": "esriFieldTypeString",
-                        "alias": this.nls.nameField
-                    },
-                    {
-                        "name": "description",
-                        "type": "esriFieldTypeString",
-                        "alias": this.nls.descriptionField
-                    },
-                    {
-                        "name": "symbol",
-                        "type": "esriFieldTypeString",
-                        "alias": this.nls.symbolField
-                    }
-                ]
-            };
-
-            var featureCollection = {
-                layers: [{
-                  layerDefinition: layerDefinition,
-                  featureSet: featureSet.toJson()
-                }]
-            };
-
-            var itemContent = {
-                name: this.fileNameField.value,
-                title: this.fileNameField.value,
-                type: 'Feature Collection',
-                typeKeywords: "WAB_created",
-                tags: 'Drawing Graphics',
-                snippet: 'PUT USER SNIPPET HERE',
-                description: 'PUT USER DESCRIPTION HERE',
-                text: JSON.stringify(featureCollection)
-            };
-
-            this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function(res) {
-                this.showMessage("Drawing has been saved", 'info');
-                this.setMode('list');
-                this._refreshDrawingsList();
-            }), function (err) {
-                this.showMessage("There was a problem saving the drawing", 'error');
-                this.setMode('list');
-            });
         },
 
         _getDrawingFolderContent : function (portal) {
@@ -1845,6 +1854,44 @@ function(
             }
         },
 
+        _addPortalDrawingItem : function(layers) {
+            var featureCollection = {
+                layers: layers
+            };
+
+            var itemContent = {
+                name: this.fileNameField.value,
+                title: this.fileNameField.value,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: 'PUT USER SNIPPET HERE',
+                description: 'PUT USER DESCRIPTION HERE',
+                text: JSON.stringify(featureCollection)
+            };
+
+            this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function(res) {
+                this.showMessage("Drawing has been saved", 'info');
+                this.setMode('list');
+                this._refreshDrawingsList();
+            }), function (err) {
+                this.showMessage("There was a problem saving the drawing", 'error');
+                this.setMode('list');
+            });
+        },
+
+        _getPortalDrawingItem : function (itemid) {
+            var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = portalUtils.getPortal(portalUrl);
+
+            if(!portal || !portal.haveSignIn()) {
+                var def = new Deferred();
+                def.resolve(false);
+                return def;
+            } else {
+                return portal.getItemData(itemid);
+            }            
+        },
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
         editorOnClickEditSaveButon : function () {
@@ -2047,7 +2094,7 @@ function(
             this.setMode("list");
         },
 
-        _syncGraphicsToLayers: function(){
+        _syncGraphicsToLayers : function(){
             /*global isRTL*/
             this._pointLayer.clear();
             this._polylineLayer.clear();
@@ -2123,7 +2170,7 @@ function(
             }
         },
 
-        _pushAddOperation: function(graphics){
+        _pushAddOperation : function(graphics, holdSyncGraphics){
             array.forEach(graphics, lang.hitch(this, function(g){
                 var attrs = g.attributes || {};
                 attrs[this._objectIdName] = this._objectIdCounter++;
@@ -2139,10 +2186,11 @@ function(
             
 
             // Sync graphics to layers (temp)
-            this._syncGraphicsToLayers();
+            if (holdSyncGraphics === undefined || holdSyncGraphics === false)
+                this._syncGraphicsToLayers();
         },
 
-        _pushDeleteOperation: function(graphics){
+        _pushDeleteOperation : function(graphics){
             //var deleteOperation = new customOp.Delete({
             //    graphicsLayer: this._graphicsLayer,
             //    deletedGraphics: graphics
@@ -2234,7 +2282,7 @@ function(
             this.setMode("add1");
         },
 
-        ////////////////////////////////////// Measure methods     //////////////////////////////////////////////
+        ////////////////////////////////////// MEASURE METHODS //////////////////////////////////////////////
         _getGeometryService : function () {
             if (!this._gs || this._gs == null) {
                 if (this.config.geometryService){
@@ -2487,7 +2535,6 @@ function(
         },
 
         _setMeasureVisibility : function () {
-
             var display_point = 'none';
             var display_line = 'none';
             var display_area = 'none';
@@ -2772,7 +2819,8 @@ function(
                 }));
         },
 
-        ////////    INIT METHODS ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////// INIT METHODS /////////////////////////////////////////////////
+
         _bindEvents : function () {
             //bind DrawBox
             this.own(on(this.drawBox, 'IconSelected', lang.hitch(this, this.drawBoxOnTypeSelected)));
@@ -2860,8 +2908,16 @@ function(
                 this.editorTextPlusPlacementBottomCenter,
                 this.editorTextPlusPlacementBottomRight
             ];
-            for (var i = 0, len = this._editorTextPlusPlacements.length ; i < len ; i++)
+            for (var i = 0, len = this._editorTextPlusPlacements.length ; i < len ; i++) {
                 on(this._editorTextPlusPlacements[i], "click", this.onEditorTextPlusPlacementClick);
+            }
+
+            /*
+            on(this.drawingsTableBody, "tr:click", function(evt){
+                var id = evt.target.parentNode.dataset["itemid"];
+                alert("the id for this is " + id);
+            });
+            */
         },
 
         _menuInit : function () {
@@ -3051,8 +3107,7 @@ function(
                 }));
         },
 
-        //////////////////////////
-        /// ECAN CODE
+        //////////////////////////// ECAN CODE /////////////////////////////////////////////////////////////
         
         _initLayers : function () {
             this._graphicsLayer = new GraphicsLayer();
@@ -3150,7 +3205,7 @@ function(
             }
         },
 
-        //////////////////////////// WIDGET CORE METHODS ///////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 
         postMixInProperties : function () {
             this.inherited(arguments);
@@ -3200,7 +3255,6 @@ function(
 
             //Init list Drag & Drop
             this._initListDragAndDrop();
-
 
             //Init the portal functionality
             this._initPortal();

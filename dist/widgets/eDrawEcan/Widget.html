@@ -4,10 +4,7 @@
         <img title="${nls.editDrawTitle}" data-dojo-attach-point="menuEditButton" class="menu-item-active hidden" src="${folderUrl}images/edit.png" />
         <img title="${nls.listDrawTitle}" data-dojo-attach-point="menuListButton" class="menu-item" src="${folderUrl}images/list.png" data-dojo-attach-event="onclick:menuOnClickList" />
     </div>
-    <!--<span class="hide-box">
-        ${nls.hideOption}
-        <input type="checkbox" data-dojo-attach-point="hideCheckbox" data-dojo-attach-event="onclick:onHideCheckboxClick"/>
-  </span>-->
+
     <div data-dojo-attach-point="settingAllContent">
 
         <div data-dojo-attach-point="addSection">
@@ -135,7 +132,7 @@
                             <th data-dojo-attach-point="tableTH"></th>
                         </tr>
                     </thead>
-                    <tbody data-dojo-attach-point="drawsTableBody"></tbody>
+                    <tbody data-dojo-attach-point="drawsTableBody" id="drawsTableBody"></tbody>
                 </table>
             </div>
             <div class="footer">
@@ -171,9 +168,10 @@
         <div data-dojo-attach-point="loadSection">
             <h2>${nls.loadDialogTitle}</h2>
             <div class="content">
-                <table class="jimu-table load-table">
+                <table class="jimu-table draw-table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>${nls.drawingName}</th>
                             <th>${nls.drawingDate}</th>
                             <th data-dojo-attach-point="loadtableTH"></th>
@@ -187,10 +185,8 @@
                     <input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />
                     <input id="portalLoadBtn" type="button" class="jimu-input blue-button" value="${nls.loadButtonPortal}" data-dojo-attach-event="onclick:loadDialogLoadPortal" style="display:none;" />
                     <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />
-                    <!--<span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:launchImportFile">&nbsp;</span>-->
                 </div>
             </div>
-
         </div>
 
     </div>
