@@ -157,6 +157,7 @@ function(
         _labelLayer: null,
 
         exportFileName: null,
+        drawingFolder: null,
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -1140,10 +1141,6 @@ function(
             this.importMessage.close();
         },
 
-        importPortalData : function () {
-
-        },
-
         //////////////////////// ECAN ////////////////////////////
         
         migrateGISmoDrawings : function(json){
@@ -1686,7 +1683,8 @@ function(
         },
 
         _refreshDrawingsList : function () {
-            if (this.drawingFolder !== undefined) {
+            if (this.drawingFolder !== null) {
+                console.log("_refreshDrawingsList");
                 var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                 var portal = portalUtils.getPortal(portalUrl);
 
@@ -1821,19 +1819,51 @@ function(
                 this.portalUser = user;
                 return user.getContent();
             })).then(lang.hitch(this, function(res) {
-                this.drawFolder = null;
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+                this.drawingFolder = null;
                 for(var i=0,il=res.folders.length; i<il; i++) {
-                    if(res.folders[i].title === 'drawings') {
-                        this.drawFolder = res.folders[i];
+                    if(res.folders[i].title === folderTitle) {
+                        this.drawingFolder = res.folders[i];
                         break;
                     }
                 }
-                return this.drawFolder;
+                return this.drawingFolder;
             }));
         },
 
+        _createDrawingFolder : function(portal) {
+            if (this.drawingFolder === null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);                
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl,this.portalUser.username);
+                var createFolderUrl = contentUrl + '/createFolder'
+
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+
+                var args = {
+                    url: createFolderUrl,
+                    handleAs: 'json',
+                    content: {
+                        f: 'json',
+                        title: folderTitle
+                    },
+                    callbackParamName: 'callback'
+                };
+
+                var options = {
+                  usePost: true      
+                };
+
+                if (portal.isValidCredential) {
+                    args.content.token = portal.credential.token;
+                }
+
+                console.log("_createDrawingFolder Call Server: ", args, options);
+                return esriRequest(args, options);
+            }
+        },
+
         _getDrawingFolderContent : function (portal) {
-            if (this.drawingFolder !== undefined && this.portalUser !== undefined) {
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
                 var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);                
                 var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl,this.portalUser.username, this.drawingFolder.id);
 
@@ -1894,6 +1924,7 @@ function(
         },
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
+        
         editorOnClickEditSaveButon : function () {
             if (this.editorSymbolChooser.type == "text") {
                 this.editorUpdateTextPlus();
@@ -1971,6 +2002,7 @@ function(
         },
 
         ///////////////////////// ADD METHODS ///////////////////////////////////////////////////////////
+        
         drawBoxOnTypeSelected : function (target, geotype, commontype) {
             if (!this._editorConfig["defaultSymbols"])
                 this._editorConfig["defaultSymbols"] = {};
@@ -2283,6 +2315,7 @@ function(
         },
 
         ////////////////////////////////////// MEASURE METHODS //////////////////////////////////////////////
+
         _getGeometryService : function () {
             if (!this._gs || this._gs == null) {
                 if (this.config.geometryService){
@@ -2964,18 +2997,30 @@ function(
 
             // Check if user logged in / has prvileges save to portal
             this.checkPrivilege().then(lang.hitch(this, function (res) {
+                console.log("_initPortal Check Privileges: ", res);
                 this.portalSaveAllowed = res;
                 if (this.portalSaveAllowed) {
                     // get the drawing folder
-                    if (this.drawingFolder === undefined) {
-                        var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
-                        var portal = portalUtils.getPortal(portalUrl);
-                        
-                        this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
-                            this.drawingFolder = res;
+                    var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                    var portal = portalUtils.getPortal(portalUrl);
+                    
+                    this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
+                        console.log("_initPortal Get Drawing Folder: ", res);
+                        this.drawingFolder = res;
+
+                        if (this.drawingFolder === null) {
+                            // Create a new folder
+                            this._createDrawingFolder(portal).then(lang.hitch(this, function(res) { 
+                                console.log("_initPortal Create Drawing Folder: ", res);
+                                this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
+                                    console.log("_initPortal Get Drawing Folder After Create: ", res);
+                                    this._refreshDrawingsList();
+                                }));
+                            }));
+                        } else {
                             this._refreshDrawingsList();
-                        }));
-                    }
+                        }
+                    }));
                 }
             }));
         },

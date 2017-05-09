@@ -34,6 +34,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         _labelLayer: null,
 
         exportFileName: null,
+        drawingFolder: null,
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -955,8 +956,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.importMessage.close();
         },
 
-        importPortalData: function importPortalData() {},
-
         //////////////////////// ECAN ////////////////////////////
 
         migrateGISmoDrawings: function migrateGISmoDrawings(json) {
@@ -1497,7 +1496,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _refreshDrawingsList: function _refreshDrawingsList() {
-            if (this.drawingFolder !== undefined) {
+            if (this.drawingFolder !== null) {
+                console.log("_refreshDrawingsList");
                 var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                 var portal = portalUtils.getPortal(portalUrl);
 
@@ -1627,19 +1627,51 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this.portalUser = user;
                 return user.getContent();
             })).then(lang.hitch(this, function (res) {
-                this.drawFolder = null;
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+                this.drawingFolder = null;
                 for (var i = 0, il = res.folders.length; i < il; i++) {
-                    if (res.folders[i].title === 'drawings') {
-                        this.drawFolder = res.folders[i];
+                    if (res.folders[i].title === folderTitle) {
+                        this.drawingFolder = res.folders[i];
                         break;
                     }
                 }
-                return this.drawFolder;
+                return this.drawingFolder;
             }));
         },
 
+        _createDrawingFolder: function _createDrawingFolder(portal) {
+            if (this.drawingFolder === null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username);
+                var createFolderUrl = contentUrl + '/createFolder';
+
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+
+                var args = {
+                    url: createFolderUrl,
+                    handleAs: 'json',
+                    content: {
+                        f: 'json',
+                        title: folderTitle
+                    },
+                    callbackParamName: 'callback'
+                };
+
+                var options = {
+                    usePost: true
+                };
+
+                if (portal.isValidCredential) {
+                    args.content.token = portal.credential.token;
+                }
+
+                console.log("_createDrawingFolder Call Server: ", args, options);
+                return esriRequest(args, options);
+            }
+        },
+
         _getDrawingFolderContent: function _getDrawingFolderContent(portal) {
-            if (this.drawingFolder !== undefined && this.portalUser !== undefined) {
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
                 var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                 var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username, this.drawingFolder.id);
 
@@ -1700,6 +1732,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
+
         editorOnClickEditSaveButon: function editorOnClickEditSaveButon() {
             if (this.editorSymbolChooser.type == "text") {
                 this.editorUpdateTextPlus();
@@ -1770,6 +1803,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         ///////////////////////// ADD METHODS ///////////////////////////////////////////////////////////
+
         drawBoxOnTypeSelected: function drawBoxOnTypeSelected(target, geotype, commontype) {
             if (!this._editorConfig["defaultSymbols"]) this._editorConfig["defaultSymbols"] = {};
             this._editorConfig['commontype'] = commontype;
@@ -2061,6 +2095,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         ////////////////////////////////////// MEASURE METHODS //////////////////////////////////////////////
+
         _getGeometryService: function _getGeometryService() {
             if (!this._gs || this._gs == null) {
                 if (this.config.geometryService) {
@@ -2691,18 +2726,30 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             // Check if user logged in / has prvileges save to portal
             this.checkPrivilege().then(lang.hitch(this, function (res) {
+                console.log("_initPortal Check Privileges: ", res);
                 this.portalSaveAllowed = res;
                 if (this.portalSaveAllowed) {
                     // get the drawing folder
-                    if (this.drawingFolder === undefined) {
-                        var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
-                        var portal = portalUtils.getPortal(portalUrl);
+                    var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                    var portal = portalUtils.getPortal(portalUrl);
 
-                        this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
-                            this.drawingFolder = res;
+                    this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                        console.log("_initPortal Get Drawing Folder: ", res);
+                        this.drawingFolder = res;
+
+                        if (this.drawingFolder === null) {
+                            // Create a new folder
+                            this._createDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                                console.log("_initPortal Create Drawing Folder: ", res);
+                                this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                                    console.log("_initPortal Get Drawing Folder After Create: ", res);
+                                    this._refreshDrawingsList();
+                                }));
+                            }));
+                        } else {
                             this._refreshDrawingsList();
-                        }));
-                    }
+                        }
+                    }));
                 }
             }));
         },
