@@ -28,6 +28,7 @@ define({
 		confirmOnDeleteLabel : "Ask for confirmation before deleting ?",
 		listShowUpAndDownButtons : "Show up & down buttons in list?",
 		allowLocalStorageLabel : "Use local storage ?",
+		isOperationalLayerLabel : "Display as operational layer?",
 		localStorageKeyLabel : "Local storage key",
 		localStorageKeyInfo : "If not empty, applications with same key (and same server) will share the same storage. If empty, all will share same storage.",
 		exportFileName : "Export file name",
