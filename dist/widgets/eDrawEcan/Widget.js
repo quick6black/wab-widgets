@@ -2731,6 +2731,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                     var portal = portalUtils.getPortal(portalUrl);
 
+                    // Check the portal credentials userid for inproperly formatted values 
+                    if (portal.credential && portal.credential.userId) {
+                        if (portal.credential.userId.includes("\\")) {
+                            // Reformat
+                            var bits = portal.credential.userId.split("\\");
+                            if (bits.length === 2) {
+                                portal.credential.userId = bits[1] + "@" + bits[0];
+                            }
+                        }
+                    }
+
                     this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
                         console.log("_initPortal Get Drawing Folder: ", res);
                         this.drawingFolder = res;
