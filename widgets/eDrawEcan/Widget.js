@@ -73,7 +73,8 @@ define([
         './proj4',
         'jimu/portalUtils',
         'jimu/portalUrlUtils',
-        'jimu/Role'
+        'jimu/Role',
+        'dojo/_base/connect'
     ],
 function(
     declare, 
@@ -135,7 +136,8 @@ function(
     proj4js,
     portalUtils,
     portalUrlUtils,
-    Role
+    Role,
+    connect
 ) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -2045,6 +2047,7 @@ function(
             if (symbol) {
                 this._editorConfig["defaultSymbols"][commontype] = symbol;
                 this.setMode('add2');
+                this.drawBoxSetMouseListeners(true);
             }
         },
 
@@ -2123,7 +2126,62 @@ function(
             //this.saveInLocalStorage();
             this._editorConfig["graphicCurrent"] = graphic;
             this._editorConfig["defaultSymbols"][this._editorConfig['commontype']] = graphic.symbol;
+
+            this.drawBoxSetMouseListeners(false);
+
             this.setMode("list");
+        },
+
+        drawBoxSetMouseListeners : function (mode) {
+            this.drawing = false;
+            if (mode) {
+                this.mouseClick = connect.connect(this.map, "onClick", lang.hitch(this, this.mouseClickHandler));
+                this.mouseMove = connect.connect(this.map, "onMouseMove", lang.hitch(this, this.mouseMoveHandler));
+            } else {
+                connect.disconnect(this.mouseClick);
+                connect.disconnect(this.mouseMove);
+            }
+        },
+
+        mouseClickHandler : function (evt) {
+            this.drawing = true;
+            if (!this.mouseTip)
+            {
+                this.mouseTip = new Graphic(evt.mapPoint, new TextSymbol());
+                this.map.graphics.add(this.mouseTip);
+            } 
+        },
+
+        mouseMoveHandler : function (evt) {
+            if (this.drawing) {
+                var g = this.drawBox.drawToolBar._graphic;
+                if (g.geometry.type === 'polyline') {
+                
+                    var graphicJson = g.toJson();
+                    var clonedGraphic = new Graphic(graphicJson);
+
+                    // Insert the mouse point 
+                    var lastpath = clonedGraphic.geometry.paths[clonedGraphic.geometry.paths.length - 1];
+                    var ln = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.paths.length - 1,lastpath.length, evt.mapPoint);
+
+                    var lnNum = geometryEngine.planarLength(ln,9001);
+                    this.mouseTip.setGeometry(evt.mapPoint);
+                    this.mouseTip.symbol.setText(lnNum);
+                    
+                    /*
+                    if (ln.paths[0].length > 1) {
+                        var pt1 = ln.paths[0][0];
+                        var pt2 = ln.paths[0][1]; 
+                        var dx = pt1[0] - pt2[0];
+                        var dy = pt1[1] - pt2[1]; 
+                        var lnNum = Math.sqrt(dx*dx + dy*dy);
+                        this.mouseTip.setGeometry(evt.mapPoint);
+                        this.mouseTip.symbol.setText(lnNum);
+                    }
+                    */
+                }
+
+            }
         },
 
         _syncGraphicsToLayers : function(){
