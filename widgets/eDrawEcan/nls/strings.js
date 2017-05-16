@@ -69,6 +69,9 @@ define({
 		loadDialogTitle:"Load Saved Drawing",
 		loadButtonPortal:"Load Drawing",
 
+		settingsTitle:"Drawing Settings",
+		settingsDialogTitle:"Drawing Settings",
+
 		drawingName:"Drawing Name",
 		drawingDate:"Date Last Modified",
 

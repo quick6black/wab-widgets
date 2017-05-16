@@ -3,6 +3,7 @@
         <img title="${nls.addDrawTitle}" data-dojo-attach-point="menuAddButton" class="menu-item-active" src="${folderUrl}images/add.png" data-dojo-attach-event="onclick:menuOnClickAdd" />
         <img title="${nls.editDrawTitle}" data-dojo-attach-point="menuEditButton" class="menu-item-active hidden" src="${folderUrl}images/edit.png" />
         <img title="${nls.listDrawTitle}" data-dojo-attach-point="menuListButton" class="menu-item" src="${folderUrl}images/list.png" data-dojo-attach-event="onclick:menuOnClickList" />
+        <img title="${nls.settingsTitle}" data-dojo-attach-point="menuSettingsButton" class="menu-item" src="${folderUrl}images/settings.png" data-dojo-attach-event="onclick:menuOnClickSettings" />
     </div>
 
     <div data-dojo-attach-point="settingAllContent">
@@ -185,6 +186,28 @@
                     <input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />
                     <input id="portalLoadBtn" type="button" class="jimu-input blue-button" value="${nls.loadButtonPortal}" data-dojo-attach-event="onclick:loadDialogLoadPortal" style="display:none;" />
                     <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />
+                </div>
+            </div>
+        </div>
+
+        <div data-dojo-attach-point="settingsSection">
+            <h2>${nls.settingsDialogTitle}</h2>
+            <div class="content">
+                <div data-dojo-attach-point="measureSettingsSection" class="measure-section">
+                    <div data-dojo-attach-point="defaultAreaMeasure" style="height:30px;margin-bottom:7px;">
+                        <div class="area-units-tip  jimu-float-leading">${nls.areaUnits}</div>
+                        <select data-dojo-attach-point="defaultAreaUnitSelect" data-dojo-type="dijit/form/Select" class=" jimu-float-trailing" style="width:50%;height:30px;"></select>
+                    </div>
+                    <div data-dojo-attach-point="defaultDistanceMeasure" style="height:30px;">
+                        <div class="distance-units-tip jimu-float-leading">${nls.distanceUnits}</div>
+                        <select data-dojo-attach-point="defaultDistanceUnitSelect" data-dojo-type="dijit/form/Select" class=" jimu-float-trailing" style="width:50%;height:30px;"></select>
+                    </div>
+                </div>
+                <hr />
+            </div>
+            <div class="footer">
+                <div>
+                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:settingsDialogCancel" />
                 </div>
             </div>
         </div>

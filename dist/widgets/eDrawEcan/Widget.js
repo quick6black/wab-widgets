@@ -117,6 +117,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 case 'load':
                     this.TabViewStack.switchView(this.loadSection);
                     break;
+
+                case 'settings':
+                    this.setMenuState('settings');
+
+                    this.TabViewStack.switchView(this.settingsSection);
+                    break;
+
             }
         },
 
@@ -141,7 +148,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         setMenuState: function setMenuState(active, elements_shown) {
             if (!elements_shown) {
-                elements_shown = ['add', 'list'];
+                elements_shown = ['add', 'list', 'settings'];
             } else if (elements_shown.indexOf(active) < 0) elements_shown.push(active);
 
             for (var button_name in this._menuButtons) {
@@ -363,6 +370,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         menuOnClickList: function menuOnClickList() {
             this.setMode("list");
+        },
+
+        menuOnClickSettings: function menuOnClickSettings() {
+            this.setMode("settings");
         },
 
         ///////////////////////// LIST METHODS ///////////////////////////////////////////////////////////
@@ -744,6 +755,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.map.enableSnapping({
                 "layerInfos": [{
                     "layer": this.drawBox.drawLayer
+                }, {
+                    "layer": this._pointLayer
+                }, {
+                    "layer": this._polylineLayer
+                }, {
+                    "layer": this._polygonLayer
                 }],
                 "tolerance": 20
             });
@@ -822,8 +839,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     return;
                 }
 
-                this.distanceUnitSelect.set('value', this.configDistanceUnits[0]['unit']);
-                this.areaUnitSelect.set('value', this.configAreaUnits[0]['unit']);
+                this.distanceUnitSelect.set('value', this.defaultDistanceUnitSelect.value);
+                this.areaUnitSelect.set('value', this.defaultAreaUnitSelect.value);
+
+                //this.distanceUnitSelect.set('value', this.configDistanceUnits[0]['unit']);
+                //this.areaUnitSelect.set('value', this.configAreaUnits[0]['unit']);
                 this.pointUnitSelect.set('value', 'map');
 
                 this.showMeasure.checked = this.config.measureEnabledByDefault;
@@ -1731,6 +1751,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
+        ///////////////////////// SETTINGS METHODS ///////////////////////////////////////////////////////////
+
+        settingsDialogCancel: function settingsDialogCancel() {
+            this.setMode('list');
+        },
+
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
 
         editorOnClickEditSaveButon: function editorOnClickEditSaveButon() {
@@ -1983,10 +2009,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 var x = null;
                 var y = null;
 
-                var areaUnit = this.areaUnitSelect.value;
-                areaUnit = areaUnit.toLowerCase().replace("_", "-");
-                var lengthUnit = this.distanceUnitSelect.value;
-                lengthUnit = lengthUnit.toLowerCase().replace("_", "-");
+                var areaUnit = this.defaultAreaUnitSelect.value;
+                var areaUnitGS = areaUnit.toLowerCase().replace("_", "-");
+                var lengthUnit = this.defaultDistanceUnitSelect.value;
+                var lengthUnitGS = lengthUnit.toLowerCase().replace("_", "-");
 
                 // set the label text
                 switch (g.geometry.type) {
@@ -1994,21 +2020,21 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         // Insert the mouse point into the last path of the line
                         var lastPath = clonedGraphic.geometry.paths[clonedGraphic.geometry.paths.length - 1];
                         measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.paths.length - 1, lastPath.length, evt.mapPoint);
-                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
                         break;
 
                     case 'polygon':
                         // Insert the mouse point into the last path of the line
                         var lastRing = clonedGraphic.geometry.rings[clonedGraphic.geometry.rings.length - 1];
                         measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.rings.length - 1, lastRing.length, evt.mapPoint);
-                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
-                        area = geometryEngine.planarArea(measureGeometry, areaUnit);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnitGS);
                         break;
 
                     case 'rect':
                         measureGeometry = clonedGraphic.geometry;
-                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
-                        area = geometryEngine.planarArea(measureGeometry, areaUnit);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnitGS);
                         break;
 
                     case 'point':
@@ -2026,13 +2052,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 //Prepare text
                 if (x && y) {
                     labelText = pointPattern.replace("{{x}}", x).replace("{{y}}", y);
-                    var pointUnit = this.pointUnitSelect.value;
                 } else {
                     var localeLength = jimuUtils.localizeNumber(length.toFixed(1));
-                    var lengthUnit = this.distanceUnitSelect.value;
                     var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).label;
                     if (area) {
-                        var areaUnit = this.areaUnitSelect.value;
                         var localeAreaUnit = this._getAreaUnitInfo(areaUnit).label;
                         var localeArea = jimuUtils.localizeNumber(area.toFixed(1));
                         labelText = polygonPattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", localeArea).replace("{{areaUnit}}", localeAreaUnit);
@@ -2838,13 +2861,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             for (var i = 0, len = this._editorTextPlusPlacements.length; i < len; i++) {
                 on(this._editorTextPlusPlacements[i], "click", this.onEditorTextPlusPlacementClick);
             }
-
-            /*
-            on(this.drawingsTableBody, "tr:click", function(evt){
-                var id = evt.target.parentNode.dataset["itemid"];
-                alert("the id for this is " + id);
-            });
-            */
         },
 
         _menuInit: function _menuInit() {
@@ -2852,10 +2868,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 "add": this.menuAddButton,
                 "edit": this.menuEditButton,
                 "list": this.menuListButton,
+                "settings": this.menuSettingsButton,
                 "importExport": this.menuListImportExport
             };
 
-            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection, this.loadSection];
+            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection, this.loadSection, this.settingsSection];
 
             this.TabViewStack = new ViewStack({
                 viewType: 'dom',
@@ -2974,6 +2991,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     label: unitInfo.label
                 };
                 this.distanceUnitSelect.addOption(option);
+                this.defaultDistanceUnitSelect.addOption(option);
             }));
 
             array.forEach(this.areaUnits, lang.hitch(this, function (unitInfo) {
@@ -2982,6 +3000,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     label: unitInfo.label
                 };
                 this.areaUnitSelect.addOption(option);
+                this.defaultAreaUnitSelect.addOption(option);
             }));
         },
 
