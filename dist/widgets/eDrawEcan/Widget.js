@@ -1841,6 +1841,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             /*jshint unused: false*/
             this.drawBox.clear();
 
+            this._resetMapTip(true);
+
             var geometry = graphic.geometry;
 
             this.editorEnableMapPreview(false);
@@ -1915,50 +1917,154 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         drawBoxSetMouseListeners: function drawBoxSetMouseListeners(mode) {
             this.drawing = false;
             if (mode) {
-                this.mouseClick = connect.connect(this.map, "onClick", lang.hitch(this, this.mouseClickHandler));
-                this.mouseMove = connect.connect(this.map, "onMouseMove", lang.hitch(this, this.mouseMoveHandler));
+                // Check draw tool mode
+                switch (this.drawBox.drawToolBar._geometryType) {
+                    case 'polyline':
+                    case 'polygon':
+                        this.mouseClick = connect.connect(this.map, "onClick", lang.hitch(this, this.mouseClickHandler));
+                        this.mouseMove = connect.connect(this.map, "onMouseMove", lang.hitch(this, this.mouseMoveHandler));
+                        break;
+
+                    case 'line':
+                    case 'freehandpolyline':
+                    case 'freehandpolygon':
+                    case 'extent':
+                    case 'circle':
+                    case 'triangle':
+                    case 'ellipse':
+                        this.mouseDown = connect.connect(this.map, "onMouseDown", lang.hitch(this, this.mouseDownHandler));
+                        this.mouseMove = connect.connect(this.map, "onMouseDrag", lang.hitch(this, this.mouseMoveHandler));
+                        break;
+
+                    default:
+                        break;
+                }
             } else {
                 connect.disconnect(this.mouseClick);
+                connect.disconnect(this.mouseDown);
                 connect.disconnect(this.mouseMove);
             }
         },
 
         mouseClickHandler: function mouseClickHandler(evt) {
-            this.drawing = true;
-            if (!this.mouseTip) {
-                this.mouseTip = new Graphic(evt.mapPoint, new TextSymbol());
-                this.map.graphics.add(this.mouseTip);
+            this._initialiseMapTip(evt);
+        },
+
+        mouseDownHandler: function mouseDownHandler(evt) {
+            var dragTools = ['line', 'freehandpolyline', 'freehandpolygon', 'extent', 'circle', 'triangle', 'ellipse'];
+            if (!this.drawing && dragTools.indexOf(this.drawBox.drawToolBar._geometryType) >= 0) {
+                this._initialiseMapTip(evt);
             }
         },
 
         mouseMoveHandler: function mouseMoveHandler(evt) {
             if (this.drawing) {
                 var g = this.drawBox.drawToolBar._graphic;
-                if (g.geometry.type === 'polyline') {
+                if (g === undefined || g === null) return;
 
+                var graphicJson = null;
+                var clonedGraphic = null;
+                if (g.geometry.type === 'rect') {
+
+                    var a = g.geometry.getExtent();
+                    var polygon = new Polygon(a.spatialReference);
+                    var r = [[a.xmin, a.ymin], [a.xmin, a.ymax], [a.xmax, a.ymax], [a.xmax, a.ymin], [a.xmin, a.ymin]];
+                    polygon.addRing(r);
+                    clonedGraphic = new Graphic(polygon, new SimpleFillSymbol(g.symbol.toJson()));
+                } else {
                     var graphicJson = g.toJson();
-                    var clonedGraphic = new Graphic(graphicJson);
-
-                    // Insert the mouse point 
-                    var lastpath = clonedGraphic.geometry.paths[clonedGraphic.geometry.paths.length - 1];
-                    var ln = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.paths.length - 1, lastpath.length, evt.mapPoint);
-
-                    var lnNum = geometryEngine.planarLength(ln, 9001);
-                    this.mouseTip.setGeometry(evt.mapPoint);
-                    this.mouseTip.symbol.setText(lnNum);
-
-                    /*
-                    if (ln.paths[0].length > 1) {
-                        var pt1 = ln.paths[0][0];
-                        var pt2 = ln.paths[0][1]; 
-                        var dx = pt1[0] - pt2[0];
-                        var dy = pt1[1] - pt2[1]; 
-                        var lnNum = Math.sqrt(dx*dx + dy*dy);
-                        this.mouseTip.setGeometry(evt.mapPoint);
-                        this.mouseTip.symbol.setText(lnNum);
-                    }
-                    */
+                    clonedGraphic = new Graphic(graphicJson);
                 }
+
+                var measureGeometry = null;
+                var labelText = null;
+                var length = null;
+                var area = null;
+                var x = null;
+                var y = null;
+
+                var areaUnit = this.areaUnitSelect.value;
+                areaUnit = areaUnit.toLowerCase().replace("_", "-");
+                var lengthUnit = this.distanceUnitSelect.value;
+                lengthUnit = lengthUnit.toLowerCase().replace("_", "-");
+
+                // set the label text
+                switch (g.geometry.type) {
+                    case 'polyline':
+                        // Insert the mouse point into the last path of the line
+                        var lastPath = clonedGraphic.geometry.paths[clonedGraphic.geometry.paths.length - 1];
+                        measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.paths.length - 1, lastPath.length, evt.mapPoint);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
+                        break;
+
+                    case 'polygon':
+                        // Insert the mouse point into the last path of the line
+                        var lastRing = clonedGraphic.geometry.rings[clonedGraphic.geometry.rings.length - 1];
+                        measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.rings.length - 1, lastRing.length, evt.mapPoint);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnit);
+                        break;
+
+                    case 'rect':
+                        measureGeometry = clonedGraphic.geometry;
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnit);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnit);
+                        break;
+
+                    case 'point':
+                    default:
+                        x = evt.mapPoint.x;
+                        y = evt.mapPoint.y;
+                        break;
+                }
+
+                // Update the label text
+                var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : "{{x}} {{y}}";
+                var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : "{{area}} {{areaUnit}}    {{length}} {{lengthUnit}}";
+                var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : "{{length}} {{lengthUnit}}";
+
+                //Prepare text
+                if (x && y) {
+                    labelText = pointPattern.replace("{{x}}", x).replace("{{y}}", y);
+                    var pointUnit = this.pointUnitSelect.value;
+                } else {
+                    var localeLength = jimuUtils.localizeNumber(length.toFixed(1));
+                    var lengthUnit = this.distanceUnitSelect.value;
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).label;
+                    if (area) {
+                        var areaUnit = this.areaUnitSelect.value;
+                        var localeAreaUnit = this._getAreaUnitInfo(areaUnit).label;
+                        var localeArea = jimuUtils.localizeNumber(area.toFixed(1));
+                        labelText = polygonPattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", localeArea).replace("{{areaUnit}}", localeAreaUnit);
+                    } else {
+                        labelText = polylinePattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit);
+                    }
+                }
+
+                this.mouseTip.setGeometry(evt.mapPoint);
+                this.mouseTip.symbol.setText(labelText);
+            }
+        },
+
+        _initialiseMapTip: function _initialiseMapTip(evt) {
+            this.drawing = true;
+            if (!this.mouseTip) {
+                this.mouseTip = new Graphic(evt.mapPoint, new TextSymbol());
+                this.mouseTip.symbol.setColor(new Color("white"));
+                this.mouseTip.symbol.setHaloSize(1);
+                this.mouseTip.symbol.setHaloColor(new Color("black"));
+                this.map.graphics.add(this.mouseTip);
+            }
+        },
+
+        _resetMapTip: function _resetMapTip(clearMapTip) {
+            if (!this.mouseTip) return;
+
+            this.mouseTip.symbol.setText('');
+
+            if (clearMapTip) {
+                this.map.graphics.remove(this.mouseTip);
+                this.mouseTip = null;
             }
         },
 
@@ -2145,6 +2251,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         editorOnClickAddCancelButon: function editorOnClickAddCancelButon() {
+            this.drawBoxSetMouseListeners(false);
             this.setMode("add1");
         },
 
