@@ -3156,6 +3156,65 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
+        ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
+
+        convertToDrawing: function convertToDrawing(featureSet) {
+            var graphicJson = null;
+            var clonedGraphic = null;
+            var graphic = null;
+            var graphics = [];
+            var graphicName = null;
+            var graphicDescription = null;
+            var nameValue = null;
+            var symbol = null;
+            var options = null;
+            for (var i = 0, il = featureSet.features.length; i < il; i++) {
+                graphic = featureSet.features[i];
+                graphicJson = graphic.toJson();
+                clonedGraphic = new Graphic(graphicJson);
+
+                // Set default symbol
+                switch (clonedGraphic.geometry.type) {
+                    case 'point':
+                        options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol ? this.config.defaultSymbols.SimpleMarkerSymbol : null;
+                        symbol = new SimpleMarkerSymbol(options);
+                        break;
+
+                    case 'polyline':
+                        options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol ? this.config.defaultSymbols.SimpleLineSymbol : null;
+                        symbol = new SimpleLineSymbol(options);
+                        break;
+
+                    case 'polygon':
+                    default:
+                        options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol ? this.config.defaultSymbols.SimpleFillSymbol : null;
+                        symbol = new SimpleFillSymbol(options);
+                        break;
+                }
+                clonedGraphic.symbol = symbol;
+
+                // Set default attributes
+                graphicName = graphic.attributes['name'] || '';
+                graphicDescription = graphic.attributes['description'] || '';
+                if (featureSet.displayFieldName) {
+                    nameValue = graphic.attributes[featureSet.displayFieldName];
+                    if (nameValue !== '' && nameValue !== undefined) {
+                        graphicName = nameValue;
+                    }
+                }
+
+                clonedGraphic.attributes = {
+                    "name": graphicName,
+                    "description": graphicDescription,
+                    "symbol": JSON.stringify(clonedGraphic.symbol.toJson())
+                };
+
+                graphics.push(clonedGraphic);
+            }
+            this._pushAddOperation(graphics);
+            this.setMode('list');
+        },
+
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 
         postMixInProperties: function postMixInProperties() {

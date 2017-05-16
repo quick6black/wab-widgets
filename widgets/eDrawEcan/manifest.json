@@ -21,5 +21,9 @@
     "hasSettingLocale": true,
     "hasSettingStyle": true,
     "IsController": false
-  }
+  },
+  "featureActions": [{
+    "name": "ConvertToDrawing",
+    "uri": "ConvertToDrawingFeatureAction"
+  }]
 }

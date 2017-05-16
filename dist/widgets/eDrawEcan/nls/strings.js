@@ -121,7 +121,8 @@ define({
     	results: "Results",
         points: "Points",
 	    lines: "Lines",
-	    areas: "Areas"				
+	    areas: "Areas",
+	    _featureAction_ConvertToDrawing: "Convert To Drawing",				
 	}),
 	"ar" : 1,
 	"cs" : 1,
