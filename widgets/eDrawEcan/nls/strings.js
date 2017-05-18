@@ -122,7 +122,13 @@ define({
         points: "Points",
 	    lines: "Lines",
 	    areas: "Areas",
-	    _featureAction_ConvertToDrawing: "Convert To Drawing",				
+
+	    mergeLabel: "Merge selected drawings",
+	    mergeErrorMixedGeometry: "You cannot merge line and polygon drawings",
+	    mergeErrorPointGeometry: "You cannot merge point drawings",
+	    mergeErrorMinimumNumber: "You must select at least 2 drawings to merge",
+
+	    _featureAction_ConvertToDrawing: "Convert to Drawing",				
 	}),
 	"ar" : 1,
 	"cs" : 1,

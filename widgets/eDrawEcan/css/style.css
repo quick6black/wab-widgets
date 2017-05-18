@@ -143,6 +143,8 @@
     background-image: url("images/save.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.open {
     background-image: url("images/open.png"); }
+  .jimu-widget-edraw-ecan .list-draw-actions span.merge {
+    background-image: url("images/merge.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span:hover {
     border: 1px solid #485566;
     cursor: pointer; }

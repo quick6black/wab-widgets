@@ -3215,6 +3215,68 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.setMode('list');
         },
 
+        ///////////////////////// MERGE FEATURES METHODS ///////////////////////////////////////////////////////////
+
+        mergeDrawings: function mergeDrawings() {
+            var graphics = this.getCheckedGraphics(false);
+
+            // Check for mixed geometry or points and minimum number of features
+            if (this._geometryPointCheck(graphics)) {
+                this.showMessage(this.nls.mergeErrorPointGeometry, 'error');
+                return false;
+            }
+
+            if (graphics.length < 2) {
+                this.showMessage(this.nls.mergeErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            if (this._geometryMixedTypeCheck(graphics)) {
+                this.showMessage(this.nls.mergeErrorMixedGeometry, 'error');
+                return false;
+            }
+
+            var geometries = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                geometries.push(graphics[i].geometry);
+            }
+
+            var newGeometry = geometryEngine.union(geometries);
+            var newGraphic = new Graphic(graphics[0].toJson());
+            newGraphic.setGeometry(newGeometry);
+
+            this._pushAddOperation([newGraphic]);
+            this._removeGraphics(graphics);
+
+            this.setInfoWindow(newGraphic);
+            var extent = graphicsUtils.graphicsExtent([newGraphic]);
+            this.map.setExtent(extent, true);
+        },
+
+        _geometryMixedTypeCheck: function _geometryMixedTypeCheck(graphics) {
+            var geometryTypes = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                var graphic = graphics[i];
+                var geometryType = graphic.geometry.type;
+
+                if (geometryTypes.indexOf(geometryType) === -1) {
+                    geometryTypes.push(geometryType);
+                }
+            }
+            return geometryTypes.length > 1;
+        },
+
+        _geometryPointCheck: function _geometryPointCheck(graphics) {
+            var result = false;
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                if (graphics[i].geometry.type === 'point') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        },
+
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 
         postMixInProperties: function postMixInProperties() {
