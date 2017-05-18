@@ -128,6 +128,10 @@ define({
 	    mergeErrorPointGeometry: "You cannot merge point drawings",
 	    mergeErrorMinimumNumber: "You must select at least 2 drawings to merge",
 
+	    explodeLabel: "Explode selected drawings",
+	    explodeErrorPointGeometry: "You cannot explode point drawings",
+	    explodeErrorMinimumNumber: "You must select at least 1 drawing to explode",
+
 	    _featureAction_ConvertToDrawing: "Convert to Drawing",				
 	}),
 	"ar" : 1,

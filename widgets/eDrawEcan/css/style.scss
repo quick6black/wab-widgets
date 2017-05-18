@@ -231,6 +231,10 @@
         background-image: url("images/merge.png");
     }
 
+    .list-draw-actions span.explode {
+        background-image: url("images/explode.png");
+    }
+
     .list-draw-actions span:hover {
         border: 1px solid rgb(72, 85, 102);
         cursor: pointer;

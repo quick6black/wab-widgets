@@ -3215,7 +3215,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.setMode('list');
         },
 
-        ///////////////////////// MERGE FEATURES METHODS ///////////////////////////////////////////////////////////
+        ///////////////////////// ADVANCED GEOMETRY METHODS ///////////////////////////////////////////////////////////
 
         mergeDrawings: function mergeDrawings() {
             var graphics = this.getCheckedGraphics(false);
@@ -3250,6 +3250,76 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.setInfoWindow(newGraphic);
             var extent = graphicsUtils.graphicsExtent([newGraphic]);
+            this.map.setExtent(extent, true);
+        },
+
+        explodeDrawings: function explodeDrawings() {
+            var graphics = this.getCheckedGraphics(false);
+
+            // Check for points and minimum number of features
+            if (this._geometryPointCheck(graphics)) {
+                this.showMessage(this.nls.explodeErrorPointGeometry, 'error');
+                return false;
+            }
+
+            if (graphics.length === 0) {
+                this.showMessage(this.nls.explodeErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            var graphic = null,
+                process = false,
+                geometry = null,
+                newGraphics = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                graphic = graphics[i];
+                process = '';
+                switch (graphic.geometry.type) {
+                    case 'polyline':
+                        if (graphic.geometry.paths.length > 0) process = 'paths';
+                        break;
+
+                    case 'polygon':
+                        if (graphic.geometry.rings.length > 0) process = 'rings';
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (process !== '') {
+                    geometry = graphic.geometry;
+                    for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+                        var newGraphic = new Graphic(graphic.toJson());
+                        var newGeometry = null;
+
+                        switch (process) {
+                            case 'rings':
+                                newGeometry = new Polygon({
+                                    "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                                    "spatialReference": geometry.spatialReference.toJson()
+                                });
+                                break;
+
+                            case 'paths':
+                                newGeometry = new Polyline({
+                                    "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                                    "spatialReference": geometry.spatialReference.toJson()
+                                });
+                                break;
+                        }
+                        newGraphic.setGeometry(newGeometry);
+                        newGraphics.push(newGraphic);
+                    }
+                } else {
+                    newGraphics.push(graphic);
+                }
+            }
+
+            this._pushAddOperation(newGraphics);
+            this._removeGraphics(graphics);
+
+            var extent = graphicsUtils.graphicsExtent(newGraphics);
             this.map.setExtent(extent, true);
         },
 
