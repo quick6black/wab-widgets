@@ -147,6 +147,8 @@
     background-image: url("images/merge.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.explode {
     background-image: url("images/explode.png"); }
+  .jimu-widget-edraw-ecan .list-draw-actions span.buffer {
+    background-image: url("images/buffer.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span:hover {
     border: 1px solid #485566;
     cursor: pointer; }
@@ -393,5 +395,15 @@
 
 .eDraw-import-message:hover .eDraw-import-draganddrop-message {
   display: block; }
+
+.edraw-buffer .dijitTextBox, .edraw-buffer .dijitSelect {
+  width: 150px; }
+
+.edraw-buffer table.buffer-set-table tr {
+  padding: 3px; }
+
+/* Remove close button from textbox in IE */
+input[type=text]::-ms-clear {
+  display: none; }
 
 /*# sourceMappingURL=style.css.map */

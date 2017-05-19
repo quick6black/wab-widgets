@@ -74,7 +74,8 @@ define([
         'jimu/portalUtils',
         'jimu/portalUrlUtils',
         'jimu/Role',
-        'dojo/_base/connect'
+        'dojo/_base/connect',
+        './BufferFeaturesPopup'
     ],
 function(
     declare, 
@@ -137,7 +138,8 @@ function(
     portalUtils,
     portalUrlUtils,
     Role,
-    connect
+    connect,
+    BufferFeaturesPopup
 ) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -2530,9 +2532,7 @@ function(
                     esri.config.defaults.io.corsEnabledServers.push(this._defaultGsUrl.split("/")[2]);
                     this._gs = new GeometryService(this._defaultGsUrl);
                 }
-
             }
-
             return this._gs;
         },
 
@@ -3530,9 +3530,12 @@ function(
 
         ///////////////////////// ADVANCED GEOMETRY METHODS ///////////////////////////////////////////////////////////
 
-        mergeDrawings : function () {
+        mergeDrawingsHandler : function() {
            var graphics = this.getCheckedGraphics(false);
+           this._mergeDrawings(graphics);
+        },
 
+        _mergeDrawings : function (graphics) {
            // Check for mixed geometry or points and minimum number of features
            if (this._geometryPointCheck(graphics)) {
                 this.showMessage(this.nls.mergeErrorPointGeometry, 'error');
@@ -3563,12 +3566,16 @@ function(
 
             this.setInfoWindow(newGraphic);
             var extent = graphicsUtils.graphicsExtent([newGraphic]);
-            this.map.setExtent(extent, true);            
+            this.map.setExtent(extent, true);    
+            this.listGenerateDrawTable();   
         },
 
-        explodeDrawings : function () {
+        explodeDrawingsHandler : function () {
            var graphics = this.getCheckedGraphics(false);
+           this._explodeDrawings(graphics);
+        },
 
+        _explodeDrawings : function (graphics) {
             // Check for points and minimum number of features
             if (this._geometryPointCheck(graphics)) {
                 this.showMessage(this.nls.explodeErrorPointGeometry, 'error');
@@ -3637,6 +3644,112 @@ function(
 
             var extent = graphicsUtils.graphicsExtent(newGraphics);
             this.map.setExtent(extent, true); 
+            this.listGenerateDrawTable();   
+        },
+
+        bufferDrawingsHandler : function() {
+           var graphics = this.getCheckedGraphics(false);
+           this._bufferDrawings(graphics);
+        },
+
+        bufferDrawingHandler : function () {
+           var graphic =  this._editorConfig["graphicCurrent"];
+           this._bufferDrawings([graphic]);
+        },
+
+        _bufferDrawings : function (graphics) {
+            // Check for drawings with text symbols and minimum number of features
+            if (this._labelPointCheck(graphics)) {
+                this.showMessage(this.nls.bufferErrorTextSymbols, 'error');
+                return false;
+            }
+
+            if (graphics.length === 0) {
+                this.showMessage(this.nls.bufferErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            // Show buffer dialog
+            var bufferFeaturesPopup, param;
+            param = {
+                map: this.map,
+                nls: this.nls,
+                config: this.config
+            };
+            // initialize buffer features popup widget
+            bufferFeaturesPopup = new BufferFeaturesPopup(param);
+            bufferFeaturesPopup.startup();
+            //hide popup and start the buffer process
+            bufferFeaturesPopup.onOkClick = lang.hitch(this, function () {
+                var bufferSettings = bufferFeaturesPopup.bufferSettings;
+                var geometries = [], distances = [], names = [], unitLabel = '',
+                bufferedGeometries = [];
+
+                var unitInfo = this._getDistanceUnitInfo(bufferSettings.unit);
+                unitLabel = unitInfo.abbr;
+
+                if (!bufferSettings.unionResults) {
+                    for(var i=0,il=graphics.length;i<il;i++) {
+                        for (var r=0,rl=bufferSettings.distance.length;r<rl;r++) {
+                            geometries.push(graphics[i].geometry);
+                            distances.push(bufferSettings.distance[r]);
+                            names.push(graphics[i].attributes.name + ' (' + bufferSettings.distance[r] + unitLabel +' buffer)');
+                        }
+                    }
+
+                    var buffers = geometryEngine.buffer(geometries, 
+                        distances, 
+                        bufferSettings.unit.toLowerCase().replace("_", "-"),
+                        bufferSettings.unionResults);
+
+                    for(var i=0,il=buffers.length;i<il;i++) {
+                        bufferedGeometries.push(buffers[i]);                        
+                    }
+                } else {
+                    // Call service once for each ring
+                    for (var r=0,rl=bufferSettings.distance.length;r<rl;r++) {
+                        geometries.length = 0;
+                        distances.length = 0;
+                        distances.push(bufferSettings.distance[r]);
+                        for(var i=0,il=graphics.length;i<il;i++) {
+                            geometries.push(graphics[i].geometry);
+                        }
+                        names.push(bufferSettings.distance[r] + unitLabel +' buffer)');
+
+                        var buffers = geometryEngine.buffer(geometries, 
+                            distances, 
+                            bufferSettings.unit.toLowerCase().replace("_", "-"),
+                            bufferSettings.unionResults);
+                        bufferedGeometries.push(buffers[0]);                        
+                    }
+                }
+
+                var newGraphics = [];
+                for (var i=0,il=bufferedGeometries.length;i<il;i++) {
+                    var symboloptions =
+                            (this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol)
+                            ? this.config.defaultSymbols.SimpleFillSymbol
+                            : null;
+                    var symbol = SimpleFillSymbol(symboloptions); 
+                    var graphicName = names[i];
+                    var graphic = new Graphic(bufferedGeometries[i], 
+                        symbol,
+                        {
+                            "name": graphicName,
+                            "description": "",
+                            "symbol": JSON.stringify(symbol.toJson())
+                        }
+                    );
+                    newGraphics.push(graphic);
+                }
+
+                this._pushAddOperation(newGraphics);
+                var extent = graphicsUtils.graphicsExtent(newGraphics);
+                this.map.setExtent(extent, true); 
+                this.listGenerateDrawTable();   
+
+                bufferFeaturesPopup.popup.close();
+            });
         },
 
         _geometryMixedTypeCheck : function (graphics) {
@@ -3663,6 +3776,16 @@ function(
             return result;
         },
 
+        _labelPointCheck : function (graphics) {
+            var result = false;
+            for (var i = 0, il = graphics.length; i<il; i++) {
+                if (graphics[i].symbol !== undefined && graphics[i].symbol.type === 'textsymbol') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        },
 
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 

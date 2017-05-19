@@ -129,8 +129,21 @@ define({
 	    mergeErrorMinimumNumber: "You must select at least 2 drawings to merge",
 
 	    explodeLabel: "Explode selected drawings",
-	    explodeErrorPointGeometry: "You cannot explode point drawings",
+	    explodeErrorTextSymbols: "You cannot explode point drawings",
 	    explodeErrorMinimumNumber: "You must select at least 1 drawing to explode",
+
+	    bufferLabel: "Buffer selected drawings",
+	    bufferErrorPointGeometry: "You cannot buffer label drawings",
+	    bufferErrorMinimumNumber: "You must select at least 1 drawing to buffer",
+	    bufferModeLabel: 'Buffer',
+	    bufferDistanceLabel: 'Distance',
+	    bufferCustomDistanceLabel: 'Custom Distance',
+	    bufferRingNumberLabel: 'No of Rings',
+	    bufferCustomDistanceOptionLabel: 'Custom',
+	    bufferMergeLabel: 'Merge',
+
+	    ok: 'OK',
+	    cancel: 'Cancel',
 
 	    _featureAction_ConvertToDrawing: "Convert to Drawing",				
 	}),

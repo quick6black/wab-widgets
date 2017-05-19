@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -2290,7 +2290,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     this._gs = new GeometryService(this._defaultGsUrl);
                 }
             }
-
             return this._gs;
         },
 
@@ -3217,9 +3216,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         ///////////////////////// ADVANCED GEOMETRY METHODS ///////////////////////////////////////////////////////////
 
-        mergeDrawings: function mergeDrawings() {
+        mergeDrawingsHandler: function mergeDrawingsHandler() {
             var graphics = this.getCheckedGraphics(false);
+            this._mergeDrawings(graphics);
+        },
 
+        _mergeDrawings: function _mergeDrawings(graphics) {
             // Check for mixed geometry or points and minimum number of features
             if (this._geometryPointCheck(graphics)) {
                 this.showMessage(this.nls.mergeErrorPointGeometry, 'error');
@@ -3251,11 +3253,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.setInfoWindow(newGraphic);
             var extent = graphicsUtils.graphicsExtent([newGraphic]);
             this.map.setExtent(extent, true);
+            this.listGenerateDrawTable();
         },
 
-        explodeDrawings: function explodeDrawings() {
+        explodeDrawingsHandler: function explodeDrawingsHandler() {
             var graphics = this.getCheckedGraphics(false);
+            this._explodeDrawings(graphics);
+        },
 
+        _explodeDrawings: function _explodeDrawings(graphics) {
             // Check for points and minimum number of features
             if (this._geometryPointCheck(graphics)) {
                 this.showMessage(this.nls.explodeErrorPointGeometry, 'error');
@@ -3321,6 +3327,103 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             var extent = graphicsUtils.graphicsExtent(newGraphics);
             this.map.setExtent(extent, true);
+            this.listGenerateDrawTable();
+        },
+
+        bufferDrawingsHandler: function bufferDrawingsHandler() {
+            var graphics = this.getCheckedGraphics(false);
+            this._bufferDrawings(graphics);
+        },
+
+        bufferDrawingHandler: function bufferDrawingHandler() {
+            var graphic = this._editorConfig["graphicCurrent"];
+            this._bufferDrawings([graphic]);
+        },
+
+        _bufferDrawings: function _bufferDrawings(graphics) {
+            // Check for drawings with text symbols and minimum number of features
+            if (this._labelPointCheck(graphics)) {
+                this.showMessage(this.nls.bufferErrorTextSymbols, 'error');
+                return false;
+            }
+
+            if (graphics.length === 0) {
+                this.showMessage(this.nls.bufferErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            // Show buffer dialog
+            var bufferFeaturesPopup, param;
+            param = {
+                map: this.map,
+                nls: this.nls,
+                config: this.config
+            };
+            // initialize buffer features popup widget
+            bufferFeaturesPopup = new BufferFeaturesPopup(param);
+            bufferFeaturesPopup.startup();
+            //hide popup and start the buffer process
+            bufferFeaturesPopup.onOkClick = lang.hitch(this, function () {
+                var bufferSettings = bufferFeaturesPopup.bufferSettings;
+                var geometries = [],
+                    distances = [],
+                    names = [],
+                    unitLabel = '',
+                    bufferedGeometries = [];
+
+                var unitInfo = this._getDistanceUnitInfo(bufferSettings.unit);
+                unitLabel = unitInfo.abbr;
+
+                if (!bufferSettings.unionResults) {
+                    for (var i = 0, il = graphics.length; i < il; i++) {
+                        for (var r = 0, rl = bufferSettings.distance.length; r < rl; r++) {
+                            geometries.push(graphics[i].geometry);
+                            distances.push(bufferSettings.distance[r]);
+                            names.push(graphics[i].attributes.name + ' (' + bufferSettings.distance[r] + unitLabel + ' buffer)');
+                        }
+                    }
+
+                    var buffers = geometryEngine.buffer(geometries, distances, bufferSettings.unit.toLowerCase().replace("_", "-"), bufferSettings.unionResults);
+
+                    for (var i = 0, il = buffers.length; i < il; i++) {
+                        bufferedGeometries.push(buffers[i]);
+                    }
+                } else {
+                    // Call service once for each ring
+                    for (var r = 0, rl = bufferSettings.distance.length; r < rl; r++) {
+                        geometries.length = 0;
+                        distances.length = 0;
+                        distances.push(bufferSettings.distance[r]);
+                        for (var i = 0, il = graphics.length; i < il; i++) {
+                            geometries.push(graphics[i].geometry);
+                        }
+                        names.push(bufferSettings.distance[r] + unitLabel + ' buffer)');
+
+                        var buffers = geometryEngine.buffer(geometries, distances, bufferSettings.unit.toLowerCase().replace("_", "-"), bufferSettings.unionResults);
+                        bufferedGeometries.push(buffers[0]);
+                    }
+                }
+
+                var newGraphics = [];
+                for (var i = 0, il = bufferedGeometries.length; i < il; i++) {
+                    var symboloptions = this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol ? this.config.defaultSymbols.SimpleFillSymbol : null;
+                    var symbol = SimpleFillSymbol(symboloptions);
+                    var graphicName = names[i];
+                    var graphic = new Graphic(bufferedGeometries[i], symbol, {
+                        "name": graphicName,
+                        "description": "",
+                        "symbol": JSON.stringify(symbol.toJson())
+                    });
+                    newGraphics.push(graphic);
+                }
+
+                this._pushAddOperation(newGraphics);
+                var extent = graphicsUtils.graphicsExtent(newGraphics);
+                this.map.setExtent(extent, true);
+                this.listGenerateDrawTable();
+
+                bufferFeaturesPopup.popup.close();
+            });
         },
 
         _geometryMixedTypeCheck: function _geometryMixedTypeCheck(graphics) {
@@ -3340,6 +3443,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             var result = false;
             for (var i = 0, il = graphics.length; i < il; i++) {
                 if (graphics[i].geometry.type === 'point') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        },
+
+        _labelPointCheck: function _labelPointCheck(graphics) {
+            var result = false;
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                if (graphics[i].symbol !== undefined && graphics[i].symbol.type === 'textsymbol') {
                     result = true;
                     break;
                 }

@@ -235,6 +235,10 @@
         background-image: url("images/explode.png");
     }
 
+    .list-draw-actions span.buffer {
+        background-image: url("images/buffer.png");
+    }
+
     .list-draw-actions span:hover {
         border: 1px solid rgb(72, 85, 102);
         cursor: pointer;
@@ -594,4 +598,22 @@
 
 .eDraw-import-message:hover .eDraw-import-draganddrop-message {
     display: block;
+}
+
+.edraw-buffer {
+    .dijitTextBox,.dijitSelect {
+        width: 150px;
+    }
+
+    table.buffer-set-table {
+        tr {
+           padding: 3px; 
+        }
+    }
+}
+
+/* Remove close button from textbox in IE */
+input[type=text]::-ms-clear
+{
+    display: none;
 }

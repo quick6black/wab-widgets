@@ -65,6 +65,29 @@
 			"abbr" : "sq yd"
 		}
 	],
+	"bufferOptions" : [{
+			"distance" : 50,
+			"unit" : "METERS",
+			"label" : "50 metres"
+		}, {
+			"distance" : 100,
+			"unit" : "METERS",
+			"label" : "100 metres"
+		}, {
+			"distance" : 500,
+			"unit" : "METERS",
+			"label" : "500 metres"
+		}, {
+			"distance" : 1000,
+			"unit" : "METERS",
+			"label" : "1000 metres",
+			"default": true
+		}, {
+			"distance" : 5,
+			"unit" : "KILOMETERS",
+			"label" : "5 kilometres"
+		}
+	],
 	"useGeometryEngine": true,
 	"geometryService": "//tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 	"measureEnabledByDefault" : false,
