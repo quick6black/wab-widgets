@@ -50,7 +50,8 @@ define({
 		operationalLayer : "Add the drawing as an operational layer of the map.",
 		allowSaveToPortalLabel : "Save drawings to Portal?",
 		portalDrawingFolderNameLabel: "Drawings folder name in Portal",
-		portalDrawingFolderName: "My Drawings"
+		portalDrawingFolderName: "My Drawings",
+		convertToDrawingWarningScaleInputLabel: "Map scale above which warnings is hown when converting features to drawings"
 	}),
 	"ar" : 1,
 	"cs" : 1,

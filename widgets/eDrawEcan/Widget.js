@@ -67,6 +67,7 @@ define([
         'jimu/symbolUtils',
         'libs/storejs/store',
         'esri/InfoTemplate',
+        'esri/dijit/PopupTemplate',
         'esri/layers/GraphicsLayer',
         'esri/layers/FeatureLayer',
         'jimu/LayerInfos/LayerInfos',        
@@ -131,6 +132,7 @@ function(
     jimuSymbolUtils, 
     localStore, 
     InfoTemplate, 
+    PopupTemplate,
     GraphicsLayer, 
     FeatureLayer,
     LayerInfos,
@@ -162,6 +164,9 @@ function(
 
         exportFileName: null,
         drawingFolder: null,
+
+        _convertWarningScale: null,
+
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -3234,13 +3239,16 @@ function(
 
         _initDrawingPopupAndClick : function () {
             //Set popup template
-            var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
+            var infoTemplate = new PopupTemplate({
+                         "title": "{name}",
+                         "description": "{description}",
+                         "fieldInfos": [
+                            { "fieldName": "name", "visible": true, "label": this.nls.nameField },
+                            { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }
+                         ]
+                    });
 
             this._graphicsLayer.setInfoTemplate(infoTemplate);
-            this._pointLayer.setInfoTemplate(infoTemplate);
-            this._polylineLayer.setInfoTemplate(infoTemplate);
-            this._polygonLayer.setInfoTemplate(infoTemplate);
-            this._labelLayer.setInfoTemplate(infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
@@ -3249,7 +3257,7 @@ function(
 
                     this._editorConfig["graphicCurrent"] = evt.graphic;
                     this.setMode("list");
-                    this.setInfoWindow(evt.graphic);
+                    //this.setInfoWindow(evt.graphic);
                 });
 
             //Allow click
@@ -3397,13 +3405,28 @@ function(
                     ]
                 };
 
+                //var options = {
+                //    "infoTemplate": new esri.InfoTemplate("${name}", "${description}")
+                //};
+
+                var options = {
+                    "infoTemplate": new PopupTemplate({
+                         "title": "{name}",
+                         "description": "{description}",
+                         "fieldInfos": [
+                            { "fieldName": "name", "visible": true, "label": this.nls.nameField },
+                            { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }
+                         ]
+                    })
+                };
+
                 var pointDefinition = lang.clone(layerDefinition);
                 pointDefinition.name = this.nls.points;//this.label + "_" +
                 pointDefinition.geometryType = "esriGeometryPoint";
                 this._pointLayer = new FeatureLayer({
                     layerDefinition: pointDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var polylineDefinition = lang.clone(layerDefinition);
                 polylineDefinition.name = this.nls.lines;
@@ -3411,7 +3434,7 @@ function(
                 this._polylineLayer = new FeatureLayer({
                     layerDefinition: polylineDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var polygonDefinition = lang.clone(layerDefinition);
                 polygonDefinition.name = this.nls.areas;
@@ -3419,7 +3442,7 @@ function(
                 this._polygonLayer = new FeatureLayer({
                     layerDefinition: polygonDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var labelDefinition = lang.clone(layerDefinition);
                 labelDefinition.name = this.nls.text;
@@ -3427,7 +3450,7 @@ function(
                 this._labelLayer = new FeatureLayer({
                     layerDefinition: labelDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var loading = new LoadingIndicator();
                 loading.placeAt(this.domNode);
@@ -3462,6 +3485,30 @@ function(
         ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
 
         convertToDrawing : function (featureSet) {
+            //do scale check
+            if(this._convertWarningScale && this.map.getScale() > this._convertWarningScale) {
+                this._confirmConvertMessage  = new Message({
+                    message : '<i class="message-warning-icon"></i>&nbsp;' + this.nls.confirmConvertScaleWarning,
+                    buttons:[
+                        {
+                            label:this.nls.ok,
+                            onClick: lang.hitch(this, function(evt) { 
+                                this._convertFeaturesToDrawings(featureSet);
+                                this._confirmConvertMessage.close();
+                                this._confirmConvertMessage = false;
+                            })
+                        },{
+                            label:this.nls.cancel
+                        }
+                    ]
+                });
+
+            } else {
+                this._convertFeaturesToDrawings(featureSet);
+            }
+        },
+
+        _convertFeaturesToDrawings : function (featureSet) {
             var graphicJson = null;
             var clonedGraphic = null;
             var graphic = null;
@@ -3842,6 +3889,9 @@ function(
             if (this.config.allowSaveToPortal) {
                 this._initPortal(); 
             } 
+
+            // Convert to drawing warning scale
+            this._convertWarningScale = this.config.convertWarningScale || 25000;
 
             // initialise the export file name
             this.exportFileName = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';

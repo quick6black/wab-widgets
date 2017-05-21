@@ -117,11 +117,12 @@ define({
 		east:'E',
 		north:'N',
 		south:'S',
+
 		drawingCollectionName: "Drawing Features",
     	results: "Results",
-        points: "Points",
-	    lines: "Lines",
-	    areas: "Areas",
+        points: "Point Drawings",
+	    lines: "Line Drawings",
+	    areas: "Area Drawings",
 
 	    mergeLabel: "Merge selected drawings",
 	    mergeErrorMixedGeometry: "You cannot merge line and polygon drawings",
@@ -144,6 +145,8 @@ define({
 
 	    ok: 'OK',
 	    cancel: 'Cancel',
+
+	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
 
 	    _featureAction_ConvertToDrawing: "Convert to Drawing",				
 	}),

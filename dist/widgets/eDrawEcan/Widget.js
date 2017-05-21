@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -35,6 +35,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         exportFileName: null,
         drawingFolder: null,
+
+        _convertWarningScale: null,
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -2944,13 +2946,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         _initDrawingPopupAndClick: function _initDrawingPopupAndClick() {
             //Set popup template
-            var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
+            var infoTemplate = new PopupTemplate({
+                "title": "{name}",
+                "description": "{description}",
+                "fieldInfos": [{ "fieldName": "name", "visible": true, "label": this.nls.nameField }, { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }]
+            });
 
             this._graphicsLayer.setInfoTemplate(infoTemplate);
-            this._pointLayer.setInfoTemplate(infoTemplate);
-            this._polylineLayer.setInfoTemplate(infoTemplate);
-            this._polygonLayer.setInfoTemplate(infoTemplate);
-            this._labelLayer.setInfoTemplate(infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
@@ -2958,7 +2960,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                 this._editorConfig["graphicCurrent"] = evt.graphic;
                 this.setMode("list");
-                this.setInfoWindow(evt.graphic);
+                //this.setInfoWindow(evt.graphic);
             });
 
             //Allow click
@@ -3096,13 +3098,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     }]
                 };
 
+                //var options = {
+                //    "infoTemplate": new esri.InfoTemplate("${name}", "${description}")
+                //};
+
+                var options = {
+                    "infoTemplate": new PopupTemplate({
+                        "title": "{name}",
+                        "description": "{description}",
+                        "fieldInfos": [{ "fieldName": "name", "visible": true, "label": this.nls.nameField }, { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }]
+                    })
+                };
+
                 var pointDefinition = lang.clone(layerDefinition);
                 pointDefinition.name = this.nls.points; //this.label + "_" +
                 pointDefinition.geometryType = "esriGeometryPoint";
                 this._pointLayer = new FeatureLayer({
                     layerDefinition: pointDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var polylineDefinition = lang.clone(layerDefinition);
                 polylineDefinition.name = this.nls.lines;
@@ -3110,7 +3124,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this._polylineLayer = new FeatureLayer({
                     layerDefinition: polylineDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var polygonDefinition = lang.clone(layerDefinition);
                 polygonDefinition.name = this.nls.areas;
@@ -3118,7 +3132,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this._polygonLayer = new FeatureLayer({
                     layerDefinition: polygonDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var labelDefinition = lang.clone(layerDefinition);
                 labelDefinition.name = this.nls.text;
@@ -3126,7 +3140,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this._labelLayer = new FeatureLayer({
                     layerDefinition: labelDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
 
                 var loading = new LoadingIndicator();
                 loading.placeAt(this.domNode);
@@ -3158,6 +3172,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
 
         convertToDrawing: function convertToDrawing(featureSet) {
+            //do scale check
+            if (this._convertWarningScale && this.map.getScale() > this._convertWarningScale) {
+                this._confirmConvertMessage = new Message({
+                    message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.confirmConvertScaleWarning,
+                    buttons: [{
+                        label: this.nls.ok,
+                        onClick: lang.hitch(this, function (evt) {
+                            this._convertFeaturesToDrawings(featureSet);
+                            this._confirmConvertMessage.close();
+                            this._confirmConvertMessage = false;
+                        })
+                    }, {
+                        label: this.nls.cancel
+                    }]
+                });
+            } else {
+                this._convertFeaturesToDrawings(featureSet);
+            }
+        },
+
+        _convertFeaturesToDrawings: function _convertFeaturesToDrawings(featureSet) {
             var graphicJson = null;
             var clonedGraphic = null;
             var graphic = null;
@@ -3515,6 +3550,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (this.config.allowSaveToPortal) {
                 this._initPortal();
             }
+
+            // Convert to drawing warning scale
+            this._convertWarningScale = this.config.convertWarningScale || 25000;
 
             // initialise the export file name
             this.exportFileName = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';
