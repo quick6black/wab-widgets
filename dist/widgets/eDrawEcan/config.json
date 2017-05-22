@@ -1,6 +1,7 @@
 {
  	"exportFileName" : "myDrawing",
 	"confirmOnDelete" : true,
+	"convertWarningScale":25000,
 	"allowLocalStorage" : true,
 	"allowSaveToPortal" : true,
 	"portalDrawingFolderName" : "My Drawings",

@@ -76,7 +76,9 @@ define([
         'jimu/portalUrlUtils',
         'jimu/Role',
         'dojo/_base/connect',
-        './BufferFeaturesPopup'
+        './BufferFeaturesPopup',
+
+        './search/InfoCard'
     ],
 function(
     declare, 
@@ -141,7 +143,8 @@ function(
     portalUrlUtils,
     Role,
     connect,
-    BufferFeaturesPopup
+    BufferFeaturesPopup,
+    InfoCard
 ) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -1612,7 +1615,10 @@ function(
             layers.push(this._generateLayerForPortal(this._pointLayer,selectedGraphics));
             layers.push(this._generateLayerForPortal(this._labelLayer,selectedGraphics));
 
-            this._addPortalDrawingItem(layers);            
+            var snippet = 'PUT USER SNIPPET HERE';
+            var description = 'PUT USER DESCRIPTION HERE';
+
+            this._addPortalDrawingItem(layers, snippet, description);            
         },
 
         _generateLayerForPortal : function (layer, selectedGraphics) {
@@ -1690,29 +1696,15 @@ function(
             // update the drawings list
             if (this.portalSaveAllowed) {
                 this._generateDrawingsList();
-                domStyle.set(dojo.byId('portalLoadBtn'),'display','inline-block');
             }
             this.setMode("load");
-        },
-
-        loadDialogLoadPortal : function () {
-            var selDrawings = this._getCheckedDrawings();
-            if (selDrawings.length > 0) {
-                var dataCalls = [];
-                for(var i=0,il=selDrawings.length;i<il;i++) {
-                    dataCalls.push(this._getPortalDrawingItem(selDrawings[i]));
-                }
-
-                var promises = all(dataCalls);
-                promises.then(lang.hitch(this, this._processPortalDrawings));
-            } else {
-                this.showMessage("No selected drawings", "warning");
-            }
         },
 
         loadDialogCancel : function () {
             this.setMode("list");
         },
+
+        /////////////// PORTAL DRAWINGS ///////////////////////////////////////////////////////////
 
         _refreshDrawingsList : function () {
             if (this.drawingFolder !== null) {
@@ -1738,60 +1730,34 @@ function(
         },
 
         _generateDrawingsList : function () {
-            //Table
-            this.drawingsTableBody.innerHTML = "";
+            this.itemsNode.innerHTML = '';
+            var currentUserName = this.portalUser.username;
 
-            // CHeck for drawings
             if (this.currentDrawings === undefined || this.currentDrawings.length === 0) {
-                 this.drawingsTableBody.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
+                 //this.portalDrawingsPane.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
             } else {
                 for(var i=0,il=this.currentDrawings.length; i<il;i++) {
                     var drawing = this.currentDrawings[i];
-                    var name = drawing.title;
-                    var itemId = drawing.id;
-
-                    var options = {  
-                        year: "numeric", month: "short",  
-                        day: "numeric", hour: "2-digit", minute: "2-digit"  
-                    };  
-
-                    var modified = new Date(drawing.modified).toLocaleTimeString('en-NZ',options);
-
-                    var actions = '';
-                    var actions_class = "list-draw-actions light";
-
-                    var html = '<td class="draw-td-checkbox"><input type="checkbox" class="td-checkbox" /></td>'
-                         + '<td>' + name + '</td>'
-                         + '<td>' + modified + '</td>'
-                         + '<td class="' + actions_class + '">' + actions + '</td>';
-
-                    var tr = domConstruct.create(
-                        "tr", 
-                        {
-                            id : 'draw-tr--' + i,
-                            innerHTML : html
-                        },
-                        this.drawingsTableBody);
-                    domAttr.set(tr,'data-itemid', itemId);
+                    var canDelete = drawing.owner === currentUserName;
+                    var infoCard = new InfoCard({
+                        item: drawing,
+                        canDelete: canDelete,
+                        resultsPane: this
+                    });
+                    infoCard.placeAt(this.itemsNode);
+                    infoCard.startup();
                 }
             }
         },
 
-        _getCheckedDrawings : function () {
-            var selDrawings = [];
-            dojoQuery('.draw-td-checkbox > input[type=checkbox]:checked').forEach(function(node, index, arr) { 
-                selDrawings.push(node.parentNode.parentNode.dataset["itemid"]);
-            });
-            return selDrawings;
-        },
+        addPortalDrawingItem : function (itemid) {
+            this._getPortalDrawingItem(itemid).then(lang.hitch(this, function(drawingData) {
+                this._loadPortalDrawing(drawingData);
+                this._syncGraphicsToLayers();
+                this.setMode('list');        
+            }), lang.hitch(this, function(err) {
 
-        _processPortalDrawings : function (results) {
-            console.log("portal calls finished: ", results);
-            array.forEach(results, lang.hitch(this, function(result) {
-               this._loadPortalDrawing(result);
             }));
-            this._syncGraphicsToLayers();
-            this.setMode('list');
         },
 
         _loadPortalDrawing : function (drawingData) {
@@ -1807,6 +1773,31 @@ function(
                 }
             }));
             this._pushAddOperation(graphics, true);
+            var extent = graphicsUtils.graphicsExtent(graphics);
+            this.map.setExtent(extent, true);    
+        },
+
+        deletePortalDrawing : function (itemid) {
+            // Confirm that user wishes to delete this item
+            this._confirmDeleteMessage  = new Message({
+                    message : '<i class="message-warning-icon"></i>&nbsp;' + this.nls.portal.confirmPortalDrawingDelete,
+                    buttons:[
+                        {
+                            label:this.nls.yes,
+                            onClick:lang.hitch(this, function(evt) { 
+                                this._confirmDeleteMessage.close();
+                                this._confirmDeleteMessage = false;
+                                this._deletePortalDrawingItem(itemid);
+                            })
+                        },{
+                            label:this.nls.no
+                        }
+                    ]
+                });
+        },
+
+        showPortalDrawingDetails : function (itemid) {
+            alert("showDetails goes here!!!");
         },
 
         ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
@@ -1916,7 +1907,7 @@ function(
             }
         },
 
-        _addPortalDrawingItem : function(layers) {
+        _addPortalDrawingItem : function(layers, snippet, description) {
             var featureCollection = {
                 layers: layers
             };
@@ -1927,19 +1918,63 @@ function(
                 type: 'Feature Collection',
                 typeKeywords: "WAB_created",
                 tags: 'Drawing Graphics',
-                snippet: 'PUT USER SNIPPET HERE',
-                description: 'PUT USER DESCRIPTION HERE',
+                snippet: snippet,
+                description: description,
                 text: JSON.stringify(featureCollection)
             };
 
             this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function(res) {
-                this.showMessage("Drawing has been saved", 'info');
+                this.showMessage(this.nls.portal.drawingAddedMessage, 'info');
                 this.setMode('list');
                 this._refreshDrawingsList();
-            }), function (err) {
-                this.showMessage("There was a problem saving the drawing", 'error');
+            }), lang.hitch(this, function (err) {
+                this.showMessage(this.nls.portal.drawingAddErrorMessage, 'error');
                 this.setMode('list');
-            });
+            }));
+        },
+
+        _deletePortalDrawingItem : function (itemid) {
+            // Custom code - portaluser method for deleting items only works on items in the root of my content
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);                
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl,this.portalUser.username);
+
+                // add drawing folder id to path
+                var deleteUrl = contentUrl + '/' + this.drawingFolder.id + '/items/' + itemid + '/delete';
+                this._deleteItem(deleteUrl).then(lang.hitch(this, function(res) {
+                    this.showMessage(this.nls.portal.drawingDeletedMessage, 'info');
+                    this.setMode('list');
+                    this._refreshDrawingsList();
+                }), lang.hitch(this, function (err) {
+                    this.showMessage(this.nls.portal.drawingDeleteErrorMessage, 'error');
+                    this.setMode('list');
+                }));
+            }
+        },
+
+        _deleteItem: function(deleteUrl) {
+            this.portalUser.updateCredential();
+            var def = new Deferred();
+
+            if (this.portalUser.isValidCredential()) {
+                //resolve {success,itemId}
+                def = esriRequest({
+                    url: deleteUrl,
+                    content: {
+                        token: this.portalUser.credential.token,
+                        f: 'json'
+                    },
+                    handleAs: 'json'
+                }, {
+                    usePost: true
+                  });
+                
+                } else {
+                    setTimeout(lang.hitch(this, function() {
+                        def.reject('token is null.');
+                    }), 0);
+                }
+            return def;
         },
 
         _getPortalDrawingItem : function (itemid) {
@@ -3225,12 +3260,12 @@ function(
                                 this._getDrawingFolder(portal).then(lang.hitch(this, function(res) {
                                     console.log("_initPortal Get Drawing Folder After Create: ", res);
                                     this._refreshDrawingsList();
-                                    domStyle.set(this.loadTable,'display','block');
+                                    //domStyle.set(this.loadTable,'display','block');
                                 }));
                             }));
                         } else {
                             this._refreshDrawingsList();
-                            domStyle.set(this.loadTable,'display','block');
+                            //domStyle.set(this.loadTable,'display','block');
                         }
                     }));
                 }

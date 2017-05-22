@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup', './search/InfoCard'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup, InfoCard) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -1409,7 +1409,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             layers.push(this._generateLayerForPortal(this._pointLayer, selectedGraphics));
             layers.push(this._generateLayerForPortal(this._labelLayer, selectedGraphics));
 
-            this._addPortalDrawingItem(layers);
+            var snippet = 'PUT USER SNIPPET HERE';
+            var description = 'PUT USER DESCRIPTION HERE';
+
+            this._addPortalDrawingItem(layers, snippet, description);
         },
 
         _generateLayerForPortal: function _generateLayerForPortal(layer, selectedGraphics) {
@@ -1493,29 +1496,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             // update the drawings list
             if (this.portalSaveAllowed) {
                 this._generateDrawingsList();
-                domStyle.set(dojo.byId('portalLoadBtn'), 'display', 'inline-block');
             }
             this.setMode("load");
-        },
-
-        loadDialogLoadPortal: function loadDialogLoadPortal() {
-            var selDrawings = this._getCheckedDrawings();
-            if (selDrawings.length > 0) {
-                var dataCalls = [];
-                for (var i = 0, il = selDrawings.length; i < il; i++) {
-                    dataCalls.push(this._getPortalDrawingItem(selDrawings[i]));
-                }
-
-                var promises = all(dataCalls);
-                promises.then(lang.hitch(this, this._processPortalDrawings));
-            } else {
-                this.showMessage("No selected drawings", "warning");
-            }
         },
 
         loadDialogCancel: function loadDialogCancel() {
             this.setMode("list");
         },
+
+        /////////////// PORTAL DRAWINGS ///////////////////////////////////////////////////////////
 
         _refreshDrawingsList: function _refreshDrawingsList() {
             if (this.drawingFolder !== null) {
@@ -1541,54 +1530,32 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _generateDrawingsList: function _generateDrawingsList() {
-            //Table
-            this.drawingsTableBody.innerHTML = "";
+            this.itemsNode.innerHTML = '';
+            var currentUserName = this.portalUser.username;
 
-            // CHeck for drawings
             if (this.currentDrawings === undefined || this.currentDrawings.length === 0) {
-                this.drawingsTableBody.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
+                //this.portalDrawingsPane.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
             } else {
                 for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
                     var drawing = this.currentDrawings[i];
-                    var name = drawing.title;
-                    var itemId = drawing.id;
-
-                    var options = {
-                        year: "numeric", month: "short",
-                        day: "numeric", hour: "2-digit", minute: "2-digit"
-                    };
-
-                    var modified = new Date(drawing.modified).toLocaleTimeString('en-NZ', options);
-
-                    var actions = '';
-                    var actions_class = "list-draw-actions light";
-
-                    var html = '<td class="draw-td-checkbox"><input type="checkbox" class="td-checkbox" /></td>' + '<td>' + name + '</td>' + '<td>' + modified + '</td>' + '<td class="' + actions_class + '">' + actions + '</td>';
-
-                    var tr = domConstruct.create("tr", {
-                        id: 'draw-tr--' + i,
-                        innerHTML: html
-                    }, this.drawingsTableBody);
-                    domAttr.set(tr, 'data-itemid', itemId);
+                    var canDelete = drawing.owner === currentUserName;
+                    var infoCard = new InfoCard({
+                        item: drawing,
+                        canDelete: canDelete,
+                        resultsPane: this
+                    });
+                    infoCard.placeAt(this.itemsNode);
+                    infoCard.startup();
                 }
             }
         },
 
-        _getCheckedDrawings: function _getCheckedDrawings() {
-            var selDrawings = [];
-            dojoQuery('.draw-td-checkbox > input[type=checkbox]:checked').forEach(function (node, index, arr) {
-                selDrawings.push(node.parentNode.parentNode.dataset["itemid"]);
-            });
-            return selDrawings;
-        },
-
-        _processPortalDrawings: function _processPortalDrawings(results) {
-            console.log("portal calls finished: ", results);
-            array.forEach(results, lang.hitch(this, function (result) {
-                this._loadPortalDrawing(result);
-            }));
-            this._syncGraphicsToLayers();
-            this.setMode('list');
+        addPortalDrawingItem: function addPortalDrawingItem(itemid) {
+            this._getPortalDrawingItem(itemid).then(lang.hitch(this, function (drawingData) {
+                this._loadPortalDrawing(drawingData);
+                this._syncGraphicsToLayers();
+                this.setMode('list');
+            }), lang.hitch(this, function (err) {}));
         },
 
         _loadPortalDrawing: function _loadPortalDrawing(drawingData) {
@@ -1605,6 +1572,29 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 }
             }));
             this._pushAddOperation(graphics, true);
+            var extent = graphicsUtils.graphicsExtent(graphics);
+            this.map.setExtent(extent, true);
+        },
+
+        deletePortalDrawing: function deletePortalDrawing(itemid) {
+            // Confirm that user wishes to delete this item
+            this._confirmDeleteMessage = new Message({
+                message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.portal.confirmPortalDrawingDelete,
+                buttons: [{
+                    label: this.nls.yes,
+                    onClick: lang.hitch(this, function (evt) {
+                        this._confirmDeleteMessage.close();
+                        this._confirmDeleteMessage = false;
+                        this._deletePortalDrawingItem(itemid);
+                    })
+                }, {
+                    label: this.nls.no
+                }]
+            });
+        },
+
+        showPortalDrawingDetails: function showPortalDrawingDetails(itemid) {
+            alert("showDetails goes here!!!");
         },
 
         ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
@@ -1714,7 +1704,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
-        _addPortalDrawingItem: function _addPortalDrawingItem(layers) {
+        _addPortalDrawingItem: function _addPortalDrawingItem(layers, snippet, description) {
             var featureCollection = {
                 layers: layers
             };
@@ -1725,19 +1715,62 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 type: 'Feature Collection',
                 typeKeywords: "WAB_created",
                 tags: 'Drawing Graphics',
-                snippet: 'PUT USER SNIPPET HERE',
-                description: 'PUT USER DESCRIPTION HERE',
+                snippet: snippet,
+                description: description,
                 text: JSON.stringify(featureCollection)
             };
 
             this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function (res) {
-                this.showMessage("Drawing has been saved", 'info');
+                this.showMessage(this.nls.portal.drawingAddedMessage, 'info');
                 this.setMode('list');
                 this._refreshDrawingsList();
-            }), function (err) {
-                this.showMessage("There was a problem saving the drawing", 'error');
+            }), lang.hitch(this, function (err) {
+                this.showMessage(this.nls.portal.drawingAddErrorMessage, 'error');
                 this.setMode('list');
-            });
+            }));
+        },
+
+        _deletePortalDrawingItem: function _deletePortalDrawingItem(itemid) {
+            // Custom code - portaluser method for deleting items only works on items in the root of my content
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username);
+
+                // add drawing folder id to path
+                var deleteUrl = contentUrl + '/' + this.drawingFolder.id + '/items/' + itemid + '/delete';
+                this._deleteItem(deleteUrl).then(lang.hitch(this, function (res) {
+                    this.showMessage(this.nls.portal.drawingDeletedMessage, 'info');
+                    this.setMode('list');
+                    this._refreshDrawingsList();
+                }), lang.hitch(this, function (err) {
+                    this.showMessage(this.nls.portal.drawingDeleteErrorMessage, 'error');
+                    this.setMode('list');
+                }));
+            }
+        },
+
+        _deleteItem: function _deleteItem(deleteUrl) {
+            this.portalUser.updateCredential();
+            var def = new Deferred();
+
+            if (this.portalUser.isValidCredential()) {
+                //resolve {success,itemId}
+                def = esriRequest({
+                    url: deleteUrl,
+                    content: {
+                        token: this.portalUser.credential.token,
+                        f: 'json'
+                    },
+                    handleAs: 'json'
+                }, {
+                    usePost: true
+                });
+            } else {
+                setTimeout(lang.hitch(this, function () {
+                    def.reject('token is null.');
+                }), 0);
+            }
+            return def;
         },
 
         _getPortalDrawingItem: function _getPortalDrawingItem(itemid) {
@@ -2932,12 +2965,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                                 this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
                                     console.log("_initPortal Get Drawing Folder After Create: ", res);
                                     this._refreshDrawingsList();
-                                    domStyle.set(this.loadTable, 'display', 'block');
+                                    //domStyle.set(this.loadTable,'display','block');
                                 }));
                             }));
                         } else {
                             this._refreshDrawingsList();
-                            domStyle.set(this.loadTable, 'display', 'block');
+                            //domStyle.set(this.loadTable,'display','block');
                         }
                     }));
                 }

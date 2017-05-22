@@ -177,23 +177,24 @@
         <div data-dojo-attach-point="loadSection">
             <h2>${nls.loadDialogTitle}</h2>
             <div class="content">
-                <table class="jimu-table draw-table" data-dojo-attach-point="loadTable" style="display:none;">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>${nls.drawingName}</th>
-                            <th>${nls.drawingDate}</th>
-                            <th data-dojo-attach-point="loadtableTH"></th>
-                        </tr>
-                    </thead>
-                    <tbody data-dojo-attach-point="drawingsTableBody"></tbody>
-                </table>                
+                <div data-dojo-attach-point="portalDrawingsPane">
+                    <div class="search-results-pane" data-dojo-attach-point="containerNode">
+                      <div class="search-results-pane-no-match empty-data-label" data-dojo-attach-point="noMatchNode" style="display:none;"></div>
+                      <div data-dojo-attach-point="itemsNode" class="search-results"></div>
+                    </div>
+                </div>
             </div>
-            <div class="footer">
+            <div class="footer load-section-footer">
                 <div>
-                    <input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />
-                    <input id="portalLoadBtn" type="button" class="jimu-input blue-button" value="${nls.loadButtonPortal}" data-dojo-attach-event="onclick:loadDialogLoadPortal" style="display:none;" />
-                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />
+                    <!--<input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />-->
+                    <!--<input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />-->
+
+                <a href="#" class="" data-dojo-attach-point="_backButton" 
+                    data-dojo-attach-event="onclick:launchImportFile">${nls.importTitle}</a>
+
+                <a href="#" class="back-button" data-dojo-attach-point="_backButton" 
+                    data-dojo-attach-event="onclick:loadDialogCancel">Back<i class="esri-icon-collapse"></i></a>
+
                 </div>
             </div>
         </div>

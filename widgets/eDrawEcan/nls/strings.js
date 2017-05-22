@@ -148,7 +148,30 @@ define({
 
 	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
 
-	    _featureAction_ConvertToDrawing: "Convert to Drawing",				
+	    portal: {
+	    	confirmPortalDrawingDelete: "Delete this saved drawing?"
+	    },
+
+	    search: {
+			item: {
+		        actions: {
+		          add: "Add",
+		          delete: "Delete",
+		          details: "Details",
+		          editDetails: "Edit Details"
+		        },
+        		typeByOwnerPattern: "{type} by {owner}",	
+		        dateFormat: "MMMM d, yyyy",
+		        datePattern: "{date}",
+		        ratingsCommentsViewsPattern: "{ratings} {ratingsIcon} {comments} {commentsIcon} {views} {viewsIcon}",
+		        ratingsCommentsViewsLabels: {"ratings": "ratings", "comments": "comments", "views": "views"},
+		        types: {
+		          "Feature Collection": "Feature Collection"
+		        }        			        
+		    }
+	    },
+
+	    _featureAction_ConvertToDrawing: "Convert to Drawing"				
 	}),
 	"ar" : 1,
 	"cs" : 1,
