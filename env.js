@@ -72,7 +72,7 @@ var
   //deprecated, use appInfo.appPath instead
   path = null,
 
-  isXT = false,
+  isXT = true,
 
   allCookies,
 
