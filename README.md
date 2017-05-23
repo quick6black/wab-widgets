@@ -23,3 +23,24 @@ To be completed...
 
 ### Use Notes
 To be completed...
+
+
+## SelectEcan Widget
+This is a customised variant of the standard Select widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm) developed by ESRI.
+
+#### Changes made include:  
+
+- Custom feature action **SelectByGeometryFeatureAction** added to widget that adds functionality to pass the geometry of a feature/featureSet to the Select widget to perform a search as though the user had drawn the shape.  A **Select By Geometry** option is added to the popup action menu for any valid featureSet option in the WAB framework e.g. on popup windows for feature layers, in the options off the select and query widgets, etc.  
+
+#### Demo
+To be deployed in the future
+
+### Deployment
+Copy the **SelectEcan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
+
+The widget has its own namespace so it can sit quite happily besides the standard Select widget without interference.
+
+Configure as per standard Select widget.
+
+### Use Notes
+To be completed...
