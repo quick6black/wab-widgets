@@ -89,6 +89,8 @@ define({
 		zoomAllLabel : "Zoom on selected drawings",
 		copyLabel : "Copy selected drawings",
 		copySuffix : " (copy)",
+		cutLabel: "Cut this drawing into multiple pieces",
+		reshapeLabel: "Reshape this drawing",
 		deleteAllLabel : "Delete selected drawings",
 		exportLabel : "Export selected drawings",
 		noSelection : "No drawings selected",
@@ -149,7 +151,11 @@ define({
 	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
 
 	    portal: {
-	    	confirmPortalDrawingDelete: "Delete this saved drawing?"
+	    	confirmPortalDrawingDelete: "Delete this saved drawing?",
+	    	drawingAddedMessage: "Drawing has been saved",
+	    	drawingAddErrorMessage: "There was a problem saving the drawing",
+	    	drawingDeletedMessage: "Drawing has been deleted",
+	    	drawingDeleteErrorMessage: "There was a problem deleting the drawing"
 	    },
 
 	    search: {

@@ -23,6 +23,10 @@
         <div data-dojo-attach-point="editorSection">
             <h2 data-dojo-attach-point="editorTitle">${nls.addDrawTitle}</h2>
             <div class="content">
+                <div data-dojo-attach-point="editorToolsDiv" style="display:none;" class="edit-draw-actions">
+                    <span title="${nls.cutLabel}" class="cut blue-button" data-dojo-attach-event="onclick:cut" >&nbsp;</span>
+                    <span title="${nls.reshapeLabel}" class="reshape blue-button" data-dojo-attach-event="onclick:reshape" >&nbsp;</span>
+                </div>
 				<div data-dojo-attach-point="fieldsDiv">
 					<label>${nls.nameField}:</label>
 					<br />

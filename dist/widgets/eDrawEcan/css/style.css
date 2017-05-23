@@ -96,9 +96,14 @@
     height: 100%;
     vertical-align: middle;
     width: 192px; }
+  .jimu-widget-edraw-ecan .edit-draw-actions {
+    vertical-align: middle;
+    width: 100%; }
   .jimu-widget-edraw-ecan .light {
     width: 120px !important; }
+  .jimu-widget-edraw-ecan .edit-draw-actions span,
   .jimu-widget-edraw-ecan .list-draw-actions span {
+    cursor: pointer;
     border-radius: 5px;
     color: white;
     display: block;
@@ -111,6 +116,7 @@
     text-align: center;
     vertical-align: middle;
     width: 30px; }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.text,
   .jimu-widget-edraw-ecan .list-draw-actions span.text {
     background: none repeat scroll 0 0 transparent;
     color: black;
@@ -135,6 +141,10 @@
     background-image: url("images/up.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.down {
     background-image: url("images/down.png"); }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.cut {
+    background-image: url("images/cut.png"); }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.reshape {
+    background-image: url("images/reshape.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.export {
     background-image: url("images/download.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.import {

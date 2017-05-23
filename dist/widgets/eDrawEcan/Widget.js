@@ -269,6 +269,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
+        cut: function cut() {
+            alert('Cut goes here');
+        },
+
+        reshape: function reshape() {
+            alert('Reshape goes here');
+        },
+
         _removeClickedGraphic: function _removeClickedGraphic() {
             if (!this._clickedGraphic) return false;
 
@@ -655,6 +663,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorSymbolChooserConfigure(symbol);
 
+            this.editorModifyToolsConfigure(false);
+
             this.nameField.value = this.nls.nameFieldDefaultValue;
             this.descriptionField.value = '';
 
@@ -690,6 +700,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
+            //this.editorModifyToolsConfigure(graphic.geometry);
+
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
             this.editorFooterAdd.style.display = 'none';
@@ -701,6 +713,24 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.editorActivateSnapping(true);
 
             this.editorMeasureConfigure(graphic, false);
+        },
+
+        editorModifyToolsConfigure: function editorModifyToolsConfigure(geometry) {
+            if (geometry) {
+                switch (geometry.type) {
+                    case 'polyline':
+                    case 'polygon':
+                        domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+                        break;
+
+                    default:
+                        // Hide the tools
+                        domStyle.set(this.editorToolsDiv, 'display', 'none');
+                        break;
+                }
+            } else {
+                domStyle.set(this.editorToolsDiv, 'display', 'none');
+            }
         },
 
         editorSymbolChooserConfigure: function editorSymbolChooserConfigure(symbol) {

@@ -372,7 +372,7 @@ function(
             return true;
         },
         
-        copy:function(){
+        copy : function(){
             var graphics = this.getCheckedGraphics(false);
             var nb = graphics.length;
 
@@ -426,6 +426,14 @@ function(
             }
         },
         
+        cut : function () {
+            alert('Cut goes here');
+        },
+
+        reshape : function () {
+            alert('Reshape goes here');
+        },
+
         _removeClickedGraphic:function(){
             if(!this._clickedGraphic)
                 return false;
@@ -835,6 +843,8 @@ function(
 
             this.editorSymbolChooserConfigure(symbol);
 
+            this.editorModifyToolsConfigure(false);
+
             this.nameField.value = this.nls.nameFieldDefaultValue;
             this.descriptionField.value = '';
 
@@ -871,6 +881,8 @@ function(
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
+            //this.editorModifyToolsConfigure(graphic.geometry);
+
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
             this.editorFooterAdd.style.display = 'none';
@@ -882,6 +894,24 @@ function(
             this.editorActivateSnapping(true);
 
             this.editorMeasureConfigure(graphic, false);
+        },
+
+        editorModifyToolsConfigure : function (geometry) {
+            if (geometry) {
+                switch(geometry.type) {
+                    case 'polyline':
+                    case 'polygon':
+                        domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+                        break;
+
+                    default:
+                        // Hide the tools
+                        domStyle.set(this.editorToolsDiv, 'display', 'none');
+                        break;
+                }
+            } else {
+                domStyle.set(this.editorToolsDiv, 'display', 'none');
+            }
         },
 
         editorSymbolChooserConfigure : function (symbol) {
