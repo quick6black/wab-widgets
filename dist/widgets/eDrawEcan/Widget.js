@@ -1421,8 +1421,40 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 return false;
             }
 
-            // Set whether to only pull in selected graphics - currently defaults to true (future development here)
-            var only_graphics_checked = true,
+            // Prepare daa for saving
+            var only_graphics_checked = true;
+
+            var layers = this._generateLayersArrayForPortal(only_graphics_checked);
+            var snippet = this.drawingSnippetField.value;
+            var description = 'PUT USER DESCRIPTION HERE';
+
+            // Check for existing drawing with that name
+            var existingDrawings = this._findUserDrawing(this.drawingNameField.value, true);
+            if (existingDrawings.length > 0) {
+                var itemid = existingDrawings[0].id;
+
+                // Confirm that user wishes to delete this item
+                this._confirmOverwriteMessage = new Message({
+                    message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.portal.drawingExistsMessage,
+                    buttons: [{
+                        label: this.nls.yes,
+                        onClick: lang.hitch(this, function (evt) {
+                            this._confirmOverwriteMessage.close();
+                            this._confirmOverwriteMessage = false;
+                            this._updatePortalDrawingItem(itemid, this.drawingNameField.value, layers, snippet, description);
+                        })
+                    }, {
+                        label: this.nls.no
+                    }]
+                });
+            } else {
+                // Set whether to only pull in selected graphics - currently defaults to true (future development here)
+                this._addPortalDrawingItem(this.drawingNameField.value, layers, snippet, description);
+            }
+        },
+
+        _generateLayersArrayForPortal: function _generateLayersArrayForPortal(only_graphics_checked) {
+            var layers = [],
                 selectedGraphics = null;
 
             // Extract the required graphics from the feature layers 
@@ -1433,16 +1465,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
 
             // Build save layers list
-            var layers = [];
             layers.push(this._generateLayerForPortal(this._polygonLayer, selectedGraphics));
             layers.push(this._generateLayerForPortal(this._polylineLayer, selectedGraphics));
             layers.push(this._generateLayerForPortal(this._pointLayer, selectedGraphics));
             layers.push(this._generateLayerForPortal(this._labelLayer, selectedGraphics));
-
-            var snippet = this.drawingSnippetField.value;
-            var description = 'PUT USER DESCRIPTION HERE';
-
-            this._addPortalDrawingItem(layers, snippet, description);
+            return layers;
         },
 
         _generateLayerForPortal: function _generateLayerForPortal(layer, selectedGraphics) {
@@ -1535,6 +1562,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         /////////////// PORTAL DRAWINGS ///////////////////////////////////////////////////////////
+
+        _findUserDrawing: function _findUserDrawing(searchText, nameOnlySearch) {
+            searchText = searchText.toLowerCase().trim();
+            var drawings = [];
+            if (nameOnlySearch) {
+                for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                    var drawing = this.currentDrawings[i];
+                    if (drawing.title.toLowerCase().trim() === searchText) {
+                        drawings.push(drawing);
+                    }
+                }
+            } else {
+                for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                    var drawing = this.currentDrawings[i];
+                    if (drawing.title.toLowerCase().trim().indexOf(searchText) >= 0 || drawing.snippet.toLowerCase().trim().indexOf(searchText) >= 0) {
+                        drawings.push(drawing);
+                    }
+                }
+            }
+            return drawings;
+        },
 
         _refreshDrawingsList: function _refreshDrawingsList() {
             if (this.drawingFolder !== null) {
@@ -1734,14 +1782,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
-        _addPortalDrawingItem: function _addPortalDrawingItem(layers, snippet, description) {
+        _addPortalDrawingItem: function _addPortalDrawingItem(drawingName, layers, snippet, description) {
             var featureCollection = {
                 layers: layers
             };
 
             var itemContent = {
-                name: this.drawingNameField.value,
-                title: this.drawingNameField.value,
+                name: drawingName,
+                title: drawingName,
                 type: 'Feature Collection',
                 typeKeywords: "WAB_created",
                 tags: 'Drawing Graphics',
@@ -1756,6 +1804,32 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this._refreshDrawingsList();
             }), lang.hitch(this, function (err) {
                 this.showMessage(this.nls.portal.drawingAddErrorMessage, 'error');
+                this.setMode('list');
+            }));
+        },
+
+        _updatePortalDrawingItem: function _updatePortalDrawingItem(itemid, drawingName, layers, snippet, description) {
+            var featureCollection = {
+                layers: layers
+            };
+
+            var itemContent = {
+                name: drawingName,
+                title: drawingName,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: snippet,
+                description: description,
+                text: JSON.stringify(featureCollection)
+            };
+
+            this.portalUser.updateItem(itemid, itemContent).then(lang.hitch(this, function (res) {
+                this.showMessage(this.nls.portal.drawingAddedMessage, 'info');
+                this.setMode('list');
+                this._refreshDrawingsList();
+            }), lang.hitch(this, function (err) {
+                this.showMessage(this.nls.portal.drawingExistsErrorMessage, 'error');
                 this.setMode('list');
             }));
         },

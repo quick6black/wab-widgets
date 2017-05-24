@@ -70,8 +70,8 @@ define({
 		loadDialogTitle:"Load Saved Drawing",
 		loadButtonPortal:"Load Drawing",
 
-		settingsTitle:"Drawing Settings",
-		settingsDialogTitle:"Drawing Settings",
+		settingsTitle:"Drawing settings",
+		settingsDialogTitle:"Drawing settings",
 
 		drawingName:"Drawing Name",
 		drawingDate:"Date Last Modified",
@@ -179,7 +179,7 @@ define({
 		          editDetails: "Edit Details"
 		        },
         		typeByOwnerPattern: "{type} by {owner}",	
-		        dateFormat: "MMMM d, yyyy",
+		        dateFormat: "MMMM d, yyyy hh:mm a",
 		        datePattern: "{date}",
 		        ratingsCommentsViewsPattern: "{ratings} {ratingsIcon} {comments} {commentsIcon} {views} {viewsIcon}",
 		        ratingsCommentsViewsLabels: {"ratings": "ratings", "comments": "comments", "views": "views"},
