@@ -3,6 +3,7 @@ define({
 		_widgetLabel : "Draw (ECAN)",
 		yes:"Yes",
 		no:"No",
+		back: "Back",
 		selectDrawMode : "Select drawing mode",
 		clear : "Clear",
 		point : "Point",
@@ -75,6 +76,8 @@ define({
 		drawingName:"Drawing Name",
 		drawingDate:"Date Last Modified",
 
+		saveButton : "Save",
+
 		nameField : "Name",
 		symbolField : "Symbol",
 		nameFieldDefaultValue : "My drawing",
@@ -94,10 +97,6 @@ define({
 		deleteAllLabel : "Delete selected drawings",
 		exportLabel : "Export selected drawings",
 		noSelection : "No drawings selected",
-		saveDialogTitle : "Save Drawings",
-		drawingNameLabel : "Drawing Name",
-		saveButton : "Save",
-		saveButtonPortal : "Save to Portal",
 		resetButton : "Reset",
 		cancelButton : "Cancel",
 		textAngle : 'Text Angle',
@@ -150,12 +149,25 @@ define({
 
 	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
 
+	    save: {
+			saveDialogTitle : "Save Drawings",
+			drawingNameLabel : "Drawing Name",
+			drawingSnippetLabel: "Summary",
+			drawingSnippetPrompt: "Add brief summary of drawing here",
+			drawingDescriptionLabel: "Description",
+	    	saveLabel: "Save",
+	    	savePortalLabel : "Save to Portal",
+			exportToFileLabel: "Save to File"
+	    },
+
 	    portal: {
 	    	confirmPortalDrawingDelete: "Delete this saved drawing?",
 	    	drawingAddedMessage: "Drawing has been saved",
 	    	drawingAddErrorMessage: "There was a problem saving the drawing",
 	    	drawingDeletedMessage: "Drawing has been deleted",
-	    	drawingDeleteErrorMessage: "There was a problem deleting the drawing"
+	    	drawingDeleteErrorMessage: "There was a problem deleting the drawing",
+	    	drawingExistsMessage: "This drawing exists - do you wish to overwrite it?",
+	    	drawingExistsErrorMessage: "There was a problem overwriting the drawing"
 	    },
 
 	    search: {

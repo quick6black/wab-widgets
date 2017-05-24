@@ -15,9 +15,6 @@
                 <label>${nls.selectDrawMode}</label>
                 <div data-dojo-attach-point="drawBox" data-dojo-type="jimu/dijit/DrawBox" data-dojo-props='types:["point","polyline","polygon","text"],showClear:false' style="margin-top:5px;"></div>
             </div>
-
-            <div class='footer'>
-            </div>
         </div>
 
         <div data-dojo-attach-point="editorSection">
@@ -118,14 +115,18 @@
                 <p class="editor-add-message" data-dojo-attach-point="editorEditMessage" style="display:none;">${nls.editMessage}.</p>
                 <p class="editor-add-message" data-dojo-attach-point="editorSnappingMessage">${nls.snappingMessage}.</p>
             </div>
-            <div class="footer">
+            <div class="footer section-footer">
                 <div data-dojo-attach-point="editorFooterEdit">
-                    <input type="button" class="jimu-input blue-button" value="${nls.saveButton}" data-dojo-attach-event="onclick:editorOnClickEditSaveButon" />
-                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:editorOnClickEditCancelButon" />
-                    <input type="button" class="jimu-input grey-button" value="${nls.resetButton}" data-dojo-attach-event="onclick:editorOnClickResetCancelButon" />
+                     <a href="#"
+                        data-dojo-attach-event="onclick:editorOnClickEditSaveButon"><i class="esri-icon-save"></i>&nbsp;${nls.saveButton}</a>
+                     <a href="#" 
+                        data-dojo-attach-event="onclick:editorOnClickResetCancelButon"><i class="esri-icon-swap"></i>&nbsp;${nls.resetButton}</a>
+                    <a href="#" class="back-button"
+                        data-dojo-attach-event="onclick:editorOnClickEditCancelButon">${nls.cancelButton}<i class="esri-icon-collapse"></i></a> 
                 </div>
                 <div data-dojo-attach-point="editorFooterAdd" style="display:none;">
-                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:editorOnClickAddCancelButon" />
+                    <a href="#" class="back-button"
+                        data-dojo-attach-event="onclick:editorOnClickAddCancelButon">${nls.cancelButton}<i class="esri-icon-collapse"></i></a>                    
                 </div>
             </div>
         </div>
@@ -145,7 +146,7 @@
                     <tbody data-dojo-attach-point="drawsTableBody" id="drawsTableBody"></tbody>
                 </table>
             </div>
-            <div class="footer">
+            <div class="footer section-footer">
                 <div>
                     <div style="width: calc(100% - 35px);" class="list-draw-actions" data-dojo-attach-point="allActionsNode">
                         <span class="text"><input type="checkbox" data-dojo-attach-event="onclick:listUpdateAllCheckbox" data-dojo-attach-point="listCheckboxAll2" /></span>
@@ -157,23 +158,43 @@
                         <span title="${nls.deleteAllLabel}" class="clear red-button" data-dojo-attach-event="onclick:clear">&nbsp;</span>
                         <span title="${nls.exportLabel}" class="save blue-button" data-dojo-attach-event="onclick:showSaveDialog">&nbsp;</span>
                     </div>
-                    <span title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:showLoadDialog">&nbsp;</span>
+                    <span data-dojo-attach-point="loadDialogAction" title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:showLoadDialog" style="display:none;">&nbsp;</span>
+                    <span data-dojo-attach-point="loadFileAction" title="${nls.importTitle}" class="import-button blue-button" data-dojo-attach-event="onclick:showLoadDialog" style="display:none;">&nbsp;</span>
+
                 </div>
             </div>
         </div>
 
         <div data-dojo-attach-point="saveSection">
-            <h2>${nls.saveDialogTitle}</h2>
+            <h2>${nls.save.saveDialogTitle}</h2>
             <div class="content">
-                <label for="fileNameField">${nls.drawingNameLabel}</label> 
-                <input id="fileNameField" type="text" data-dojo-attach-point="fileNameField" class="jimu-input" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[\\w]+', invalidMessage:'Can only contain letters, numbers and underscores!'" />
+                <div class="save-section">
+                    <div data-dojo-attach-point="saveName" style="height:30px;margin-bottom:7px;">
+                        <div class="drawing-name-tip jimu-float-leading">${nls.save.drawingNameLabel}</div>
+                        <input type="text" data-dojo-attach-point="drawingNameField" class="jimu-input jimu-float-trailing" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]*', invalidMessage:'Can only contain letters, numbers, spaces and underscores!'" 
+                        style="width:60%;height:30px;" />
+                    </div>
+
+                    <div data-dojo-attach-point="saveSnippet" style="margin-bottom:7px;">
+                        <div class="drawing-name-tip jimu-float-leading">${nls.save.drawingSnippetLabel}</div>
+                        <textarea rows="4" maxlength="250" data-dojo-attach-point="drawingSnippetField" class="jimu-input jimu-float-trailing text-area" required="false" style="width:60%; height: 100px;" 
+                        placeholder="${nls.save.drawingSnippetPrompt}"></textarea>
+                    </div>
+                </div>
             </div>
-            <div class="footer">
+            <div class="footer section-footer">
                 <div>
-                    <input id="portalSaveBtn" type="button" class="jimu-input blue-button" value="${nls.saveButtonPortal}" data-dojo-attach-event="onclick:saveDialogSavePortal" style="display:none;" />
-                    <input type="button" class="jimu-input blue-button" value="${nls.saveButton}" data-dojo-attach-event="onclick:saveDialogSave" />
-                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:saveDialogCancel" />
-                    <input type="button" class="jimu-input grey-button" value="${nls.resetButton}" data-dojo-attach-event="onclick:saveDialogReset" />
+                     <a href="#" style="display:none;" data-dojo-attach-point="portalSaveBtn"
+                        data-dojo-attach-event="onclick:saveDialogSavePortal"><i class="esri-icon-save"></i>&nbsp;${nls.save.saveLabel}</a>
+
+                     <a href="#" 
+                        data-dojo-attach-event="onclick:saveDialogSave"><i class="esri-icon-download"></i>&nbsp;${nls.save.exportToFileLabel}</a>
+
+                     <a href="#" 
+                        data-dojo-attach-event="onclick:saveDialogReset"><i class="esri-icon-swap"></i>&nbsp;${nls.resetButton}</a>
+
+                     <a href="#" class="back-button"
+                        data-dojo-attach-event="onclick:saveDialogCancel">${nls.back}&nbsp;<i class="esri-icon-collapse"></i></a>
                 </div>
             </div>
         </div>
@@ -188,17 +209,12 @@
                     </div>
                 </div>
             </div>
-            <div class="footer load-section-footer">
+            <div class="footer section-footer">
                 <div>
-                    <!--<input type="button" class="jimu-input blue-button" value="${nls.importTitle}" data-dojo-attach-event="onclick:launchImportFile" />-->
-                    <!--<input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:loadDialogCancel" />-->
+                    <a href="#" data-dojo-attach-event="onclick:launchImportFile"><i class="esri-icon-upload"></i>&nbsp;${nls.importTitle}</a>
 
-                <a href="#" class="" data-dojo-attach-point="_backButton" 
-                    data-dojo-attach-event="onclick:launchImportFile">${nls.importTitle}</a>
-
-                <a href="#" class="back-button" data-dojo-attach-point="_backButton" 
-                    data-dojo-attach-event="onclick:loadDialogCancel">Back<i class="esri-icon-collapse"></i></a>
-
+                    <a href="#" class="back-button"
+                        data-dojo-attach-event="onclick:loadDialogCancel">${nls.back}&nbsp;<i class="esri-icon-collapse"></i></a>
                 </div>
             </div>
         </div>
@@ -218,9 +234,10 @@
                 </div>
                 <hr />
             </div>
-            <div class="footer">
+            <div class="footer section-footer">
                 <div>
-                    <input type="button" class="jimu-input red-button" value="${nls.cancelButton}" data-dojo-attach-event="onclick:settingsDialogCancel" />
+                    <a href="#" class="back-button"
+                        data-dojo-attach-event="onclick:settingsDialogCancel">${nls.back}<i class="esri-icon-collapse"></i></a>
                 </div>
             </div>
         </div>

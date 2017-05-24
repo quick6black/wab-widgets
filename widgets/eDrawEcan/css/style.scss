@@ -1,4 +1,12 @@
 .jimu-widget-edraw-ecan {
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
+
     font-size: 14px;
     height: 100%;
     min-height: 192px;
@@ -16,6 +24,7 @@
         font-style: italic;
     }
 
+    .save-section,
     .measure-section {
         margin-top: 12px;
         width: 100%;
@@ -24,13 +33,15 @@
         padding-bottom: 10px;
     }
 
-    .area-units-tip {
-        height: 30px;
-        line-height: 30px;
-        padding-left: 17px;
+    .save-section {
+        .jimu-input {
+            padding: 0;
+        }
     }
 
-    .distance-units-tip {
+    .area-units-tip,
+    .distance-units-tip,
+    .drawing-name-tip {
         height: 30px;
         line-height: 30px;
         padding-left: 17px;
@@ -62,9 +73,8 @@
     }
 
     .menu {
-        border-bottom: 2px solid rgb(72, 85, 102);
+        border-bottom: 1px solid #ccc;
         height: 36px;
-        margin-bottom: 10px;
         width: 100%;
     }
 
@@ -111,6 +121,13 @@
     .hidden {
         display: none;
     }
+
+    .draw-items {
+        .draw-item {
+            cursor: pointer;
+        }
+    }
+
 
     .draw-table tr {
         border: 1px solid white;
@@ -290,8 +307,13 @@
     }
 
     h2 {
-        margin-bottom: 0;
-        margin-top: 2px;
+        margin: 0;
+        padding: 7px 15px;
+        border-bottom: 1px solid #ccc;
+        color: #898989;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 2;
     }
 
     .draw-import {
@@ -348,23 +370,24 @@
     }
 
     .content {
-        background-color: rgba(78, 130, 138, 0.1);
-        height: calc(100% - 100px);
+        /*background-color: rgba(78, 130, 138, 0.1);*/
+        height: calc(100% - 120px);
         overflow-x: hidden;
         overflow-y: auto;
         position: absolute;
         width: calc(100%);
     }
 
-    .bloc {
-        background-color: rgba(78, 130, 138, 0.1);
-    }
-
     .content hr {
         color: rgba(78, 130, 138, 0.6);
     }
 
+    .bloc {
+        padding: 10px;
+    }
+
     .footer {
+        border-top: 1px solid #ccc;
         bottom: 0;
         position: absolute;
         width: 100%;
@@ -630,8 +653,11 @@
         text-align: right;
     }
 
-    .load-section-footer {
-        
+    .section-footer {
+
+        padding-left: 10px;
+        padding-right: 10px;
+
         a {
             display: inline-block;
             color: #196fa6;
@@ -642,11 +668,17 @@
             font-size: 11px;
         }
 
-       .back-button {
+        .back-button {
             float: right;
-       }
+        }
     }
 
+    .text-area {
+        font-family: inherit;
+        font-size: 14px;
+        color: #000000;
+        padding: 3px 10px !important;
+    }
 }
 
 .jimu-rtl .jimu-widget-edraw-ecan .area-units-tip {

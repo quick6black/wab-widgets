@@ -1592,12 +1592,12 @@ function(
                 return false;
             }
 
-            if (this.fileNameField.value === '')
+            if (this.drawingNameField.value === '')
                 this.saveDialogReset();
 
             this.setMode("save");
             if (this.portalSaveAllowed) {
-                domStyle.set(dojo.byId('portalSaveBtn'),'display','inline-block');
+                domStyle.set(this.portalSaveBtn,'display','inline-block');
             }
         },
 
@@ -1606,24 +1606,24 @@ function(
         },
 
         saveDialogSave : function () {
-            if (!this.fileNameField.isValid()) {
+            if (!this.drawingNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
 
-            this.exportFileName = this.fileNameField.value;
+            this.exportFileName = this.drawingNameField.value;
             this.exportSelectionInFile();
             this.setMode("list");
         },
 
         saveDialogReset : function () {
             var val = (this.config.exportFileName) ? (this.config.exportFileName) : 'myDrawings';
-            this.fileNameField.set('value',val);
+            this.drawingNameField.set('value',val);
         },
 
         saveDialogSavePortal : function () {
             // Validate drawing name
-            if (!this.fileNameField.isValid()) {
+            if (!this.drawingNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
@@ -1645,7 +1645,7 @@ function(
             layers.push(this._generateLayerForPortal(this._pointLayer,selectedGraphics));
             layers.push(this._generateLayerForPortal(this._labelLayer,selectedGraphics));
 
-            var snippet = 'PUT USER SNIPPET HERE';
+            var snippet = this.drawingSnippetField.value;
             var description = 'PUT USER DESCRIPTION HERE';
 
             this._addPortalDrawingItem(layers, snippet, description);            
@@ -1943,8 +1943,8 @@ function(
             };
 
             var itemContent = {
-                name: this.fileNameField.value,
-                title: this.fileNameField.value,
+                name: this.drawingNameField.value,
+                title: this.drawingNameField.value,
                 type: 'Feature Collection',
                 typeKeywords: "WAB_created",
                 tags: 'Drawing Graphics',
@@ -3952,8 +3952,11 @@ function(
 
             //Init the portal functionality
             if (this.config.allowSaveToPortal) {
+                domStyle.set(this.loadDialogAction,'display','inline-block');
                 this._initPortal(); 
-            } 
+            } else {
+                domStyle.set(this.loadFileAction,'display','inline-block');
+            }
 
             // Convert to drawing warning scale
             this._convertWarningScale = this.config.convertWarningScale || 25000;

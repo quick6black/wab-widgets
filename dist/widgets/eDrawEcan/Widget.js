@@ -1386,11 +1386,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 return false;
             }
 
-            if (this.fileNameField.value === '') this.saveDialogReset();
+            if (this.drawingNameField.value === '') this.saveDialogReset();
 
             this.setMode("save");
             if (this.portalSaveAllowed) {
-                domStyle.set(dojo.byId('portalSaveBtn'), 'display', 'inline-block');
+                domStyle.set(this.portalSaveBtn, 'display', 'inline-block');
             }
         },
 
@@ -1399,24 +1399,24 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         saveDialogSave: function saveDialogSave() {
-            if (!this.fileNameField.isValid()) {
+            if (!this.drawingNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
 
-            this.exportFileName = this.fileNameField.value;
+            this.exportFileName = this.drawingNameField.value;
             this.exportSelectionInFile();
             this.setMode("list");
         },
 
         saveDialogReset: function saveDialogReset() {
             var val = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';
-            this.fileNameField.set('value', val);
+            this.drawingNameField.set('value', val);
         },
 
         saveDialogSavePortal: function saveDialogSavePortal() {
             // Validate drawing name
-            if (!this.fileNameField.isValid()) {
+            if (!this.drawingNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
@@ -1439,7 +1439,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             layers.push(this._generateLayerForPortal(this._pointLayer, selectedGraphics));
             layers.push(this._generateLayerForPortal(this._labelLayer, selectedGraphics));
 
-            var snippet = 'PUT USER SNIPPET HERE';
+            var snippet = this.drawingSnippetField.value;
             var description = 'PUT USER DESCRIPTION HERE';
 
             this._addPortalDrawingItem(layers, snippet, description);
@@ -1740,8 +1740,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             };
 
             var itemContent = {
-                name: this.fileNameField.value,
-                title: this.fileNameField.value,
+                name: this.drawingNameField.value,
+                title: this.drawingNameField.value,
                 type: 'Feature Collection',
                 typeKeywords: "WAB_created",
                 tags: 'Drawing Graphics',
@@ -3611,7 +3611,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             //Init the portal functionality
             if (this.config.allowSaveToPortal) {
+                domStyle.set(this.loadDialogAction, 'display', 'inline-block');
                 this._initPortal();
+            } else {
+                domStyle.set(this.loadFileAction, 'display', 'inline-block');
             }
 
             // Convert to drawing warning scale
