@@ -80,7 +80,7 @@ define([
         'jimu/Role',
         'dojo/_base/connect',
         './BufferFeaturesPopup',
-
+        './search/DrawingDetailsPopup',
         './search/InfoCard'
     ],
 function(
@@ -150,6 +150,7 @@ function(
     Role,
     connect,
     BufferFeaturesPopup,
+    DrawingDetailsPopup,
     InfoCard
 ) {
     /*jshint unused: false*/
@@ -1815,6 +1816,17 @@ function(
             return drawings;
         },
 
+        _findDrawing : function (itemId) {
+            var drawing = null;
+            for(var i = 0,il=this.currentDrawings.length;i<il;i++) {
+                drawing = this.currentDrawings[i];
+                if (drawing.id === itemId) {
+                    break;
+                }
+            }
+            return drawing;
+        },
+
         _refreshDrawingsList : function () {
             if (this.drawingFolder !== null) {
                 console.log("_refreshDrawingsList");
@@ -1951,7 +1963,27 @@ function(
         },
 
         showPortalDrawingDetails : function (itemid) {
-            alert("showDetails goes here!!!");
+            // Get the drawing item
+            var drawingDetails = this._findDrawing(itemid);
+            if (drawingDetails) {
+                var drawingDetailsPopup, param;
+                param = {
+                    map: this.map,
+                    nls: this.nls,
+                    config: this.config,
+                    drawing: drawingDetails,
+                    user: this.portalUser
+                };
+                // initialize drawing details popup widget
+                drawingDetailsPopup = new DrawingDetailsPopup(param);
+                drawingDetailsPopup.startup();
+                //hide popup and start the update process
+                drawingDetailsPopup.onUpdateClick = lang.hitch(this, function () {
+                    var settings = drawingDetailsPopup.getSettings();
+                    this._updatePortalDrawingItem(settings.itemId, settings.title, null, settings.snippet);
+                    drawingDetailsPopup.popup.close();
+                });
+            }
         },
 
         ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
@@ -2092,6 +2124,7 @@ function(
                 layers: layers
             };
 
+            /*
             var itemContent = {
                 name: drawingName,
                 title: drawingName,
@@ -2102,6 +2135,27 @@ function(
                 description: description,
                 text: JSON.stringify(featureCollection)
             };
+            */
+           
+            var itemContent = {
+            };
+
+            if (drawingName) {
+                itemContent.name = drawingName;
+                itemContent.title = drawingName;
+            }
+
+            if (layers) {
+                itemContent.text = JSON.stringify(featureCollection);
+            }
+
+            if (snippet) {
+                itemContent.snippet = snippet;
+            }
+
+            if (description) {
+                itemContent.description = description;
+            }
 
             this.portalUser.updateItem(itemid, itemContent).then(lang.hitch(this, function(res) {
                 this.showMessage(this.nls.portal.drawingAddedMessage, 'info');

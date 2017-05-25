@@ -93,6 +93,8 @@ define(["dojo/_base/declare",
         // TODO escape text or not?
         util.setNodeText(this.titleNode, this.item.title);
         util.setNodeTitle(this.titleNode, this.item.title);
+        if (this.item.snippet && this.item.snippet !== '')
+          util.setNodeTitle(this.cardNode, this.item.snippet);
         this._renderThumbnail();
         this._renderTypeOwnerDate();
         if (this.canRemove) {

@@ -149,6 +149,20 @@ define({
 
 	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
 
+	    drawingDetails: {
+	    	backLabel: "Back",
+	    	updateLabel: "Update",
+	    	dialogTitle: "Drawing Details",
+	    	drawingNameLabel: "Drawing Name",
+	    	drawingSnippetLabel: "Drawing Summary",
+	    	ownerLabel: "Owner",
+	    	dateLastModifiedLabel: "Last Modified",
+		    dateFormat: "MMMM d, yyyy hh:mm a",
+		    datePattern: "{date}",	  
+		    drawingType: "Drawing",
+		    ownerPattern: "{owner}"
+	    },
+
 	    save: {
 			saveDialogTitle : "Save Drawings",
 			drawingNameLabel : "Drawing Name",
