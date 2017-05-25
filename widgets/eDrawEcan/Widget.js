@@ -25,6 +25,7 @@ define([
         'jimu/exportUtils',
         'esri/graphic',
         'esri/symbols/SimpleMarkerSymbol',
+        'esri/symbols/PictureMarkerSymbol',
         'esri/geometry/Polyline',
         'esri/symbols/SimpleLineSymbol',
         'esri/geometry/Polygon',
@@ -32,6 +33,8 @@ define([
         'esri/symbols/SimpleFillSymbol',
         'esri/symbols/TextSymbol',
         'esri/symbols/Font',
+        'esri/renderers/SimpleRenderer',
+        'esri/renderers/UniqueValueRenderer',
         'esri/units',
         'esri/toolbars/edit',
         'esri/geometry/webMercatorUtils',
@@ -92,6 +95,7 @@ function(
     exportUtils, 
     Graphic, 
     SimpleMarkerSymbol, 
+    PictureMarkerSymbol,
     Polyline, 
     SimpleLineSymbol, 
     Polygon, 
@@ -99,6 +103,8 @@ function(
     SimpleFillSymbol,
     TextSymbol, 
     Font, 
+    SimpleRenderer,
+    UniqueValueRenderer,
     esriUnits, 
     Edit, 
     webMercatorUtils, 
@@ -333,6 +339,13 @@ function(
                 dojo.disconnect(this._clickPolylineHandler);
                 dojo.disconnect(this._clickPolygonHandler);
                 dojo.disconnect(this._clickLabelHandler);
+
+                this._clickHandler = false;
+                this._clickPointHandler = false;
+                this._clickPolylineHandler = false;
+                this._clickPolygonHandler = false;
+                this._clickLabelHandler = false;
+
             } else {
                 this._clickHandler = this._graphicsLayer.on("click", this._onDrawClick);
                 this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
@@ -1549,7 +1562,8 @@ function(
                             g.setSymbol(symbol);
                         }
                     }
-                    g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
+                    //g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
+                    g.attributes["symbolClass"] = this._getSymbolHash(JSON.stringify(g.symbol.toJson()));
 
                     //If is with measure
                     if (json_feat.measure) {
@@ -1685,15 +1699,29 @@ function(
             var layerDef = layer.toJson();
 
             // Ensure only the selected graphics included in the layer
-            var removes = [], found = false, graphic = null, index = null;
+            var removes = [], found = false, graphic = null, index = null, geometryType = null;;
             for (var i=0,il=layerDef.featureSet.features.length;i<il;i++) {
                 graphic = layerDef.featureSet.features[i];
                 found = false;
+                switch(layerDef.featureSet.geometryType) {
+                    case "esriGeometryPolyline":
+                        geometryType = "polyline";
+                        break;
+
+                    case "esriGeometryPolygon":
+                        geometryType = "polygon";
+                        break;
+
+                    case "esriGeometryPoint":
+                        geometryType = "point";
+                        break;
+                }
+
 
                 for (var j=0,jl=selectedGraphics.length;j<jl;j++) {
                     var selected = selectedGraphics[j];
 
-                    if (selected.geometry.geometryType === graphic.geometry.geometryType && selected.attributes[this._objectIdName] === graphic.attributes[this._objectIdName]) {
+                    if (selected.geometry.type === geometryType && selected.attributes[this._objectIdName] === graphic.attributes["parentId"]) {
                         found = true;
                         break;
                     }
@@ -1837,25 +1865,70 @@ function(
                 this._syncGraphicsToLayers();
                 this.setMode('list');        
             }), lang.hitch(this, function(err) {
-
+                alert(err);
             }));
         },
 
         _loadPortalDrawing : function (drawingData) {
-            var layer = null, graphics = [];
+            var layer = null, graphics = [], symbols = null, renderer = null;
             array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
                 // Check for drawings in layer
                 if (drawingLayer.featureSet.features.length > 0) {
+                    // Prepare the symbols
+                    symbols = {}, renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+
+                    if (renderer.defaultSymbol === null) {
+                        getRendererSymbol = true;
+                        array.forEach(renderer.uniqueValueInfos, lang.hitch(this, function(info) {
+                            symbols[info.value] = info.symbol;
+                        }));
+                    }
+
                     // Build the graphics
                     array.forEach(drawingLayer.featureSet.features, lang.hitch(this, function (graphicJson) {
                         var graphic = new Graphic(graphicJson);
+
+                        // update the symbol based on the renderer
+                        if (getRendererSymbol) {
+                            var symbolJson = symbols[graphic.attributes["symbolClass"]];
+                            switch(symbolJson.type) {
+                                case "esriSFS":
+                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                    break;
+
+                                case "esriSLS":
+                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                    break;
+
+                                case "esriSMS":
+                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                    break;
+
+                                case "esriPMS":
+                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                    break;
+
+
+                                default:
+                                    //do nothing
+                                    break;
+                            }
+                        }
+
+                        // Reset the attribute fields for the graphic
+                        graphic.setAttributes(this._formatPortalAttributes(graphic.attributes)); 
+                        
+
                         graphics.push(graphic);
                     }));
                 }
             }));
-            this._pushAddOperation(graphics, true);
-            var extent = graphicsUtils.graphicsExtent(graphics);
-            this.map.setExtent(extent, true);    
+
+            if (graphics.length > 0) {
+                this._pushAddOperation(graphics, true);
+                var extent = graphicsUtils.graphicsExtent(graphics);
+                this.map.setExtent(extent, true);    
+            }
         },
 
         deletePortalDrawing : function (itemid) {
@@ -2113,7 +2186,8 @@ function(
 
             this._editorConfig["graphicCurrent"].attributes["name"] = this.nameField.value;
             this._editorConfig["graphicCurrent"].attributes["description"] = this.descriptionField.value;
-            this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
+            //this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
+            this._editorConfig["graphicCurrent"].attributes["symbolClass"] = this._getSymbolHash(JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson()));
 
             if (this.editorSymbolChooser.type != "text") {
                 var geom = this._editorConfig["graphicCurrent"].geometry;
@@ -2191,36 +2265,7 @@ function(
 
             var symbol = this._editorConfig["defaultSymbols"][commontype];
             if (!symbol) {
-                switch (commontype) {
-                case "point":
-                    var options =
-                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol)
-                        ? this.config.defaultSymbols.SimpleMarkerSymbol
-                        : null;
-                    symbol = new SimpleMarkerSymbol(options);
-                    break;
-                case "polyline":
-                    var options =
-                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol)
-                        ? this.config.defaultSymbols.SimpleLineSymbol
-                        : null;
-                    symbol = new SimpleLineSymbol(options);
-                    break;
-                case "polygon":
-                    var options =
-                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol)
-                        ? this.config.defaultSymbols.SimpleFillSymbol
-                        : null;
-                    symbol = new SimpleFillSymbol(options);
-                    break;
-                case "text":
-                    var options =
-                        (this.config.defaultSymbols && this.config.defaultSymbols.TextSymbol)
-                        ? this.config.defaultSymbols.TextSymbol
-                        : {"verticalAlignment": "middle", "horizontalAlignment": "center"};
-                    symbol = new TextSymbol(options);
-                    break;
-                }
+                symbol = this._createDefaultSymbol(commontype);
             }
 
             if (symbol) {
@@ -2243,7 +2288,7 @@ function(
             graphic.attributes = {
                 "name" : this.nameField.value,
                 "description" : this.descriptionField.value,
-                "symbol": JSON.stringify(graphic.symbol.toJson())
+                "symbolClass": this._getSymbolHash(JSON.stringify(graphic.symbol.toJson()))
             };
 
             if (geometry.type === 'extent') {
@@ -2436,9 +2481,9 @@ function(
                 }
                 else {
                     var localeLength = jimuUtils.localizeNumber(length.toFixed(1));
-                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).label;
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
                     if (area) {
-                        var localeAreaUnit = this._getAreaUnitInfo(areaUnit).label;
+                        var localeAreaUnit = this._getAreaUnitInfo(areaUnit).abbr;
                         var localeArea = jimuUtils.localizeNumber(area.toFixed(1));
                         labelText = polygonPattern
                             .replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit)
@@ -2482,39 +2527,112 @@ function(
             this._polylineLayer.clear();
             this._polygonLayer.clear();
             this._labelLayer.clear();
+
+            var pointDrawings = [], polylineDrawings = [], polygonDrawings = [],
+                labelDrawings = []; 
+
             var graphics = this._getAllGraphics();
             array.forEach(graphics, lang.hitch(this, function(g){
                 var graphicJson = g.toJson();
                 var clonedGraphic = new Graphic(graphicJson);
+                clonedGraphic.setInfoTemplate(null);
                 var geoType = clonedGraphic.geometry.type;
                 var layer = null;
                 var isNeedRTL = false;
 
                 if(geoType === 'point'){
                     if(clonedGraphic.symbol && clonedGraphic.symbol.type === 'textsymbol'){
-                        layer = this._labelLayer;
-                        isNeedRTL = isRTL;
+                        labelDrawings.push(clonedGraphic);
                     } else {
-                        layer = this._pointLayer;
+                        pointDrawings.push(clonedGraphic);
                     }
                 } else if(geoType === 'polyline') {
-                    layer = this._polylineLayer;
+                    polylineDrawings.push(clonedGraphic);
                 } else if(geoType === 'polygon' || geoType === 'extent') {
-                    layer = this._polygonLayer;
+                    polygonDrawings.push(clonedGraphic);
                 }
+            }));
 
-                if (layer) {
-                    var graphic = layer.add(clonedGraphic);
-                    if (true === isNeedRTL && graphic.getNode) {
-                        var node = graphic.getNode();
-                        if (node) {
-                            //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
-                            //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
-                            domStyle.set(node, "direction", "rtl");
-                        }
+            this._buildLayerRenderer(pointDrawings, this._pointLayer, this._createDefaultSymbol("point"));
+            this._buildLayerRenderer(polylineDrawings, this._polylineLayer, this._createDefaultSymbol("polyline"));
+            this._buildLayerRenderer(polygonDrawings, this._polygonLayer, this._createDefaultSymbol("polygon"));
+            this._populateLabelLayer(labelDrawings, this._labelLayer, this._createDefaultSymbol("text"));
+        },
+
+        _buildLayerRenderer : function(graphics, layer, defaultSymbol) {
+            var symbolClasses = {};
+
+            array.forEach(graphics, lang.hitch(this, function(g){
+                var symbolJson = g.symbol.toJson();
+                g.setSymbol(null);
+                var hash = g.attributes.symbolClass;
+                if (!symbolClasses[hash]) {
+                    symbolClasses[hash] = {
+                        "value" : hash,
+                        "label" : g.attributes.name,
+                        "description" : "",
+                        "symbol" : symbolJson
+                    };
+                }
+                g.setAttributes(this._stripNonStandardAttributes(g.attributes));
+            }));
+
+            var uvrJson = {
+                "type": "uniqueValue",
+                "field1": "symbolClass",
+                "defaultSymbol": null,
+                "uniqueValueInfos": Object.keys(symbolClasses).map(function(e) {
+                    return symbolClasses[e];
+                })
+            };
+
+            var renderer = new UniqueValueRenderer(uvrJson);
+            layer.setRenderer(renderer);
+            layer.applyEdits(graphics,null,null);
+        }, 
+
+        _populateLabelLayer : function(graphics, layer, defaultSymbol) {
+            var isNeedRTL = false;
+            array.forEach(graphics, lang.hitch(this, function(g){
+                g.setAttributes(this._stripNonStandardAttributes(g.attributes));
+                var graphic = layer.add(g);
+                if (true === isNeedRTL && graphic.getNode) {
+                    var node = graphic.getNode();
+                    if (node) {
+                        //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
+                        //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
+                        domStyle.set(node, "direction", "rtl");
                     }
                 }
             }));
+        },
+
+        _getSymbolHash : function (symbolJson) {
+            var hash = 0;
+            if (symbolJson.length == 0) return hash;
+            for (i = 0; i < symbolJson.length; i++) {
+                char = symbolJson.charCodeAt(i);
+                hash = ((hash<<5)-hash)+char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        },
+
+        _stripNonStandardAttributes : function (attributes) {
+            return {
+                "parentId" : attributes[this._objectIdName],
+                "nameField" : attributes["name"],
+                "descriptionField" : attributes["description"],
+                "symbolClass" : attributes["symbolClass"]
+            };
+       },
+
+        _formatPortalAttributes : function (attributes) {
+            return {
+                "name" : attributes["nameField"],
+                "description" : attributes["descriptionField"],
+                "symbolClass" : attributes["symbolClass"]
+            };
         },
 
         _hideOperationalGraphic : function (graphic) {
@@ -3381,7 +3499,7 @@ function(
 
         _initDrawingPopupAndClick : function () {
             //Set popup template
-            var infoTemplate = new PopupTemplate({
+            this.infoTemplate = new PopupTemplate({
                          "title": "{name}",
                          "description": "{description}",
                          "fieldInfos": [
@@ -3390,16 +3508,29 @@ function(
                          ]
                     });
 
-            this._graphicsLayer.setInfoTemplate(infoTemplate);
+            this._graphicsLayer.setInfoTemplate(this.infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
                     if (!evt.graphic)
                         return;
 
-                    this._editorConfig["graphicCurrent"] = evt.graphic;
-                    this.setMode("list");
-                    //this.setInfoWindow(evt.graphic);
+                    // Find the parent graphic if layer is not one of the operational layers
+                    var parentId = evt.graphic.attributes.parentId;
+                    var graphic = null;
+                    for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                        if (this._graphicsLayer.graphics[i].attributes[this._objectIdName] === parentId) {
+                            graphic = this._graphicsLayer.graphics[i];
+                            break;
+                        }
+                    }
+ 
+                    if (graphic !== null) {
+                        this._editorConfig["graphicCurrent"] = graphic;
+                        this.setMode("list");
+                    } else {
+                        return;
+                    }
                 });
 
             //Allow click
@@ -3528,36 +3659,39 @@ function(
                         },
 
                         {
-                            "name": "name",
+                            "name": "nameField",
                             "type": "esriFieldTypeString",
                             "alias": this.nls.nameField
                         },
 
                         {
-                            "name": "description",
+                            "name": "descriptionField",
                             "type": "esriFieldTypeString",
                             "alias": this.nls.descriptionField
                         },
 
                         {
-                            "name": "symbol",
-                            "type": "esriFieldTypeString",
+                            "name": "symbolClass",
+                            "type": "esriFieldTypeInteger",
                             "alias": this.nls.symbolField
+                        },
+
+                        {
+                            "name": "parentId",
+                            "type": "esriFieldTypeInteger",
+                            "alias": "ParentId"
                         }
+
                     ]
                 };
 
-                //var options = {
-                //    "infoTemplate": new esri.InfoTemplate("${name}", "${description}")
-                //};
-
                 var options = {
                     "infoTemplate": new PopupTemplate({
-                         "title": "{name}",
-                         "description": "{description}",
+                         "title": "{nameField}",
+                         "description": "{descriptionField}",
                          "fieldInfos": [
-                            { "fieldName": "name", "visible": true, "label": this.nls.nameField },
-                            { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }
+                            { "fieldName": "nameField", "visible": true, "label": this.nls.nameField },
+                            { "fieldName": "descriptionField", "visible": true, "label": this.nls.descriptionField }
                          ]
                     })
                 };
@@ -3593,6 +3727,9 @@ function(
                     layerDefinition: labelDefinition,
                     featureSet: null
                 }, lang.clone(options));
+                var ts = this._createDefaultSymbol('text');
+                ts.setText('Text');                
+                this._labelLayer.setRenderer(new SimpleRenderer(ts));
 
                 var loading = new LoadingIndicator();
                 loading.placeAt(this.domNode);
@@ -3659,39 +3796,13 @@ function(
             var graphicDescription = null;
             var nameValue = null;
             var symbol = null;
-            var options = null;
             for (var i=0,il=featureSet.features.length;i<il;i++) {
                 graphic = featureSet.features[i];
                 graphicJson = graphic.toJson();
                 clonedGraphic = new Graphic(graphicJson);
 
                 // Set default symbol
-                switch(clonedGraphic.geometry.type) {
-                    case 'point':
-                        options =
-                            (this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol)
-                            ? this.config.defaultSymbols.SimpleMarkerSymbol
-                            : null;
-                        symbol = new SimpleMarkerSymbol(options);
-                        break;
-
-                    case 'polyline':
-                        options =
-                            (this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol)
-                            ? this.config.defaultSymbols.SimpleLineSymbol
-                            : null;
-                        symbol = new SimpleLineSymbol(options);
-                        break;
-
-                    case 'polygon':
-                    default:
-                        options =
-                            (this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol)
-                            ? this.config.defaultSymbols.SimpleFillSymbol
-                            : null;
-                        symbol = new SimpleFillSymbol(options);
-                        break;
-                }
+                symbol = this._createDefaultSymbol(clonedGraphic.geometry.type);
                 clonedGraphic.symbol = symbol;
 
                 // Set default attributes
@@ -3707,13 +3818,53 @@ function(
                 clonedGraphic.attributes = {
                     "name": graphicName,
                     "description": graphicDescription,
-                    "symbol": JSON.stringify(clonedGraphic.symbol.toJson())
+                    "symbolClass": this._getSymbolHash(JSON.stringify(symbol.toJson()))
                 };
 
                 graphics.push(clonedGraphic);
             }
             this._pushAddOperation(graphics);
             this.setMode('list');
+        },
+
+        _createDefaultSymbol : function (commonType) {
+            var symbol = null, options = null;
+            switch(commonType) {
+                case 'text': 
+                    options =
+                        (this.config.defaultSymbols && this.config.defaultSymbols.TextSymbol)
+                        ? this.config.defaultSymbols.TextSymbol
+                        : {"verticalAlignment": "middle", "horizontalAlignment": "center"};
+                    symbol = new TextSymbol(options);
+                    break;
+
+                case 'point':
+                    options =
+                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol)
+                        ? this.config.defaultSymbols.SimpleMarkerSymbol
+                        : null;
+                    symbol = new SimpleMarkerSymbol(options);
+                    break;
+
+                case 'polyline':
+                    options =
+                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol)
+                        ? this.config.defaultSymbols.SimpleLineSymbol
+                        : null;
+                    symbol = new SimpleLineSymbol(options);
+                    break;
+
+                case 'polygon':
+                default:
+                    options =
+                        (this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol)
+                        ? this.config.defaultSymbols.SimpleFillSymbol
+                        : null;
+                    symbol = new SimpleFillSymbol(options);
+                    break;
+            }
+
+            return symbol;
         },
 
 
@@ -3926,7 +4077,7 @@ function(
                         {
                             "name": graphicName,
                             "description": "",
-                            "symbol": JSON.stringify(symbol.toJson())
+                            "symbolClass": this._getSymbolHash(JSON.stringify(symbol.toJson()))
                         }
                     );
                     newGraphics.push(graphic);

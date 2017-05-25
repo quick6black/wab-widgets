@@ -83,15 +83,19 @@
   .jimu-widget-edraw-ecan .draw-items .draw-item {
     cursor: pointer; }
   .jimu-widget-edraw-ecan .draw-table tr {
-    border: 1px solid white;
-    cursor: move; }
+    /*border: 1px solid white;*/
+    /*cursor: move;*/
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-color: #cccccc; }
   .jimu-widget-edraw-ecan .draw-table th {
-    background-color: #8d989e;
     font-weight: bold;
+    background-color: #f8f8f8;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 11px;
     text-align: center;
     cursor: auto; }
-  .jimu-widget-edraw-ecan .draw-table tr:hover th {
-    background-color: #8d989e; }
   .jimu-widget-edraw-ecan .draw-table .td-center {
     text-align: center; }
   .jimu-widget-edraw-ecan .draw-table .td-checkbox {
@@ -412,10 +416,6 @@
       padding: 0px 5px 5px 5px; }
   .jimu-widget-edraw-ecan .item-card .item-card-inner {
     margin-bottom: 0;
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    border-bottom-color: #e0e0e0;
     height: 75px;
     background: #ffffff;
     border: 1px solid #e0e0e0;
@@ -428,7 +428,8 @@
     text-align: right; }
   .jimu-widget-edraw-ecan .section-footer {
     padding-left: 10px;
-    padding-right: 10px; }
+    padding-right: 10px;
+    background-color: #f8f8f8; }
     .jimu-widget-edraw-ecan .section-footer a {
       display: inline-block;
       color: #196fa6;

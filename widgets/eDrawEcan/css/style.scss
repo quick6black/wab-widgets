@@ -1,12 +1,10 @@
 .jimu-widget-edraw-ecan {
-
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     padding-top: 5px;
-
     font-size: 14px;
     height: 100%;
     min-height: 192px;
@@ -128,37 +126,40 @@
         }
     }
 
+    .draw-table {
+        tr {
+            /*border: 1px solid white;*/
+            /*cursor: move;*/
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-color: #cccccc;
+        }
 
-    .draw-table tr {
-        border: 1px solid white;
-        cursor: move;
-    }
+        th {
+            font-weight: bold;
+            background-color: #f8f8f8;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            font-size: 11px;
+            text-align: center;
+            cursor: auto;
+        }
 
-    .draw-table th {
-        background-color: #8d989e;
-        font-weight: bold;
-        text-align: center;
-        cursor: auto;
-    }
+        .td-center {
+            text-align: center;
+        }
 
-    .draw-table tr:hover th {
-        background-color: #8d989e;
-    }
+        .td-checkbox {
+            width: 30px;
+        }
 
-    .draw-table .td-center {
-        text-align: center;
-    }
+        .selected td {
+            background-color: rgba(15, 108, 159, 0.2);
+        }
 
-    .draw-table .td-checkbox {
-        width: 30px;
-    }
-
-    .draw-table .selected td {
-        background-color: rgba(15, 108, 159, 0.2);
-    }
-
-    .draw-table .selected:hover td {
-        background-color: rgba(15, 108, 159, 0.3);
+        .selected:hover td {
+            background-color: rgba(15, 108, 159, 0.3);
+        }
     }
 
     .list-draw-actions {
@@ -634,10 +635,6 @@
 
         .item-card-inner {
             margin-bottom: 0;
-            border-top: 0;
-            border-left: 0;
-            border-right: 0;
-            border-bottom-color: #e0e0e0;
             height: 75px;
             background: #ffffff;
             border: 1px solid #e0e0e0;
@@ -654,9 +651,9 @@
     }
 
     .section-footer {
-
         padding-left: 10px;
         padding-right: 10px;
+        background-color: #f8f8f8;
 
         a {
             display: inline-block;
