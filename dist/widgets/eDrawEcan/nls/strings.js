@@ -3,6 +3,7 @@ define({
 		_widgetLabel : "Draw (ECAN)",
 		yes:"Yes",
 		no:"No",
+		back: "Back",
 		selectDrawMode : "Select drawing mode",
 		clear : "Clear",
 		point : "Point",
@@ -65,6 +66,18 @@ define({
 		importWarningNoExport0Draw : "No export of the file (No drawing to export).",
 		importErrorFileName : "The filename you have selected is not supported.",
 		importCloseButton:"Close",
+
+		loadDialogTitle:"Load Saved Drawing",
+		loadButtonPortal:"Load Drawing",
+
+		settingsTitle:"Drawing settings",
+		settingsDialogTitle:"Drawing settings",
+
+		drawingName:"Drawing Name",
+		drawingDate:"Date Last Modified",
+
+		saveButton : "Save",
+
 		nameField : "Name",
 		symbolField : "Symbol",
 		nameFieldDefaultValue : "My drawing",
@@ -79,11 +92,11 @@ define({
 		zoomAllLabel : "Zoom on selected drawings",
 		copyLabel : "Copy selected drawings",
 		copySuffix : " (copy)",
+		cutLabel: "Cut this drawing into multiple pieces",
+		reshapeLabel: "Reshape this drawing",
 		deleteAllLabel : "Delete selected drawings",
 		exportLabel : "Export selected drawings",
 		noSelection : "No drawings selected",
-		saveDialogTitle : "Export Drawings to File",
-		saveButton : "Save",
 		resetButton : "Reset",
 		cancelButton : "Cancel",
 		textAngle : 'Text Angle',
@@ -105,11 +118,92 @@ define({
 		east:'E',
 		north:'N',
 		south:'S',
+
 		drawingCollectionName: "Drawing Features",
     	results: "Results",
-        points: "Points",
-	    lines: "Lines",
-	    areas: "Areas"				
+        points: "Point Drawings",
+	    lines: "Line Drawings",
+	    areas: "Area Drawings",
+
+	    mergeLabel: "Merge selected drawings",
+	    mergeErrorMixedGeometry: "You cannot merge line and polygon drawings",
+	    mergeErrorPointGeometry: "You cannot merge point drawings",
+	    mergeErrorMinimumNumber: "You must select at least 2 drawings to merge",
+
+	    explodeLabel: "Explode selected drawings",
+	    explodeErrorTextSymbols: "You cannot explode point drawings",
+	    explodeErrorMinimumNumber: "You must select at least 1 drawing to explode",
+
+	    bufferLabel: "Buffer selected drawings",
+	    bufferErrorPointGeometry: "You cannot buffer label drawings",
+	    bufferErrorMinimumNumber: "You must select at least 1 drawing to buffer",
+	    bufferModeLabel: 'Buffer',
+	    bufferDistanceLabel: 'Distance',
+	    bufferCustomDistanceLabel: 'Custom Distance',
+	    bufferRingNumberLabel: 'No of Rings',
+	    bufferCustomDistanceOptionLabel: 'Custom',
+	    bufferMergeLabel: 'Merge',
+
+	    ok: 'OK',
+	    cancel: 'Cancel',
+
+	    confirmConvertScaleWarning: "At the current map scale the features you have selected to convert to drawings may have been simplified to make them display more quickly on screen.  \n\nIf you convert them to drawings, the result may not be as spatially accurate as the original source shape.  \n\nIf spatial accuracy is important, please click cancel, and zoom in the map to a closer scale before using the convert to drawing option, otherwise press OK to proceed.",
+
+	    drawingDetails: {
+	    	backLabel: "Back",
+	    	updateLabel: "Update",
+	    	dialogTitle: "Drawing Details",
+	    	drawingNameLabel: "Drawing Name",
+	    	drawingSnippetLabel: "Drawing Summary",
+	    	ownerLabel: "Owner",
+	    	dateLastModifiedLabel: "Last Modified",
+		    dateFormat: "MMMM d, yyyy hh:mm a",
+		    datePattern: "{date}",	  
+		    drawingType: "Drawing",
+		    ownerPattern: "{owner}"
+	    },
+
+	    save: {
+			saveDialogTitle : "Save Drawings",
+			drawingNameLabel : "Drawing Name",
+			drawingSnippetLabel: "Summary",
+			drawingSnippetPrompt: "Add brief summary of drawing here",
+			drawingDescriptionLabel: "Description",
+	    	saveLabel: "Save",
+	    	savePortalLabel : "Save to Portal",
+			exportToFileLabel: "Save to File"
+	    },
+
+	    portal: {
+	    	confirmPortalDrawingDelete: "Delete this saved drawing?",
+	    	drawingAddedMessage: "Drawing has been saved",
+	    	drawingAddErrorMessage: "There was a problem saving the drawing",
+	    	drawingDeletedMessage: "Drawing has been deleted",
+	    	drawingDeleteErrorMessage: "There was a problem deleting the drawing",
+	    	drawingExistsMessage: "This drawing exists - do you wish to overwrite it?",
+	    	drawingExistsErrorMessage: "There was a problem overwriting the drawing"
+	    },
+
+	    search: {
+			item: {
+		        actions: {
+		          add: "Add",
+		          delete: "Delete",
+		          details: "Details",
+		          editDetails: "Edit Details"
+		        },
+        		typeByOwnerPattern: "{type} by {owner}",	
+		        dateFormat: "MMMM d, yyyy hh:mm a",
+		        datePattern: "{date}",
+		        ratingsCommentsViewsPattern: "{ratings} {ratingsIcon} {comments} {commentsIcon} {views} {viewsIcon}",
+		        ratingsCommentsViewsLabels: {"ratings": "ratings", "comments": "comments", "views": "views"},
+		        types: {
+		          "Feature Collection": "Feature Collection"
+		        }        			        
+		    }
+	    },
+
+	    _featureAction_ConvertToDrawing: "Convert to Drawing"				
 	}),
 	"ar" : 1,
 	"cs" : 1,

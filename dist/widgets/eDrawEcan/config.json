@@ -1,7 +1,10 @@
 {
  	"exportFileName" : "myDrawing",
 	"confirmOnDelete" : true,
+	"convertWarningScale":25000,
 	"allowLocalStorage" : true,
+	"allowSaveToPortal" : true,
+	"portalDrawingFolderName" : "My Drawings",
 	"localStorageKey" : false,
 	"isOperationalLayer": true,
 	"drawPlus" : {
@@ -61,6 +64,29 @@
 		}, {
 			"unit" : "SQUARE_YARDS",
 			"abbr" : "sq yd"
+		}
+	],
+	"bufferOptions" : [{
+			"distance" : 50,
+			"unit" : "METERS",
+			"label" : "50 metres"
+		}, {
+			"distance" : 100,
+			"unit" : "METERS",
+			"label" : "100 metres"
+		}, {
+			"distance" : 500,
+			"unit" : "METERS",
+			"label" : "500 metres"
+		}, {
+			"distance" : 1000,
+			"unit" : "METERS",
+			"label" : "1000 metres",
+			"default": true
+		}, {
+			"distance" : 5,
+			"unit" : "KILOMETERS",
+			"label" : "5 kilometres"
 		}
 	],
 	"useGeometryEngine": true,

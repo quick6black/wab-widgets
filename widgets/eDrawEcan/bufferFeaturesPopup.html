@@ -1,0 +1,41 @@
+<div data-dojo-attach-point="bufferSettingsContainer" style="width: 100%; height: 100%;">
+	<div class="content">
+		<table class="buffer-set-table" cellspading="0" data-dojo-attach-point="editorSymbolTextPlusNode">
+            <tbody>
+                <tr class="">
+                    <td>
+                        <span>${nls.bufferModeLabel}:&nbsp;</span>
+                    </td>
+                    <td>
+                        <div data-dojo-attach-point="bufferModeNodeSelect" data-dojo-type="dijit/form/Select" class="" data-dojo-attach-event="onChange:onBufferModeChange"></div>
+                    </td>
+                </tr>
+                <tr data-dojo-attach-point="bufferCustomDistanceSection" style="display:none;">
+                	<td>
+                        <span>${nls.bufferDistanceLabel}:&nbsp;</span>
+                	</td>
+                	<td>
+                		<input data-dojo-attach-point="bufferDistanceNode" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="value:1,constraints:{min:-1,max:20000},invalidMessage:'Please enter a numeric value.',rangeMessage:'Invalid distance'" class=""></input>
+                        <div data-dojo-attach-point="bufferDistanceUnitsSelect" data-dojo-type="dijit/form/Select" class=""></div>
+                	</td>
+                </tr>
+                <tr>
+	                <td>
+	                	<span>${nls.bufferRingNumberLabel}:&nbsp;</span>
+	                </td>
+	                <td>
+	                	<input data-dojo-attach-point="bufferRingNumberNode" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="value:1,smallDelta:1,constraints:{min:-1,max:5},intermediateChanges:true" class=""></input>
+	                </td>
+                </tr>
+                <tr>
+	                <td>
+	                	<span>${nls.bufferMergeLabel}:&nbsp;</span>
+	                </td>
+	                <td>
+	                	<input data-dojo-attach-point="bufferMergeNode" type="checkbox" />
+	                </td>
+                </tr>
+            </tbody>
+         </table>
+	</div
+</div>

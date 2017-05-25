@@ -156,16 +156,11 @@ function(
           })
         }
       ];
+
     },
 
     postCreate : function () {
       this.inherited(arguments);
-      // this.cbxOperationalLayer = new CheckBox({
-      // label : this.nls.operationalLayer,
-      // style : 'margin-top:10px;'
-      // });
-      // html.addClass(this.cbxOperationalLayer.domNode, 'tip');
-      // this.cbxOperationalLayer.placeAt(this.domNode);
       this.own(on(this.btnAddDistance, 'click', lang.hitch(this, this._addDistance)));
       this.own(on(this.btnAddArea, 'click', lang.hitch(this, this._addArea)));
       this.own(on(this.btnAddFontFamily, 'click', lang.hitch(this, this._addFontFamily)));
@@ -210,7 +205,6 @@ function(
       this.config = config;
       this._setDistanceTable(this.config.distanceUnits);
       this._setAreaTable(this.config.areaUnits);
-      // this.cbxOperationalLayer.setValue(config.isOperationalLayer);
 
       this._setTextPlusFontFamilyTable(this.config);
 
@@ -220,6 +214,11 @@ function(
       this.allowLocalStorageInput.checked = (config.allowLocalStorage) ? true : false;
       this.localStorageKeyInput.value = (config.localStorageKey) ? config.localStorageKey : '';
       this.isOperationalLayerInput.checked = (config.isOperationalLayer) ? true : false;
+      this.convertToDrawingWarningScaleInput.value = (config.convertWarningScale) ? config.convertWarningScale : 25000;
+
+      // Portal Save Functions       
+      this.allowSaveToPortalInput.checked = (config.allowSaveToPortal) ? true : false;
+      this.portalDrawingFolderNameInput.value = (config.portalDrawingFolderName) ? config.portalDrawingFolderName : this.nls.portalDrawingFolderName;
 
       //Text plus FontFamily
       this._setTextPlusFontFamilyTable(config);
@@ -286,13 +285,17 @@ function(
       };
       config.distanceUnits = this._getDistanceConfig();
       config.areaUnits = this._getAreaConfig();
-      // config.isOperationalLayer = this.cbxOperationalLayer.getValue();
 
       config.exportFileName = (this.exportFileNameInput.value.trim() != "") ? this.exportFileNameInput.value.trim() : this.nls.exportFileName;
       config.confirmOnDelete = this.confirmOnDeleteInput.checked;
       config.listShowUpAndDownButtons = this.listShowUpAndDownButtons.checked;
       config.allowLocalStorage = this.allowLocalStorageInput.checked;
       config.isOperationalLayer = this.isOperationalLayerInput.checked;
+      config.convertWarningScale = this.convertToDrawingWarningScaleInput.value;
+
+      config.allowSaveToPortal = this.allowSaveToPortalInput.checked;
+      config.portalDrawingFolderName = (this.portalDrawingFolderNameInput.value.trim() != "") ? this.portalDrawingFolderNameInput.value.trim() : this.nls.portalDrawingFolderName;
+
       var key = this.localStorageKeyInput.value.trim();
       config.localStorageKey = (key == "") ? false : key;
 
@@ -314,6 +317,12 @@ function(
       config.measurePolylineLabel = (this.measurePolylineLabelInput.value && this.measurePolylineLabelInput.value.trim() != "") ? this.measurePolylineLabelInput.value : false;
       config.measurePolygonLabel = (this.measurePolygonLabelInput.value && this.measurePolygonLabelInput.value.trim() != "") ? this.measurePolygonLabelInput.value : false;
   
+      // buffer details
+      config.bufferOptions = this.config.bufferOptions;       
+      
+      // symbol details
+      config.defaultSymbols = this.config.defaultSymbols;
+
       return config;
     },
 

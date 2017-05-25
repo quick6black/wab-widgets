@@ -4,7 +4,7 @@
   "2D": true,
   "3D": false,
   "platform": "HTML",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "wabVersion": "2.4",
   "author": "Esri R&D Center Beijing modified by MAGIS NC and Environment Canterbury GIS Team",
   "description": "Enhanced draw widget for Web AppBuilder for ArcGIS. Modified from eDraw widget https://github.com/magis-nc/esri-webappbuilder-widget-eDraw",
@@ -21,5 +21,9 @@
     "hasSettingLocale": true,
     "hasSettingStyle": true,
     "IsController": false
-  }
+  },
+  "featureActions": [{
+    "name": "ConvertToDrawing",
+    "uri": "ConvertToDrawingFeatureAction"
+  }]
 }

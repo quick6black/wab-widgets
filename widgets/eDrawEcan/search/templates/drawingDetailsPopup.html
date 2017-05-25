@@ -1,0 +1,41 @@
+<div data-dojo-attach-point="drawingDetailsContainer" style="width: 100%; height: 100%;">
+	<div class="content">
+		<table class="drawing-set-table" cellspading="0">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="label-text jimu-float-leading">${nls.drawingDetails.drawingNameLabel}:&nbsp;</div>
+                    </td>
+                    <td>
+                        <input data-dojo-attach-point="drawingNameInput" required="true" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="regExp:'[A-Za-z0-9 _]*[A-Za-z0-9][A-Za-z0-9 _]*', invalidMessage:'Can only contain letters, numbers, spaces and underscores!'" class="input-control "></input>
+                    </td>
+                </tr>
+                <tr>
+                	<td>
+                        <div class="label-text jimu-float-leading">${nls.drawingDetails.drawingSnippetLabel}:&nbsp;</div>
+                	</td>
+                	<td>
+                        <textarea rows="4" maxlength="250" data-dojo-attach-point="drawingSnippetInput" class="jimu-input jimu-float-trailing text-area" required="false" style="height: 150px; width: 100%;" 
+                        placeholder="${nls.save.drawingSnippetPrompt}"></textarea>                        
+                	</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="label-text jimu-float-leading">${nls.drawingDetails.dateLastModifiedLabel}:&nbsp;</div>
+                    </td>
+                    <td>
+                        <div class="label-text" data-dojo-attach-point="dateNode"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="label-text jimu-float-leading">${nls.drawingDetails.ownerLabel}:&nbsp;</div>
+                    </td>
+                    <td>
+                        <div class="label-text" data-dojo-attach-point="ownerNode"></div>
+                    </td>
+                </tr>
+            </tbody>
+         </table>
+	</div
+</div>

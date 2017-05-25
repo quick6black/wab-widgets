@@ -1,4 +1,10 @@
 .jimu-widget-edraw-ecan {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 5px;
   font-size: 14px;
   height: 100%;
   min-height: 192px;
@@ -11,17 +17,18 @@
   .jimu-widget-edraw-ecan .editor-add-message {
     margin-top: 10px;
     font-style: italic; }
+  .jimu-widget-edraw-ecan .save-section,
   .jimu-widget-edraw-ecan .measure-section {
     margin-top: 12px;
     width: 100%;
     margin-bottom: 12px;
     padding-right: 3px;
     padding-bottom: 10px; }
-  .jimu-widget-edraw-ecan .area-units-tip {
-    height: 30px;
-    line-height: 30px;
-    padding-left: 17px; }
-  .jimu-widget-edraw-ecan .distance-units-tip {
+  .jimu-widget-edraw-ecan .save-section .jimu-input {
+    padding: 0; }
+  .jimu-widget-edraw-ecan .area-units-tip,
+  .jimu-widget-edraw-ecan .distance-units-tip,
+  .jimu-widget-edraw-ecan .drawing-name-tip {
     height: 30px;
     line-height: 30px;
     padding-left: 17px; }
@@ -39,9 +46,8 @@
   .jimu-widget-edraw-ecan .dijitReset.dijitLeft.dijitButtonNode.dijitArrowButton.dijitUpArrowButton .dijitArrowButtonInner {
     width: 100%; }
   .jimu-widget-edraw-ecan .menu {
-    border-bottom: 2px solid #485566;
+    border-bottom: 1px solid #ccc;
     height: 36px;
-    margin-bottom: 10px;
     width: 100%; }
   .jimu-widget-edraw-ecan .menu-item {
     background-color: rgba(72, 85, 102, 0.4);
@@ -74,16 +80,22 @@
     font-size: 1.1em; }
   .jimu-widget-edraw-ecan .hidden {
     display: none; }
+  .jimu-widget-edraw-ecan .draw-items .draw-item {
+    cursor: pointer; }
   .jimu-widget-edraw-ecan .draw-table tr {
-    border: 1px solid white;
-    cursor: move; }
+    /*border: 1px solid white;*/
+    /*cursor: move;*/
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-color: #cccccc; }
   .jimu-widget-edraw-ecan .draw-table th {
-    background-color: #8d989e;
     font-weight: bold;
+    background-color: #f8f8f8;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 11px;
     text-align: center;
     cursor: auto; }
-  .jimu-widget-edraw-ecan .draw-table tr:hover th {
-    background-color: #8d989e; }
   .jimu-widget-edraw-ecan .draw-table .td-center {
     text-align: center; }
   .jimu-widget-edraw-ecan .draw-table .td-checkbox {
@@ -96,9 +108,14 @@
     height: 100%;
     vertical-align: middle;
     width: 192px; }
+  .jimu-widget-edraw-ecan .edit-draw-actions {
+    vertical-align: middle;
+    width: 100%; }
   .jimu-widget-edraw-ecan .light {
     width: 120px !important; }
+  .jimu-widget-edraw-ecan .edit-draw-actions span,
   .jimu-widget-edraw-ecan .list-draw-actions span {
+    cursor: pointer;
     border-radius: 5px;
     color: white;
     display: block;
@@ -111,6 +128,7 @@
     text-align: center;
     vertical-align: middle;
     width: 30px; }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.text,
   .jimu-widget-edraw-ecan .list-draw-actions span.text {
     background: none repeat scroll 0 0 transparent;
     color: black;
@@ -135,6 +153,10 @@
     background-image: url("images/up.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.down {
     background-image: url("images/down.png"); }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.cut {
+    background-image: url("images/cut.png"); }
+  .jimu-widget-edraw-ecan .edit-draw-actions span.reshape {
+    background-image: url("images/reshape.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.export {
     background-image: url("images/download.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.import {
@@ -143,6 +165,12 @@
     background-image: url("images/save.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span.open {
     background-image: url("images/open.png"); }
+  .jimu-widget-edraw-ecan .list-draw-actions span.merge {
+    background-image: url("images/merge.png"); }
+  .jimu-widget-edraw-ecan .list-draw-actions span.explode {
+    background-image: url("images/explode.png"); }
+  .jimu-widget-edraw-ecan .list-draw-actions span.buffer {
+    background-image: url("images/buffer.png"); }
   .jimu-widget-edraw-ecan .list-draw-actions span:hover {
     border: 1px solid #485566;
     cursor: pointer; }
@@ -166,8 +194,13 @@
     padding: 3px;
     width: 100%; }
   .jimu-widget-edraw-ecan h2 {
-    margin-bottom: 0;
-    margin-top: 2px; }
+    margin: 0;
+    padding: 7px 15px;
+    border-bottom: 1px solid #ccc;
+    color: #898989;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 2; }
   .jimu-widget-edraw-ecan .draw-import {
     height: 50px;
     width: 100%; }
@@ -206,17 +239,18 @@
   .jimu-widget-edraw-ecan label {
     font-weight: bold; }
   .jimu-widget-edraw-ecan .content {
-    background-color: rgba(78, 130, 138, 0.1);
-    height: calc(100% - 100px);
+    /*background-color: rgba(78, 130, 138, 0.1);*/
+    height: calc(100% - 120px);
     overflow-x: hidden;
     overflow-y: auto;
     position: absolute;
     width: calc(100%); }
-  .jimu-widget-edraw-ecan .bloc {
-    background-color: rgba(78, 130, 138, 0.1); }
   .jimu-widget-edraw-ecan .content hr {
     color: rgba(78, 130, 138, 0.6); }
+  .jimu-widget-edraw-ecan .bloc {
+    padding: 10px; }
   .jimu-widget-edraw-ecan .footer {
+    border-top: 1px solid #ccc;
     bottom: 0;
     position: absolute;
     width: 100%; }
@@ -346,6 +380,71 @@
     left: 5px;
     text-align: right;
     padding-top: 10px; }
+  .jimu-widget-edraw-ecan .item-card .thumbnail {
+    float: left;
+    margin-right: 10px; }
+    .jimu-widget-edraw-ecan .item-card .thumbnail img {
+      height: 60px;
+      width: 90px; }
+  .jimu-widget-edraw-ecan .item-card h3.title {
+    /*min-height: 35px;*/
+    margin: 0 5px;
+    padding: 0;
+    font-size: 12px;
+    font-weight: bold;
+    color: #4c4c4c;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .jimu-widget-edraw-ecan .item-card div.info {
+    color: #898989;
+    font-size: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-top: 3px; }
+  .jimu-widget-edraw-ecan .item-card .action-bar {
+    text-align: right; }
+    .jimu-widget-edraw-ecan .item-card .action-bar a {
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 5px;
+      margin-right: 5px;
+      color: #196fa6;
+      text-decoration: none;
+      line-height: 20px;
+      padding: 0px 5px 5px 5px; }
+  .jimu-widget-edraw-ecan .item-card .item-card-inner {
+    margin-bottom: 0;
+    height: 75px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-bottom-color: #cccccc;
+    padding: 5px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+  .jimu-widget-edraw-ecan .action-bar {
+    text-align: right; }
+  .jimu-widget-edraw-ecan .section-footer {
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #f8f8f8; }
+    .jimu-widget-edraw-ecan .section-footer a {
+      display: inline-block;
+      color: #196fa6;
+      text-decoration: none;
+      line-height: 20px;
+      padding: 10px 5px;
+      text-transform: uppercase;
+      font-size: 11px; }
+    .jimu-widget-edraw-ecan .section-footer .back-button {
+      float: right; }
+  .jimu-widget-edraw-ecan .text-area {
+    font-family: inherit;
+    font-size: 14px;
+    color: #000000;
+    padding: 3px 10px !important; }
 
 .jimu-rtl .jimu-widget-edraw-ecan .area-units-tip {
   padding-left: 0;
@@ -389,5 +488,31 @@
 
 .eDraw-import-message:hover .eDraw-import-draganddrop-message {
   display: block; }
+
+.edraw-buffer .dijitTextBox, .edraw-buffer .dijitSelect {
+  width: 150px; }
+
+.edraw-buffer table.buffer-set-table tr {
+  padding: 3px; }
+
+.edraw-drawing-details table.drawing-set-table {
+  width: 100%; }
+  .edraw-drawing-details table.drawing-set-table tr {
+    padding: 3px; }
+  .edraw-drawing-details table.drawing-set-table td .label-text {
+    color: #333;
+    font-size: 13px; }
+  .edraw-drawing-details table.drawing-set-table td .input-control {
+    width: 100%;
+    color: #000000; }
+  .edraw-drawing-details table.drawing-set-table td .text-area {
+    font-family: inherit;
+    font-size: 14px;
+    color: #000000;
+    padding: 3px 10px !important; }
+
+/* Remove close button from textbox in IE */
+input[type=text]::-ms-clear {
+  display: none; }
 
 /*# sourceMappingURL=style.css.map */
