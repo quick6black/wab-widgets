@@ -1,0 +1,22 @@
+﻿.claro .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitButton .dijitButtonNode,
+.claro .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitDropDownButton .dijitButtonNode,
+.claro .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitComboButton .dijitButtonNode,
+.claro .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitToggleButton .dijitButtonNode {
+  
+   min-width: 20px!important;
+  
+}
+.jimu-widget-smartEditor-ecan .esriAttributeInspector .atiNavButtons {
+    
+    margin-left: -120px!important;
+    
+}
+.widgetIndicator {
+     top:-6px !important;
+}
+.jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitTextBox {
+    height: 30px!important;
+}
+.jimu-widget-smartEditor-ecan .dijitTextBox {
+    height: 30px!important;
+}
