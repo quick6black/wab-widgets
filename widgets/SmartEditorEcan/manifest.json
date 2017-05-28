@@ -1,0 +1,28 @@
+{
+  "name": "SmartEditorEcan",
+  "label": "Smart Editor (Ecan)",
+  "2D": true,
+  "3D": false,
+  "platform": "HTML",
+  "version": "0.0.1",
+  "wabVersion": "2.4",
+  "author": "Esri, Inc.  Modified by Environment Canterbury GIS Team",
+  "description": "Widget designed to improve editing by providing data validation and ability to set values and apply them to each edit.  Customised to include ability to pass attributes from url parameters when using preset mode.",
+  "copyright": "Esri, Inc.",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "inPanel": true,
+    "hasLocale": true,
+    "hasStyle": true,
+    "hasConfig": true,
+    "hasUIFile": true,
+    "hasSettingPage": true,
+    "hasSettingUIFile": true,
+    "hasSettingLocale": true,
+    "hasSettingStyle": true,
+    "IsController": false,
+    "keepConfigAfterMapSwithched": false,
+    "supportMultiInstance": false,
+    "hasVersionManager": true
+  }
+}
