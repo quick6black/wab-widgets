@@ -1,6 +1,6 @@
 define({
   root: ({
-    _widgetLabel: "Group Filter",
+    _widgetLabel: "Edit Filter",
     label1: "Group filtering widget",
     labels: {
       selectGroup: "Select a Group to Filter",

@@ -1,4 +1,7 @@
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'dijit', 'jimu/dijit/FilterParameters', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/on', 'dojo/query', 'dojo/string', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/date/locale', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dijit/registry', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', 'jimu/FilterManager', 'esri/tasks/query', 'esri/tasks/QueryTask', 'esri/geometry/geometryEngine', 'esri/layers/FeatureLayer', './SaveJSON', './ReadJSON', './LayersHandler', 'dojox/html/entities', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'dijit', 'jimu/dijit/FilterParameters', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/on', 'dojo/query', 'dojo/string', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/date/locale', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dijit/registry', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', 'jimu/FilterManager', 'esri/tasks/query', 'esri/tasks/QueryTask', 'esri/geometry/geometryEngine', 'esri/layers/FeatureLayer', './SaveJSON', './ReadJSON', './LayersHandler', 'dojox/html/entities',
+
+/* ECAN ADDITION REQUIRES */
+'esri/urlUtils', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -25,6 +28,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.inherited(arguments);
       this.defaultDef = [];
       this.graphicsHolder = [];
+
+      //BEGIN: Ecan Changes
+
+      this.checkURIParameters();
+
+      //END: Ecan Changes
     },
 
     startup: function startup() {
@@ -956,7 +965,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       //do nothing, not a valid service
 
       //}
-
     },
 
     resetLayerDef: function resetLayerDef(pParam) {
@@ -1215,6 +1223,61 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.map.setExtent(newExt);
       }
     },
+
+    // BEGIN: ECAN CUSTOM CODE
+    checkURIParameters: function checkURIParameters() {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var filterQuery = urlObject.query["filter"];
+        if (filterQuery) {
+          // Check configs values for the matching filter
+          var filter = this._getFilterParam(filterQuery);
+
+          // Match to the configured group settings
+          var groupSettings;
+          for (var i = 0, il = this.config.groups.length; i < il; i++) {
+            var group = this.config.groups[i];
+            if (group["name"] === filter["name"] || filter["name"] === null) {
+              // Use this group
+              groupSettings = group;
+              break;
+            }
+          }
+
+          if (groupSettings) {
+            // set the default value to the provided value in the url parameter
+            groupSettings.defaultVal = filter["value"];
+            groupSettings.operator = "=";
+          }
+        }
+      }
+    },
+
+    _getFilterParam: function _getFilterParam(query) {
+      var filter = {
+        name: null,
+        value: null
+      };
+
+      if (query) {
+        var items = query.split(':');
+        if (items.length !== 2) {
+          filter.name = null;
+          filter.value = items[0];
+        } else {
+          filter.name = items[0];
+          filter.value = items[1];
+        }
+      }
+
+      return filter;
+    },
+
+    // END: ECAN CUSTOM CODE
+
 
     onOpen: function onOpen() {
       console.log('onOpen');
