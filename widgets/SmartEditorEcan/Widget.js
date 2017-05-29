@@ -289,9 +289,19 @@ define([
           } else {
             return;
           }
+
+          /* ------------------------------------------------------------- 
+            CHANGE ECAN 2017-05-29 - addition of EditFilter to Listener 
           if (name !== 'GroupFilter') {
             return;
           }
+          */
+         
+          if (name !== 'GroupFilter' && name !== 'EditFilter') {
+            return;
+          }
+
+          /* ----------- END OF CHANGE 2017-05-29 ---------------------- */
 
           if (data.message.hasOwnProperty("fields") &&
             data.message.hasOwnProperty("values")) {
