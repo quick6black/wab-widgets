@@ -48,3 +48,37 @@ Configure as per standard Select widget.
 
 ### Use Notes
 To be completed...
+
+
+
+## EditFilter Widget
+This is a customised variant of the standard Group Filter widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-geoprocessing.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-geoprocessing.htm) developed by ESRI.
+
+#### Changes made include:  
+
+- Alteration made that includes a check to look at the url parameters of the viewer during the postCreate stage of the widget lifecycle.  if a parameter of the name **filter** is discovered, the widget will apply the parameter value as the default filter value (overriding any existing default value).  If the widget has multiple groups configured, the filter value can include the name of a group (as recorded in the widget config) and the value to apply separated by colon, and the widget will use that group with the specified value.
+
+` e.g. http://pathtoviewer?filter=Group Name:filtervalue` 
+
+
+#### Notes
+The following are changes that are still needed to be implemented:
+
+- Requires option for calling on open of widget if it is closed
+- Reset should apply default values from parameters again if they have been changed
+- Change to specified group if multiple groups are configured still to be implemented.
+
+- Developed in conjunction with the Smart Editor (ECan) widget which should accept filter values from widget or the standard Group Filter widget. 
+
+#### Demo
+To be deployed in the future
+
+### Deployment
+Copy the **EditFilter** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
+
+The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
+
+Configure as per standard Group Filter widget.
+
+### Use Notes
+To be completed...
