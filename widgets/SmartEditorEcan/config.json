@@ -8,5 +8,7 @@
         "listenToGF": false,
         "keepTemplateSelected": false,
         "useURLParameters": false
-    }
+    },
+   "links": [],
+   "editScaleLimit": "200000"
 }

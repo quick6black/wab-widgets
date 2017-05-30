@@ -1,3 +1,253 @@
-.jimu-widget-smartEditor-ecan-setting input {
-  margin-left: 10px;
+.jimu-widget-smartEditor-setting {
+    margin: 0;
+    padding: 0;
+    font-size: 15px;
+
+    .edit-description-box {
+        width: 100%;
+        height: 215px;
+        margin-bottom: 20px;
+        position: relative;
+        padding-top: 5px;
+    }
+
+    .edit-description-title {
+        padding-top: 10px;
+    }
+
+    .dijitEditorIFrameContainer {
+        background-color: #ffffff;
+        border: none !important;
+        width: 100% !important;
+        height: 145px !important;
+    }
+    /*CSS for Layers config tables*/
+    .editable {
+        width: 100px;
+    }
+
+    .layer {
+        width: auto;
+    }
+
+    .update {
+        width: 125px;
+    }
+
+    .disable {
+        width: 220px;
+    }
+
+    .actions {
+        width: 70px;
+        padding-right: 1px !important;
+    }
+
+    .description {
+        width: 90px;
+    }
+
+    .setting-table {
+        width: 100%;
+    }
+
+    .setting-table > thead > tr > th,
+    .setting-table > tbody > tr > td {
+        height: 40px;
+        line-height: 40px;
+        vertical-align: middle;
+    }
+
+    .input-table > tbody > tr > .first {
+        width: auto;
+        min-width: 160px;
+        text-align: left;
+    }
+
+    .input-table > tbody > tr > .first {
+        text-align: right;
+    }
+
+    .input-table > tbody > tr > .second {
+        width: auto;
+    }
+
+
+    .input-table > tbody > tr > .second > span {
+        display: inline-block;
+        height: 40px;
+        line-height: 40px;
+    }
+
+    .dijitArrowButtonContainer {
+        width: 17px;
+    }
+
+    .dijitSelect {
+        height: 30px;
+        width: 100%;
+    }
+
+    .checkOption {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 5px;
+    }
+
+    .check {
+        margin-left: 15px;
+    }
+
+    .generalSettings {
+        padding-bottom: 5px;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    .generalSettingsOptions {
+        border: solid;
+        border-color: rgb(181, 188, 199);
+        border-width: thin;
+        margin-top: 5px;
+    }
+
+    .generalSettingsTitle {
+    }
+
+    .layerTable {
+        margin-top: 5px;
+    }
+    /*Required for the image uploader in the editor rich text*/
+    .jimu-image-chooser {
+        right: inherit !important;
+    }
+
+    .editor-container .uploaderInsideNode embed {
+        display: none;
+    }
+
+    .add-icon {
+        background-image: url(images/add_icon.png);
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 14px;
+        height: 14px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .add-label {
+        font-size: 14px;
+        color: #518dca;
+        margin-left: 2px;
+        display: inline-block;
+        height: 100%;
+        text-decoration: underline;
+    }
+
+    .add-links {
+        margin-bottom: 7px;
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        float: left;
+    }
+}
+
+/*CSS for fields config tables*/
+.jimu-widget-smartEditor-setting-fields {
+
+    .required {
+        width: 7px;
+        color: red;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .editable {
+        width: 120px;
+    }
+
+    .visible {
+        width: 90px;
+    }
+
+    .preset {
+        width: 120px;
+    }
+
+    .fieldName {
+        width: 190px;
+    }
+
+    .fieldLabel {
+    }
+
+    .settingsDesc {
+        padding-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .settingsNotes {
+        padding-top: 10px;
+        font-size: 14px;
+    }
+
+    .actions {
+        width: 80px;
+        padding-right: 2px !important;
+    }
+}
+
+
+/*CSS for fields rule tables*/
+.jimu-widget-smartEditor-rule-table {
+    .rule {
+        width: 185px;
+    }
+
+    .expression {
+        overflow: hidden;
+    }
+
+    .actions {
+        width: 100px;
+    }
+
+    .settingsDesc {
+        font-size: 14px;
+        padding-bottom: 10px;
+    }
+}
+
+
+
+jimu-widget-smartEditor-edit-description {
+
+    .jimu-image-chooser {
+        right: inherit !important;
+    }
+
+    .editor-container .uploaderInsideNode embed {
+        display: none;
+    }
+
+    a.attDescrip {
+        width: 20px;
+        height: 20px;
+        display: block;
+        background: transparent url(../images/desc.png) center center no-repeat;
+        text-align: center;
+        vertical-align: middle;
+        z-index: 9999;
+    }
+
+    a.attDescrip:hover {
+        background-image: url(../images/descHover.png);
+    }
+}
+
+.jimu-widget-smartEditor-filter-page .submithide {
+    padding-left: 4px;
+    font-size: 12px;
 }

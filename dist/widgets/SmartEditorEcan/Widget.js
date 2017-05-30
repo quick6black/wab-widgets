@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', './SEFilterEditor', './PrivilegeUtil', 'jimu/dijit/LoadingShelter'], function (dojo, dijit, declare, lang, array, html, query, esriBundle, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, entities, utils, portalUrlUtils, SEFilterEditor, PrivilegeUtil) {
+define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', './SEFilterEditor', './PrivilegeUtil', './components/operationLink', 'jimu/dijit/LoadingShelter'], function (dojo, dijit, declare, lang, array, html, query, esriBundle, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, entities, utils, portalUrlUtils, SEFilterEditor, PrivilegeUtil, operationLink) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     name: 'SmartEditorEcan',
     baseClass: 'jimu-widget-smartEditor-ecan',
@@ -41,6 +41,12 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
     postCreate: function postCreate() {
       this.inherited(arguments);
       console.log('SmartEditorEcan::postCreate');
+
+      /* BEGIN: Ecan Changes */
+
+      this._setLinkInfo();
+
+      /* END: Ecan Changes */
     },
 
     startup: function startup() {
@@ -70,6 +76,13 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
 
       this.editToolbar = new Edit(this.map);
       this.drawToolbar = new Draw(this.map);
+
+      /* BEGIN: Ecan Changes */
+
+      this._updateLinksUI();
+
+      /* END: Ecan Changes */
+
       // edit events
       this.own(on(this.editToolbar, "graphic-move-stop, rotate-stop, scale-stop, vertex-move-stop, vertex-click", lang.hitch(this, function () {
         this.geometryChanged = true;
@@ -1619,6 +1632,42 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
         }));
       }
     },
+
+    /* BEGIN: Ecan Changes */
+
+    _getPresetValues: function _getPresetValues() {
+      var values = [];
+      var presetValueTable = query("#eePresetValueBody")[0];
+      if (presetValueTable) {
+        var inputElements = query(".preset-value-editable .ee-inputField");
+        array.forEach(inputElements, lang.hitch(this, function (ele) {
+
+          if (!domClass.contains(ele, "dijitTimeTextBox")) {
+            var elem = dijit.byNode(ele);
+            if (elem !== undefined && elem !== null) {
+              values.push({
+                "fieldName": elem.get("name"),
+                "value": elem.get("value")
+              });
+            }
+            //else {
+            //  var element = query("input[type='hidden']", ele);
+            //  if (!element || element.length === 0) {
+            //    element = query("input", ele);
+            //  }
+            //  if (element[0].name === fieldName) {
+            //    element[0].value = value;
+            //  }
+            //}
+          }
+        }));
+      }
+
+      return values;
+    },
+
+    /* END: Ecan Changes */
+
     _modifyAttributesWithPresetValues: function _modifyAttributesWithPresetValues(attributes, newTempLayerInfos) {
       var presetValueTable = query("#eePresetValueBody")[0];
       var presetFieldInfos = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
@@ -2759,6 +2808,35 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
     resize: function resize() {
       console.log('SmartEditorEcan::resize');
       this._update();
+    },
+
+    /* BEGIN: Ecan Changes */
+
+    _setLinkInfo: function _setLinkInfo() {
+      console.log('SmartEditorEcan::_setLinkInfo');
+      this._links = this.config.links || [];
+    },
+
+    _updateLinksUI: function _updateLinksUI() {
+      if (!this._links || this._links.length == 0) {
+        domConstruct.destroy(this.linksDiv);
+      } else {
+        var fieldValues = this._getPresetValues();
+
+        array.forEach(this._links, lang.hitch(this, function (linkConfig) {
+          var link = new operationLink({
+            item: linkConfig,
+            fieldValues: fieldValues
+          });
+
+          link.placeAt(this.linksTableNode);
+          link.startup();
+        }));
+        this.resize();
+      }
     }
+
+    /* END: Ecan Changes */
+
   });
 });
