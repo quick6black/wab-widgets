@@ -349,5 +349,46 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'esri/geome
       }
     }
   };
+
+  mo.checkMixedContent = function (uri) {
+    if (typeof window.location.href === "string" && window.location.href.indexOf("https://") === 0) {
+      if (typeof uri === "string" && uri.indexOf("http://") === 0) {
+        uri = "https:" + uri.substring("5");
+      }
+    }
+    return uri;
+  };
+
+  mo.endsWith = function (sv, sfx) {
+    return sv.indexOf(sfx, sv.length - sfx.length) !== -1;
+  };
+
+  mo.escapeForLucene = function (value) {
+    var a = ['+', '-', '&', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\'];
+    var r = new RegExp("(\\" + a.join("|\\") + ")", "g");
+    return value.replace(r, "\\$1");
+  };
+
+  mo.setNodeText = function (nd, text) {
+    nd.innerHTML = "";
+    if (text) {
+      nd.appendChild(document.createTextNode(text));
+    }
+  };
+
+  mo.setNodeTitle = function (nd, text) {
+    nd.title = "";
+    if (text) {
+      nd.setAttribute("title", text);
+    }
+  };
+
+  mo.setNodeHTML = function (nd, html) {
+    nd.innerHTML = "";
+    if (html) {
+      nd.innerHTML = html;
+    }
+  };
+
   return mo;
 });

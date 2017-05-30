@@ -1,229 +1,6 @@
 ﻿@import 'SEFilterEditor';
 
 .processing-indicator-panel {
-  display: none;
-  width: 100%;
-  height: 100%;
-  z-index: 500;
-  top: 0;
-  left: 0;
-  position: absolute;
-  background-position: center center;
-  background-image: url(../images/busy.gif);
-  background-repeat: no-repeat;
-
-  .panel {
-    display: block;
-  }
-}
-
-.jimu-widget-smartEditor-ecan {
-  position: relative;
-
-  .hideField {
-    display: none;
-  }
-  /***********about templatePicker**************/
-  .templatePicker {
-    position: relative;
-    height: 296px;
-  }
-
-  .grid {
-    height: 100% !important;
-  }
-
-  .dojoxGridMasterHeader {
-    height: 0 !important;
-  }
-
-  .dojoxGridContent {
-    width: 100% !important;
-  }
-
-  .dojoxGridContent div[role=presentation] {
-    right: 0;
-  }
-
-  .dojoxGridRowTable {
-    width: 100%;
-  }
-
-  .dojoxGridRow {
-    width: 100%;
-  }
-
-  .dojoxGridView {
-    width: 100% !important;
-  }
-  /********about attributeInspector*********/
-  .esriAttributeInspector {
-    height: 100%;
-    width: 100%;
-
-    td {
-      display: block;
-      clear: both;
-      height: auto;
-      width: 100%;
-      float: left;
-    }
-
-    .atiNavButtons {
-      position: absolute;
-      left: 50%;
-      margin-left: -90px;
-      top: -10px;
-    }
-
-    .asteriskIndicator {
-      color: red !important;
-    }
-
-    .saveButton {
-      float: right;
-      display: inline;
-
-      .jimu-rtl {
-        float: left;
-        display: inline;
-      }
-    }
-
-    .deleteButton {
-      float: right;
-      margin-right: 20px;
-
-      .jimu-rtl {
-        float: left;
-        display: inline;
-      }
-    }
-
-    .atiField {
-      width: 100%;
-    }
-
-    .dijitTextBox {
-      width: 100% !important;
-    }
-
-    .dijitTextArea {
-      width: 100% !important;
-      min-height: 70px;
-      resize: vertical;
-      overflow: auto;
-      font-family: inherit;
-      line-height: 20px !important;
-      font-size: 14px;
-    }
-  }
-  /*********about preset values table*********/
-  .ee-presetValueTableDiv {
-    height: 100%;
-    width: 100%;
-  }
-
-  .ee-presetValueHeaderTable {
-    color: #000000;
-    font-size: 14px;
-    padding: 8px;
-    background-color: #E3E3E3;
-    vertical-align: middle;
-    width: 100%;
-  }
-
-  .ee-presetValueBodyTable td {
-    display: block;
-    clear: both;
-    height: auto;
-    width: 100%;
-    float: left;
-  }
-
-  .ee-atiLabel {
-    width: 100%;
-    margin-bottom: 3px;
-  }
-
-  .atiLabel {
-    width: 100%;
-    margin-top: 6px !important;
-    margin-bottom: 3px !important;
-  }
-
-  .ee-presetValueBody {
-    vertical-align: top;
-  }
-
-  .ee-presetValueBodyTable {
-    width: 100%;
-  }
-
-  .ee-presetValue-label-header-field,
-  .field-alias-label {
-    width: 40%;
-  }
-
-  .ee-presetValue-value-header-field,
-  .preset-value-editable {
-    width: 100%;
-    margin-bottom: 6px;
-  }
-
-  .ee-inputField {
-    width: 100%;
-  }
-
-  .ee-inputFieldTextArea {
-    width: 100% !important;
-    resize: vertical;
-    overflow: auto;
-    font-family: inherit;
-    line-height: 20px !important;
-    font-size: 14px;
-    min-height: 70px;
-  }
-
-  .ee-inputFieldRichText {
-    width: 100% !important;
-    margin: 5px auto;
-  }
-
-  .spacer {
-    height: 12px;
-  }
-
-  .spacerSmall {
-    height: 8px;
-  }
-
-  .attributeInspectorDiv {
-    padding-top: 8px;
-  }
-
-  div.atiAttributes {
-    table {
-      width: 98%;
-    }
-  }
-
-  .processing-indicator {
-    display: none;
-    float: right;
-    width: 40px;
-    height: 40px;
-    background-position: center center;
-    background-image: url(../images/busy.gif);
-    background-repeat: no-repeat;
-    z-index: 999;
-
-    &.busy {
-      display: inline;
-    }
-  }
-
-  .processing-indicator-panel {
     display: none;
     width: 100%;
     height: 100%;
@@ -235,94 +12,337 @@
     background-image: url(../images/busy.gif);
     background-repeat: no-repeat;
 
-    &.busy {
-      display: block;
+    .panel {
+        display: block;
     }
-  }
+}
 
-  .updateOnlyText {
-    vertical-align: middle;
-    padding: 10px;
-  }
+.jimu-widget-smartEditor-ecan {
+    position: relative;
 
-  .attInput {
-    padding-top: 3px;
-    padding-bottom: 3px;
-    display: inline-block;
-  }
-
-  .deleteAttachment {
-    padding-right: 5px;
-    cursor: pointer;
-    color: red !important;
-    font-weight: bold;
-  }
-
-  .atiNavMessage {
-    display: inline-block;
-    float: none;
-  }
-
-  .dijitButtonHover {
-    .dijitButtonNode {
-      background-color: transparent !important;
-      background-image: none !important;
-      border: none !important;
-      -webkit-box-shadow: none !important;
-      -moz-box-shadow: none !important;
-      box-shadow: none !important;
+    .hideField {
+        display: none;
     }
-  }
-
-  .dijitButton {
-    background-color: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    -webkit-box-shadow: none !important;
-    -moz-box-shadow: none !important;
-    box-shadow: none !important;
-
-    .dijitButtonNode {
-      background-color: transparent !important;
-      background-image: none !important;
-      border: none !important;
-      -webkit-box-shadow: none !important;
-      -moz-box-shadow: none !important;
-      box-shadow: none !important;
+    /***********about templatePicker**************/
+    .templatePicker {
+        position: relative;
+        height: 296px;
     }
-  }
 
-  .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton {
-    width: 25px !important;
-  }
+    .grid {
+        height: 100% !important;
+    }
 
-  .dijitTextBox .dijitInputField {
-    height: 100% !important;
-  }
+    .dojoxGridMasterHeader {
+        height: 0 !important;
+    }
 
-  .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton > input {
-    width: 100%;
-  }
+    .dojoxGridContent {
+        width: 100% !important;
+    }
 
-  .attwarning {
-    margin-top: 2px;
-    color: brown;
-  }
+    .dojoxGridContent div[role=presentation] {
+        right: 0;
+    }
 
-  .presetFieldsTableDiv {
-    display: none;
-  }
+    .dojoxGridRowTable {
+        width: 100%;
+    }
+
+    .dojoxGridRow {
+        width: 100%;
+    }
+
+    .dojoxGridView {
+        width: 100% !important;
+    }
+    /********about attributeInspector*********/
+    .esriAttributeInspector {
+        height: 100%;
+        width: 100%;
+
+        td {
+            display: block;
+            clear: both;
+            height: auto;
+            width: 100%;
+            float: left;
+        }
+
+        .atiNavButtons {
+            position: absolute;
+            left: 50%;
+            margin-left: -90px;
+            top: -10px;
+        }
+
+        .asteriskIndicator {
+            color: red !important;
+        }
+
+        .saveButton {
+            float: right;
+            display: inline;
+
+            .jimu-rtl {
+                float: left;
+                display: inline;
+            }
+        }
+
+        .deleteButton {
+            float: right;
+            margin-right: 20px;
+
+            .jimu-rtl {
+                float: left;
+                display: inline;
+            }
+        }
+
+        .atiField {
+            width: 100%;
+        }
+
+        .dijitTextBox {
+            width: 100% !important;
+        }
+
+        .dijitTextArea {
+            width: 100% !important;
+            min-height: 70px;
+            resize: vertical;
+            overflow: auto;
+            font-family: inherit;
+            line-height: 20px !important;
+            font-size: 14px;
+        }
+    }
+    /*********about preset values table*********/
+    .ee-presetValueTableDiv {
+        height: 100%;
+        width: 100%;
+    }
+
+    .ee-presetValueHeaderTable {
+        color: #000000;
+        font-size: 14px;
+        padding: 8px;
+        background-color: #E3E3E3;
+        vertical-align: middle;
+        width: 100%;
+    }
+
+    .ee-presetValueBodyTable td {
+        display: block;
+        clear: both;
+        height: auto;
+        width: 100%;
+        float: left;
+    }
+
+    .ee-atiLabel {
+        width: 100%;
+        margin-bottom: 3px;
+    }
+
+    .atiLabel {
+        width: 100%;
+        margin-top: 6px !important;
+        margin-bottom: 3px !important;
+    }
+
+    .ee-presetValueBody {
+        vertical-align: top;
+    }
+
+    .ee-presetValueBodyTable {
+        width: 100%;
+    }
+
+    .ee-presetValue-label-header-field,
+    .field-alias-label {
+        width: 40%;
+    }
+
+    .ee-presetValue-value-header-field,
+    .preset-value-editable {
+        width: 100%;
+        margin-bottom: 6px;
+    }
+
+    .ee-inputField {
+        width: 100%;
+    }
+
+    .ee-inputFieldTextArea {
+        width: 100% !important;
+        resize: vertical;
+        overflow: auto;
+        font-family: inherit;
+        line-height: 20px !important;
+        font-size: 14px;
+        min-height: 70px;
+    }
+
+    .ee-inputFieldRichText {
+        width: 100% !important;
+        margin: 5px auto;
+    }
+
+    .spacer {
+        height: 12px;
+    }
+
+    .spacerSmall {
+        height: 8px;
+    }
+
+    .attributeInspectorDiv {
+        padding-top: 8px;
+    }
+
+    div.atiAttributes {
+        table {
+            width: 98%;
+        }
+    }
+
+    .processing-indicator {
+        display: none;
+        float: right;
+        width: 40px;
+        height: 40px;
+        background-position: center center;
+        background-image: url(../images/busy.gif);
+        background-repeat: no-repeat;
+        z-index: 999;
+
+        &.busy {
+            display: inline;
+        }
+    }
+
+    .processing-indicator-panel {
+        display: none;
+        width: 100%;
+        height: 100%;
+        z-index: 500;
+        top: 0;
+        left: 0;
+        position: absolute;
+        background-position: center center;
+        background-image: url(../images/busy.gif);
+        background-repeat: no-repeat;
+
+        &.busy {
+            display: block;
+        }
+    }
+
+    .updateOnlyText {
+        vertical-align: middle;
+        padding: 10px;
+    }
+
+    .attInput {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        display: inline-block;
+    }
+
+    .deleteAttachment {
+        padding-right: 5px;
+        cursor: pointer;
+        color: red !important;
+        font-weight: bold;
+    }
+
+    .atiNavMessage {
+        display: inline-block;
+        float: none;
+    }
+
+    .dijitButtonHover {
+        .dijitButtonNode {
+            background-color: transparent !important;
+            background-image: none !important;
+            border: none !important;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+    }
+
+    .dijitButton {
+        background-color: transparent !important;
+        background-image: none !important;
+        border: none !important;
+        -webkit-box-shadow: none !important;
+        -moz-box-shadow: none !important;
+        box-shadow: none !important;
+
+        .dijitButtonNode {
+            background-color: transparent !important;
+            background-image: none !important;
+            border: none !important;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+    }
+
+    .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton {
+        width: 25px !important;
+    }
+
+    .dijitTextBox .dijitInputField {
+        height: 100% !important;
+    }
+
+    .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton > input {
+        width: 100%;
+    }
+
+    .attwarning {
+        margin-top: 2px;
+        color: brown;
+    }
+
+    .presetFieldsTableDiv {
+        display: none;
+    }
+
+    .linksBarDiv {
+        height: 30px !important;
+    }
+
+    .links-bar {
+        text-align: right;
+
+        a {
+            display: inline-block;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 5px;
+            margin-right: 5px;
+            color: #196fa6;
+            text-decoration: none;
+            line-height: 20px;
+            padding: 0px 5px 5px 5px;
+        }
+    }
 }
 
 .widgetIndicator {
-  height: 4px;
-  position: absolute;
-  top: 0;
-  z-index: 1;
-  width: 100%;
-  overflow: hidden;
-  overflow-x: hidden;
-  /*width: 94%;
+    height: 4px;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    overflow: hidden;
+    overflow-x: hidden;
+    /*width: 94%;
         border-radius: 3px;
         padding-left: 3px;
         padding-right: 3px;
@@ -331,11 +351,11 @@
 }
 
 .widgetActive {
-  background: #73AD21;
+    background: #73AD21;
 }
 
 .widgetNotActive {
-  background: red;
+    background: red;
 }
 /*.jimu-widget-smartEditor .widgetActive {
         width: 22px;
@@ -360,31 +380,31 @@
     }*/
 
 .clearfix:after {
-  content: ".";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
 .clearfix {
-  display: inline-block;
+    display: inline-block;
 }
 
 * html .clearfix {
-  height: 1%;
+    height: 1%;
 }
 /* Hides from IE-mac \*/
 .clearfix {
-  display: block;
+    display: block;
 }
 
 .clear:after {
-  clear: both;
-  content: ".";
-  display: block;
-  height: 0;
-  visibility: hidden;
+    clear: both;
+    content: ".";
+    display: block;
+    height: 0;
+    visibility: hidden;
 }
 /*tr td {
       padding: 20px 40px;
@@ -393,15 +413,15 @@
     }*/
 
 .dijitCalendarDateTemplate.dijitCalendarCurrentDate .dijitCalendarDateLabel {
-  color: red;
-  border-color: red;
+    color: red;
+    border-color: red;
 }
 
 /* hover */
 
 .dijitCalendarDateTemplate.dijitCalendarHoveredDate .dijitCalendarDateLabel,
 .dijitCalendarDateTemplate.dijitCalendarEnabledDate:hover .dijitCalendarDateLabel {
-  background-color: greenyellow;
+    background-color: greenyellow;
 }
 
 /* active 
@@ -415,5 +435,5 @@
 
 .dijitCalendarDateTemplate.dijitCalendarSelectedDate .dijitCalendarDateLabel,
 .dijitCalendarDateTemplate.dijitCalendarSelectedDate.dijitCalendarHoveredDate .dijitCalendarDateLabel {
-  background-color: cyan;
+    background-color: cyan;
 }

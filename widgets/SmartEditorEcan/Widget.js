@@ -70,6 +70,7 @@ define([
     'jimu/portalUrlUtils',
     './SEFilterEditor',
     './PrivilegeUtil',
+    './components/operationLink',
     'jimu/dijit/LoadingShelter'
 ],
   function (
@@ -127,10 +128,13 @@ define([
     utils,
     portalUrlUtils,
     SEFilterEditor,
-    PrivilegeUtil) {
+    PrivilegeUtil,
+
+    operationLink
+    ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
       name: 'SmartEditorEcan',
-    baseClass: 'jimu-widget-smartEditor-ecan',
+      baseClass: 'jimu-widget-smartEditor-ecan',
       _defaultStartStr: "",
       _defaultAddPointStr: "",
       _jimuLayerInfos: null,
@@ -154,6 +158,12 @@ define([
     postCreate: function() {
       this.inherited(arguments);
       console.log('SmartEditorEcan::postCreate');
+
+      /* BEGIN: Ecan Changes */
+
+      this._setLinkInfo();      
+
+      /* END: Ecan Changes */
     },
 
     startup: function() {
@@ -184,6 +194,13 @@ define([
 
         this.editToolbar = new Edit(this.map);
         this.drawToolbar = new Draw(this.map);
+ 
+        /* BEGIN: Ecan Changes */
+
+        this._updateLinksUI();
+
+        /* END: Ecan Changes */
+
         // edit events
         this.own(on(this.editToolbar,
           "graphic-move-stop, rotate-stop, scale-stop, vertex-move-stop, vertex-click",
@@ -1838,6 +1855,42 @@ define([
           }));
         }
       },
+
+      /* BEGIN: Ecan Changes */
+
+      _getPresetValues: function () {
+        var values = [];
+        var presetValueTable = query("#eePresetValueBody")[0];
+        if (presetValueTable) {
+          var inputElements = query(".preset-value-editable .ee-inputField");
+          array.forEach(inputElements, lang.hitch(this, function (ele) {
+
+            if (!domClass.contains(ele, "dijitTimeTextBox")) {
+              var elem = dijit.byNode(ele);
+              if (elem !== undefined && elem !== null) {
+                values.push({
+                  "fieldName" : elem.get("name"),
+                  "value": elem.get("value")
+                });
+             }
+              //else {
+              //  var element = query("input[type='hidden']", ele);
+              //  if (!element || element.length === 0) {
+              //    element = query("input", ele);
+              //  }
+              //  if (element[0].name === fieldName) {
+              //    element[0].value = value;
+              //  }
+              //}
+            }
+          }));
+        }
+
+        return values;
+      },
+
+      /* END: Ecan Changes */
+
       _modifyAttributesWithPresetValues: function (attributes, newTempLayerInfos) {
         var presetValueTable = query("#eePresetValueBody")[0];
         var presetFieldInfos = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
@@ -3077,9 +3130,38 @@ define([
 
     resize: function(){
        console.log('SmartEditorEcan::resize');
-      this._update();
+       this._update();
+    },
 
-     }
+     /* BEGIN: Ecan Changes */
+
+    _setLinkInfo:function(){
+       console.log('SmartEditorEcan::_setLinkInfo');
+       this._links = this.config.links || [];
+    },
+
+    _updateLinksUI: function () {
+        if (!this._links || this._links.length == 0) {
+            domConstruct.destroy(this.linksDiv);
+        } else {
+            var fieldValues = this._getPresetValues();
+
+            array.forEach(this._links, lang.hitch(this, function (linkConfig) {
+              var link = new operationLink({
+                item: linkConfig,
+                fieldValues: fieldValues
+              });
+
+              link.placeAt(this.linksTableNode);
+              link.startup();
+            }));
+            this.resize();
+        }
+    }
+
+
+    /* END: Ecan Changes */
+
   });
 
 });

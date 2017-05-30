@@ -82,6 +82,14 @@ define({
       title: "Configure expression for the ${action} rule",
       filterBuilder: "Set action on field when record matches ${any_or_all} of the following expressions",
       noFilterTip: "Using the tools below, define the statement for when the action is active."
+    },
+    linksPage: {
+      title: "Returning URLs",
+      addLinks: "Add Returning URL(s)",
+      linkTitle: "Link Text",
+      linkHref: "URL Prefix",
+      linkAttribute: "Linking Attribute",
+      editTag: "Edit",
     }
   }),
   "ar": 1,
