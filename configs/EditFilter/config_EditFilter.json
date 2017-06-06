@@ -1,0 +1,36 @@
+{
+  "groups": [
+    {
+      "name": "EDIT LAYERS",
+      "desc": "",
+      "operator": "",
+      "defaultVal": "",
+      "appendSameLayer": true,
+      "appendSameLayerConjunc": "OR",
+      "layers": [
+        {
+          "layer": "Parks_Misc_edit_7113",
+          "field": "Comments",
+          "dataType": "esriFieldTypeString",
+          "useDomain": ""
+        },
+        {
+          "layer": "Parks_Misc_edit_2565",
+          "field": "Comments",
+          "dataType": "esriFieldTypeString",
+          "useDomain": ""
+        },
+        {
+          "layer": "Parks_Misc_edit_1447",
+          "field": "Comments",
+          "dataType": "esriFieldTypeString",
+          "useDomain": ""
+        }
+      ]
+    }
+  ],
+  "simpleMode": true,
+  "optionsMode": true,
+  "slAppendChoice": "OR",
+  "zoomMode": true
+}

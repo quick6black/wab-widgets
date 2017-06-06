@@ -84,7 +84,7 @@
   "listShowUpAndDownButtons": true,
   "allowLocalStorage": true,
   "localStorageKey": false,
-  "allowSaveToPortal": true,
+  "allowSaveToPortal": false,
   "portalDrawingFolderName": "My Drawings",
   "drawPlus": {
     "fontFamilies": [

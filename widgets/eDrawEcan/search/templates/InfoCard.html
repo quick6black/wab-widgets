@@ -1,4 +1,4 @@
-<div class="item-card">
+<div class="item-card" data-dojo-attach-point="cardNode">
   <div class="item-card-inner">
     <div class="thumbnail" data-dojo-attach-point="thumbnailNode"></div>
     <h3 class="title" data-dojo-attach-point="titleNode"></h3>
@@ -9,17 +9,20 @@
       <a href="javascript:void(0)"
         data-dojo-attach-point="addButton"
         data-dojo-attach-event="onClick: addClicked"
+        title="${i18n.search.item.actions.add}"
         >${i18n.search.item.actions.add}
       </a>
       <a href="javascript:void(0)"
         data-dojo-attach-point="detailsButton"
         data-dojo-attach-event="onClick: detailsClicked"
+        title="${i18n.search.item.actions.details}"
         >${i18n.search.item.actions.details}
       </a>
       <a href="javascript:void(0)"
         data-dojo-attach-point="deleteButton"
         data-dojo-attach-event="onClick: deleteClicked"
         class="disabled"
+        title="${i18n.search.item.actions.delete}"
         >${i18n.search.item.actions.delete}
       </a>
     </div>

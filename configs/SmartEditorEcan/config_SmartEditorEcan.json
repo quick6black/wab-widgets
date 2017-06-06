@@ -1,0 +1,232 @@
+{
+  "editor": {
+    "layerInfos": [
+      {
+        "featureLayer": {
+          "id": "Parks_Misc_edit_7113"
+        },
+        "disableGeometryUpdate": false,
+        "allowUpdateOnly": false,
+        "allowDelete": true,
+        "fieldInfos": [
+          {
+            "fieldName": "Data_Originator",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type_Desc",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Date_",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Approx_Age",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Comments",
+            "canPresetValue": true,
+            "isEditable": true,
+            "visible": true
+          }
+        ],
+        "fieldValidations": {}
+      },
+      {
+        "featureLayer": {
+          "id": "Parks_Misc_edit_2565"
+        },
+        "disableGeometryUpdate": false,
+        "allowUpdateOnly": false,
+        "allowDelete": true,
+        "fieldInfos": [
+          {
+            "fieldName": "Data_Originator",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type_Desc",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Date_",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Approx_Age",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Comments",
+            "canPresetValue": true,
+            "isEditable": true,
+            "visible": true
+          }
+        ],
+        "fieldValidations": {}
+      },
+      {
+        "featureLayer": {
+          "id": "Parks_Misc_edit_1447"
+        },
+        "disableGeometryUpdate": false,
+        "allowUpdateOnly": false,
+        "allowDelete": true,
+        "fieldInfos": [
+          {
+            "fieldName": "Data_Originator",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Feature_Type_Desc",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Date_",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Approx_Age",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "Comments",
+            "canPresetValue": true,
+            "isEditable": true,
+            "visible": true
+          }
+        ],
+        "fieldValidations": {}
+      },
+      {
+        "featureLayer": {
+          "id": "Water_Quality_Sample_Hosted_Test_Layer_1876"
+        },
+        "disableGeometryUpdate": false,
+        "allowUpdateOnly": false,
+        "allowDelete": true,
+        "fieldInfos": [
+          {
+            "fieldName": "stationnumber",
+            "canPresetValue": true,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "time",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "weather",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "winddir",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "rainfall",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "date",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "county",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "watertemp",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "airtemp",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "cooltemp",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          },
+          {
+            "fieldName": "tides",
+            "canPresetValue": false,
+            "isEditable": true,
+            "visible": true
+          }
+        ],
+        "fieldValidations": {}
+      }
+    ],
+    "displayPromptOnSave": true,
+    "displayPromptOnDelete": true,
+    "removeOnSave": false,
+    "useFilterEditor": true,
+    "listenToGF": true,
+    "keepTemplateSelected": false,
+    "useURLParameters": false,
+    "editDescription": "Select a template to create features"
+  }
+}
