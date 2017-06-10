@@ -2834,6 +2834,10 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
         }));
         this.resize();
       }
+    },
+
+    copyFeatureSet: function copyFeatureSet(featureSet) {
+      alert('Start Copy');
     }
 
     /* END: Ecan Changes */

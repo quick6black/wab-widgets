@@ -24,7 +24,9 @@ define({
       noAvailableTempaltes: "No available templates",
       searchTemplates: "Search Templates"
     },
-    invalidConfiguration: "Widget is either not configured or the layers in the configuration are no longer in the map.  Please open the app in the builder mode and reconfigure the widget."
+    invalidConfiguration: "Widget is either not configured or the layers in the configuration are no longer in the map.  Please open the app in the builder mode and reconfigure the widget.",
+
+    _featureAction_Copy: "Copy to Edit Layer"
   }),
   "ar": 1,
   "bs": 1,
