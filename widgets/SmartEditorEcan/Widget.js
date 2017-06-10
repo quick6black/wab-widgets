@@ -3157,8 +3157,11 @@ define([
             }));
             this.resize();
         }
-    }
+    },
 
+    copyFeatureSet: function (featureSet) {
+      alert('Start Copy');
+    }
 
     /* END: Ecan Changes */
 

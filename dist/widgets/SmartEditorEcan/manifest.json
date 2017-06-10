@@ -24,5 +24,9 @@
     "keepConfigAfterMapSwithched": false,
     "supportMultiInstance": false,
     "hasVersionManager": true
-  }
+  },
+  "featureActions": [{
+    "name": "Copy",
+    "uri": "CopyFeatureAction"
+  }]
 }
