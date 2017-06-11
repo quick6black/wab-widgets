@@ -26,6 +26,14 @@ define({
     },
     invalidConfiguration: "Widget is either not configured or the layers in the configuration are no longer in the map.  Please open the app in the builder mode and reconfigure the widget.",
 
+    copyFeaturesPopup: {
+      ok: "OK",
+      cancel: "Cancel",
+      titleLabel: "Copy Features to Editable Layer",
+      templatePickerLabel: "Select a Feature type",
+      multipleFeaturesMessage: "Multiple features have been selected to be copied.  In this situation you cannot alter the field details prior to saving to the target layer."
+    },
+
     _featureAction_Copy: "Copy to Edit Layer"
   }),
   "ar": 1,

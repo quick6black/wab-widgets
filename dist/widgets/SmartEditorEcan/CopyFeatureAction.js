@@ -1,10 +1,32 @@
-define(['dojo/_base/declare', 'dojo/_base/lang', 'jimu/BaseFeatureAction', 'jimu/WidgetManager', 'esri/tasks/query', 'esri/tasks/QueryTask'], function (declare, lang, BaseFeatureAction, WidgetManager, Query, QueryTask) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseFeatureAction', 'jimu/WidgetManager', 'esri/tasks/query', 'esri/tasks/QueryTask'], function (declare, array, lang, BaseFeatureAction, WidgetManager, Query, QueryTask) {
   var clazz = declare(BaseFeatureAction, {
 
     iconFormat: 'png',
 
     isFeatureSupported: function isFeatureSupported(featureSet) {
-      return featureSet.features.length > 0;
+      if (featureSet.features.length > 0) {
+        // Get geometry type and ensure editable layer of this geometry type is available
+        var geometryType = featureSet.geometryType;
+        if (!geometryType) {
+          geometryType = featureSet.features[0].geometry.geometryType;
+        }
+        geometryType = this._getEsriGeometryType(geometryType);
+
+        var layerIds = this.map.graphicsLayerIds,
+            hasEditableLayer = false;
+        array.forEach(layerIds, lang.hitch(this, function (layerId) {
+          var layer = this.map.getLayer(layerId);
+          if (layer.capabilities && layer.capabilities.indexOf('Create') >= 0) {
+            // Check geometry type
+            if (layer.geometryType && layer.geometryType === geometryType) {
+              hasEditableLayer = true;
+            }
+          }
+        }));
+        return hasEditableLayer;
+      }
+
+      return false;
     },
 
     onExecute: function onExecute(featureSet) {
@@ -48,6 +70,28 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'jimu/BaseFeatureAction', 'jimu
       query.outFields = fields;
 
       return layer.queryFeatures(query);
+    },
+
+    _getEsriGeometryType: function _getEsriGeometryType(geometryType) {
+      var esriGeometryType = '';
+      switch (geometryType) {
+        case 'polygon':
+          esriGeometryType = 'esriGeometryPolygon';
+          break;
+
+        case 'polyline':
+          esriGeometryType = 'esriGeometryPolyline';
+          break;
+
+        case 'point':
+          esriGeometryType = 'esriGeometryPoint';
+          break;
+
+        default:
+          esriGeometryType = geometryType;
+          break;
+      }
+      return esriGeometryType;
     }
 
   });
