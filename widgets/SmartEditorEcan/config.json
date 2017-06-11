@@ -7,7 +7,8 @@
         "useFilterEditor": false,
         "listenToGF": false,
         "keepTemplateSelected": false,
-        "useURLParameters": false
+        "useURLParameters": false,
+	"copyExistingValues": true
     },
    "links": [],
    "editScaleLimit": "200000"

@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', './SEFilterEditor', './PrivilegeUtil', './components/operationLink', 'jimu/dijit/LoadingShelter'], function (dojo, dijit, declare, lang, array, html, query, esriBundle, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, entities, utils, portalUrlUtils, SEFilterEditor, PrivilegeUtil, operationLink) {
+define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', './SEFilterEditor', './PrivilegeUtil', './components/operationLink', './components/copyFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (dojo, dijit, declare, lang, array, html, query, esriBundle, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, entities, utils, portalUrlUtils, SEFilterEditor, PrivilegeUtil, OperationLink, CopyFeaturesPopup) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     name: 'SmartEditorEcan',
     baseClass: 'jimu-widget-smartEditor-ecan',
@@ -38,6 +38,7 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
     _creationDisabledOnAll: false,
     _editGeomSwitch: null,
     _userHasPrivilege: false,
+    _copyExistingValues: false,
     postCreate: function postCreate() {
       this.inherited(arguments);
       console.log('SmartEditorEcan::postCreate');
@@ -80,6 +81,7 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
       /* BEGIN: Ecan Changes */
 
       this._updateLinksUI();
+      this._copyExistingValues = this.config.editor.copyExistingValues || false;
 
       /* END: Ecan Changes */
 
@@ -2824,7 +2826,7 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
         var fieldValues = this._getPresetValues();
 
         array.forEach(this._links, lang.hitch(this, function (linkConfig) {
-          var link = new operationLink({
+          var link = new OperationLink({
             item: linkConfig,
             fieldValues: fieldValues
           });
@@ -2837,8 +2839,122 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
     },
 
     copyFeatureSet: function copyFeatureSet(featureSet) {
-      alert('Start Copy');
-    }
+      // Get geometry type and ensure editable layer of this geometry type is available
+      var geometryType = featureSet.geometryType;
+      if (!geometryType) {
+        geometryType = featureSet.features[0].geometry.type;
+      }
+      geometryType = this._getEsriGeometryType(geometryType);
+
+      var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+      layers = layers.filter(function (layer) {
+        return layer.geometryType && layer.geometryType === geometryType;
+      });
+
+      var copyPopup, param;
+      param = {
+        map: this.map,
+        nls: this.nls,
+        config: this.config,
+        featureSet: featureSet,
+        layers: layers
+      };
+
+      copyPopup = new CopyFeaturesPopup(param);
+      copyPopup.startup();
+
+      copyPopup.onOkClick = lang.hitch(this, function () {
+        var template = copyPopup.getSelectedTemplate();
+        if (template) {
+          if (copyPopup.featureSet.features.length === 1) {
+            this._addFeature(copyPopup.featureSet.features[0], template);
+          } else {}
+        }
+        copyPopup.popup.close();
+      });
+    },
+
+    _getEsriGeometryType: function _getEsriGeometryType(geometryType) {
+      var esriGeometryType = '';
+      switch (geometryType) {
+        case 'polygon':
+          esriGeometryType = 'esriGeometryPolygon';
+          break;
+
+        case 'polyline':
+          esriGeometryType = 'esriGeometryPolyline';
+          break;
+
+        case 'point':
+          esriGeometryType = 'esriGeometryPoint';
+          break;
+
+        default:
+          esriGeometryType = geometryType;
+          break;
+      }
+      return esriGeometryType;
+    },
+
+    _addFeature: function _addFeature(feature, template) {
+      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+      var newTempLayerInfos;
+      var localLayerInfo = null;
+
+      if (this.attrInspector) {
+        this.attrInspector.destroy();
+        this.attrInspector = null;
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+      this._removeLocalLayers();
+      // preparation for a new attributeInspector for the local layer
+      this.cacheLayer = this._cloneLayer(template.featureLayer);
+      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+
+      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
+
+      this._createAttributeInspector([localLayerInfo]);
+
+      var newAttributes = lang.clone(template.template.prototype.attributes);
+      if (this._usePresetValues) {
+        this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+      }
+
+      var newGraphic = new Graphic(feature.geometry, null, newAttributes);
+
+      // store original attrs for later use
+      newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+      this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
+        this._isDirty = true;
+        var query = new Query();
+        query.objectIds = [e[0].objectId];
+        this.cacheLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW);
+
+        this.currentFeature = this.updateFeatures[0] = newGraphic;
+        this.geometryChanged = false;
+        if (this._attributeInspectorTools) {
+          this._attributeInspectorTools.triggerFormValidation();
+        }
+        this._attachLayerHandler();
+        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+        this.currentLayerInfo.isCache = true;
+        this._toggleDeleteButton(false);
+        //this._toggleEditGeoSwitch(false);
+
+        //this._createSmartAttributes();
+        //
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
+      }));
+
+      this._showTemplate(false, false);
+    },
+
+    _bulkAddFeatures: function _bulkAddFeatures(featureSet, template) {}
 
     /* END: Ecan Changes */
 
