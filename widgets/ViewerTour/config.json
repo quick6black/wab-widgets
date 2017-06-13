@@ -1,0 +1,20 @@
+{
+  "widgets": [
+    {
+      "title": "Header Controller",
+      "widgetName": "HeaderController",
+      "content": "<p>This is the header controller!!!</p>",
+      "placement": "below"
+    },
+    {
+      "title": "Zoom Slider",
+      "widgetName": "ZoomSlider",
+      "content": "<p>This is the zoom Slider</p>",
+      "placement": "right"
+    }
+  ],
+  "tourName": "wab-tour",
+  "backdrop": true,
+  "autoscroll": true,
+  "keyboard": true
+}
