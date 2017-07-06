@@ -214,7 +214,7 @@ function(
       this.allowLocalStorageInput.checked = (config.allowLocalStorage) ? true : false;
       this.localStorageKeyInput.value = (config.localStorageKey) ? config.localStorageKey : '';
       this.isOperationalLayerInput.checked = (config.isOperationalLayer) ? true : false;
-      this.convertToDrawingWarningScaleInput.value = (config.convertWarningScale) ? config.convertWarningScale : 25000;
+      // this.convertToDrawingWarningScaleInput.value = (config.convertWarningScale) ? config.convertWarningScale : 25000;
 
       // Portal Save Functions       
       this.allowSaveToPortalInput.checked = (config.allowSaveToPortal) ? true : false;
@@ -291,7 +291,7 @@ function(
       config.listShowUpAndDownButtons = this.listShowUpAndDownButtons.checked;
       config.allowLocalStorage = this.allowLocalStorageInput.checked;
       config.isOperationalLayer = this.isOperationalLayerInput.checked;
-      config.convertWarningScale = this.convertToDrawingWarningScaleInput.value;
+      //config.convertWarningScale = this.convertToDrawingWarningScaleInput.value;
 
       config.allowSaveToPortal = this.allowSaveToPortalInput.checked;
       config.portalDrawingFolderName = (this.portalDrawingFolderNameInput.value.trim() != "") ? this.portalDrawingFolderNameInput.value.trim() : this.nls.portalDrawingFolderName;
