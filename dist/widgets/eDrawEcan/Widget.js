@@ -36,7 +36,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         exportFileName: null,
         drawingFolder: null,
 
-        _convertWarningScale: null,
+        //_convertWarningScale: null,
+
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -2141,34 +2142,28 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (commontype === 'point') {
                 if (this.showMeasure.checked) {
                     this._addPointMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'polyline') {
                 if (this.showMeasure.checked) {
                     this._addLineMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'polygon') {
                 if (this.showMeasure.checked) {
                     this._addPolygonMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'text') {
                 if (this.editorSymbolChooser.inputText.value.trim() == "") {
                     //Message
                     this.showMessage(this.nls.textWarningMessage, 'warning');
-
-                    //Remove empty feature (text symbol without text)
-                    // graphic.getLayer().remove(graphic);
                 } else {
                     this._pushAddOperation([graphic]);
                 }
@@ -3504,24 +3499,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
 
         convertToDrawing: function convertToDrawing(featureSet) {
-            //do scale check
-            if (this._convertWarningScale && this.map.getScale() > this._convertWarningScale) {
-                this._confirmConvertMessage = new Message({
-                    message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.confirmConvertScaleWarning,
-                    buttons: [{
-                        label: this.nls.ok,
-                        onClick: lang.hitch(this, function (evt) {
-                            this._convertFeaturesToDrawings(featureSet);
-                            this._confirmConvertMessage.close();
-                            this._confirmConvertMessage = false;
-                        })
-                    }, {
-                        label: this.nls.cancel
-                    }]
+            //do scale check - no longer required as copy action now queries for ungeneralised versions of graphics if layer has capability
+            /*
+            if(this._convertWarningScale && this.map.getScale() > this._convertWarningScale) {
+                this._confirmConvertMessage  = new Message({
+                    message : '<i class="message-warning-icon"></i>&nbsp;' + this.nls.confirmConvertScaleWarning,
+                    buttons:[
+                        {
+                            label:this.nls.ok,
+                            onClick: lang.hitch(this, function(evt) { 
+                                this._convertFeaturesToDrawings(featureSet);
+                                this._confirmConvertMessage.close();
+                                this._confirmConvertMessage = false;
+                            })
+                        },{
+                            label:this.nls.cancel
+                        }
+                    ]
                 });
-            } else {
-                this._convertFeaturesToDrawings(featureSet);
-            }
+              } else { */
+            this._convertFeaturesToDrawings(featureSet);
+            /*}*/
         },
 
         _convertFeaturesToDrawings: function _convertFeaturesToDrawings(featureSet) {
@@ -3898,8 +3896,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 domStyle.set(this.loadFileAction, 'display', 'inline-block');
             }
 
-            // Convert to drawing warning scale
-            this._convertWarningScale = this.config.convertWarningScale || 25000;
+            // Convert to drawing warning scale - no longer required as copy function now queries for ungeneralised versions of graphics
+            //this._convertWarningScale = this.config.convertWarningScale || 25000;
 
             // initialise the export file name
             this.exportFileName = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';
