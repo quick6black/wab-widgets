@@ -58,8 +58,11 @@ define([
       query.maxAllowableOffset = 0;
       query.objectIds = objectIds;
       query.outFields = fields;
+      query.returnGeometry = true;
 
-      return layer.queryFeatures(query);
+      // Create query task and execute against it - used instead of feature layer to override auto generalisation
+      var queryTask = new QueryTask(layer.url);
+      return queryTask.execute(query);
     }
 
   });
