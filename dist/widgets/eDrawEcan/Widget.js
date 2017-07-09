@@ -1180,6 +1180,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         convertGISMoSymbol: function convertGISMoSymbol(json) {
+            if (json === undefined) return null;
+
             var symbol = {};
 
             switch (json.symboltype) {
@@ -1191,15 +1193,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     symbol.angle = 0;
                     symbol.xoffset = 0;
                     symbol.yoffset = 0;
-                    symbol.outline = {};
 
-                    if (json.outline.color) {
-                        symbol.outline.color = this.convertDecimalColor2RGB(json.outline.color, json.outline.alpha);
-                    } else {
-                        symbol.outline.color = [0, 0, 0, 255];
+                    if (json.outline) {
+                        symbol.outline = {};
+                        if (json.outline.color) {
+                            symbol.outline.color = this.convertDecimalColor2RGB(json.outline.color, json.outline.alpha);
+                        } else {
+                            symbol.outline.color = [0, 0, 0, 255];
+                        }
+                        symbol.outline.width = json.outline.width;
+                        symbol.outline.style = this.convertStyleType(json.symboltype, json.outline.symboltype);
                     }
-                    symbol.outline.width = json.outline.width;
-                    symbol.outline.style = this.convertStyleType(json.symboltype, json.outline.symboltype);
 
                     break;
 
