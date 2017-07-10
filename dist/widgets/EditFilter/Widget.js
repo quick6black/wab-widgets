@@ -1,7 +1,7 @@
 define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'dijit', 'jimu/dijit/FilterParameters', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/on', 'dojo/query', 'dojo/string', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/date/locale', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dijit/registry', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', 'jimu/FilterManager', 'esri/tasks/query', 'esri/tasks/QueryTask', 'esri/geometry/geometryEngine', 'esri/layers/FeatureLayer', './SaveJSON', './ReadJSON', './LayersHandler', 'dojox/html/entities',
 
 /* ECAN ADDITION REQUIRES */
-'esri/urlUtils', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils) {
+'esri/urlUtils', 'esri/geometry/Point', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -1200,12 +1200,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
     _queryExtentToZoom: function _queryExtentToZoom(results) {
       if (typeof results.extent !== 'undefined' && results.extent !== null && !isNaN(results.extent.xmax)) {
-        var newExt;
+        var newExt,
+            ext = results.extent;
         if (results.extent.spatialReference.wkid !== 102100 && results.extent.spatialReference.wkid !== 102113 && results.extent.spatialReference.wkid !== 3857 && results.extent.spatialReference.wkid !== 4326) {
-          newExt = geometryEngine.buffer(results.extent, 10, 9002, false).getExtent();
+
+          // BEGIN: ECAN CUSTOM CODE
+          if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
+            newExt = geometryEngine.buffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
+          } else {
+            newExt = geometryEngine.buffer(ext2, 10, 9002, false).getExtent();
+          }
+          // END: ECAN CUSTOM CODE
         } else {
-          newExt = geometryEngine.geodesicBuffer(results.extent, 10, 9002, false).getExtent();
+          // BEGIN: ECAN CUSTOM CODE
+          if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
+            newExt = geometryEngine.geodesicBuffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
+          } else {
+            newExt = geometryEngine.geodesicBuffer(ext, 10, 9002, false).getExtent();
+          }
+          // END: ECAN CUSTOM CODE
         }
+
         if (this.filterExt === null) {
           this.filterExt = newExt;
         }
@@ -1213,6 +1228,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         var newMinX = this.filterExt.xmin < newExt.xmin ? this.filterExt.xmin : newExt.xmin;
         var newMaxY = this.filterExt.ymax > newExt.ymax ? this.filterExt.ymax : newExt.ymax;
         var newMinY = this.filterExt.ymin < newExt.ymin ? this.filterExt.ymin : newExt.ymin;
+
         newExt = newExt.update(newMinX, newMinY, newMaxX, newMaxY, newExt.spatialReference);
         if (results.extent.spatialReference.wkid !== 102100 && results.extent.spatialReference.wkid !== 102113 && results.extent.spatialReference.wkid !== 3857 && results.extent.spatialReference.wkid !== 4326) {
           newExt = geometryEngine.buffer(newExt, 200, 9002, false).getExtent();
