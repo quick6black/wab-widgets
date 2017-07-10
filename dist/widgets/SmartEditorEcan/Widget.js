@@ -2925,6 +2925,10 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
         this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
       }
 
+      if (this._copyExistingValues) {
+        this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+      }
+
       var newGraphic = new Graphic(feature.geometry, null, newAttributes);
 
       // store original attrs for later use
@@ -2954,7 +2958,18 @@ define(['dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/ar
       this._showTemplate(false, false);
     },
 
-    _bulkAddFeatures: function _bulkAddFeatures(featureSet, template) {}
+    _bulkAddFeatures: function _bulkAddFeatures(featureSet, template) {},
+
+    _modifyAttributesWithCopyValues: function _modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, attributes) {
+      for (var key in newAttributes) {
+        if (attributes[key]) {
+          // Validate the attribute value is suitable for the new field
+
+
+          newAttributes[key] = attributes[key];
+        }
+      }
+    }
 
     /* END: Ecan Changes */
 
