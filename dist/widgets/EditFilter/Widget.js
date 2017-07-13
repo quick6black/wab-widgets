@@ -1212,6 +1212,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           }
           // END: ECAN CUSTOM CODE
         } else {
+
           // BEGIN: ECAN CUSTOM CODE
           if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
             newExt = geometryEngine.geodesicBuffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
