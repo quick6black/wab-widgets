@@ -36,7 +36,7 @@ define([
 
     _checkForFeatureLayers: function (featureSet) {
       var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0) {
+      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
         return true;
       }
 
