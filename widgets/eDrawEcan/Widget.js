@@ -2557,6 +2557,7 @@ function(
                 this.mouseTip.symbol.setColor(new Color("white"));
                 this.mouseTip.symbol.setHaloSize(1);
                 this.mouseTip.symbol.setHaloColor(new Color("black"));
+                this.mouseTip.symbol.setAlign(TextSymbol.ALIGN_START);
                 this.map.graphics.add(this.mouseTip);
             }
         },
@@ -3754,6 +3755,10 @@ function(
                     layerDefinition: pointDefinition,
                     featureSet: null
                 }, lang.clone(options));
+                this._pointLayer.arcgisProps = {
+                  title: this.nls.points
+                };
+                this._pointLayer._titleForLegend = this.nls.points;
 
                 var polylineDefinition = lang.clone(layerDefinition);
                 polylineDefinition.name = this.nls.lines;
@@ -3762,6 +3767,10 @@ function(
                     layerDefinition: polylineDefinition,
                     featureSet: null
                 }, lang.clone(options));
+                this._polylineLayer.arcgisProps = {
+                  title: this.nls.lines
+                };
+                this._polylineLayer._titleForLegend = this.nls.lines;
 
                 var polygonDefinition = lang.clone(layerDefinition);
                 polygonDefinition.name = this.nls.areas;
@@ -3770,9 +3779,13 @@ function(
                     layerDefinition: polygonDefinition,
                     featureSet: null
                 }, lang.clone(options));
+                this._polygonLayer.arcgisProps = {
+                  title: this.nls.areas
+                };
+                this._polygonLayer._titleForLegend = this.nls.areas;
 
                 var labelDefinition = lang.clone(layerDefinition);
-                labelDefinition.name = this.nls.text;
+                labelDefinition.name = this.nls.labels;
                 labelDefinition.geometryType = "esriGeometryPoint";
                 this._labelLayer = new FeatureLayer({
                     layerDefinition: labelDefinition,
@@ -3781,7 +3794,16 @@ function(
                 var ts = this._createDefaultSymbol('text');
                 ts.setText('Text');                
                 this._labelLayer.setRenderer(new SimpleRenderer(ts));
+                this._labelLayer.arcgisProps = {
+                  title: this.nls.labels
+                };
+                this._labelLayer._titleForLegend = this.nls.labels;
 
+
+                /* BEGIN:CHANGE 27 Sep 2017 - 
+                    Issue with Add Layers widget has newly added layers being added into feature collection group below the groupw title if the 
+                    drawings collection is located at top of stack.  Change to add layers indivudally rather than grouped until this is sorted. 
+                
                 var loading = new LoadingIndicator();
                 loading.placeAt(this.domNode);
 
@@ -3800,6 +3822,12 @@ function(
                         loading.destroy();
                     console.error("Can not get LayerInfos instance", err);
                     }));
+                */
+               
+                this.map.addLayer(this._polygonLayer);
+                this.map.addLayer(this._polylineLayer);
+                this.map.addLayer(this._pointLayer);
+                this.map.addLayer(this._labelLayer);
             } else {
                 this._pointLayer = new GraphicsLayer();
                 this._polylineLayer = new GraphicsLayer();

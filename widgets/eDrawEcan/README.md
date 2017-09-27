@@ -36,3 +36,14 @@ https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest
 
 ## Demo :
 To be created
+
+
+### Changes
+
+**27 September 2017**     
+
+
+- Alteration to following functions to **Widget.js** in section marked *BEGIN:CHANGE 27 Sep 2017*:  
+    -  **\_initLayers** function altered to bypass creating a feature collection and adding it to the map in favour of adding the point, line, area and label features layers to the map ungrouped.  Change made to correct issue found when code ported to WAB 2.5 where it was discovered the when used in conjunction with AddLayers widget and Layers Widget, newly added layers from AddLayers are appearing in the feature collection group in the layers list if the drawing layers are located at the top of the layer stack.   Label for layer that holds text label drawings changed to use new proeprty in nls strings file called "labels" nls"
+
+-- New parameter added to nls strings.js file for text labels to bbe used in preference to "text" value used for title of the layer which holds the text label graphics 
