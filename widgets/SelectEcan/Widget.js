@@ -181,7 +181,7 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
 
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
-              checked: visible,
+              checked: false,//visible, -- ECAN default to not-selected initially
               layerVisible: visible,
               folderUrl: this.folderUrl,
               allowExport: this.config ? this.config.allowExport : false,
