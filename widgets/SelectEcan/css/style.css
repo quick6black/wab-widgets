@@ -24,11 +24,21 @@
     color: #000000; }
   .jimu-widget-select-ecan .light-label, .jimu-widget-select-ecan .selectable-layer-item .layer-row .layer-name, .jimu-widget-select-ecan .selectable-layer-item .layer-row .selected-num {
     font-family: "Avenir Light"; }
+  .jimu-widget-select-ecan .selectable-layer-item .layer-row .layer-name-toggleall {
+    font-weight: bold
+  }
   .jimu-widget-select-ecan .medium-label {
     font-family: "Avenir Medium"; }
-  .jimu-widget-select-ecan .layer-nodes {
+  .jimu-widget-select-ecan .layer-nodes-toggleall {
     position: absolute;
     top: 65px;
+    bottom: 0;
+    width: 100%;
+    overflow: auto;
+  }
+  .jimu-widget-select-ecan .layer-nodes {
+    position: absolute;
+    top: 101px;
     bottom: 0;
     width: 100%;
     overflow: auto; }
