@@ -6,6 +6,30 @@
     height: 100%; }
     .jimu-widget-select-ecan .jimu-viewstack .view {
       position: relative; }
+
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select {
+  position: absolute;
+  left: 0;
+  right: 20px;
+  top: 0;
+  bottom: 0;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #B7B7B7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 0;
+}
+
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected {
+  background-color: #009966;
+  border: 0;
+}
+
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover {
+  background-color: #006241;
+}
+
   .jimu-widget-select-ecan .seperator {
     width: 100%;
     height: 1px;
