@@ -20,15 +20,25 @@
   text-overflow: ellipsis;
   border: 0;
 }
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select + .jimu-float-trailing {
+    background-color: #B7B7B7;
+}
 
 .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected {
   background-color: #009966;
   border: 0;
 }
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected + .jimu-float-trailing {
+    background-color: #009966;
+}
 
 .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover {
   background-color: #006241;
 }
+.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover + .jimu-float-trailing {
+    background-color: #006241;
+}
+    
 
   .jimu-widget-select-ecan .seperator {
     width: 100%;
@@ -67,8 +77,7 @@
     width: 100%;
     overflow: auto; }
   .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .draw-item {
-    padding: 0;
-    width: 60%; }
+    padding: 0; }
   .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-clear {
     padding: 0;
     width: 30%;
