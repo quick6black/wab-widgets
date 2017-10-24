@@ -29,7 +29,7 @@ define(["dojo/_base/declare",
     _WidgetsInTemplateMixin, template, i18n, util, LayerLoader) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-
+ 
       i18n: i18n,
       templateString: template,
 
@@ -41,6 +41,10 @@ define(["dojo/_base/declare",
 
       postCreate: function() {
         this.inherited(arguments);
+			  
+	  //ECan
+	  this.config = this.resultsPane.searchPane.wabWidget.config;
+	  //
       },
 
       startup: function() {
@@ -48,6 +52,9 @@ define(["dojo/_base/declare",
           return;
         }
         this.inherited(arguments);
+		//ECan
+		//this.config = this.wabWidget.config;
+		//
         this.render();
       },
 
@@ -106,10 +113,12 @@ define(["dojo/_base/declare",
         var baseUrl = util.checkMixedContent(item.portalUrl);
         var url = baseUrl + "/home/item.html?id=" + encodeURIComponent(item.id);
 		
+		if(this.config.CMapsVersion.allow){
 		//ECAN CHANGE
 		if (item.tags.indexOf("Open Data") > -1) {
           url = this.openDataUrl(item);
         }
+		}
 		//ECAN CHANGE
 		
         window.open(url);
@@ -158,9 +167,11 @@ define(["dojo/_base/declare",
 		
 		//ECAN CHANGE
 		// Change the details button text to download
+		if(this.config.CMapsVersion.allow){
         if (this.item.tags.indexOf("Open Data") > -1) {
           util.setNodeText(this.detailsButton, "Download");
         }
+		}
 		///ECAN CHANGE
       },
 

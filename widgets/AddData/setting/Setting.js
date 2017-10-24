@@ -117,6 +117,8 @@ define(["dojo/_base/declare",
           this.MyOrganizationCheckBox,this.MyOrganizationTextBox);
         setOption(options,"ArcGISOnline",
           this.ArcGISOnlineCheckBox,this.ArcGISOnlineTextBox);
+		
+		//ECan
         setOption(options, "Curated1",
             this.Curated1CheckBox, this.Curated1TextBox);
         options.Curated1.filter = getStr(this.Curated1FilterTextBox);
@@ -132,9 +134,13 @@ define(["dojo/_base/declare",
         setOption(options, "Curated5",
             this.Curated5CheckBox, this.Curated5TextBox);
         options.Curated5.filter = getStr(this.Curated5FilterTextBox);
-
+		//
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);
+		
+		//ECan
+		setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
+		//
 
         this.config.addFromFile.maxRecordCount = 1000;
         /*
@@ -217,6 +223,7 @@ define(["dojo/_base/declare",
           this.MyOrganizationCheckBox,this.MyOrganizationTextBox,true);
         setOption(options,"ArcGISOnline",
           this.ArcGISOnlineCheckBox,this.ArcGISOnlineTextBox,true);
+		 //ECan
         setOption(options, "Curated1",
             this.Curated1CheckBox, this.Curated1TextBox, true);
         setStr(options.Curated1.filter, this.Curated1FilterTextBox);
@@ -232,8 +239,14 @@ define(["dojo/_base/declare",
         setOption(options, "Curated5",
             this.Curated5CheckBox, this.Curated5TextBox, true);
         setStr(options.Curated5.filter, this.Curated5FilterTextBox);
+		//
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);
+		
+		//ECan
+		setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
+		//
+		  
 
         /*
         this.maxRecordBox.set("value",1000);

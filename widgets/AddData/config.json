@@ -1,4 +1,7 @@
 {
+ "CMapsVersion": {
+    "allow": false
+  },
   "numPerPage": 30,
   "scopeOptions": {
     "MyContent": {
