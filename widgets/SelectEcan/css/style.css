@@ -6,40 +6,6 @@
     height: 100%; }
     .jimu-widget-select-ecan .jimu-viewstack .view {
       position: relative; }
-
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select {
-  position: absolute;
-  left: 0;
-  right: 20px;
-  top: 0;
-  bottom: 0;
-  text-align: center;
-  white-space: nowrap;
-  background-color: #B7B7B7;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: 0;
-}
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select + .jimu-float-trailing {
-    background-color: #B7B7B7;
-}
-
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected {
-  background-color: #009966;
-  border: 0;
-}
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected + .jimu-float-trailing {
-    background-color: #009966;
-}
-
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover {
-  background-color: #006241;
-}
-.jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover + .jimu-float-trailing {
-    background-color: #006241;
-}
-    
-
   .jimu-widget-select-ecan .seperator {
     width: 100%;
     height: 1px;
@@ -58,26 +24,31 @@
     color: #000000; }
   .jimu-widget-select-ecan .light-label, .jimu-widget-select-ecan .selectable-layer-item .layer-row .layer-name, .jimu-widget-select-ecan .selectable-layer-item .layer-row .selected-num {
     font-family: "Avenir Light"; }
-  .jimu-widget-select-ecan .selectable-layer-item .layer-row .layer-name-toggleall {
-    font-weight: bold
-  }
   .jimu-widget-select-ecan .medium-label {
     font-family: "Avenir Medium"; }
-  .jimu-widget-select-ecan .layer-nodes-toggleall {
-    position: absolute;
-    top: 65px;
-    bottom: 0;
-    width: 100%;
-    overflow: auto;
-  }
-  .jimu-widget-select-ecan .layer-nodes {
+  .jimu-widget-select-ecan .layer-nodes, .jimu-widget-select-ecan .layer-nodes-toggleall {
     position: absolute;
     top: 101px;
     bottom: 0;
     width: 100%;
     overflow: auto; }
+  .jimu-widget-select-ecan .layer-nodes-toggleall {
+    top: 65px; }
   .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .draw-item {
     padding: 0; }
+  .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select {
+    border: 0;
+    background-color: #B7B7B7; }
+    .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover {
+      background-color: #006241; }
+    .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select:hover + .jimu-float-trailing {
+      background-color: #006241; }
+    .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected {
+      background-color: #009966; }
+    .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select.selected + .jimu-float-trailing {
+      background-color: #009966; }
+  .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-select + .jimu-float-trailing {
+    background-color: #B7B7B7; }
   .jimu-widget-select-ecan .jimu-multiple-layers-featureset-chooser .btn-clear {
     padding: 0;
     width: 30%;
@@ -92,6 +63,8 @@
       height: 36px;
       position: relative;
       cursor: pointer; }
+      .jimu-widget-select-ecan .selectable-layer-item .layer-row .layer-name-toggleall {
+        font-weight: bold; }
       .jimu-widget-select-ecan .selectable-layer-item .layer-row > div {
         display: inline-block; }
       .jimu-widget-select-ecan .selectable-layer-item .layer-row .selectable-check {
