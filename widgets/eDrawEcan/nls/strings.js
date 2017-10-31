@@ -124,6 +124,7 @@ define({
         points: "Point Drawings",
 	    lines: "Line Drawings",
 	    areas: "Area Drawings",
+	    labels: "Label Drawings",
 
 	    mergeLabel: "Merge selected drawings",
 	    mergeErrorMixedGeometry: "You cannot merge line and polygon drawings",
