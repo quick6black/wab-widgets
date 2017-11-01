@@ -84,6 +84,7 @@ define([
         this.chkWebmapAppendMode.set('checked', this.config.webmapAppendMode);
         this.slAppendChoice.set('value', this.config.slAppendChoice);
         this.chkZoomMode.set('checked', this.config.zoomMode);
+        this.chkPersistOnClose.set('checked', this.config.persistOnClose);
         this.createMapLayerList();
       },
 
@@ -107,6 +108,7 @@ define([
             this.config.webmapAppendMode = this.chkWebmapAppendMode.checked;
             this.config.slAppendChoice = this.slAppendChoice.get('value');
             this.config.zoomMode = this.chkZoomMode.checked;
+            this.config.persistOnClose = this.chkPersistOnClose.checked;
             this.config.groups = [];
             array.forEach(this.groupLayerName, lang.hitch(this, function(groupName, i) {
               if(groupName !== null) {

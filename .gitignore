@@ -176,3 +176,6 @@ FakesAssemblies/
 # Client tools not required to be tracked
 # Sample files included for equivalent functions 
 Gruntfile.js
+wab-widgets.sublime-project
+wab-widgets.sublime-workspace
+package-lock.json
