@@ -36,6 +36,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         exportFileName: null,
         drawingFolder: null,
 
+        defaultMeasurePointLabel: '{{x}}, {{y}}',
+        defaultMeasurePolygonLabel: '{{area}} {{areaUnit}}; {{length}} {{lengthUnit}}',
+        defaultMeasurePolylineLabel: '{{length}} {{lengthUnit}}',
+
         //_convertWarningScale: null,
 
 
@@ -1278,7 +1282,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             return symbol;
         },
 
-        importJsonContent: function importJsonContent(json, nameField, descriptionField) {
+        importJsonContent: function importJsonContent(json, nameField, descriptionField, measureField) {
             try {
                 if (typeof json == 'string') {
                     json = JSON.parse(json);
@@ -1323,6 +1327,18 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         }
                     }
                 }
+                if (!measureField) {
+                    var g = json.features[0];
+                    var fields_possible = ["measure"];
+                    if (g.attributes) {
+                        for (var i = 0, len = fields_possible.length; i < len; i++) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
+                                measureField = fields_possible[i];
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 var measure_features_i = [];
                 var graphics = [];
@@ -1338,6 +1354,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     g.attributes["name"] = !nameField || !g.attributes[nameField] ? 'n°' + (i + 1) : g.attributes[nameField];
                     if (g.symbol && g.symbol.type == "textsymbol") g.attributes["name"] = g.symbol.text;
                     g.attributes["description"] = !descriptionField || !g.attributes[descriptionField] ? '' : g.attributes[descriptionField];
+                    g.attributes["measure"] = !measureField || !g.attributes[measureField] ? '' : g.attributes[measureField];
 
                     if (!g.symbol) {
                         var symbol = false;
@@ -2032,6 +2049,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this._editorConfig["graphicCurrent"].attributes["description"] = this.descriptionField.value;
             //this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
             this._editorConfig["graphicCurrent"].attributes["symbolClass"] = this._getSymbolHash(JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson()));
+            this._editorConfig["graphicCurrent"].attributes["measure"] = this._getMeasureAttributeText(this._editorConfig["graphicCurrent"].geometry);
 
             if (this.editorSymbolChooser.type != "text") {
                 var geom = this._editorConfig["graphicCurrent"].geometry;
@@ -2124,7 +2142,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             graphic.attributes = {
                 "name": this.nameField.value,
                 "description": this.descriptionField.value,
-                "symbolClass": this._getSymbolHash(JSON.stringify(graphic.symbol.toJson()))
+                "symbolClass": this._getSymbolHash(JSON.stringify(graphic.symbol.toJson())),
+                "measure": this._getMeasureAttributeText(geometry)
             };
 
             if (geometry.type === 'extent') {
@@ -2287,9 +2306,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 }
 
                 // Update the label text
-                var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : "{{x}} {{y}}";
-                var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : "{{area}} {{areaUnit}}    {{length}} {{lengthUnit}}";
-                var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : "{{length}} {{lengthUnit}}";
+                var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+                var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+                var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
 
                 //Prepare text
                 if (x && y) {
@@ -2438,7 +2457,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 "parentId": attributes[this._objectIdName],
                 "nameField": attributes["name"],
                 "descriptionField": attributes["description"],
-                "symbolClass": attributes["symbolClass"]
+                "symbolClass": attributes["symbolClass"],
+                "measureField": attributes["measure"]
             };
         },
 
@@ -2446,7 +2466,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             return {
                 "name": attributes["nameField"],
                 "description": attributes["descriptionField"],
-                "symbolClass": attributes["symbolClass"]
+                "symbolClass": attributes["symbolClass"],
+                "measure": attributes["measureField"]
             };
         },
 
@@ -2901,9 +2922,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 return false;
             }
 
-            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : "{{x}} {{y}}";
-            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : "{{area}} {{areaUnit}}    {{length}} {{lengthUnit}}";
-            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : "{{length}} {{lengthUnit}}";
+            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
 
             //Prepare text
             if (x && y) {
@@ -3100,6 +3121,34 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }));
         },
 
+        _getMeasureAttributeText: function _getMeasureAttributeText(geometry) {
+            var measure = '';
+
+            var areaUnit = this.defaultAreaUnitSelect.value;
+            var lengthUnit = this.defaultDistanceUnitSelect.value;
+            var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
+
+            if (geometry.type == 'point') {
+                measure = pointPattern.replace("{{x}}", this._round(geometry.x, 2)).replace("{{y}}", this._round(geometry.y, 2));
+            } else if (geometry.type == 'polyline') {
+                this._getLengthAndArea(geometry, false).then(lang.hitch(this, function (result) {
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+                    measure = polylinePattern.replace("{{length}}", jimuUtils.localizeNumber(result.length.toFixed(1))).replace("{{lengthUnit}}", localeLengthUnit);
+                }));
+            } else if (geometry.type == 'polygon') {
+                this._getLengthAndArea(geometry, true).then(lang.hitch(this, function (result) {
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+                    var localeAreaUnit = this._getAreaUnitInfo(areaUnit).abbr;
+                    measure = polygonPattern.replace("{{length}}", jimuUtils.localizeNumber(result.length.toFixed(1))).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", jimuUtils.localizeNumber(result.area.toFixed(1))).replace("{{areaUnit}}", localeAreaUnit);
+                }));
+            }
+
+            return measure;
+        },
+
         ////////////////////////////////////// INIT METHODS /////////////////////////////////////////////////
 
         _bindEvents: function _bindEvents() {
@@ -3210,7 +3259,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             //Closure with timeout to be sure widget is ready
             (function (widget) {
                 setTimeout(function () {
-                    widget.importJsonContent(content, "name", "description");
+                    widget.importJsonContent(content, "name", "description", "measure");
                     widget.showMessage(widget.nls.localLoading);
                 }, 200);
             })(this);
@@ -3431,6 +3480,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     }]
                 };
 
+                var layerDefinitionWithMeasure = lang.clone(layerDefinition);
+                layerDefinitionWithMeasure.fields.push({
+                    "name": "measureField",
+                    "type": "esriFieldTypeString",
+                    "alias": "Measure"
+                });
+
                 var options = {
                     "infoTemplate": new PopupTemplate({
                         "title": "{nameField}",
@@ -3438,38 +3494,45 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         "fieldInfos": [{ "fieldName": "nameField", "visible": true, "label": this.nls.nameField }, { "fieldName": "descriptionField", "visible": true, "label": this.nls.descriptionField }]
                     })
                 };
+                var optionsWithMeasure = {
+                    "infoTemplate": new PopupTemplate({
+                        "title": "{nameField}",
+                        "description": '<p>{descriptionField}</p><p>[{measureField}]</p>',
+                        "fieldInfos": [{ "fieldName": "nameField", "visible": true, "label": this.nls.nameField }, { "fieldName": "descriptionField", "visible": true, "label": this.nls.descriptionField }]
+                    })
+                };
 
-                var pointDefinition = lang.clone(layerDefinition);
+                var pointDefinition = lang.clone(layerDefinitionWithMeasure);
                 pointDefinition.name = this.nls.points; //this.label + "_" +
                 pointDefinition.geometryType = "esriGeometryPoint";
                 this._pointLayer = new FeatureLayer({
                     layerDefinition: pointDefinition,
                     featureSet: null
-                }, lang.clone(options));
+                }, lang.clone(optionsWithMeasure));
                 this._pointLayer.arcgisProps = {
                     title: this.nls.points
                 };
                 this._pointLayer._titleForLegend = this.nls.points;
 
-                var polylineDefinition = lang.clone(layerDefinition);
+                var polylineDefinition = lang.clone(layerDefinitionWithMeasure);
                 polylineDefinition.name = this.nls.lines;
                 polylineDefinition.geometryType = "esriGeometryPolyline";
                 this._polylineLayer = new FeatureLayer({
                     layerDefinition: polylineDefinition,
                     featureSet: null
-                }, lang.clone(options));
+                }, lang.clone(optionsWithMeasure));
                 this._polylineLayer.arcgisProps = {
                     title: this.nls.lines
                 };
                 this._polylineLayer._titleForLegend = this.nls.lines;
 
-                var polygonDefinition = lang.clone(layerDefinition);
+                var polygonDefinition = lang.clone(layerDefinitionWithMeasure);
                 polygonDefinition.name = this.nls.areas;
                 polygonDefinition.geometryType = "esriGeometryPolygon";
                 this._polygonLayer = new FeatureLayer({
                     layerDefinition: polygonDefinition,
                     featureSet: null
-                }, lang.clone(options));
+                }, lang.clone(optionsWithMeasure));
                 this._polygonLayer.arcgisProps = {
                     title: this.nls.areas
                 };
