@@ -21,6 +21,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     graphicsHolder: null,
     slAppendChoice: null,
     chkAppendToDef: null,
+    persistOnClose: true,
     filterExt: null,
     dayInMS: 24 * 60 * 60 * 1000 - 1000, // 1 sec less than 1 day
 
@@ -50,6 +51,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       if (typeof this.config.webmapAppendMode !== 'undefined') {
         this.chkAppendToDef.checked = this.config.webmapAppendMode;
         this.slAppendChoice.value = this.config.slAppendChoice;
+      }
+
+      if (typeof this.config.persistOnClose !== 'undefined') {
+        this.persistOnClose = this.config.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
+      } else {
+        //if key does not exist, take the default value of the wisget
+        this.config.persistOnClose = this.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
       }
 
       this.createMapLayerList();
@@ -931,7 +941,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           else {
           */
           // layer.layerObject.setDefinitionExpression(expr.trim());
-          this._applyFilter(layer.layerObject, expr.trim());
+          this._applyFilter(layer.layerObject, expr.trim(), false);
           //}
           layer.layerObject.setVisibility(true);
         }
@@ -965,6 +975,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       //do nothing, not a valid service
 
       //}
+
     },
 
     resetLayerDef: function resetLayerDef(pParam) {
@@ -994,14 +1005,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     if (typeof layer.layerObject.defaultDefinitionExpression !== 'undefined') {
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     } else if (typeof layer.layerObject.layerDefinitions !== 'undefined') {
                       //layer.layerObject.setDefaultLayerDefinitions();
                       layer.layerObject.setLayerDefinitions(def.definition);
                     } else {
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     }
 
                     layer.layerObject.setVisibility(def.visible);
@@ -1138,13 +1149,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
     },
 
-    _applyFilter: function _applyFilter(layer, exp) {
+    _applyFilter: function _applyFilter(layer, exp, destory) {
       var howAppend = false;
       if (this.slAppendChoice.value === "AND") {
         howAppend = true;
       }
       FilterManager.getInstance().applyWidgetFilter(layer.id, this.id, exp, this.chkAppendToDef.checked, howAppend);
-      this._zoomOnFilter(layer);
+      if (!destory) {
+        this._zoomOnFilter(layer);
+      }
     },
 
     _zoomOnFilter: function _zoomOnFilter(layer) {
@@ -1208,10 +1221,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
             newExt = geometryEngine.buffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
           } else {
-            newExt = geometryEngine.buffer(ext2, 10, 9002, false).getExtent();
+            newExt = geometryEngine.buffer(ext, 10, 9002, false).getExtent();
           }
           // END: ECAN CUSTOM CODE
         } else {
+
           // BEGIN: ECAN CUSTOM CODE
           if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
             newExt = geometryEngine.geodesicBuffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
@@ -1236,7 +1250,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           newExt = geometryEngine.geodesicBuffer(newExt, 200, 9002, false).getExtent();
         }
         this.filterExt = newExt;
-        this.map.setExtent(newExt);
+        this.map.setExtent(newExt, true);
       }
     },
 

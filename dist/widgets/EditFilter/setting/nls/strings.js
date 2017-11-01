@@ -27,6 +27,7 @@ define({
       simpleModeTip : "Option to simplify the configured widget interface. When checked, the operator drop-down list and add criteria buttons are removed from the interface.",
       webmapAppendMode : "Append Filter to Existing Web Map Filter Using ",
       webmapAppendModeTip : "Option to append the filter set to an existing web map filter. Operators that are supported are OR and AND.",
+      persistOnClose: "Persist After Widget is Closed",
       optionsMode : "Hide Widget Options",
       optionsModeTip : "Option to expose additional widget settings. If checked, saving and loading defined filters and persisting the filter after the widget is closed are removed from the interface.",
       optionOR : "OR",

@@ -61,6 +61,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
     graphicsHolder: null,
     slAppendChoice: null,
     chkAppendToDef: null,
+    persistOnClose: true,
     filterExt: null,
     dayInMS: (24 * 60 * 60 * 1000) - 1000, // 1 sec less than 1 day
 
@@ -91,6 +92,15 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       if(typeof(this.config.webmapAppendMode) !== 'undefined') {
         this.chkAppendToDef.checked = this.config.webmapAppendMode;
         this.slAppendChoice.value = this.config.slAppendChoice;
+      }
+
+      if(typeof(this.config.persistOnClose) !== 'undefined') {
+        this.persistOnClose = this.config.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
+      } else {
+        //if key does not exist, take the default value of the wisget
+        this.config.persistOnClose = this.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
       }
 
       this.createMapLayerList();
@@ -1086,7 +1096,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
           else {
           */
           // layer.layerObject.setDefinitionExpression(expr.trim());
-          this._applyFilter(layer.layerObject, expr.trim());
+          this._applyFilter(layer.layerObject, expr.trim(), false);
           //}
           layer.layerObject.setVisibility(true);
         }
@@ -1121,6 +1131,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         //do nothing, not a valid service
       }
       //}
+
+
     },
 
     resetLayerDef: function(pParam) {
@@ -1150,7 +1162,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                     if(typeof(layer.layerObject.defaultDefinitionExpression) !== 'undefined'){
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     }
                     else if(typeof(layer.layerObject.layerDefinitions) !== 'undefined') {
                       //layer.layerObject.setDefaultLayerDefinitions();
@@ -1159,7 +1171,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                     else {
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     }
 
                     layer.layerObject.setVisibility(def.visible);
@@ -1297,13 +1309,15 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       }
     },
 
-    _applyFilter: function(layer, exp){
+    _applyFilter: function(layer, exp, destory){
       var howAppend = false;
       if(this.slAppendChoice.value === "AND") {
         howAppend = true;
       }
       FilterManager.getInstance().applyWidgetFilter(layer.id, this.id, exp, this.chkAppendToDef.checked, howAppend);
-      this._zoomOnFilter(layer);
+      if(!destory) {
+        this._zoomOnFilter(layer);
+      }
     },
 
     _zoomOnFilter: function(layer) {
@@ -1406,7 +1420,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
           newExt = (geometryEngine.geodesicBuffer(newExt, 200, 9002, false)).getExtent();
         }
         this.filterExt = newExt;
-        this.map.setExtent(newExt);
+        this.map.setExtent(newExt, true);
       }
     },
 
