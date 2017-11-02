@@ -19,23 +19,15 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/date/
     },
 
     linkClicked: function linkClicked() {
-      /*
-      var urlObject = urlUtils.urlToObject(window.location.href);
-      var queryObject = urlObject.query;
-      var queryValue = "";
-      if (this.featureIdentifier) {
-          queryValue = queryObject[this.featureIdentifier];
-      }
-      */
-
       var url = this.item.href;
+      var paramAttr = this.item.attr;
 
-      if (this.fieldValues && this.item.attr !== "") {
+      if (this.fieldValues && paramAttr !== "") {
         var fieldValue = "";
 
         if (this.fieldValues && this.fieldValues.length > 0) {
           array.some(this.fieldValues, lang.hitch(this, function (field) {
-            if (field.fieldName === fieldValues) {
+            if (field.fieldName === paramAttr) {
               fieldValue = field.value;
               return false;
             }
@@ -44,7 +36,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/date/
 
         url = url.replace(/\{([a-zA-Z]+)\}/g, lang.hitch(this, function (match) {
           var token = match.replace(/\{|\}/g, "");
-          if (token === this.item.attr) {
+          if (token === paramAttr) {
             return fieldValue;
           }
         }));
@@ -57,7 +49,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/date/
       // TODO escape text or not?
       //util.setNodeText(this.titleNode, this.item.title);
       //util.setNodeTitle(this.titleNode, this.item.title);
-    }
+    },
 
+    destroy: function destroy() {
+      this.inherited(arguments);
+    }
   });
 });

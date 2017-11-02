@@ -2122,6 +2122,10 @@ define([
             presetValueTable.appendChild(row);
           }
         }));
+
+        // BEGIN: ECAN CHANGE - Refresh UI Links to account for preset value parameters
+        this._updateLinksUI();
+        // END: ECAN CHANGE
       },
 
       _dateClick: function (dateWidget, timeWidget) {
@@ -2289,6 +2293,10 @@ define([
               //}
             }
           }));
+
+          /* BEGIN: ECAN CHANGES - Call to update the link button urls if preset values change */
+          this._updateLinksUI();
+          /* END: ECAN CHANGES */
         }
       },
 
@@ -3756,6 +3764,16 @@ define([
         if (!this._links || this._links.length == 0) {
             domConstruct.destroy(this.linksDiv);
         } else {
+            // Destroy the old links if any
+            if (this._linkControls) {
+              array.forEach(this._linkControls, lang.hitch(this, function (linkControl) {
+                linkControl.destroy();
+              }));
+            } else {
+              this._linkControls = [];
+            }
+
+            // Populate the links
             var fieldValues = this._getPresetValues();
 
             array.forEach(this._links, lang.hitch(this, function (linkConfig) {
@@ -3766,6 +3784,7 @@ define([
 
               link.placeAt(this.linksTableNode);
               link.startup();
+              this._linkControls.push(link);
             }));
             this.resize();
         }
