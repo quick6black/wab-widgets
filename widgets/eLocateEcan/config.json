@@ -1,6 +1,6 @@
 {
   "locator": {
-    "url": "http://gis.ecan.govt.nz/arcgis/rest/services/Locators/Canterbury_Composite_Locator/GeocodeServer",
+    "url": "https://gis.ecan.govt.nz/arcgis/rest/services/Locators/Canterbury_Composite_Locator/GeocodeServer",
     "name": "Canterbury Geocoder",
     "singleLineFieldName": "SingleLine",
     "countryCode": ""
@@ -49,7 +49,7 @@
         "wkid": 2193,
         "mapref": true,
         "name": "NZTopo50 Map Reference",
-        "example": "BK34, 082, 882",
+        "example": "BX24, 706, 802",
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""
@@ -67,7 +67,7 @@
         "wkid": 27200,
         "mapref": true,
         "name": "NZ260 Map Reference",
-        "example": "S22, 182, 499",
+        "example": "M35, 8858, 4457",
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""

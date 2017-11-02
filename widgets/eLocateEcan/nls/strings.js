@@ -17,6 +17,7 @@ define({
     wabversionmsg: "Widget is designed to run in Web AppBuilder version",
     revgeocodetip: "Inspect Address by Point",
     coordUnitLbl: "Units:",
+    mapSheetLbl: "Map Sheet:",
     example: "Example:",
     locate: "Locate",
     drawpointtooltip: "Inspect Locations Address",

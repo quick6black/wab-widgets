@@ -370,6 +370,7 @@ define([
         this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
         this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
         this.CoordHintText.innerHTML = this._unitArr[newValue].example;
+        this.mapSheetDD.set('value', '');
         this.xCoordTextBox.set('value', '');
         this.yCoordTextBox.set('value', '');
         if (this._unitArr[newValue].mapref) {
@@ -386,6 +387,10 @@ define([
           var lenWkids = this.config.mapSheets.length;
           for (var i = 0; i < lenWkids; i++) {
               if (this.config.mapSheets[i].wkid == wkid) {
+                  options.push({
+                      value: null,
+                      label: ''
+                  });
                   var lenSheets = this.config.mapSheets[i].sheets.length;
                   for (var j = 0; j < lenSheets; j++) {
                       var option = {
@@ -397,9 +402,8 @@ define([
                   break;
               }
           }
-          this.mapsheetdd.removeOption(this.mapsheetdd.getOptions());
-          this.mapsheetdd.addOption(options);
-          //this.own(on(this.mapsheetdd, "change", lang.hitch(this, this._unitDDChanged)));
+          this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
+          this.mapSheetDD.addOption(options);
       },
 
       isSelTabVisible: function () {
@@ -612,8 +616,16 @@ define([
 
       _addExampleText: function() {
         var exampleArr = this.CoordHintText.innerHTML.split(",");
-        this.xCoordTextBox.set('value', exampleArr[0]);
-        this.yCoordTextBox.set('value', exampleArr[1]);
+        var selUnit = this._unitArr[this.unitdd.get('value')];
+        if (selUnit.mapref) {
+            this.mapSheetDD.set('value', exampleArr[0]);
+            this.xCoordTextBox.set('value', exampleArr[1]);
+            this.yCoordTextBox.set('value', exampleArr[2]);
+        }
+        else {
+            this.xCoordTextBox.set('value', exampleArr[0]);
+            this.yCoordTextBox.set('value', exampleArr[1]);
+        }
       },
 
       _clear: function () {
@@ -673,11 +685,12 @@ define([
       prelocateCoords: function ()  {
         var long = this.xCoordTextBox.get('value');
         var lat = this.yCoordTextBox.get('value');
-        if (long && lat){
+        var sheetID = this.mapSheetDD.get('value');
+        var selUnit = this._unitArr[this.unitdd.get('value')];
+        if (long && lat && (sheetID || !selUnit.mapref)){
           var numLong = parseFloat(long);
           var numLat = parseFloat(lat);
-          var selUnit = this._unitArr[this.unitdd.get('value')];
-          if(selUnit.wkid === this.map.spatialReference.wkid || selUnit.wgs84option == "map"){
+          if ((selUnit.wkid === this.map.spatialReference.wkid && !selUnit.mapref) || selUnit.wgs84option == "map"){
             this.locateCoordinates();
           }else{
             this.tabContainer.selectTab(this.nls.resultslabel);
@@ -702,6 +715,32 @@ define([
                 this.projectCompleteHandler2([wmPoint]);
                 return;
               }
+            } else if (selUnit.mapref) {
+                var lenWkids = this.config.mapSheets.length;
+                for (var i = 0; i < lenWkids; i++) {
+                    if (this.config.mapSheets[i].wkid == selUnit.wkid) {
+                        var lenSheets = this.config.mapSheets[i].sheets.length;
+                        for (var j = 0; j < lenSheets; j++) {
+                            if (this.config.mapSheets[i].sheets[j].sheetID == sheetID) {
+                                var mapSheet = this.config.mapSheets[i].sheets[j];
+
+                                // Convert the grid coordinates
+                                numLong = parseFloat((mapSheet.xmin.substring(0, 2) + long + '0000000').substring(0, 7));
+                                numLat = parseFloat((mapSheet.ymin.substring(0, 2) + lat + '0000000').substring(0, 7));
+
+                                point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
+                                if (webMercatorUtils.canProject(point, this.map)) {
+                                    wmPoint = webMercatorUtils.project(point, this.map);
+                                    this.projectCompleteHandler2([wmPoint]);
+                                    return;
+                                }
+
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
             } else {
               point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
               if (webMercatorUtils.canProject(point, this.map)) {
@@ -731,11 +770,13 @@ define([
         try{
           var long = this.xCoordTextBox.get('value');
           var lat = this.yCoordTextBox.get('value');
-          if (long && lat){
+          var sheetID = this.mapSheetDD.get('value');
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+          if (long && lat && (sheetID || !selUnit.mapref)){
             var locateResult = {};
             locateResult.sym = this.coordMarkerSymbol;
             locateResult.title = this.nls.coordslabel;
-            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + long + ", " + lat;
+            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
             locateResult.point = results[0];
             locateResult.alt = false;
             locateResult.id = 'id_1';
