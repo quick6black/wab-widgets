@@ -163,6 +163,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                     xlabel: unitConfig[0].xlabel,
                     ylabel: unitConfig[0].ylabel,
                     wkid: unitConfig[0].wkid,
+                    mapref: unitConfig[0].mapref,
                     wgs84option: unitConfig[0].wgs84option
                 });
                 unitConfig[1].singleUnit = unitConfig[0];
@@ -174,6 +175,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                     xlabel: unitConfig[0].xlabel,
                     ylabel: unitConfig[0].ylabel,
                     wkid: unitConfig[0].wkid,
+                    mapref: unitConfig[0].mapref,
                     wgs84option: unitConfig[0].wgs84option
                 });
                 unitConfig[1].singleUnit = unitConfig[0];
@@ -259,6 +261,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                 xlabel: args.config && args.config.xlabel || '',
                 ylabel: args.config && args.config.ylabel || '',
                 wkid: args.config && args.config.wkid || '',
+                mapref: args.config && args.config.mapref || '',
                 wgs84option: args.config && args.config.wgs84option || ''
             };
 

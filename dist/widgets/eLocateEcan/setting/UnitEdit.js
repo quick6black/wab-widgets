@@ -54,6 +54,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
       }
       var config = {
         wkid: utils.standardizeWkid(this.wkid.get('value')),
+        mapref: this.unitMapRefTB.get('value') === 'on',
         name: this.unitnameTB.get('value'),
         example: this.unitExampleTB.get('value'),
         xlabel: this.unitXLabelTB.get('value'),
@@ -70,6 +71,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
       utils.loadResource().then(lang.hitch(this, function () {
         if (config && config.wkid) {
           this.wkid.set('value', parseInt(config.wkid, 10));
+          this.unitMapRefTB.set('value', this.config.mapref);
           this.currentWkid = parseInt(config.wkid, 10);
           this.unitnameTB.set('value', lang.trim(this.config.name));
           this.unitExampleTB.set('value', lang.trim(this.config.example));
@@ -144,11 +146,17 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
           domStyle.set(this.unitWkid4326Ops1, 'display', 'none');
           domStyle.set(this.unitWkid4326Ops2, 'display', 'none');
         }
+        if (newWkid === 2193 || newWkid === 27200) {
+          domStyle.set(this.wkidMapRef, 'display', '');
+        } else {
+          domStyle.set(this.wkidMapRef, 'display', 'none');
+        }
       } else if (newValue) {
         this.wkid.set('value', "");
         this.wkidLabel.innerHTML = this.nls.cName;
         domStyle.set(this.unitWkid4326Ops1, 'display', 'none');
         domStyle.set(this.unitWkid4326Ops2, 'display', 'none');
+        domStyle.set(this.wkidMapRef, 'display', 'none');
       }
       this.currentWkid = newWkid;
     }

@@ -1,6 +1,6 @@
 {
-  "name": "eLocate",
-  "label": "Enhanced Locate",
+  "name": "eLocateEcan",
+  "label": "Enhanced Locate (Ecan)",
   "2D": true,
   "3D": false,
   "type": "widget",

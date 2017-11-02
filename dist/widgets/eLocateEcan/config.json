@@ -38,6 +38,7 @@
     "pointunit": [
       {
         "wkid": 2193,
+        "mapref":  false,
         "name": "NZTM",
         "example": "1577194.01, 5171715.27",
         "xlabel": "Easting (X):",
@@ -45,7 +46,17 @@
         "wgs84option": ""
       },
       {
+        "wkid": 2193,
+        "mapref": true,
+        "name": "NZTopo50 Map Reference",
+        "example": "BK34, 082, 882",
+        "xlabel": "Easting (X):",
+        "ylabel": "Northing (Y):",
+        "wgs84option": ""
+      },
+      {
         "wkid": 27200,
+        "mapref": false,
         "name": "NZMG",
         "example": "2494375.81, 5735582.68",
         "xlabel": "Easting (X):",
@@ -53,7 +64,17 @@
         "wgs84option": ""
       },
       {
+        "wkid": 27200,
+        "mapref": true,
+        "name": "NZ260 Map Reference",
+        "example": "S22, 182, 499",
+        "xlabel": "Easting (X):",
+        "ylabel": "Northing (Y):",
+        "wgs84option": ""
+      },
+      {
         "wkid": 4326,
+        "mapref": false,
         "name": "Decimal Degrees (WGS84)",
         "example": "172.715, -43.607",
         "xlabel": "Longitude:",
@@ -62,6 +83,7 @@
       },
       {
         "wkid": 4326,
+        "mapref": false,
         "name": "Degrees Decimal Minutes (WGS84)",
         "example": "172-40.33 E, 43-35.50 S",
         "xlabel": "Longitude:",
@@ -70,6 +92,7 @@
       },
       {
         "wkid": 4326,
+        "mapref": false,
         "name": "Degrees Minutes Seconds (WGS84)",
         "example": "172-40-1.45 E, 43-39-10.99 S",
         "xlabel": "Longitude:",
