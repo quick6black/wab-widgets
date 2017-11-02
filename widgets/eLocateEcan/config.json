@@ -1,0 +1,86 @@
+{
+  "locator": {
+    "url": "http://gis.ecan.govt.nz/arcgis/rest/services/Locators/Canterbury_Composite_Locator/GeocodeServer",
+    "name": "Canterbury Geocoder",
+    "singleLineFieldName": "SingleLine",
+    "countryCode": ""
+  },
+  "keepinspectoractive": true,
+  "initialView": "coordinate",
+  "enablemouseoverrecordinfo": false,
+  "enablemouseovergraphicsinfo": true,
+  "zoomscale": 5000,
+  "forcescale": true,
+  "symbols": {
+    "coordpicturemarkersymbol": {
+      "type": "esriPMS",
+      "url": "images/i_pin1.png",
+      "contentType": "image/png",
+      "width": 20,
+      "height": 20
+    },
+    "geopicturemarkersymbol": {
+      "type": "esriPMS",
+      "url": "images/i_house.png",
+      "contentType": "image/png",
+      "height": 20,
+      "width": 20
+    },
+    "addresspicturemarkersymbol": {
+      "type": "esriPMS",
+      "url": "images/i_mailbox.png",
+      "contentType": "image/png",
+      "height": 20,
+      "width": 20
+    }
+  },
+  "pointunits": {
+    "pointunit": [
+      {
+        "wkid": 2193,
+        "name": "NZTM",
+        "example": "1577194.01, 5171715.27",
+        "xlabel": "Easting (X):",
+        "ylabel": "Northing (Y):",
+        "wgs84option": ""
+      },
+      {
+        "wkid": 27200,
+        "name": "NZMG",
+        "example": "2494375.81, 5735582.68",
+        "xlabel": "Easting (X):",
+        "ylabel": "Northing (Y):",
+        "wgs84option": ""
+      },
+      {
+        "wkid": 4326,
+        "name": "Decimal Degrees (WGS84)",
+        "example": "172.715, -43.607",
+        "xlabel": "Longitude:",
+        "ylabel": "Latitude:",
+        "wgs84option": "dd"
+      },
+      {
+        "wkid": 4326,
+        "name": "Degrees Decimal Minutes (WGS84)",
+        "example": "172-40.33 E, 43-35.50 S",
+        "xlabel": "Longitude:",
+        "ylabel": "Latitude:",
+        "wgs84option": "ddm"
+      },
+      {
+        "wkid": 4326,
+        "name": "Degrees Minutes Seconds (WGS84)",
+        "example": "172-40-1.45 E, 43-39-10.99 S",
+        "xlabel": "Longitude:",
+        "ylabel": "Latitude:",
+        "wgs84option": "dms"
+      }
+    ]
+  },
+  "limitsearchtomapextentbydefault": false,
+  "disabledtabs": [
+    "address",
+    "reverse"
+  ]
+}
