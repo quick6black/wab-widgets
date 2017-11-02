@@ -34,6 +34,7 @@ define([
   'dojo/Deferred',
   'dijit/ProgressBar',
   'dojo/_base/lang',
+  'dojo/dom-style',
   'dojo/on',
   'dojo/aspect',
   'dojo/_base/html',
@@ -53,7 +54,7 @@ define([
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, lang, domStyle, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -371,6 +372,34 @@ define([
         this.CoordHintText.innerHTML = this._unitArr[newValue].example;
         this.xCoordTextBox.set('value', '');
         this.yCoordTextBox.set('value', '');
+        if (this._unitArr[newValue].mapref) {
+            this._refreshMapSheetDD(this._unitArr[newValue].wkid);
+            domStyle.set(this.mapSheetDiv, 'display', '');
+        }
+        else {
+            domStyle.set(this.mapSheetDiv, 'display', 'none');
+        }
+      },
+
+      _refreshMapSheetDD: function (wkid) {
+          var options = [];
+          var lenWkids = this.config.mapSheets.length;
+          for (var i = 0; i < lenWkids; i++) {
+              if (this.config.mapSheets[i].wkid == wkid) {
+                  var lenSheets = this.config.mapSheets[i].sheets.length;
+                  for (var j = 0; j < lenSheets; j++) {
+                      var option = {
+                          value: this.config.mapSheets[i].sheets[j].sheetID,
+                          label: this.config.mapSheets[i].sheets[j].sheetID
+                      };
+                      options.push(option);
+                  }
+                  break;
+              }
+          }
+          this.mapsheetdd.removeOption(this.mapsheetdd.getOptions());
+          this.mapsheetdd.addOption(options);
+          //this.own(on(this.mapsheetdd, "change", lang.hitch(this, this._unitDDChanged)));
       },
 
       isSelTabVisible: function () {
