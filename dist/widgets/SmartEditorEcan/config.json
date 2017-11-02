@@ -7,8 +7,10 @@
         "useFilterEditor": false,
         "listenToGF": false,
         "keepTemplateSelected": false,
+        "editGeometryDefault": false,
+        "autoSaveEdits": false,
         "useURLParameters": false,
-	"copyExistingValues": true
+		"copyExistingValues": true
     },
    "links": [],
    "editScaleLimit": "200000"

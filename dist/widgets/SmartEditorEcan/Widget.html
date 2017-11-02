@@ -2,16 +2,27 @@
     <!--<div class="widgetActive widgetIndicator" id="widgetActiveIndicator" data-dojo-attach-point="widgetActiveIndicator"></div>-->
     <div class="templatePickerMainDiv">
 
-        <div class="templatePickerDiv" data-dojo-attach-point="templatePickerDiv">
+        <div id="templatePickerDiv" class="templatePickerDiv" data-dojo-attach-point="templatePickerDiv">
             <div data-dojo-attach-point="templateTitle">
 
             </div>
             <div class="spacer"></div>
         </div>
+        <div class="drawingOptionsDiv">
+            <div data-dojo-attach-point="drawingOptionsDiv">
+            </div>
+        </div>
         <br />
 
-        <div class="presetFieldsTableDiv">
-            <div class="spacer"></div>
+        <div class="autoSaveOptionDiv">
+            <div>
+                <input id="autoSaveSwitch" data-dojo-type="dijit/form/CheckBox"
+                       data-dojo-attach-event="change:_toggleRunTimeAutoSave" checked="true" />
+                <label id="lblAutoSave" for="autoSaveSwitch">${nls.autoSaveEdits}</label>
+            </div>
+        </div>
+        <div id="presetFieldsTableDiv" class="presetFieldsTableDiv" data-dojo-attach-point="presetFieldsTableDiv">
+            <div class=" spacer"></div>
             <div>
                 <input id="savePresetValueSwitch" data-dojo-type="dijit/form/CheckBox"
                        data-dojo-attach-event="change:_setPresetValue" />

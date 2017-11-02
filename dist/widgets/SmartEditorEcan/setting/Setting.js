@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetSetting', 'jimu/dijit/SimpleTable', 'jimu/LayerInfos/LayerInfos', 'dojo/_base/lang', 'dojo/on', 'dojo/query', 'dijit/registry', 'dojo/_base/array', "./EditFields", "./EditDescription", "../utils", 'dijit/Editor', 'dojo/dom-style', 'dojo/sniff', 'jimu/utils', 'dojo/_base/html', 'jimu/dijit/Message', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dijit/_editor/plugins/FontChoice', 'dojox/editor/plugins/Preview', 'dijit/_editor/plugins/TextColor', 'dojox/editor/plugins/ToolbarLineBreak', 'dojox/editor/plugins/FindReplace', 'dojox/editor/plugins/PasteFromWord', 'dojox/editor/plugins/InsertAnchor', 'dojox/editor/plugins/Blockquote', 'dojox/editor/plugins/UploadImage', './ChooseImage', 'jimu/dijit/EditorTextColor', 'jimu/dijit/EditorBackgroundColor'], function (declare, _WidgetsInTemplateMixin, BaseWidgetSetting, Table, LayerInfos, lang, on, query, registry, array, EditFields, EditDescription, editUtils, Editor, domStyle, has, utils, html, Message) {
+// jscs:disable validateIndentation
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetSetting', 'jimu/dijit/SimpleTable', 'jimu/LayerInfos/LayerInfos', 'dojo/_base/lang', 'dojo/on', 'dojo/query', 'dijit/registry', 'dojo/_base/array', "./EditFields", "./EditDescription", "../utils", 'dijit/Editor', 'dojo/dom-style', 'dojo/sniff', 'jimu/utils', 'dojo/_base/html', 'jimu/dijit/Message', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dijit/_editor/plugins/FontChoice', 'dojox/editor/plugins/Preview', 'dijit/_editor/plugins/TextColor', 'dojox/editor/plugins/ToolbarLineBreak', 'dojox/editor/plugins/FindReplace', 'dojox/editor/plugins/PasteFromWord', 'dojox/editor/plugins/InsertAnchor', 'dojox/editor/plugins/Blockquote', 'dojox/editor/plugins/UploadImage', 'jimu/dijit/EditorChooseImage', 'jimu/dijit/EditorTextColor', 'jimu/dijit/EditorBackgroundColor'], function (declare, _WidgetsInTemplateMixin, BaseWidgetSetting, Table, LayerInfos, lang, on, query, registry, array, EditFields, EditDescription, editUtils, Editor, domStyle, has, utils, html, Message) {
   return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
     //these two properties is defined in the BaseWidget
     baseClass: 'jimu-widget-smartEditor-setting',
@@ -178,6 +178,16 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
     _initSettings: function _initSettings() {
       //this.showDeleteButton.set('checked', this.config.editor.showDeleteButton);
       this.useFilterEditor.set('checked', this.config.editor.useFilterEditor);
+      if (this.config.editor.hasOwnProperty("displayShapeSelector")) {
+        this.displayShapeSelector.set('checked', this.config.editor.displayShapeSelector);
+      } else {
+        this.displayShapeSelector.set('checked', false);
+      }
+      if (this.config.editor.hasOwnProperty("displayPresetTop")) {
+        this.displayPresetTop.set('checked', this.config.editor.displayPresetTop);
+      } else {
+        this.displayPresetTop.set('checked', false);
+      }
       this.displayPromptOnSave.set('checked', this.config.editor.displayPromptOnSave);
       this.displayPromptOnDelete.set('checked', this.config.editor.displayPromptOnDelete);
       this.removeOnSave.set('checked', this.config.editor.removeOnSave);
@@ -191,6 +201,26 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
       } else {
         this.keepTemplateSelected.set('checked', false);
       }
+      if (this.config.editor.hasOwnProperty("editGeometryDefault")) {
+        this.editGeometryDefault.set('checked', this.config.editor.editGeometryDefault);
+      } else {
+        this.editGeometryDefault.set('checked', false);
+      }
+      if (this.config.editor.hasOwnProperty("autoSaveEdits")) {
+        this.autoSaveEdits.set('checked', this.config.editor.autoSaveEdits);
+        //if(this.autoSaveEdits.get('checked')) {
+        //  this.removeOnSave.set('checked', true);
+        //}
+      } else {
+        this.autoSaveEdits.set('checked', false);
+      }
+      this.own(on(this.autoSaveEdits, 'click', lang.hitch(this, function () {
+        if (this.autoSaveEdits.get('checked')) {
+          this.removeOnSave.set('checked', true);
+        } else {
+          this.removeOnSave.set('checked', false);
+        }
+      })));
       //this.clearSelectionOnClose.set('checked', false);
     },
 
@@ -420,11 +450,18 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
       this.config.editor.displayPromptOnSave = this.displayPromptOnSave.checked === undefined ? false : this.displayPromptOnSave.checked;
       this.config.editor.displayPromptOnDelete = this.displayPromptOnDelete.checked === undefined ? false : this.displayPromptOnDelete.checked;
       this.config.editor.removeOnSave = this.removeOnSave.checked === undefined ? false : this.removeOnSave.checked;
+
       this.config.editor.useFilterEditor = this.useFilterEditor.checked === undefined ? false : this.useFilterEditor.checked;
 
+      this.config.editor.displayShapeSelector = this.displayShapeSelector.checked === undefined ? false : this.displayShapeSelector.checked;
+      this.config.editor.displayPresetTop = this.displayPresetTop.checked === undefined ? false : this.displayPresetTop.checked;
       this.config.editor.listenToGF = this.listenToGF.checked === undefined ? false : this.listenToGF.checked;
 
       this.config.editor.keepTemplateSelected = this.keepTemplateSelected.checked === undefined ? false : this.keepTemplateSelected.checked;
+
+      this.config.editor.editGeometryDefault = this.editGeometryDefault.checked === undefined ? false : this.editGeometryDefault.checked;
+
+      this.config.editor.autoSaveEdits = this.autoSaveEdits.checked === undefined ? false : this.autoSaveEdits.checked;
     },
 
     getConfig: function getConfig() {

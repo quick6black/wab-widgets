@@ -1,11 +1,14 @@
+// jscs:disable validateIndentation
 define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/json', "dojo/text!./FilterPage.html", 'dijit/_TemplatedMixin', 'jimu/BaseWidgetSetting', "jimu/dijit/Popup", 'jimu/dijit/Filter', 'esri/lang', "dojox/html/entities", "dijit/form/CheckBox", 'dojo/dom-construct'], function (declare, lang, JSON, template, _TemplatedMixin, BaseWidgetSetting, Popup, Filter, esriLang, entities, CheckBox, domConstruct) {
   return declare([BaseWidgetSetting, _TemplatedMixin], {
     baseClass: "jimu-widget-smartEditor-filter-page",
     templateString: template,
     _filter: null,
     _url: null,
+    _layerId: null,
     _layerDefinition: null,
     _validationTable: null,
+
     postCreate: function postCreate() {
       this.inherited(arguments);
       this._init();
@@ -97,10 +100,23 @@ define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/json', "dojo/text!./Filte
         });
 
         if (rowData.filter === undefined || rowData.filter === null || rowData.filter === '') {
-          this._filter.buildByExpr(this._url, null, this._layerDefinition);
+          // this._filter.buildByExpr(this._url, null, this._layerDefinition);
+          this._filter.build({
+            url: this._url,
+            expr: null,
+            layerDefinition: this._layerDefinition,
+            featureLayerId: this._layerId
+          });
         } else {
 
-          this._filter.buildByExpr(this._url, entities.decode(rowData.expression), this._layerDefinition);
+          // this._filter.buildByExpr(this._url, entities.decode(rowData.expression),
+          //   this._layerDefinition);
+          this._filter.build({
+            url: this._url,
+            expr: entities.decode(rowData.expression),
+            layerDefinition: this._layerDefinition,
+            featureLayerId: this._layerId
+          });
         }
       }
     }

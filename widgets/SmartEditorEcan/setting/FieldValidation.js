@@ -37,6 +37,8 @@ define(
       _url: null,
       _fieldName: null,
       _fieldValidations: null,
+      _layerId: null,
+
       postCreate: function () {
         this.inherited(arguments);
         this._initActionsTable();
@@ -307,6 +309,7 @@ define(
           nls: this.nls,
           _resourceInfo: this._resourceInfo,
           _url: this._url,
+          _layerId: this._layerId,
           _validationTable: this._validationTable
         });
         this._filterPage.popup(tr);
