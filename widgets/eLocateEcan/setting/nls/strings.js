@@ -5,6 +5,7 @@ define({
     "xlabel": "X Label",
     "ylabel": "Y Label",
     "wkid": "WKID",
+    "mapref": "Map Ref",
     "countryCode": "Country Code(s)",
     "countryCodeEg": "e.g. ",
     "countryCodeHint": "Leaving this value blank will search all countries",
