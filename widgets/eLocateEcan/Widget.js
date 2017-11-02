@@ -725,8 +725,9 @@ define([
                                 var mapSheet = this.config.mapSheets[i].sheets[j];
 
                                 // Convert the grid coordinates
-                                numLong = parseFloat((mapSheet.xmin.substring(0, 2) + long + '0000000').substring(0, 7));
-                                numLat = parseFloat((mapSheet.ymin.substring(0, 2) + lat + '0000000').substring(0, 7));
+                                // NOTE: parseInt is used to remove any decimal places before padding with 0's
+                                numLong = parseFloat(parseInt((mapSheet.xmin.substring(0, 2) + long + '0000000')).toString().substring(0, 7));
+                                numLat = parseFloat(parseInt((mapSheet.ymin.substring(0, 2) + lat + '0000000')).toString().substring(0, 7));
 
                                 point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
                                 if (webMercatorUtils.canProject(point, this.map)) {
