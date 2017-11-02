@@ -107,6 +107,15 @@ define([
 
     onOkClick: function (evt) {
       return evt;
+    },
+
+    destroy: function () {
+      this.inherited(arguments);
+
+      if (this.templatePicker) {
+        this.templatePicker.destroy();
+        this.templatePicker = null;
+      }
     }
   });
 });

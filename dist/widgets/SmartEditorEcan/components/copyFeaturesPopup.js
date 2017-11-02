@@ -85,6 +85,15 @@ define(["dojo/_base/declare", "jimu/BaseWidgetSetting", "dijit/_WidgetsInTemplat
 
     onOkClick: function onOkClick(evt) {
       return evt;
+    },
+
+    destroy: function destroy() {
+      this.inherited(arguments);
+
+      if (this.templatePicker) {
+        this.templatePicker.destroy();
+        this.templatePicker = null;
+      }
     }
   });
 });
