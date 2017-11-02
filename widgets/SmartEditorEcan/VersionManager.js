@@ -81,7 +81,25 @@ function (BaseVersionManager) {
         }
         return newConfig;
       }
-    }];
+    }, {
+      version: '2.5',
+      upgrader: function (oldConfig) {
+        var newConfig = oldConfig;
+        newConfig.editor.editGeometryDefault = false;
+        newConfig.editor.autoSaveEdits = false;
+        return newConfig;
+      }
+    },
+    {
+      version: '2.6',
+      upgrader: function (oldConfig) {
+        var newConfig = oldConfig;
+        newConfig.editor.displayPresetTop = false;
+        newConfig.editor.displayShapeSelector = false;
+        return newConfig;
+      }
+    }
+    ];
   }
 
   VersionManager.prototype = new BaseVersionManager();

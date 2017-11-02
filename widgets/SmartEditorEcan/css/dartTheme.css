@@ -49,3 +49,10 @@
     left: -15px !important;
     width: 125% !important;
 }
+/* dropdown */
+
+    .drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+        
+        border: 1px solid #7EABCD!important;
+     
+    }

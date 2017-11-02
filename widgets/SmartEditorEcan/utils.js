@@ -1,5 +1,5 @@
 /*
-Copyright ©2014 Esri. All rights reserved.
+// Copyright © 2014 - 2017 Esri. All rights reserved.
 
 TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
 Unpublished material - all rights reserved under the
@@ -23,7 +23,7 @@ define([
   'esri/geometry/Extent',
   'jimu/utils',
   'esri/dijit/AttributeInspector'
-], function (declare,lang, array, Extent, jimuUtils, AttributeInspector) {
+], function (declare, lang, array, Extent, jimuUtils, AttributeInspector) {
 
   var mo = {};
   // Working around for bug of AttributeInspector. Incorrect behavior with
@@ -53,6 +53,9 @@ define([
 
   mo.filterOnlyUpdatedAttributes = function (attributes, origAttributes, featureLayer) {
 
+    if (origAttributes === null || origAttributes === undefined) {
+      return attributes;
+    }
     var updatedAttrs = {};
     for (var prop in attributes) {
       if (attributes.hasOwnProperty(prop)) {
@@ -73,7 +76,7 @@ define([
   //Methods to get the Field Info from the map, layer and configuration
   mo.mergeFieldInfosWithConfiguration = function (layerInfo, configurationLayerInfo) {
     var fieldInfos = [];
-    var defaultEditableFieldInfos = this.getDefaultEditableFieldInfos(layerInfo, true);
+    var defaultEditableFieldInfos = this.getDefaultEditableFieldInfos(layerInfo, false);
 
     if (configurationLayerInfo && configurationLayerInfo.fieldInfos) {
 
@@ -98,17 +101,68 @@ define([
     } else {
       fieldInfos = defaultEditableFieldInfos;
     }
+    var fields_to_remove = [];
+    if (layerInfo.layerObject.hasOwnProperty('globalIdField')) {
+      if (layerInfo.layerObject.globalIdField !== undefined && layerInfo.layerObject.globalIdField !== null) {
+        fields_to_remove.push(layerInfo.layerObject.globalIdField);
+      }
+    }
+    if (layerInfo.layerObject.hasOwnProperty('objectIdField')) {
+      if (layerInfo.layerObject.objectIdField !== undefined && layerInfo.layerObject.objectIdField !== null) {
+        fields_to_remove.push(layerInfo.layerObject.objectIdField);
+      }
+    }
+
+    if (layerInfo.layerObject.hasOwnProperty('editFieldsInfo')) {
+      if (layerInfo.layerObject.editFieldsInfo !== undefined && layerInfo.layerObject.editFieldsInfo !== null) {
+        for (var k in layerInfo.layerObject.editFieldsInfo) {
+          if (layerInfo.layerObject.editFieldsInfo.hasOwnProperty(k)) {
+            fields_to_remove.push(layerInfo.layerObject.editFieldsInfo[k]);
+          }
+        }
+      }
+    }
+    fieldInfos = fieldInfos.filter(function (field) {
+      if (array.indexOf(fields_to_remove, field.fieldName) !== -1) {
+        return false;
+      }
+      return field.isEditableOnLayer;
+    });
     return fieldInfos;
   };
   mo.getDefaultEditableFieldInfos = function (layerInfo, editableOnly) {
     var filteredFieldInfos = [];
     var fieldInfos =
      this.getFieldInfosFromWebmap(layerInfo);
+    var fcInfos = this.getFieldInfosLayer(layerInfo);
     if (fieldInfos === undefined || fieldInfos === null) {
-      fieldInfos = this.getFieldInfosLayer(layerInfo);
+      fieldInfos = fcInfos;
+    }
+    else {
+      var infosToAdd = [];
+      array.forEach(fcInfos, function (fcInfo) {
+        var filteredArr = array.filter(fieldInfos, function (fieldInfo) {
+          return fieldInfo.name === fcInfo.fieldName;
+        });
+        if (filteredArr.length === 0) {
+          fcInfo.isEditableOnLayer = fcInfo.editable;
+          infosToAdd.push(fcInfo);
+        }
+      });
+      if (infosToAdd.length > 0) {
+        fieldInfos = fieldInfos.concat(infosToAdd);
+      }
     }
     array.forEach(fieldInfos, function (fieldInfo) {
-      fieldInfo.isEditable = fieldInfo.editable;
+      if (fieldInfo.hasOwnProperty('isEditableOnLayer') === false) {
+        fieldInfo.isEditableOnLayer = fieldInfo.editable;
+      }
+      if (fieldInfo.editable === false) {
+        fieldInfo.isEditable = fieldInfo.editable;
+      }
+      if (fieldInfo.isEditable === false) {
+        fieldInfo.editable = fieldInfo.isEditable;
+      }
       fieldInfo.fieldName = fieldInfo.name;
       fieldInfo.canPresetValue = false;
 

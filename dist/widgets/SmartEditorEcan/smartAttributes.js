@@ -1,21 +1,19 @@
-/*
-Copyright ©2014 Esri. All rights reserved.
-
-TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
-Unpublished material - all rights reserved under the
-Copyright Laws of the United States and applicable international
-laws, treaties, and conventions.
-
-For additional information, contact:
-Attn: Contracts and Legal Department
-Environmental Systems Research Institute, Inc.
-380 New York Street
-Redlands, California, 92373
-USA
-
-email: contracts@esri.com
-*/
-
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+///////////////////////////////////////////////////////////////////////////
+// jscs:disable validateIndentation
 define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'dojo/dom-class', 'dojo/on', 'dojo/query', 'dijit/registry', 'jimu/filterUtils', 'jimu/BaseWidgetSetting'], function (dojo, declare, lang, array, domClass, on, query, registry, filterUtils, BaseWidgetSetting) {
   return declare([BaseWidgetSetting], {
     _attrInspector: null,
@@ -209,11 +207,12 @@ define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'do
 
           switch (part.valueObj.type) {
             case 'value':
+              partResults.push(this.validatePart(part.operator, this._feature.attributes[part.fieldObj.name], value1, value2, part.caseSensitive));
+              break;
             case 'unique':
               partResults.push(this.validatePart(part.operator, this._feature.attributes[part.fieldObj.name], value1, value2, part.caseSensitive));
               break;
             case 'field':
-
               partResults.push(this.validatePart(part.operator, this._feature.attributes[part.fieldObj.name], value1, value2, part.caseSensitive));
               break;
             default:
@@ -346,8 +345,10 @@ define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'do
           }
           if (String(field).toUpperCase().indexOf(value1.toUpperCase()) >= 0) {
             return false;
+          } else {
+            return true;
           }
-          return false;
+          break;
         case this.OPERATORS.stringOperatorIsBlank:
           return field === undefined || field === null || field === "";
         case this.OPERATORS.stringOperatorIsNotBlank:
@@ -441,6 +442,26 @@ define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'do
             return false;
           }
           return field > value1.getTime();
+        case this.OPERATORS.dateOperatorIsOnOrBefore:
+          if (field === null || field === undefined) {
+            return false;
+          }
+          if (value1 === undefined || value1 === null) {
+            return false;
+          }
+          return field < value1.getTime();
+        case this.OPERATORS.dateOperatorIsOnOrAfter:
+          if (field === null || field === undefined) {
+            return false;
+          }
+          if (value1 === undefined || value1 === null) {
+            return false;
+          }
+          return field > value1.getTime();
+        case this.OPERATORS.dateOperatorInTheLast:
+          return false;
+        case this.OPERATORS.dateOperatorNotInTheLast:
+          return false;
         case this.OPERATORS.dateOperatorIsBetween:
           if (field === null || field === undefined) {
             return false;
@@ -473,6 +494,18 @@ define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'do
             return true;
           }
           return false;
+        case this.OPERATORS.dateOperatorMinutes:
+          //Not exposed in control, not implemented in app
+          if (field === null || field === undefined) {
+            //return true;
+          }
+          return false;
+        case this.OPERATORS.dateOperatorHours:
+          //Not exposed in control, not implemented in app
+          if (field === null || field === undefined) {
+            //return true;
+          }
+          return false;
         case this.OPERATORS.dateOperatorDays:
           //Not exposed in control, not implemented in app
           if (field === null || field === undefined) {
@@ -486,6 +519,12 @@ define(["dojo", "dojo/_base/declare", 'dojo/_base/lang', 'dojo/_base/array', 'do
           }
           return false;
         case this.OPERATORS.dateOperatorMonths:
+          //Not exposed in control, not implemented in app
+          if (field === null || field === undefined) {
+            //return true;
+          }
+          return false;
+        case this.OPERATORS.dateOperatorYears:
           //Not exposed in control, not implemented in app
           if (field === null || field === undefined) {
             //return true;

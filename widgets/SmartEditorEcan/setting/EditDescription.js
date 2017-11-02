@@ -1,3 +1,4 @@
+// jscs:disable validateIndentation
 define(
   ["dojo/_base/declare",
     "dojo/_base/lang",
@@ -23,7 +24,7 @@ define(
     'dojox/editor/plugins/InsertAnchor',
     'dojox/editor/plugins/Blockquote',
     'dojox/editor/plugins/UploadImage',
-    './ChooseImage',
+    'jimu/dijit/EditorChooseImage',
     'jimu/dijit/EditorTextColor',
     'jimu/dijit/EditorBackgroundColor'
   ],

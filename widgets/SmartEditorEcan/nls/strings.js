@@ -1,6 +1,7 @@
 define({
   root: ({
     _widgetLabel: "Smart Editor",
+    _featureAction_SmartEditor: "Smart Editor",
     noEditPrivileges: "Your account does not have permission to create or modify data.",
     widgetActive:"Active",
     widgetNotActive:"Not Active",
@@ -19,6 +20,7 @@ define({
     deletePrompt: "Are you sure you want to delete the selected feature?",
     attachmentLoadingError: "Error uploading attachments",
     attachmentSaveDeleteWarning: "Warning: Changes to attachments are saved automatically",
+    autoSaveEdits: "Saves the edit automatically",
     filterEditor:{
       all: "All",
       noAvailableTempaltes: "No available templates",

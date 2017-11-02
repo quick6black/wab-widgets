@@ -88,6 +88,20 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       this.own(on(layerInfosObject, 'layerInfosIsShowInMapChanged', lang.hitch(this, this._layerVisibilityChanged)));
 
       this.own(on(this.map, 'zoom-end', lang.hitch(this, this._layerVisibilityChanged)));
+
+      ///////////////////////////// ECAN CHANGES /////////////////////////////
+
+      this.toggleAllChecked = false;
+
+      if (this.toggleAllChecked) {
+        html.addClass(this.toggleAllCheckBox, 'checked');
+      } else {
+        html.removeClass(this.toggleAllCheckBox, 'checked');
+      }
+
+      this.own(on(this.toggleAllCheckBox, 'click', lang.hitch(this, this._toggleAllChecked)));
+
+      ///////////////////////// END OF ECAN CHANGES //////////////////////////
     },
 
     onDeActive: function onDeActive() {
@@ -132,7 +146,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
-              checked: visible,
+              checked: false, //visible, -- ECAN default to not-selected initially
               layerVisible: visible,
               folderUrl: this.folderUrl,
               allowExport: this.config ? this.config.allowExport : false,
@@ -254,6 +268,19 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
     },
 
     ///////////////////////////// ECAN CHANGES /////////////////////////////
+
+    toggleAllChecked: false,
+
+    _toggleAllChecked: function _toggleAllChecked(event) {
+      //Event.stop(event);
+
+      html.toggleClass(this.toggleAllCheckBox, 'checked');
+      this.toggleAllChecked = html.hasClass(this.toggleAllCheckBox, 'checked');
+
+      array.forEach(this.layerItems, function (layerItem) {
+        layerItem.setChecked(this.toggleAllChecked);
+      }, this);
+    },
 
     /// Custome function added to handle a passed featureset to generate a shape to select features by
     selectByFeature: function selectByFeature(featureSet) {
