@@ -2,7 +2,7 @@
 // Robert Scheitlin WAB eLocate Widget
 ///////////////////////////////////////////////////////////////////////////
 /*global define, console, setTimeout, clearTimeout*/
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, domStyle, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
     baseClass: 'widget-eLocate-ecan',
     progressBar: null,
@@ -314,8 +314,39 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
       this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
       this.CoordHintText.innerHTML = this._unitArr[newValue].example;
+      this.mapSheetDD.set('value', '');
       this.xCoordTextBox.set('value', '');
       this.yCoordTextBox.set('value', '');
+      if (this._unitArr[newValue].mapref) {
+        this._refreshMapSheetDD(this._unitArr[newValue].wkid);
+        domStyle.set(this.mapSheetDiv, 'display', '');
+      } else {
+        domStyle.set(this.mapSheetDiv, 'display', 'none');
+      }
+    },
+
+    _refreshMapSheetDD: function _refreshMapSheetDD(wkid) {
+      var options = [];
+      var lenWkids = this.config.mapSheets.length;
+      for (var i = 0; i < lenWkids; i++) {
+        if (this.config.mapSheets[i].wkid == wkid) {
+          options.push({
+            value: null,
+            label: ''
+          });
+          var lenSheets = this.config.mapSheets[i].sheets.length;
+          for (var j = 0; j < lenSheets; j++) {
+            var option = {
+              value: this.config.mapSheets[i].sheets[j].sheetID,
+              label: this.config.mapSheets[i].sheets[j].sheetID
+            };
+            options.push(option);
+          }
+          break;
+        }
+      }
+      this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
+      this.mapSheetDD.addOption(options);
     },
 
     isSelTabVisible: function isSelTabVisible() {
@@ -525,8 +556,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
     _addExampleText: function _addExampleText() {
       var exampleArr = this.CoordHintText.innerHTML.split(",");
-      this.xCoordTextBox.set('value', exampleArr[0]);
-      this.yCoordTextBox.set('value', exampleArr[1]);
+      var selUnit = this._unitArr[this.unitdd.get('value')];
+      if (selUnit.mapref) {
+        this.mapSheetDD.set('value', exampleArr[0]);
+        this.xCoordTextBox.set('value', exampleArr[1]);
+        this.yCoordTextBox.set('value', exampleArr[2]);
+      } else {
+        this.xCoordTextBox.set('value', exampleArr[0]);
+        this.yCoordTextBox.set('value', exampleArr[1]);
+      }
     },
 
     _clear: function _clear() {
@@ -583,14 +621,26 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.showLocation(locResult);
     },
 
+    _showError: function _showError(message) {
+      html.setStyle(this.errorText, 'display', '');
+      this.errorText.innerHTML = message;
+    },
+
+    _hideError: function _hideError() {
+      html.setStyle(this.errorText, 'display', 'none');
+      this.errorText.innerHTML = '';
+    },
+
     prelocateCoords: function prelocateCoords() {
+      this._hideError();
       var long = this.xCoordTextBox.get('value');
       var lat = this.yCoordTextBox.get('value');
-      if (long && lat) {
+      var sheetID = this.mapSheetDD.get('value');
+      var selUnit = this._unitArr[this.unitdd.get('value')];
+      if (long && lat && (sheetID || !selUnit.mapref)) {
         var numLong = parseFloat(long);
         var numLat = parseFloat(lat);
-        var selUnit = this._unitArr[this.unitdd.get('value')];
-        if (selUnit.wkid === this.map.spatialReference.wkid || selUnit.wgs84option == "map") {
+        if (selUnit.wkid === this.map.spatialReference.wkid && !selUnit.mapref || selUnit.wgs84option == "map") {
           this.locateCoordinates();
         } else {
           this.tabContainer.selectTab(this.nls.resultslabel);
@@ -614,6 +664,33 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               wmPoint = webMercatorUtils.project(point, this.map);
               this.projectCompleteHandler2([wmPoint]);
               return;
+            }
+          } else if (selUnit.mapref) {
+            var lenWkids = this.config.mapSheets.length;
+            for (var i = 0; i < lenWkids; i++) {
+              if (this.config.mapSheets[i].wkid == selUnit.wkid) {
+                var lenSheets = this.config.mapSheets[i].sheets.length;
+                for (var j = 0; j < lenSheets; j++) {
+                  if (this.config.mapSheets[i].sheets[j].sheetID == sheetID) {
+                    var mapSheet = this.config.mapSheets[i].sheets[j];
+
+                    // Convert the grid coordinates
+                    // NOTE: parseInt is used to remove any decimal places before padding with 0's
+                    numLong = parseFloat(parseInt(mapSheet.xmin.substring(0, 2) + long + '0000000').toString().substring(0, 7));
+                    numLat = parseFloat(parseInt(mapSheet.ymin.substring(0, 2) + lat + '0000000').toString().substring(0, 7));
+
+                    point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
+                    if (webMercatorUtils.canProject(point, this.map)) {
+                      wmPoint = webMercatorUtils.project(point, this.map);
+                      this.projectCompleteHandler2([wmPoint]);
+                      return;
+                    }
+
+                    break;
+                  }
+                }
+                break;
+              }
             }
           } else {
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
@@ -640,30 +717,36 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.locateResultArr = [];
       }
 
-      try {
-        var long = this.xCoordTextBox.get('value');
-        var lat = this.yCoordTextBox.get('value');
-        if (long && lat) {
-          var locateResult = {};
-          locateResult.sym = this.coordMarkerSymbol;
-          locateResult.title = this.nls.coordslabel;
-          locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + long + ", " + lat;
-          locateResult.point = results[0];
-          locateResult.alt = false;
-          locateResult.id = 'id_1';
+      if (isNaN(results[0].x) || isNaN(results[0].y)) {
+        this._showError(this.nls.errorInvalidCoordinates);
+        this.tabContainer.selectTab(this.nls.coordslabel);
+      } else {
+        try {
+          var long = this.xCoordTextBox.get('value');
+          var lat = this.yCoordTextBox.get('value');
+          var sheetID = this.mapSheetDD.get('value');
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+          if (long && lat && (sheetID || !selUnit.mapref)) {
+            var locateResult = {};
+            locateResult.sym = this.coordMarkerSymbol;
+            locateResult.title = this.nls.coordslabel;
+            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
+            locateResult.point = results[0];
+            locateResult.alt = false;
+            locateResult.id = 'id_1';
 
-          this.locateResultArr = [locateResult];
-          this.list.add(locateResult);
-          this.showLocation(locateResult);
+            this.locateResultArr = [locateResult];
+            this.list.add(locateResult);
+            this.showLocation(locateResult);
 
-          this.divResultMessage.textContent = this.nls.resultsfoundlabel + ' ' + this.locateResultArr.length;
-
-          html.setStyle(this.progressBar.domNode, 'display', 'none');
-          html.setStyle(this.divResult, 'display', 'block');
+            this.divResultMessage.textContent = this.nls.resultsfoundlabel + ' ' + this.locateResultArr.length;
+          }
+        } catch (error) {
+          console.info(error);
         }
-      } catch (error) {
-        console.info(error);
       }
+      html.setStyle(this.progressBar.domNode, 'display', 'none');
+      html.setStyle(this.divResult, 'display', 'block');
     },
 
     geometryService_faultHandler: function geometryService_faultHandler(err) {

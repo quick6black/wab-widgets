@@ -18,6 +18,10 @@
         <label class="unitDDLbl">${nls.coordUnitLbl}</label>
         <select data-dojo-attach-point="unitdd" data-dojo-type="dijit/form/Select" class="unitSelect"></select>
       </div>
+      <div style="width: 100%;height: 32px;margin-top: 8px;clear:both;display: none;" data-dojo-attach-point="mapSheetDiv">
+        <label class="mapsheetDDLbl">${nls.mapSheetLbl}</label>
+        <select data-dojo-attach-point="mapSheetDD" data-dojo-type="dijit/form/Select" class="mapsheetSelect"></select>
+      </div>
       <div style="width: 100%;height: 32px;margin-top: 8px;clear:both;">
         <label data-dojo-attach-point="xCoordLbl" class="xCoordLblCls"></label>
         <input data-dojo-attach-point="xCoordTextBox" data-dojo-type="dijit/form/TextBox"
@@ -34,6 +38,7 @@
                title="${nls.exampleClickTooltip}"></label>
       </div>
       <div data-dojo-attach-point="btnCoordLocate" class="locate-btn btn-coordLocate" >${nls.locate}</div>
+      <div data-dojo-attach-point="errorText" class="errorMessage" style="display:none;"></div>
     </div>
     <div class="eLocate-tab-node-hidden" data-dojo-attach-point="tabNode3">
       <label>${nls.reverseDescLabel}</label>
@@ -48,7 +53,7 @@
         <a style="float:right; margin-right:10px" href="#" data-dojo-attach-point="btnClear">${nls.clear}</a>
       </div>
       <hr>
-      <div data-dojo-type="widgets/eLocate/List" data-dojo-attach-point="list"
+      <div data-dojo-type="widgets/eLocateEcan/List" data-dojo-attach-point="list"
            data-dojo-attach-event="click:_selectResultItem,mouseover:_overResultItem,mouseout:_outResultItem"
            style="position:absolute;width:100%;height:auto;left:0;right:0;top:43px;bottom:0;overflow-x:auto;overflow-y:auto;"></div>
     </div>
