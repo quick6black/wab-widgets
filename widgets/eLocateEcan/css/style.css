@@ -51,6 +51,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap; }
+  .widget-eLocate-ecan .errorMessage {
+    margin-top: 10px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 12px;
+    color: #FF0000;
+    clear: both; }
   .widget-eLocate-ecan .btn-coordLocate,
   .widget-eLocate-ecan .btn-addressLocate {
     float: right; }

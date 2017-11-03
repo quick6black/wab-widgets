@@ -62,6 +62,15 @@
     white-space: nowrap;
   }
 
+  .errorMessage {
+    margin-top: 10px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 12px;
+    color: #FF0000;
+    clear: both;
+  }
+
   .btn-coordLocate,
   .btn-addressLocate {
     float: right;

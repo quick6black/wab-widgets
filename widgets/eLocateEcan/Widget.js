@@ -682,7 +682,18 @@ define([
         this.showLocation(locResult);
       },
 
+      _showError: function (message) {
+          html.setStyle(this.errorText, 'display', '');
+          this.errorText.innerHTML = message;
+      },
+
+      _hideError: function () {
+          html.setStyle(this.errorText, 'display', 'none');
+          this.errorText.innerHTML = '';
+      },
+
       prelocateCoords: function ()  {
+        this._hideError();
         var long = this.xCoordTextBox.get('value');
         var lat = this.yCoordTextBox.get('value');
         var sheetID = this.mapSheetDD.get('value');
@@ -768,34 +779,39 @@ define([
           this.locateResultArr = [];
         }
 
-        try{
-          var long = this.xCoordTextBox.get('value');
-          var lat = this.yCoordTextBox.get('value');
-          var sheetID = this.mapSheetDD.get('value');
-          var selUnit = this._unitArr[this.unitdd.get('value')];
-          if (long && lat && (sheetID || !selUnit.mapref)){
-            var locateResult = {};
-            locateResult.sym = this.coordMarkerSymbol;
-            locateResult.title = this.nls.coordslabel;
-            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
-            locateResult.point = results[0];
-            locateResult.alt = false;
-            locateResult.id = 'id_1';
+        if (isNaN(results[0].x) || isNaN(results[0].y)) {
+            this._showError(this.nls.errorInvalidCoordinates);
+            this.tabContainer.selectTab(this.nls.coordslabel);
+        }
+        else {
+          try{
+            var long = this.xCoordTextBox.get('value');
+            var lat = this.yCoordTextBox.get('value');
+            var sheetID = this.mapSheetDD.get('value');
+            var selUnit = this._unitArr[this.unitdd.get('value')];
+            if (long && lat && (sheetID || !selUnit.mapref)){
+              var locateResult = {};
+              locateResult.sym = this.coordMarkerSymbol;
+              locateResult.title = this.nls.coordslabel;
+              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
+              locateResult.point = results[0];
+              locateResult.alt = false;
+              locateResult.id = 'id_1';
 
-            this.locateResultArr = [locateResult];
-            this.list.add(locateResult);
-            this.showLocation(locateResult);
+              this.locateResultArr = [locateResult];
+              this.list.add(locateResult);
+              this.showLocation(locateResult);
 
-            this.divResultMessage.textContent = this.nls.resultsfoundlabel + ' ' + this.locateResultArr.length;
-
-            html.setStyle(this.progressBar.domNode, 'display', 'none');
-            html.setStyle(this.divResult, 'display', 'block');
+              this.divResultMessage.textContent = this.nls.resultsfoundlabel + ' ' + this.locateResultArr.length;
+            }
+          }
+          catch (error)
+          {
+            console.info(error);
           }
         }
-        catch (error)
-        {
-          console.info(error);
-        }
+        html.setStyle(this.progressBar.domNode, 'display', 'none');
+        html.setStyle(this.divResult, 'display', 'block');
       },
 
       geometryService_faultHandler: function(err) {

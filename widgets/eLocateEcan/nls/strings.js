@@ -32,6 +32,7 @@ define({
     locatorissuemessage: "GeocodeServer needs to have a singleLineFieldName.",
     limittomapextent: "Limit address search to maps extent.",
     reversegeocodefailtitle: "Address Inspection Failed",
-    reversegeocodefailmsg: "Failed to find an address at the location clicked. Please try again."
+    reversegeocodefailmsg: "Failed to find an address at the location clicked. Please try again.",
+    errorInvalidCoordinates: "Invalid coordinates. Please try again."
   })
 });
