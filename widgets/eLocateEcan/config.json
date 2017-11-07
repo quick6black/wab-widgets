@@ -98,6 +98,15 @@
         "xlabel": "Longitude:",
         "ylabel": "Latitude:",
         "wgs84option": "dms"
+      },
+      {
+        "wkid": 4326,
+        "mapref": false,
+        "name": "Longitude Latitude (WGS84)",
+        "example": "172.966, -43.805",
+        "xlabel": "Longitude:",
+        "ylabel": "Latitude:",
+        "wgs84option": ""
       }
     ]
   },
