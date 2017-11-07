@@ -127,6 +127,25 @@ define([
         this.enableMoverGra = this.config.enablemouseovergraphicsinfo;
         this.autoCloseNum = this.config.infoautoclosemilliseconds || Number.NEGATIVE_INFINITY;
         this.cbxAddSearchExtent.setValue(this.config.limitsearchtomapextentbydefault || false);
+
+        // Natural sort map sheets
+        for (var i = 0; i < this.config.mapSheets.length; i++) {
+            this.config.mapSheets[i].sheets.sort(function (a, b) {
+                var ax = [], bx = [];
+
+                a.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+                b.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+
+                while (ax.length && bx.length) {
+                    var an = ax.shift();
+                    var bn = bx.shift();
+                    var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                    if (nn) return nn;
+                }
+
+                return ax.length - bx.length;
+            });
+        }
       },
 
       _bindEvents: function() {
@@ -312,7 +331,6 @@ define([
 
       standardizeAddress: function(result) {
         var retStr = "";
-//        console.info(result.address);
         if(result.address.Address){
             retStr += result.address.Address + "\n";
         }else if(result.address.Street){
