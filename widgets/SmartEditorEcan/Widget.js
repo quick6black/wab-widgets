@@ -83,6 +83,9 @@ define([
     './SEDrawingOptions',
     './PrivilegeUtil',
     
+    /* ECAN ADDITION REQUIRES */
+    'esri/urlUtils',
+
     './components/operationLink',
     './components/copyFeaturesPopup',
 
@@ -156,6 +159,7 @@ define([
     SEDrawingOptions,
     PrivilegeUtil,
 
+    esriUrlUtils,
     OperationLink,
     CopyFeaturesPopup
 
@@ -203,7 +207,7 @@ define([
 
       /* BEGIN: Ecan Changes */
 
-      this._setLinkInfo();      
+      this._setLinkInfo();     
 
       /* END: Ecan Changes */
     },
@@ -1462,6 +1466,11 @@ define([
             this._createAutoSaveSwitch(this.config.editor.autoSaveEdits);
             this._createPresetTable(layers, this.config.editor.configInfos);
 
+            /* BEGIN: ECAN CHANGE - Init URL Preset Values */
+
+            this._initURLPresetValues(); 
+
+            /* END: ECAN CHANGE */
           }
           //create template picker
           this.templatePickerNode = domConstruct.create("div",
@@ -3753,7 +3762,7 @@ define([
        this._update();
     },
 
-     /* BEGIN: Ecan Changes */
+    /* BEGIN: Ecan Changes - Operation Links */
 
     _setLinkInfo:function(){
        console.log('SmartEditorEcan::_setLinkInfo');
@@ -3789,6 +3798,10 @@ define([
             this.resize();
         }
     },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Copy Features */        
 
     copyFeatureSet: function (featureSet) {
       // Get geometry type and ensure editable layer of this geometry type is available
@@ -3925,7 +3938,45 @@ define([
           newAttributes[key] = attributes[key];
         }
       }
-    }
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - URL Parameter Preset Fields */        
+
+    _initURLPresetValues: function () {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var valuesQuery = urlObject.query["preset"];
+        if (valuesQuery) {
+          var values = this._getPresetParams(valuesQuery);
+          array.forEach(values, function (field) {
+            this._setPresetValueValue(field.name, field.value);
+          }, this);
+        }
+      }
+    },
+
+    _getPresetParams : function (query) {
+      var presetValues = [];
+      if (query) {
+        var items = query.split(',');
+        array.forEach(items, lang.hitch(this, function (item) {
+          var itemparts = item.split(':');
+          if (itemparts.length === 2) {
+            presetValues.push({
+              name: itemparts[0],
+              value: itemparts[1]
+            });
+          }
+        }));
+      }
+      return presetValues;
+    },
+
 
     /* END: Ecan Changes */
 
