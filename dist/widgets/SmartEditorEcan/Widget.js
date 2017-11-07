@@ -18,7 +18,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 // jscs:disable validateIndentation
 
-define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './components/operationLink', './components/copyFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, OperationLink, CopyFeaturesPopup) {
+define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil',
+
+/* ECAN ADDITION REQUIRES */
+'esri/urlUtils', './components/operationLink', './components/copyFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, OperationLink, CopyFeaturesPopup) {
   var _declare;
 
   return declare([BaseWidget, _WidgetsInTemplateMixin], (_declare = {
@@ -1254,6 +1257,12 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         } else {
           this._createAutoSaveSwitch(this.config.editor.autoSaveEdits);
           this._createPresetTable(layers, this.config.editor.configInfos);
+
+          /* BEGIN: ECAN CHANGE - Init URL Preset Values */
+
+          this._initURLPresetValues();
+
+          /* END: ECAN CHANGE */
         }
         //create template picker
         this.templatePickerNode = domConstruct.create("div", { 'class': "eeTemplatePicker" });
@@ -3511,5 +3520,34 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         newAttributes[key] = attributes[key];
       }
     }
+  }), _defineProperty(_declare, '_initURLPresetValues', function _initURLPresetValues() {
+    var loc = window.location;
+    var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+    // Check for filter
+    if (urlObject.query !== null) {
+      var valuesQuery = urlObject.query["preset"];
+      if (valuesQuery) {
+        var values = this._getPresetParams(valuesQuery);
+        array.forEach(values, function (field) {
+          this._setPresetValueValue(field.name, field.value);
+        }, this);
+      }
+    }
+  }), _defineProperty(_declare, '_getPresetParams', function _getPresetParams(query) {
+    var presetValues = [];
+    if (query) {
+      var items = query.split(',');
+      array.forEach(items, lang.hitch(this, function (item) {
+        var itemparts = item.split(':');
+        if (itemparts.length === 2) {
+          presetValues.push({
+            name: itemparts[0],
+            value: itemparts[1]
+          });
+        }
+      }));
+    }
+    return presetValues;
   }), _declare));
 });
