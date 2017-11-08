@@ -35,6 +35,7 @@ define([
   'dijit/ProgressBar',
   'dojo/_base/lang',
   'dojo/dom-style',
+  'dojo/dom-construct',
   'dojo/on',
   'dojo/aspect',
   'dojo/_base/html',
@@ -54,7 +55,7 @@ define([
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, domStyle, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, lang, domStyle, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -158,7 +159,6 @@ define([
         html.setStyle(this.btnClear1, 'display', 'none');
         this.own(on(this.btnCoordLocate, "click", lang.hitch(this, this.prelocateCoords)));
         this.own(on(this.revGeocodeBtn, "click", lang.hitch(this, this._reverseGeocodeToggle)));
-        this.own(on(this.CoordHintText, "click", lang.hitch(this, this._addExampleText)));
         this.own(on(this.btnAddressLocate, "click", lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -377,7 +377,7 @@ define([
             this.xCoordLbl.innerHTML = this.config.pointunits.pointunit[i].xlabel;
             this.yCoordLbl.innerHTML = this.config.pointunits.pointunit[i].ylabel;
             this.CoordHintLbl.innerHTML = this.nls.example;
-            this.CoordHintText.innerHTML = this.config.pointunits.pointunit[i].example;
+            this._refreshExamples(this.config.pointunits.pointunit[i].examples);
           }
         }
         this.unitdd.addOption(options);
@@ -387,7 +387,7 @@ define([
       _unitDDChanged: function (newValue){
         this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
         this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
-        this.CoordHintText.innerHTML = this._unitArr[newValue].example;
+        this._refreshExamples(this._unitArr[newValue].examples);
         this.mapSheetDD.set('value', '');
         this.xCoordTextBox.set('value', '');
         this.yCoordTextBox.set('value', '');
@@ -422,6 +422,17 @@ define([
           }
           this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
           this.mapSheetDD.addOption(options);
+      },
+
+      _refreshExamples: function (examples) {
+          this.ExamplesList.innerHTML = '';
+
+          var len = examples.length;
+          for (var i = 0; i < len; i++) {
+              var li = domConstruct.create('li', { innerHTML: examples[i], title: this.nls.exampleClickTooltip });
+              this.own(on(li, 'click', lang.hitch(this, this._useExampleText, examples[i])));
+              domConstruct.place(li, this.ExamplesList);
+          }
       },
 
       isSelTabVisible: function () {
@@ -631,19 +642,19 @@ define([
       projectCompleteHandler: function (results, locateResult){
         locateResult.point = results[0];
       },
-
-      _addExampleText: function() {
-        var exampleArr = this.CoordHintText.innerHTML.split(",");
-        var selUnit = this._unitArr[this.unitdd.get('value')];
-        if (selUnit.mapref) {
-            this.mapSheetDD.set('value', exampleArr[0]);
-            this.xCoordTextBox.set('value', exampleArr[1]);
-            this.yCoordTextBox.set('value', exampleArr[2]);
-        }
-        else {
-            this.xCoordTextBox.set('value', exampleArr[0]);
-            this.yCoordTextBox.set('value', exampleArr[1]);
-        }
+      
+      _useExampleText: function (example) {
+          var exampleArr = example.split(",");
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+          if (selUnit.mapref) {
+              this.mapSheetDD.set('value', exampleArr[0]);
+              this.xCoordTextBox.set('value', exampleArr[1]);
+              this.yCoordTextBox.set('value', exampleArr[2]);
+          }
+          else {
+              this.xCoordTextBox.set('value', exampleArr[0]);
+              this.yCoordTextBox.set('value', exampleArr[1]);
+          }
       },
 
       _clear: function () {

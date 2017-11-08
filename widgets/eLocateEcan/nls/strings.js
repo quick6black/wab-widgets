@@ -18,7 +18,7 @@ define({
     revgeocodetip: "Inspect Address by Point",
     coordUnitLbl: "Units:",
     mapSheetLbl: "Map Sheet:",
-    example: "Example:",
+    example: "Example(s):",
     locate: "Locate",
     drawpointtooltip: "Inspect Locations Address",
     longitude: "Longitude (X)",

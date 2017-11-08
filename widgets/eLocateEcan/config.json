@@ -40,7 +40,7 @@
         "wkid": 2193,
         "mapref": false,
         "name": "NZTM",
-        "example": "1577194.01, 5171715.27",
+        "examples": [ "1577194.01, 5171715.27" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""
@@ -49,7 +49,7 @@
         "wkid": 2193,
         "mapref": true,
         "name": "NZTopo50 Map Reference",
-        "example": "BX24, 706, 802",
+        "examples": [ "BX24, 706, 802" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""
@@ -58,7 +58,7 @@
         "wkid": 27200,
         "mapref": false,
         "name": "NZMG",
-        "example": "2494375.81, 5735582.68",
+        "examples": [ "2494375.81, 5735582.68" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""
@@ -67,7 +67,7 @@
         "wkid": 27200,
         "mapref": true,
         "name": "NZ260 Map Reference",
-        "example": "M35, 8858, 4457",
+        "examples": [ "M35, 8858, 4457" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):",
         "wgs84option": ""
@@ -76,7 +76,7 @@
         "wkid": 4326,
         "mapref": false,
         "name": "Decimal Degrees (WGS84)",
-        "example": "172.715, -43.607",
+        "examples": [ "172.715, -43.607" ],
         "xlabel": "Longitude:",
         "ylabel": "Latitude:",
         "wgs84option": "dd"
@@ -85,7 +85,7 @@
         "wkid": 4326,
         "mapref": false,
         "name": "Degrees Decimal Minutes (WGS84)",
-        "example": "172-40.33 E, 43-35.50 S",
+        "examples": [ "172-40.33 E, 43-35.50 S" ],
         "xlabel": "Longitude:",
         "ylabel": "Latitude:",
         "wgs84option": "ddm"
@@ -94,7 +94,7 @@
         "wkid": 4326,
         "mapref": false,
         "name": "Degrees Minutes Seconds (WGS84)",
-        "example": "172-40-1.45 E, 43-39-10.99 S",
+        "examples": [ "172-40-1.45 E, 43-39-10.99 S" ],
         "xlabel": "Longitude:",
         "ylabel": "Latitude:",
         "wgs84option": "dms"
@@ -103,7 +103,7 @@
         "wkid": 4326,
         "mapref": false,
         "name": "Longitude Latitude (WGS84)",
-        "example": "172.966, -43.805",
+        "examples": [ "172.715, -43.607", "172-40.33 E, 43-35.50 S", "172-40-1.45 E, 43-39-10.99 S" ],
         "xlabel": "Longitude:",
         "ylabel": "Latitude:",
         "wgs84option": ""
