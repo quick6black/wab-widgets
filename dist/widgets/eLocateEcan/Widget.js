@@ -2,7 +2,7 @@
 // Robert Scheitlin WAB eLocate Widget
 ///////////////////////////////////////////////////////////////////////////
 /*global define, console, setTimeout, clearTimeout*/
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, domStyle, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/dom-construct', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, domStyle, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
     baseClass: 'widget-eLocate-ecan',
     progressBar: null,
@@ -109,7 +109,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       html.setStyle(this.btnClear1, 'display', 'none');
       this.own(on(this.btnCoordLocate, "click", lang.hitch(this, this.prelocateCoords)));
       this.own(on(this.revGeocodeBtn, "click", lang.hitch(this, this._reverseGeocodeToggle)));
-      this.own(on(this.CoordHintText, "click", lang.hitch(this, this._addExampleText)));
       this.own(on(this.btnAddressLocate, "click", lang.hitch(this, this._locateAddress)));
       this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function (evt) {
         var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -326,7 +325,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           this.xCoordLbl.innerHTML = this.config.pointunits.pointunit[i].xlabel;
           this.yCoordLbl.innerHTML = this.config.pointunits.pointunit[i].ylabel;
           this.CoordHintLbl.innerHTML = this.nls.example;
-          this.CoordHintText.innerHTML = this.config.pointunits.pointunit[i].example;
+          this._refreshExamples(this.config.pointunits.pointunit[i].examples);
         }
       }
       this.unitdd.addOption(options);
@@ -336,7 +335,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     _unitDDChanged: function _unitDDChanged(newValue) {
       this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
       this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
-      this.CoordHintText.innerHTML = this._unitArr[newValue].example;
+      this._refreshExamples(this._unitArr[newValue].examples);
       this.mapSheetDD.set('value', '');
       this.xCoordTextBox.set('value', '');
       this.yCoordTextBox.set('value', '');
@@ -370,6 +369,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
       this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
       this.mapSheetDD.addOption(options);
+    },
+
+    _refreshExamples: function _refreshExamples(examples) {
+      this.ExamplesList.innerHTML = '';
+
+      var len = examples.length;
+      for (var i = 0; i < len; i++) {
+        var li = domConstruct.create('li', { innerHTML: examples[i], title: this.nls.exampleClickTooltip });
+        this.own(on(li, 'click', lang.hitch(this, this._useExampleText, examples[i])));
+        domConstruct.place(li, this.ExamplesList);
+      }
     },
 
     isSelTabVisible: function isSelTabVisible() {
@@ -577,8 +587,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       locateResult.point = results[0];
     },
 
-    _addExampleText: function _addExampleText() {
-      var exampleArr = this.CoordHintText.innerHTML.split(",");
+    _useExampleText: function _useExampleText(example) {
+      var exampleArr = example.split(",");
       var selUnit = this._unitArr[this.unitdd.get('value')];
       if (selUnit.mapref) {
         this.mapSheetDD.set('value', exampleArr[0]);
@@ -670,18 +680,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           html.setStyle(this.progressBar.domNode, 'display', 'block');
           html.setStyle(this.divResult, 'display', 'none');
           var point, wmPoint;
-          if (selUnit.wgs84option == "dms") {
-            numLong = this.dms_to_deg(this.xCoordTextBox.get('value'));
-            numLat = this.dms_to_deg(this.yCoordTextBox.get('value'));
-            point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
-            if (webMercatorUtils.canProject(point, this.map)) {
-              wmPoint = webMercatorUtils.project(point, this.map);
-              this.projectCompleteHandler2([wmPoint]);
-              return;
+
+          if (selUnit.wkid == 4326) {
+            // Flexible WGS84 coordinate format handling
+            var matchCoordFormats = [this._wgs84MatchCoordFormatD, this._wgs84MatchCoordFormatDM, this._wgs84MatchCoordFormatDMS];
+
+            for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
+              numLong = matchCoordFormats[i](this, this.xCoordTextBox.get('value'));
+              if (numLong) break;
             }
-          } else if (selUnit.wgs84option == "dm" || selUnit.wgs84option == "ddm") {
-            numLong = this.dm_to_deg(this.xCoordTextBox.get('value'));
-            numLat = this.dm_to_deg(this.yCoordTextBox.get('value'));
+            for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
+              numLat = matchCoordFormats[i](this, this.yCoordTextBox.get('value'));
+              if (numLat) break;
+            }
+
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
             if (webMercatorUtils.canProject(point, this.map)) {
               wmPoint = webMercatorUtils.project(point, this.map);
@@ -1082,6 +1094,104 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           aspect.after(sidebarWidget[0], "onMaximize", lang.hitch(this, this.onOpen));
         }
       }
+    },
+
+    /*
+    Attempt to match DEGREES coord format
+    Returns matchedCoords if successful
+      Matches decimal lat lng, such as:
+    -42.493365
+    172.385101
+    -42
+    172
+    -42.493365S
+    42.493365S
+    -42.493365 S
+    42.493365 S
+    -176.433333
+    -176.433333 W
+    176.433333 W
+    172.385101E
+    -42.493365°
+    172.385101°
+    */
+    _wgs84MatchCoordFormatD: function _wgs84MatchCoordFormatD(context, value) {
+      var matches = /^\s*(-?\d{2,3}(?:\.\d*)?)\s*([nsewNSEW])?\D?\s*$/.exec(value);
+      if (matches != null) {
+        var coord = parseFloat(matches[1]);
+        var compass = matches[2];
+
+        coord = context._wgs84ApplyCompass(coord, compass);
+
+        return coord;
+      }
+    },
+
+    /*
+    Attempt to match DEGREES & MINUTES coord format
+    Returns matchedCoords if successful
+        Matches lat lng, such as:
+    -38 29.295
+    38 29.295S
+    -38 29.295S
+    178 3.515E
+    43°36'S
+    -43°36'
+    172°43'E
+    172-40.33 E
+    */
+    _wgs84MatchCoordFormatDM: function _wgs84MatchCoordFormatDM(context, value) {
+      var matches = /^\s*(-?\d{2,3})\D+(\d{1,2}(\.\d+)?)[^nsewNSEW]?\s*([nsewNSEW])?\s*$/.exec(value);
+      if (matches != null) {
+        var degrees = parseInt(matches[1]);
+        var minutes = parseFloat(matches[2]);
+        var compass = matches[4];
+
+        var coord = degrees + minutes / 60;
+        coord = context._wgs84ApplyCompass(coord, compass);
+
+        return coord;
+      }
+    },
+
+    /*
+    Attempt to match DEGREES, MINUTES & SECONDS coord format
+    Returns matchedCoords if successful
+        Matches lat lng, such as:
+    -38°29′18″
+    38°29′18″S
+    178°03′31″
+    178°03′31″E
+    38°29′18.123″S
+    178°03′31.123″E
+    172-40-1.45 E
+    */
+    _wgs84MatchCoordFormatDMS: function _wgs84MatchCoordFormatDMS(context, value) {
+      var matches = /^\s*(-?\d{2,3})\D+(\d{1,2})\D+(\d{1,2}(?:\.\d*)?)[^nsewNSEW]?\s*([nsewNSEW])?\s*$/.exec(value);
+      if (matches != null) {
+        var degrees = parseInt(matches[1]);
+        var minutes = parseInt(matches[2]);
+        var seconds = parseFloat(matches[3]);
+        var compass = matches[4];
+
+        var coord = degrees + (minutes + seconds / 60) / 60;
+        coord = context._wgs84ApplyCompass(coord, compass);
+
+        return coord;
+      }
+    },
+
+    /*
+    Helper to adjust WGS84 coordinate value based on N/S/E/W compass direction being present
+    */
+    _wgs84ApplyCompass: function _wgs84ApplyCompass(coord, compass) {
+      if (compass != null) {
+        compass = compass.toUpperCase();
+        if (coord > 0 && compass == 'S' || compass == 'W') {
+          coord = coord * -1;
+        }
+      }
+      return coord;
     }
 
   });
