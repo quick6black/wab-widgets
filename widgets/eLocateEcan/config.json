@@ -42,8 +42,7 @@
         "name": "NZTM",
         "examples": [ "1577194.01, 5171715.27" ],
         "xlabel": "Easting (X):",
-        "ylabel": "Northing (Y):",
-        "wgs84option": ""
+        "ylabel": "Northing (Y):"
       },
       {
         "wkid": 2193,
@@ -51,8 +50,7 @@
         "name": "NZTopo50 Map Reference",
         "examples": [ "BX24, 706, 802" ],
         "xlabel": "Easting (X):",
-        "ylabel": "Northing (Y):",
-        "wgs84option": ""
+        "ylabel": "Northing (Y):"
       },
       {
         "wkid": 27200,
@@ -60,8 +58,7 @@
         "name": "NZMG",
         "examples": [ "2494375.81, 5735582.68" ],
         "xlabel": "Easting (X):",
-        "ylabel": "Northing (Y):",
-        "wgs84option": ""
+        "ylabel": "Northing (Y):"
       },
       {
         "wkid": 27200,
@@ -69,35 +66,7 @@
         "name": "NZ260 Map Reference",
         "examples": [ "M35, 8858, 4457" ],
         "xlabel": "Easting (X):",
-        "ylabel": "Northing (Y):",
-        "wgs84option": ""
-      },
-      {
-        "wkid": 4326,
-        "mapref": false,
-        "name": "Decimal Degrees (WGS84)",
-        "examples": [ "172.715, -43.607" ],
-        "xlabel": "Longitude:",
-        "ylabel": "Latitude:",
-        "wgs84option": "dd"
-      },
-      {
-        "wkid": 4326,
-        "mapref": false,
-        "name": "Degrees Decimal Minutes (WGS84)",
-        "examples": [ "172-40.33 E, 43-35.50 S" ],
-        "xlabel": "Longitude:",
-        "ylabel": "Latitude:",
-        "wgs84option": "ddm"
-      },
-      {
-        "wkid": 4326,
-        "mapref": false,
-        "name": "Degrees Minutes Seconds (WGS84)",
-        "examples": [ "172-40-1.45 E, 43-39-10.99 S" ],
-        "xlabel": "Longitude:",
-        "ylabel": "Latitude:",
-        "wgs84option": "dms"
+        "ylabel": "Northing (Y):"
       },
       {
         "wkid": 4326,
@@ -105,8 +74,7 @@
         "name": "Longitude Latitude (WGS84)",
         "examples": [ "172.715, -43.607", "172-40.33 E, 43-35.50 S", "172-40-1.45 E, 43-39-10.99 S" ],
         "xlabel": "Longitude:",
-        "ylabel": "Latitude:",
-        "wgs84option": ""
+        "ylabel": "Latitude:"
       }
     ]
   },

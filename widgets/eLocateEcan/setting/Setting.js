@@ -199,24 +199,22 @@ define([
                 if (this.popupState === 'ADD') {
                     this.unitList.editRow(unitConfig[1], {
                         name: unitConfig[0].name,
-                        example: unitConfig[0].example,
+                        example: unitConfig[0].examples.join('; '),
                         xlabel: unitConfig[0].xlabel,
                         ylabel: unitConfig[0].ylabel,
                         wkid: unitConfig[0].wkid,
-                        mapref: unitConfig[0].mapref,
-                        wgs84option: unitConfig[0].wgs84option
+                        mapref: unitConfig[0].mapref
                     });
                     unitConfig[1].singleUnit = unitConfig[0];
                     this.popupState = '';
                 } else {
                     this.unitList.editRow(unitConfig[1], {
                         name: unitConfig[0].name,
-                        example: unitConfig[0].example,
+                        example: unitConfig[0].examples.join('; '),
                         xlabel: unitConfig[0].xlabel,
                         ylabel: unitConfig[0].ylabel,
                         wkid: unitConfig[0].wkid,
-                        mapref: unitConfig[0].mapref,
-                        wgs84option: unitConfig[0].wgs84option
+                        mapref: unitConfig[0].mapref
                     });
                     unitConfig[1].singleUnit = unitConfig[0];
                 }
@@ -297,12 +295,11 @@ define([
                 args.nls = this.nls;
                 var rowData = {
                     name: (args.config && args.config.name) || '',
-                    example: (args.config && args.config.example) || '',
+                    examples: (args.config && args.config.examples.join('; ')) || '',
                     xlabel: (args.config && args.config.xlabel) || '',
                     ylabel: (args.config && args.config.ylabel) || '',
                     wkid: (args.config && args.config.wkid) || '',
-                    mapref: (args.config && args.config.mapref) || '',
-                    wgs84option: (args.config && args.config.wgs84option) || ''
+                    mapref: (args.config && args.config.mapref) || ''
                 };
 
                 var result = this.unitList.addRow(rowData);
