@@ -3385,6 +3385,20 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       // Populate the links
       var fieldValues = this._getPresetValues();
 
+      //Append url parameters
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        for (var key in urlObject.query) {
+          fieldValues.push({
+            "fieldName": key,
+            "value": urlObject.query[key]
+          });
+        }
+      }
+
       array.forEach(this._links, lang.hitch(this, function (linkConfig) {
         var link = new OperationLink({
           item: linkConfig,

@@ -95,7 +95,7 @@ define({
       addLinks: "Add Returning URL(s)",
       linkTitle: "Link Text",
       linkHref: "URL Prefix",
-      linkAttribute: "Linking Attribute",
+      linkAttribute: "Linking Attribute/Url Parameter Name",
       editTag: "Edit",
     }
   }),
