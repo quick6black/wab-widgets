@@ -59,6 +59,7 @@ define(
         var config = {
           wkid: utils.standardizeWkid(this.wkid.get('value')),
           mapref: this.unitMapRefTB.get('value') === 'on',
+          maprefprecision: (this.unitMapRefPrecisionTB.get('value') == null ? null : parseInt(this.unitMapRefPrecisionTB.get('value'))),
           name: this.unitnameTB.get('value'),
           examples: examples,
           xlabel: this.unitXLabelTB.get('value'),
@@ -75,6 +76,7 @@ define(
           if (config && config.wkid) {
             this.wkid.set('value', parseInt(config.wkid, 10));
             this.unitMapRefTB.set('value', this.config.mapref);
+            this.unitMapRefPrecisionTB.set('value', this.config.maprefprecision);
             this.currentWkid = parseInt(config.wkid, 10);
             this.unitnameTB.set('value', lang.trim(this.config.name));
             this.unitExampleTB.set('value', lang.trim(this.config.examples.join('; ')));
@@ -115,17 +117,28 @@ define(
           this.popup.enableButton(0);
           if (newWkid === 2193 || newWkid === 27200) {
               domStyle.set(this.wkidMapRef, 'display', '');
+              domStyle.set(this.wkidMapRefPrecision, 'display', (newValue ? '' : 'none'));
           } else {
               this.unitMapRefTB.set('value', false);
+              this.unitMapRefPrecisionTB.set('value', null);
               domStyle.set(this.wkidMapRef, 'display', 'none');
+              domStyle.set(this.wkidMapRefPrecision, 'display', 'none');
           }
         } else if (newValue) {
           this.wkid.set('value', "");
           this.wkidLabel.innerHTML = this.nls.cName;
           this.unitMapRefTB.set('value', false);
+          this.unitMapRefPrecisionTB.set('value', null);
           domStyle.set(this.wkidMapRef, 'display', 'none');
+          domStyle.set(this.wkidMapRefPrecision, 'display', 'none');
         }
         this.currentWkid = newWkid;
+      },
+
+      onMapRefChange: function(newValue) {
+          // TODO: Hide / show precision!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          console.log('onMapRefChange :: newValue', newValue);
+          domStyle.set(this.wkidMapRefPrecision, 'display', (newValue ? '' : 'none'));
       }
     });
   });

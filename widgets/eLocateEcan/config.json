@@ -39,6 +39,7 @@
       {
         "wkid": 2193,
         "mapref": false,
+        "maprefprecision": null,
         "name": "NZTM",
         "examples": [ "1577194.01, 5171715.27" ],
         "xlabel": "Easting (X):",
@@ -47,6 +48,7 @@
       {
         "wkid": 2193,
         "mapref": true,
+        "maprefprecision": 4,
         "name": "NZTopo50 Map Reference",
         "examples": [ "BX24, 706, 802" ],
         "xlabel": "Easting (X):",
@@ -55,6 +57,7 @@
       {
         "wkid": 27200,
         "mapref": false,
+        "maprefprecision": null,
         "name": "NZMG",
         "examples": [ "2494375.81, 5735582.68" ],
         "xlabel": "Easting (X):",
@@ -63,6 +66,7 @@
       {
         "wkid": 27200,
         "mapref": true,
+        "maprefprecision": 4,
         "name": "NZ260 Map Reference",
         "examples": [ "M35, 8858, 4457" ],
         "xlabel": "Easting (X):",
@@ -71,6 +75,7 @@
       {
         "wkid": 4326,
         "mapref": false,
+        "maprefprecision": null,
         "name": "Longitude Latitude (WGS84)",
         "examples": [ "172.715, -43.607", "172-40.33 E, 43-35.50 S", "172-40-1.45 E, 43-39-10.99 S" ],
         "xlabel": "Longitude:",
