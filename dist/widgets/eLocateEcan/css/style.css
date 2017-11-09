@@ -786,5 +786,47 @@
       cursor: pointer; }
   .widget-eLocate-ecan .tab.jimu-vcenter-text {
     overflow: hidden; }
+  .widget-eLocate-ecan .coord-input-btns {
+    margin-top: 8px;
+    height: 30px; }
+    .widget-eLocate-ecan .coord-input-btns div {
+      float: left; }
+      .widget-eLocate-ecan .coord-input-btns div + div {
+        margin-left: 8px; }
+    .widget-eLocate-ecan .coord-input-btns + div {
+      clear: both; }
+    .widget-eLocate-ecan .coord-input-btns .coord-input-btn, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton {
+      padding: 2px;
+      height: 30px;
+      background-color: #666;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: pointer;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      -o-border-radius: 5px;
+      border-radius: 5px;
+      background-position: 5px center;
+      background-repeat: no-repeat; }
+      .widget-eLocate-ecan .coord-input-btns .coord-input-btn:hover, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton:hover, .widget-eLocate-ecan .coord-input-btns .coord-input-btn.btn-active, .widget-eLocate-ecan .coord-input-btns .my-location-widget .btn-active.zoomLocateButton {
+        background-color: #333; }
+      .widget-eLocate-ecan .coord-input-btns .coord-input-btn:active, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton:active {
+        background-color: #ccc; }
+      .widget-eLocate-ecan .coord-input-btns .coord-input-btn.btn-map, .widget-eLocate-ecan .coord-input-btns .my-location-widget .btn-map.zoomLocateButton {
+        background-image: url(../images/fa-hand-pointer-o.png); }
+      .widget-eLocate-ecan .coord-input-btns .coord-input-btn span, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton span {
+        margin-left: 28px;
+        line-height: 26px;
+        padding-right: 5px;
+        color: #FFF; }
+    .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton {
+      background-image: url(../images/locate.png); }
+    .widget-eLocate-ecan .coord-input-btns .my-location-widget .loading {
+      background-image: url(../images/loading.gif); }
+    .widget-eLocate-ecan .coord-input-btns .my-location-widget .tracking {
+      background-image: url(../images/stop.png) !important;
+      background-color: #333; }
 
 /*# sourceMappingURL=style.css.map */

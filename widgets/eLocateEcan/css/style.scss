@@ -1092,4 +1092,73 @@
   .tab.jimu-vcenter-text {
     overflow: hidden;
   }
+
+  .coord-input-btns {
+    margin-top: 8px;
+    height: 30px;
+
+    div {
+      float: left;
+
+      + div {
+        margin-left: 8px;
+      }
+    }
+
+    + div {
+      clear: both;
+    }
+
+    .coord-input-btn {
+      padding: 2px;
+      height: 30px;
+      background-color: #666;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: pointer;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      -o-border-radius: 5px;
+      border-radius: 5px;
+      background-position: 5px center;
+      background-repeat: no-repeat;
+
+      &:hover, &.btn-active {
+        background-color: #333;
+      }
+
+      &:active {
+        background-color: #ccc;
+      }
+
+      &.btn-map {
+        background-image: url(../images/fa-hand-pointer-o.png);
+      }
+
+      span {
+        margin-left: 28px;
+        line-height: 26px;
+        padding-right: 5px;
+        color: #FFF;
+      }
+    }
+
+    .my-location-widget {
+      .zoomLocateButton {
+        @extend .coord-input-btn;
+        background-image: url(../images/locate.png);
+      }
+
+      .loading {
+        background-image: url(../images/loading.gif);
+      }
+
+      .tracking {
+        background-image: url(../images/stop.png) !important;
+        background-color: #333;
+      }
+    }
+  }
 }

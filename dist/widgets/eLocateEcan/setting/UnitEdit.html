@@ -30,7 +30,19 @@
             <span>${nls.mapref}</span>
           </td>
           <td class="second">
-            <input type="checkbox" data-dojo-attach-point="unitMapRefTB" data-dojo-type="dijit/form/CheckBox" />
+            <input type="checkbox" data-dojo-attach-point="unitMapRefTB" data-dojo-attach-event="onChange:onMapRefChange" data-dojo-type="dijit/form/CheckBox" />
+          </td>
+        </tr>
+        <tr style="display: none;" data-dojo-attach-point="wkidMapRefPrecision">
+          <td class="first">
+            <span>${nls.maprefprecision}</span>
+          </td>
+          <td class="second">
+            <select data-dojo-attach-point="unitMapRefPrecisionDD" data-dojo-type="dijit/form/Select" class="unitSelect">
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
           </td>
         </tr>
         <tr>

@@ -25,6 +25,7 @@ define([
   'esri/symbols/SimpleFillSymbol',
   'esri/renderers/SimpleRenderer',
   'esri/dijit/PopupTemplate',
+  'esri/dijit/LocateButton',
   'esri/request',
   'esri/tasks/locator',
   'esri/toolbars/draw',
@@ -54,13 +55,14 @@ define([
   function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes,
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
-    SimpleRenderer, PopupTemplate, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
+    SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
     Deferred, ProgressBar, lang, domStyle, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
       baseClass: 'widget-eLocate-ecan',
       progressBar: null,
+      locateButton: null,
       tabContainer: null,
       disabledTabs: null,
       list: null,
@@ -99,6 +101,7 @@ define([
         this.list.removeResultMsg =  this.nls.removeresultmessage;
         this._initTabContainer();
         this._initProgressBar();
+        this._initCoordInputButtons();
         this._initUnitsDD();
         this._initDraw();
         this._initLocator();
@@ -359,6 +362,75 @@ define([
 
       toProperCase: function (str) {
         return str.replace(/\w\S*/g, function(str){return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();});
+      },
+
+      _initCoordInputButtons: function () {
+          // Locate button
+
+          this.locateButton = new LocateButton({
+              map: this.map,
+              theme: 'my-location-widget jimu-widget',
+              useTracking: true,
+              clearOnTrackingStop: true
+          }, this.CoordInputBtns_LocateMe);
+
+          this.locateButton.startup();
+
+          this.own(on(this.locateButton, 'locate', lang.hitch(this, this._locateUpdate)));
+
+          // Map select
+
+          // TODO!
+      },
+
+      _locateUpdate: function (event) {
+          if (event.error == null && event.position != null && event.position.coords != null) {
+              this._useWgs84Coords(event.position.coords);
+          }
+      },
+
+      _useWgs84Coords: function (coords) {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+
+          if (selUnit.wkid == 4326) {
+              this.xCoordTextBox.set('value', coords.longitude);
+              this.yCoordTextBox.set('value', coords.latitude);
+          }
+          else {
+              var point = new Point(coords.longitude, coords.latitude, new SpatialReference(4326));
+              var projParams = new ProjectParameters();
+              projParams.geometries = [point];
+              projParams.outSR = new SpatialReference(parseInt(selUnit.wkid));
+              esriConfig.defaults.geometryService.project(projParams, lang.hitch(this, this.projectCompleteHandlerFromMap),
+                  lang.hitch(this, this.geometryService_faultHandler));
+          }
+      },
+
+      projectCompleteHandlerFromMap: function (results, locateResult) {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+
+          if (selUnit.mapref) {
+              var lenWkids = this.config.mapSheets.length;
+              for (var i = 0; i < lenWkids; i++) {
+                  if (this.config.mapSheets[i].wkid == selUnit.wkid) {
+                      var lenSheets = this.config.mapSheets[i].sheets.length;
+                      for (var j = 0; j < lenSheets; j++) {
+                          if (results[0].x >= this.config.mapSheets[i].sheets[j].xmin && results[0].x <= this.config.mapSheets[i].sheets[j].xmax && results[0].y >= this.config.mapSheets[i].sheets[j].ymin && results[0].y <= this.config.mapSheets[i].sheets[j].ymax) {
+                              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
+                              this.xCoordTextBox.set('value', results[0].x.toString().substring(2, selUnit.maprefprecision + 2));
+                              this.yCoordTextBox.set('value', results[0].y.toString().substring(2, selUnit.maprefprecision + 2));
+
+                              break;
+                          }
+                      }
+                      break;
+                  }
+              }
+          }
+          else {
+              this.xCoordTextBox.set('value', results[0].x);
+              this.yCoordTextBox.set('value', results[0].y);
+          }
       },
 
       _initUnitsDD: function() {
@@ -768,8 +840,8 @@ define([
 
                                 // Convert the grid coordinates
                                 // NOTE: parseInt is used to remove any decimal places before padding with 0's
-                                numLong = parseFloat(parseInt((mapSheet.xmin.substring(0, 2) + long + '0000000')).toString().substring(0, 7));
-                                numLat = parseFloat(parseInt((mapSheet.ymin.substring(0, 2) + lat + '0000000')).toString().substring(0, 7));
+                                numLong = parseFloat(parseInt((mapSheet.xmin.toString().substring(0, 2) + long + '0000000')).toString().substring(0, 7));
+                                numLat = parseFloat(parseInt((mapSheet.ymin.toString().substring(0, 2) + lat + '0000000')).toString().substring(0, 7));
 
                                 point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
                                 if (webMercatorUtils.canProject(point, this.map)) {

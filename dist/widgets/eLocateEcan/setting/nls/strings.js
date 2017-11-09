@@ -6,6 +6,7 @@ define({
     "ylabel": "Y Label",
     "wkid": "WKID",
     "mapref": "Map Ref",
+    "maprefprecision": "Precision",
     "countryCode": "Country Code(s)",
     "countryCodeEg": "e.g. ",
     "countryCodeHint": "Leaving this value blank will search all countries",
