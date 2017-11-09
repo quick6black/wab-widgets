@@ -417,8 +417,8 @@ define([
                       for (var j = 0; j < lenSheets; j++) {
                           if (results[0].x >= this.config.mapSheets[i].sheets[j].xmin && results[0].x <= this.config.mapSheets[i].sheets[j].xmax && results[0].y >= this.config.mapSheets[i].sheets[j].ymin && results[0].y <= this.config.mapSheets[i].sheets[j].ymax) {
                               this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
-                              this.xCoordTextBox.set('value', results[0].x.toString().substring(2, selUnit.maprefprecision + 2));
-                              this.yCoordTextBox.set('value', results[0].y.toString().substring(2, selUnit.maprefprecision + 2));
+                              this.xCoordTextBox.set('value', results[0].x.toString().substring(2, selUnit.precision + 2));
+                              this.yCoordTextBox.set('value', results[0].y.toString().substring(2, selUnit.precision + 2));
 
                               break;
                           }
@@ -428,8 +428,8 @@ define([
               }
           }
           else {
-              this.xCoordTextBox.set('value', results[0].x);
-              this.yCoordTextBox.set('value', results[0].y);
+              this.xCoordTextBox.set('value', parseFloat(results[0].x.toFixed(selUnit.precision)));
+              this.yCoordTextBox.set('value', parseFloat(results[0].y.toFixed(selUnit.precision)));
           }
       },
 

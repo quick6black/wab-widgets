@@ -1133,6 +1133,11 @@
         background-color: #ccc;
       }
 
+      &.btn-active {
+        background-image: url(../images/stop.png) !important;
+        background-color: #333;
+      }
+
       &.btn-map {
         background-image: url(../images/fa-hand-pointer-o.png);
       }
