@@ -355,8 +355,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       var selUnit = this._unitArr[this.unitdd.get('value')];
 
       if (selUnit.mapref) {
-        var mapRefPrecision = 4; // TODO! Drive from config! Defaulting to 4.
-
         var lenWkids = this.config.mapSheets.length;
         for (var i = 0; i < lenWkids; i++) {
           if (this.config.mapSheets[i].wkid == selUnit.wkid) {
@@ -364,8 +362,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             for (var j = 0; j < lenSheets; j++) {
               if (results[0].x >= this.config.mapSheets[i].sheets[j].xmin && results[0].x <= this.config.mapSheets[i].sheets[j].xmax && results[0].y >= this.config.mapSheets[i].sheets[j].ymin && results[0].y <= this.config.mapSheets[i].sheets[j].ymax) {
                 this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
-                this.xCoordTextBox.set('value', results[0].x.toString().substring(2, mapRefPrecision + 2));
-                this.yCoordTextBox.set('value', results[0].y.toString().substring(2, mapRefPrecision + 2));
+                this.xCoordTextBox.set('value', results[0].x.toString().substring(2, selUnit.maprefprecision + 2));
+                this.yCoordTextBox.set('value', results[0].y.toString().substring(2, selUnit.maprefprecision + 2));
 
                 break;
               }
