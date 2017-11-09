@@ -702,6 +702,9 @@ define([
               nls: this.nls
             }, this._filterEditorNode);
           }
+
+
+
         }
       },
       _activateEditToolbar: function (feature) {
@@ -1499,6 +1502,13 @@ define([
           //this.templatePicker.domNode.appendChild(this.widgetActiveIndicator);
           //this.templatePickerNode.appendChild(this.templatePicker.domNode);
           this._addFilterEditor(layers);
+
+          /* BEGIN: ECAN CHANGE - Look for and apply url parameter template filters */
+
+          this._applyURLTemplateFilter();
+
+          /* END: ECAN CHANGE */
+
           // wire up events
 
           if (selectedTemplate !== null && this.templatePicker) {
@@ -3991,6 +4001,75 @@ define([
       return presetValues;
     },
 
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - URL Parameter Template Filter */        
+
+    _applyURLTemplateFilter: function () {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var templatesQuery = urlObject.query["templates"];
+        if (templatesQuery) {
+          var templateIDs = this._getTemplateParams(templatesQuery);
+          this._filterEditor.filterTextBox.value = templateIDs;
+          this._filterEditor._onTemplateFilterChanged();
+        }
+      }
+
+    },
+
+    _getTemplateParams: function(query) {
+      var templatesString = '';
+
+      var filterParams = query.split(',');
+
+      if (filterParams.length > 0) {
+        // Check layer templates for domain codes that match template urls
+        var layers = this._getEditableLayers(this.config.editor.configInfos, false);   
+        var tmps = [], tmpIds = [];   
+        array.forEach(layers, lang.hitch(this,function (layer) {
+          var dmVals = layer.types.map(function (item) {
+            return {
+              "id": item["id"],
+              "label": item.templates[0]["name"]
+            }
+          });
+
+          for(var i = 0, l = dmVals.length;i <l;i++) {
+            if (tmpIds.indexOf(dmVals[i].label) === -1) {
+                tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].label);
+
+            } else if (tmpIds.indexOf(dmVals[i].id) === -1) { 
+                tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].id);
+            }
+          }
+        }));
+
+        var templates = [];
+        array.forEach(filterParams, function (param) {
+          var paramlc = param.toLowerCase();
+          var options = tmps.filter(function (item, index) {
+            return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+          });
+
+          array.forEach(options, function (item) {
+            if (templates.indexOf(item.label) === -1) {
+              templates.push(item.label);
+            }
+          });
+
+        });
+        templatesString = templates.join(',');
+      }
+
+      return templatesString;      
+    }
 
     /* END: Ecan Changes */
 
