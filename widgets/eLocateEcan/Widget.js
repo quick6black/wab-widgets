@@ -93,7 +93,7 @@ define([
       rGeoMarkerSymbol: null,
       addressMarkerSymbol: null,
       coordMarkerSymbol: null,
-
+      
       postCreate: function () {
         this.inherited(arguments);
         this.drawLayer = new GraphicsLayer({id:"DrawGL"});
@@ -180,6 +180,13 @@ define([
         if(this.enableMoverGra){
           this.graphicsLayer.on('mouse-over', lang.hitch(this, this.mouseOverGraphic));
         }
+
+        aspect.before(this, 'onClose', function () {
+            // Stop tracking
+            if (this.locateButton && this.locateButton.tracking) {
+                this.locateButton.locate(); // Toggle tracking off
+            }
+        });
       },
 
       _initSymbols: function () {
