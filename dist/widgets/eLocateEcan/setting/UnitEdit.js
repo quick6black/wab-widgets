@@ -8,7 +8,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
     popup: null,
     adding: false,
     currentWkid: null,
-    wgs84Opt: null,
 
     postCreate: function postCreate() {
       this.inherited(arguments);
@@ -20,46 +19,22 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
         this.popup.disableButton(0);
       }
       this._setConfig(this.config);
-      registry.byId("radioOne").on("change", lang.hitch(this, function (isChecked) {
-        if (isChecked) {
-          this.wgs84Opt = "dd";
-        }
-      }));
-
-      registry.byId("radioTwo").on("change", lang.hitch(this, function (isChecked) {
-        if (isChecked) {
-          this.wgs84Opt = "dms";
-        }
-      }));
-
-      registry.byId("radioThree").on("change", lang.hitch(this, function (isChecked) {
-        if (isChecked) {
-          this.wgs84Opt = "dm";
-        }
-      }));
-
-      registry.byId("radioFour").on("change", lang.hitch(this, function (isChecked) {
-        if (isChecked) {
-          this.wgs84Opt = "ddm";
-        }
-      }));
     },
 
     getConfig: function getConfig() {
-      var fwgs84Opt;
-      if (this.currentWkid === 4326) {
-        fwgs84Opt = this.wgs84Opt;
-      } else {
-        fwgs84Opt = '';
+      // Create array of examples from input
+      var examples = this.unitExampleTB.get('value').split(';');
+      for (var i = 0; i < examples.length; i++) {
+        examples[i] = examples[i].replace(/ +(?= )/g, ''); // Remove white space
       }
+
       var config = {
         wkid: utils.standardizeWkid(this.wkid.get('value')),
         mapref: this.unitMapRefTB.get('value') === 'on',
         name: this.unitnameTB.get('value'),
-        example: this.unitExampleTB.get('value'),
+        examples: examples,
         xlabel: this.unitXLabelTB.get('value'),
-        ylabel: this.unitYLabelTB.get('value'),
-        wgs84option: fwgs84Opt
+        ylabel: this.unitYLabelTB.get('value')
       };
       this.config = config;
       return [this.config, this.tr];
@@ -74,38 +49,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
           this.unitMapRefTB.set('value', this.config.mapref);
           this.currentWkid = parseInt(config.wkid, 10);
           this.unitnameTB.set('value', lang.trim(this.config.name));
-          this.unitExampleTB.set('value', lang.trim(this.config.example));
+          this.unitExampleTB.set('value', lang.trim(this.config.examples.join('; ')));
           this.unitXLabelTB.set('value', lang.trim(this.config.xlabel));
           this.unitYLabelTB.set('value', lang.trim(this.config.ylabel));
-          if (this.currentWkid === 4326) {
-            //select wgs option
-            switch (this.config.wgs84option) {
-              case 'dd':
-                {
-                  registry.byId("radioOne").set('checked', true);
-                  this.wgs84Opt = 'dd';
-                  break;
-                }
-              case 'dms':
-                {
-                  registry.byId("radioTwo").set('checked', true);
-                  this.wgs84Opt = 'dms';
-                  break;
-                }
-              case 'dm':
-                {
-                  registry.byId("radioThree").set('checked', true);
-                  this.wgs84Opt = 'dm';
-                  break;
-                }
-              case 'ddm':
-                {
-                  registry.byId("radioFour").set('checked', true);
-                  this.wgs84Opt = 'ddm';
-                  break;
-                }
-            }
-          }
         }
       }), lang.hitch(this, function (err) {
         console.error(err);
@@ -139,23 +85,16 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/on', 'd
           }
         }
         this.popup.enableButton(0);
-        if (newWkid === 4326) {
-          domStyle.set(this.unitWkid4326Ops1, 'display', '');
-          domStyle.set(this.unitWkid4326Ops2, 'display', '');
-        } else {
-          domStyle.set(this.unitWkid4326Ops1, 'display', 'none');
-          domStyle.set(this.unitWkid4326Ops2, 'display', 'none');
-        }
         if (newWkid === 2193 || newWkid === 27200) {
           domStyle.set(this.wkidMapRef, 'display', '');
         } else {
+          this.unitMapRefTB.set('value', false);
           domStyle.set(this.wkidMapRef, 'display', 'none');
         }
       } else if (newValue) {
         this.wkid.set('value', "");
         this.wkidLabel.innerHTML = this.nls.cName;
-        domStyle.set(this.unitWkid4326Ops1, 'display', 'none');
-        domStyle.set(this.unitWkid4326Ops2, 'display', 'none');
+        this.unitMapRefTB.set('value', false);
         domStyle.set(this.wkidMapRef, 'display', 'none');
       }
       this.currentWkid = newWkid;

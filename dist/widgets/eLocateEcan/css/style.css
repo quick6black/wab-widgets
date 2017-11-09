@@ -766,7 +766,6 @@
     padding-right: 8px; }
   .widget-eLocate-ecan .DartTheme .xCoordTextBoxCls,
   .widget-eLocate-ecan .DartTheme .yCoordTextBoxCls,
-  .widget-eLocate-ecan .DartTheme .CoordHintTextCls,
   .widget-eLocate-ecan .DartTheme .unitSelect {
     width: 190px;
     line-height: 32px; }
@@ -774,10 +773,17 @@
     left: 75px; }
   .widget-eLocate-ecan .xCoordTextBoxCls,
   .widget-eLocate-ecan .yCoordTextBoxCls,
-  .widget-eLocate-ecan .CoordHintTextCls,
   .widget-eLocate-ecan .unitSelect {
     width: 200px;
     line-height: 32px; }
+  .widget-eLocate-ecan ul.CoordHintTextCls {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 90px; }
+    .widget-eLocate-ecan ul.CoordHintTextCls li {
+      width: 200px;
+      line-height: 32px;
+      cursor: pointer; }
   .widget-eLocate-ecan .tab.jimu-vcenter-text {
     overflow: hidden; }
 
