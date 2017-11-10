@@ -164,7 +164,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                     ylabel: unitConfig[0].ylabel,
                     wkid: unitConfig[0].wkid,
                     mapref: unitConfig[0].mapref,
-                    maprefprecision: unitConfig[0].maprefprecision
+                    precision: unitConfig[0].precision
                 });
                 unitConfig[1].singleUnit = unitConfig[0];
                 this.popupState = '';
@@ -176,7 +176,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                     ylabel: unitConfig[0].ylabel,
                     wkid: unitConfig[0].wkid,
                     mapref: unitConfig[0].mapref,
-                    maprefprecision: unitConfig[0].maprefprecision
+                    precision: unitConfig[0].precision
                 });
                 unitConfig[1].singleUnit = unitConfig[0];
             }
@@ -262,7 +262,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
                 ylabel: args.config && args.config.ylabel || '',
                 wkid: args.config && args.config.wkid || '',
                 mapref: args.config && args.config.mapref || '',
-                maprefprecision: args.config && args.config.maprefprecision || ''
+                precision: args.config && args.config.precision || ''
             };
 
             var result = this.unitList.addRow(rowData);

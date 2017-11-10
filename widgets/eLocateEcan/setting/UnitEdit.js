@@ -36,7 +36,6 @@ define(
       popup: null,
       adding: false,
       currentWkid: null,
-      defaultMapRefPrecision: 4,
 
       postCreate: function() {
         this.inherited(arguments);
@@ -60,7 +59,7 @@ define(
         var config = {
           wkid: utils.standardizeWkid(this.wkid.get('value')),
           mapref: this.unitMapRefTB.get('value') === 'on',
-          maprefprecision: (this.unitMapRefTB.get('value') !== 'on' ? null : parseInt(this.unitMapRefPrecisionDD.get('value'))),
+          precision: parseInt(this.unitPrecisionDD.get('value')),
           name: this.unitnameTB.get('value'),
           examples: examples,
           xlabel: this.unitXLabelTB.get('value'),
@@ -77,7 +76,7 @@ define(
           if (config && config.wkid) {
             this.wkid.set('value', parseInt(config.wkid, 10));
             this.unitMapRefTB.set('value', this.config.mapref);
-            this.unitMapRefPrecisionDD.set('value', this.config.maprefprecision);
+            this.unitPrecisionDD.set('value', this.config.precision);
             this.currentWkid = parseInt(config.wkid, 10);
             this.unitnameTB.set('value', lang.trim(this.config.name));
             this.unitExampleTB.set('value', lang.trim(this.config.examples.join('; ')));
@@ -118,29 +117,18 @@ define(
           this.popup.enableButton(0);
           if (newWkid === 2193 || newWkid === 27200) {
               domStyle.set(this.wkidMapRef, 'display', '');
-              domStyle.set(this.wkidMapRefPrecision, 'display', (this.unitMapRefTB.get('value') === 'on' ? '' : 'none'));
           } else {
               this.unitMapRefTB.set('value', false);
-              this.unitMapRefPrecisionDD.set('value', null);
               domStyle.set(this.wkidMapRef, 'display', 'none');
-              domStyle.set(this.wkidMapRefPrecision, 'display', 'none');
           }
         } else if (newValue) {
           this.wkid.set('value', "");
           this.wkidLabel.innerHTML = this.nls.cName;
           this.unitMapRefTB.set('value', false);
-          this.unitMapRefPrecisionDD.set('value', null);
           domStyle.set(this.wkidMapRef, 'display', 'none');
-          domStyle.set(this.wkidMapRefPrecision, 'display', 'none');
         }
         this.currentWkid = newWkid;
-      },
-
-      onMapRefChange: function(newValue) {
-          domStyle.set(this.wkidMapRefPrecision, 'display', (newValue ? '' : 'none'));
-          if (newValue && this.unitMapRefPrecisionDD.get('value') == null) {
-              this.unitMapRefPrecisionDD.set('value', this.defaultMapRefPrecision);
-          }
       }
+
     });
   });

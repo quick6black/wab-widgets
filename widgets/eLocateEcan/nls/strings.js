@@ -33,6 +33,9 @@ define({
     limittomapextent: "Limit address search to maps extent.",
     reversegeocodefailtitle: "Address Inspection Failed",
     reversegeocodefailmsg: "Failed to find an address at the location clicked. Please try again.",
-    errorInvalidCoordinates: "Invalid coordinates. Please try again."
+    errorInvalidCoordinates: "Invalid coordinates. Please try again.",
+    mapInputButton: "Map Input",
+    mapInputButtonTitle: "Select coordinates using map",
+    mapInputButtonTitleStop: "Stop selecting coordinates using map"
   })
 });

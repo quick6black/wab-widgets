@@ -39,43 +39,43 @@
       {
         "wkid": 2193,
         "mapref": false,
-        "maprefprecision": null,
+        "precision": 0,
         "name": "NZTM",
-        "examples": [ "1577194.01, 5171715.27" ],
+        "examples": [ "1577194, 5171715" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },
       {
         "wkid": 2193,
         "mapref": true,
-        "maprefprecision": 4,
+        "precision": 4,
         "name": "NZTopo50 Map Reference",
-        "examples": [ "BX24, 706, 802" ],
+        "examples": [ "BX24:7065-8022" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },
       {
         "wkid": 27200,
         "mapref": false,
-        "maprefprecision": null,
+        "precision": 0,
         "name": "NZMG",
-        "examples": [ "2494375.81, 5735582.68" ],
+        "examples": [ "2494375, 5735582" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },
       {
         "wkid": 27200,
         "mapref": true,
-        "maprefprecision": 4,
+        "precision": 4,
         "name": "NZ260 Map Reference",
-        "examples": [ "M35, 8858, 4457" ],
+        "examples": [ "M35:8858-4457" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },
       {
         "wkid": 4326,
         "mapref": false,
-        "maprefprecision": null,
+        "precision": 6,
         "name": "Longitude Latitude (WGS84)",
         "examples": [ "172.715, -43.607", "172-40.33 E, 43-35.50 S", "172-40-1.45 E, 43-39-10.99 S" ],
         "xlabel": "Longitude:",

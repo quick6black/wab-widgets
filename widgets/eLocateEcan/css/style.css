@@ -814,6 +814,9 @@
         background-color: #333; }
       .widget-eLocate-ecan .coord-input-btns .coord-input-btn:active, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton:active {
         background-color: #ccc; }
+      .widget-eLocate-ecan .coord-input-btns .coord-input-btn.btn-active, .widget-eLocate-ecan .coord-input-btns .my-location-widget .btn-active.zoomLocateButton {
+        background-image: url(../images/stop.png) !important;
+        background-color: #333; }
       .widget-eLocate-ecan .coord-input-btns .coord-input-btn.btn-map, .widget-eLocate-ecan .coord-input-btns .my-location-widget .btn-map.zoomLocateButton {
         background-image: url(../images/fa-hand-pointer-o.png); }
       .widget-eLocate-ecan .coord-input-btns .coord-input-btn span, .widget-eLocate-ecan .coord-input-btns .my-location-widget .zoomLocateButton span {
