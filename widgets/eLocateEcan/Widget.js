@@ -36,6 +36,7 @@ define([
   'dijit/ProgressBar',
   'dojo/_base/lang',
   'dojo/dom-style',
+  'dojo/dom-attr',
   'dojo/dom-construct',
   'dojo/on',
   'dojo/aspect',
@@ -56,7 +57,7 @@ define([
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, domStyle, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, lang, domStyle, domAttr, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -93,6 +94,7 @@ define([
       rGeoMarkerSymbol: null,
       addressMarkerSymbol: null,
       coordMarkerSymbol: null,
+      isCapturingCoordsFromMap: false,
       
       postCreate: function () {
         this.inherited(arguments);
@@ -160,15 +162,17 @@ define([
         html.setStyle(this.btnClear2, 'display', 'none');
         this.own(on(this.btnClear1, 'click', lang.hitch(this, this._clear)));
         html.setStyle(this.btnClear1, 'display', 'none');
-        this.own(on(this.btnCoordLocate, "click", lang.hitch(this, this.prelocateCoords)));
-        this.own(on(this.revGeocodeBtn, "click", lang.hitch(this, this._reverseGeocodeToggle)));
-        this.own(on(this.btnAddressLocate, "click", lang.hitch(this, this._locateAddress)));
+        this.own(on(this.CoordInputBtns_Map, 'click', lang.hitch(this, this._toggleMapClickCapture)));
+        this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
+        this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
+        this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
           if (keyNum === 13) {
             this._locateAddress();
           }
         })));
+        this.own(on(this.map, 'click', lang.hitch(this, this._onMapClick)));
       },
 
       startup: function () {
@@ -400,8 +404,8 @@ define([
           var selUnit = this._unitArr[this.unitdd.get('value')];
 
           if (selUnit.wkid == 4326) {
-              this.xCoordTextBox.set('value', coords.longitude);
-              this.yCoordTextBox.set('value', coords.latitude);
+              this.xCoordTextBox.set('value', parseFloat(coords.longitude.toFixed(selUnit.precision)));
+              this.yCoordTextBox.set('value', parseFloat(coords.latitude.toFixed(selUnit.precision)));
           }
           else {
               var point = new Point(coords.longitude, coords.latitude, new SpatialReference(4326));
@@ -413,26 +417,52 @@ define([
           }
       },
 
-      projectCompleteHandlerFromMap: function (results, locateResult) {
+      _usePointCoords: function (point) {
           var selUnit = this._unitArr[this.unitdd.get('value')];
 
-          if (selUnit.mapref) {
-              var lenWkids = this.config.mapSheets.length;
-              for (var i = 0; i < lenWkids; i++) {
-                  if (this.config.mapSheets[i].wkid == selUnit.wkid) {
-                      var lenSheets = this.config.mapSheets[i].sheets.length;
-                      for (var j = 0; j < lenSheets; j++) {
-                          if (results[0].x >= this.config.mapSheets[i].sheets[j].xmin && results[0].x <= this.config.mapSheets[i].sheets[j].xmax && results[0].y >= this.config.mapSheets[i].sheets[j].ymin && results[0].y <= this.config.mapSheets[i].sheets[j].ymax) {
-                              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
-                              this.xCoordTextBox.set('value', results[0].x.toString().substring(2, selUnit.precision + 2));
-                              this.yCoordTextBox.set('value', results[0].y.toString().substring(2, selUnit.precision + 2));
-
-                              break;
-                          }
-                      }
-                      break;
-                  }
+          if (selUnit.wkid == point.spatialReference.wkid) {
+              if (selUnit.mapref) {
+                  this._displayAsMapRef(point);
               }
+              else {
+                this.xCoordTextBox.set('value', parseFloat(point.x.toFixed(selUnit.precision)));
+                this.yCoordTextBox.set('value', parseFloat(point.y.toFixed(selUnit.precision)));
+              }
+          }
+          else {
+              var projParams = new ProjectParameters();
+              projParams.geometries = [point];
+              projParams.outSR = new SpatialReference(parseInt(selUnit.wkid));
+              esriConfig.defaults.geometryService.project(projParams, lang.hitch(this, this.projectCompleteHandlerFromMap),
+                  lang.hitch(this, this.geometryService_faultHandler));
+          }
+      },
+
+      _displayAsMapRef: function (point) {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+
+          var lenWkids = this.config.mapSheets.length;
+          for (var i = 0; i < lenWkids; i++) {
+              if (this.config.mapSheets[i].wkid == selUnit.wkid) {
+                  var lenSheets = this.config.mapSheets[i].sheets.length;
+                  for (var j = 0; j < lenSheets; j++) {
+                      if (point.x >= this.config.mapSheets[i].sheets[j].xmin && point.x <= this.config.mapSheets[i].sheets[j].xmax && point.y >= this.config.mapSheets[i].sheets[j].ymin && point.y <= this.config.mapSheets[i].sheets[j].ymax) {
+                          this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
+                          this.xCoordTextBox.set('value', point.x.toString().substring(2, selUnit.precision + 2));
+                          this.yCoordTextBox.set('value', point.y.toString().substring(2, selUnit.precision + 2));
+
+                          break;
+                      }
+                  }
+                  break;
+              }
+          }
+      },
+
+      projectCompleteHandlerFromMap: function (results, locateResult) {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+          if (selUnit.mapref) {
+              this._displayAsMapRef(results[0]);
           }
           else {
               this.xCoordTextBox.set('value', parseFloat(results[0].x.toFixed(selUnit.precision)));
@@ -798,6 +828,24 @@ define([
       _hideError: function () {
           html.setStyle(this.errorText, 'display', 'none');
           this.errorText.innerHTML = '';
+      },
+
+      _toggleMapClickCapture: function () {
+          if (this.isCapturingCoordsFromMap) { // Stop capturing
+              domClass.remove(this.CoordInputBtns_Map, 'btn-active');
+              domAttr.set(this.CoordInputBtns_Map, 'title', this.nls.mapInputButtonTitle);
+          }
+          else { // Start capturing
+              domClass.add(this.CoordInputBtns_Map, 'btn-active');
+              domAttr.set(this.CoordInputBtns_Map, 'title', this.nls.mapInputButtonTitleStop);
+          }
+          this.isCapturingCoordsFromMap = !this.isCapturingCoordsFromMap;
+      },
+
+      _onMapClick: function (event) {
+          if (this.isCapturingCoordsFromMap) {
+              this._usePointCoords(event.mapPoint);
+          }
       },
 
       prelocateCoords: function ()  {
