@@ -50,7 +50,7 @@
         "mapref": true,
         "precision": 4,
         "name": "NZTopo50 Map Reference",
-        "examples": [ "BX24, 706, 802" ],
+        "examples": [ "BX24:7065-8022" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },
@@ -68,7 +68,7 @@
         "mapref": true,
         "precision": 4,
         "name": "NZ260 Map Reference",
-        "examples": [ "M35, 8858, 4457" ],
+        "examples": [ "M35:8858-4457" ],
         "xlabel": "Easting (X):",
         "ylabel": "Northing (Y):"
       },

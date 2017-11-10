@@ -689,16 +689,33 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     },
 
     _useExampleText: function _useExampleText(example) {
-      var exampleArr = example.split(",");
       var selUnit = this._unitArr[this.unitdd.get('value')];
       if (selUnit.mapref) {
-        this.mapSheetDD.set('value', exampleArr[0]);
-        this.xCoordTextBox.set('value', exampleArr[1]);
-        this.yCoordTextBox.set('value', exampleArr[2]);
+        var exampleArr = this._regexMatchAll(example, /(((?=[^0-9])\s-)?[a-zA-Z0-9.]+)/g); // The ((?=[^0-9])\s-)? allows us to discard - from "M35:8858-4457" but capture -43.607 from "172.715, -43.607"
+        this.mapSheetDD.set('value', this._strTrim(exampleArr[0][0]));
+        this.xCoordTextBox.set('value', this._strTrim(exampleArr[1][0]));
+        this.yCoordTextBox.set('value', this._strTrim(exampleArr[2][0]));
       } else {
-        this.xCoordTextBox.set('value', exampleArr[0]);
-        this.yCoordTextBox.set('value', exampleArr[1]);
+        var exampleArr = example.split(','); // Don't rely on regex for normal coords as WGS84 has lots of variations which can trip up above regex
+        this.xCoordTextBox.set('value', this._strTrim(exampleArr[0]));
+        this.yCoordTextBox.set('value', this._strTrim(exampleArr[1]));
       }
+    },
+
+    _regexMatchAll: function _regexMatchAll(str, regexp) {
+      var matches = [];
+      str.replace(regexp, function () {
+        var arr = [].slice.call(arguments, 0);
+        var extras = arr.splice(-2);
+        arr.index = extras[0];
+        arr.input = extras[1];
+        matches.push(arr);
+      });
+      return matches.length ? matches : null;
+    },
+
+    _strTrim: function _strTrim(str) {
+      return str.replace(/ +(?= )/g, '');
     },
 
     _clear: function _clear() {
