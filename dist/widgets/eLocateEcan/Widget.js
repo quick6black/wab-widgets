@@ -83,10 +83,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           var ax = [],
               bx = [];
 
-          a.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+          a.sheet.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
             ax.push([$1 || Infinity, $2 || ""]);
           });
-          b.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+          b.sheet.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
             bx.push([$1 || Infinity, $2 || ""]);
           });
 
@@ -388,7 +388,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           var lenSheets = this.config.mapSheets[i].sheets.length;
           for (var j = 0; j < lenSheets; j++) {
             if (point.x >= this.config.mapSheets[i].sheets[j].xmin && point.x <= this.config.mapSheets[i].sheets[j].xmax && point.y >= this.config.mapSheets[i].sheets[j].ymin && point.y <= this.config.mapSheets[i].sheets[j].ymax) {
-              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
+              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheet);
               this.xCoordTextBox.set('value', point.x.toString().substring(2, selUnit.precision + 2));
               this.yCoordTextBox.set('value', point.y.toString().substring(2, selUnit.precision + 2));
 
@@ -459,11 +459,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           });
           var lenSheets = this.config.mapSheets[i].sheets.length;
           for (var j = 0; j < lenSheets; j++) {
-            var option = {
-              value: this.config.mapSheets[i].sheets[j].sheetID,
-              label: this.config.mapSheets[i].sheets[j].sheetID
-            };
-            options.push(option);
+            if (j == 0 || this.config.mapSheets[i].sheets[j].sheet != this.config.mapSheets[i].sheets[j - 1].sheet) {
+              // Avoid duplicate values
+              var option = {
+                value: this.config.mapSheets[i].sheets[j].sheet,
+                label: this.config.mapSheets[i].sheets[j].sheet
+              };
+              options.push(option);
+            }
           }
           break;
         }
@@ -805,9 +808,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this._hideError();
       var long = this.xCoordTextBox.get('value');
       var lat = this.yCoordTextBox.get('value');
-      var sheetID = this.mapSheetDD.get('value');
+      var sheet = this.mapSheetDD.get('value');
       var selUnit = this._unitArr[this.unitdd.get('value')];
-      if (long && lat && (sheetID || !selUnit.mapref)) {
+      if (long && lat && (sheet || !selUnit.mapref)) {
         var numLong = parseFloat(long);
         var numLat = parseFloat(lat);
         if (selUnit.wkid === this.map.spatialReference.wkid && !selUnit.mapref || selUnit.wgs84option == "map") {
@@ -843,7 +846,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               if (this.config.mapSheets[i].wkid == selUnit.wkid) {
                 var lenSheets = this.config.mapSheets[i].sheets.length;
                 for (var j = 0; j < lenSheets; j++) {
-                  if (this.config.mapSheets[i].sheets[j].sheetID == sheetID) {
+                  if (this.config.mapSheets[i].sheets[j].sheet == sheet) {
                     var mapSheet = this.config.mapSheets[i].sheets[j];
 
                     // Convert the grid coordinates
@@ -896,13 +899,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         try {
           var long = this.xCoordTextBox.get('value');
           var lat = this.yCoordTextBox.get('value');
-          var sheetID = this.mapSheetDD.get('value');
+          var sheet = this.mapSheetDD.get('value');
           var selUnit = this._unitArr[this.unitdd.get('value')];
-          if (long && lat && (sheetID || !selUnit.mapref)) {
+          if (long && lat && (sheet || !selUnit.mapref)) {
             var locateResult = {};
             locateResult.sym = this.coordMarkerSymbol;
             locateResult.title = this.nls.coordslabel;
-            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
+            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheet + ", " : "") + long + ", " + lat;
             locateResult.point = results[0];
             locateResult.alt = false;
             locateResult.id = 'id_1';
