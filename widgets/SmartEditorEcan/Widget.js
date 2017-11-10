@@ -3858,7 +3858,7 @@ define([
           if (copyPopup.featureSet.features.length === 1) {
             this._addFeature(copyPopup.featureSet.features[0], template);
           } else {
-
+            this._bulkAddFeatures(copyPopup.featureSet.features, template);
           }
         }
         copyPopup.popup.close();
@@ -3911,13 +3911,18 @@ define([
 
         this._createAttributeInspector([localLayerInfo]);
 
-        var newAttributes = lang.clone(template.template.prototype.attributes);
-        if (this._usePresetValues) {
-          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+        if (this.config.editor.hasOwnProperty("editGeometryDefault") &&
+          this.config.editor.editGeometryDefault === true) {
+          setTimeout(lang.hitch(this, function () { this._editGeomSwitch.set('checked', true); }), 100);
         }
 
+        var newAttributes = lang.clone(template.template.prototype.attributes);
         if (this._copyExistingValues) {
           this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+        }
+
+        if (this._usePresetValues) {
+          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
         }
 
         var newGraphic = new Graphic(feature.geometry, null, newAttributes);
@@ -3925,12 +3930,12 @@ define([
         // store original attrs for later use
         newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
         this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
-          this._isDirty = true;
-          var query = new Query();
-          query.objectIds = [e[0].objectId];
-          this.cacheLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW);
+          var queryTask = new Query();
+          queryTask.objectIds = [e[0].objectId];
+          this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
 
           this.currentFeature = this.updateFeatures[0] = newGraphic;
+          this.getConfigDefaults();
           this.geometryChanged = false;
           if (this._attributeInspectorTools) {
             this._attributeInspectorTools.triggerFormValidation();
@@ -3947,21 +3952,204 @@ define([
         }));
 
         this._showTemplate(false, false);
+
+        if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+          setTimeout(lang.hitch(this, function () {
+            var saveBtn = query(".saveButton")[0];
+            if (!saveBtn) {
+              //do nothing
+            } else {
+              on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
+            }
+          }), 100);
+        }        
     },
 
     _bulkAddFeatures: function(featureSet, template) {
+      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+      var newTempLayerInfos;
+      var localLayerInfo = null;
 
+      if (this.attrInspector) {
+        this.attrInspector.destroy();
+        this.attrInspector = null;
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+      this._removeLocalLayers();
+      // preparation for a new attributeInspector for the local layer
+      this.cacheLayer = this._cloneLayer(template.featureLayer);
+      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+
+      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+      newTempLayerInfos = [localLayerInfo];//this._converConfiguredLayerInfos([localLayerInfo]);
+
+      this._createAttributeInspector([localLayerInfo]);
+
+      if (this.config.editor.hasOwnProperty("editGeometryDefault") &&
+        this.config.editor.editGeometryDefault === true) {
+        setTimeout(lang.hitch(this, function () { this._editGeomSwitch.set('checked', true); }), 100);
+      }
+
+      var updateFeatures = [];
+      array.forEach(featureSet, lang.hitch(this, function(feature) {
+        var newAttributes = lang.clone(template.template.prototype.attributes);
+        if (this._copyExistingValues) {
+          this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+        }
+
+        if (this._usePresetValues) {
+          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+        }
+
+        var newGraphic = new Graphic(feature.geometry, null, newAttributes);
+
+        // store original attrs for later use
+        newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+        updateFeatures.push(newGraphic);
+      }));
+
+      this.cacheLayer.applyEdits(updateFeatures, null, null, lang.hitch(this, function (e) {
+        var queryTask = new Query();
+        var objectIds = e.map(function(feature) {
+          return feature.objectId;
+        });
+        queryTask.objectIds = objectIds;
+        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+
+        /*
+
+        this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
+        this.getConfigDefaults();
+        this.geometryChanged = false;
+        if (this._attributeInspectorTools) {
+          this._attributeInspectorTools.triggerFormValidation();
+        }
+        this._attachLayerHandler();
+        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+        this.currentLayerInfo.isCache = true;
+        this._toggleDeleteButton(false);
+        //this._toggleEditGeoSwitch(false);
+
+        //this._createSmartAttributes();
+        //
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
+        */
+        array.forEach(updateFeatures, lang.hitch(this, function(feature) {
+          this._postChanges(feature).then(lang.hitch(this, function (e) {
+            if (e === "failed") {
+            }
+            else {
+            }
+          }));
+        }));
+
+        this._showTemplate(false, false);
+
+        if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+          setTimeout(lang.hitch(this, function () {
+            var saveBtn = query(".saveButton")[0];
+            if (!saveBtn) {
+              //do nothing
+            } else {
+              on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
+            }
+          }), 100);
+        }    
+      }));
     },
 
     _modifyAttributesWithCopyValues: function (newAttributes, newTempLayerInfos, attributes) {
       for(var key in newAttributes) {
+        // Check if attribute exists in new feature
         if (attributes[key]) {
-          // Validate the attribute value is suitable for the new field
-
-
-          newAttributes[key] = attributes[key];
+          // Validate the attribute value is valid for data type
+          if (this._validateCopyAttribute(attributes[key], key, newTempLayerInfos[0].fieldInfos)) {
+            newAttributes[key] = attributes[key];
+          }
         }
       }
+    },
+
+    _validateCopyAttribute: function (fieldValue,fieldName,fieldInfos) {
+      var isValid = false;
+      var field = fieldInfos.filter(function(fieldInfo) {
+        return fieldInfo.name === fieldName;
+      })[0];
+
+      // Validate data type
+      switch (field.type) {
+        case 'esriFieldTypeGUID':
+          var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
+          if (pattern.test(fieldValue) === true) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeInteger":
+          var regInt = parseInt(fieldValue);
+          if (regInt &&  regInt >= -2147483648 && regInt <= 2147483647) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSmallInteger":
+          var shtInt = parseInt(fieldValue);
+          if (shtInt &&  shtInt >= -32768 && shtInt <= 32767) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSingle":
+        case "esriFieldTypeDouble":
+          if(Number.isNumeric(fieldValue)) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeDate":
+          var newDate = new Date(fieldValue);
+          isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
+          break;
+
+        case 'esriFieldTypeString':
+        default:
+          isValid = (field["length"] >= fieldValue.length);
+          break;
+      }
+
+      // Check Domain values
+      if (field.domain && isValid) {
+        switch (field.domain.type) {
+          case "codedValue":
+            // Validate value is with domain list
+            isValid = field.domain.codedValues.filter(function(value) { return value.code === fieldValue}).length > 0;          
+            break;
+
+          case "range":
+            var numValue = Number(fieldValue);
+            isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      // Check editable
+      if (!field.ediatble && isValid) {
+        isValid = false;
+      }
+
+      return isValid;
     },
 
     /* END: Ecan Changes */
