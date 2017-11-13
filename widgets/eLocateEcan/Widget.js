@@ -37,7 +37,6 @@ define([
   'dojo/_base/lang',
   'dojo/dom-style',
   'dojo/dom-attr',
-  'dojo/dom-construct',
   'dojo/on',
   'dojo/aspect',
   'dojo/_base/html',
@@ -57,7 +56,7 @@ define([
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, domStyle, domAttr, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, lang, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -165,6 +164,7 @@ define([
         this.own(on(this.CoordInputBtns_Map, 'click', lang.hitch(this, this._toggleMapClickCapture)));
         this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
         this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
+        this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
         this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -486,7 +486,7 @@ define([
             this.xCoordLbl.innerHTML = this.config.pointunits.pointunit[i].xlabel;
             this.yCoordLbl.innerHTML = this.config.pointunits.pointunit[i].ylabel;
             this.CoordHintLbl.innerHTML = this.nls.example;
-            this._refreshExamples(this.config.pointunits.pointunit[i].examples);
+            this.CoordHintText.innerHTML = this.config.pointunits.pointunit[i].example;
           }
         }
         this.unitdd.addOption(options);
@@ -496,7 +496,7 @@ define([
       _unitDDChanged: function (newValue){
         this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
         this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
-        this._refreshExamples(this._unitArr[newValue].examples);
+        this.CoordHintText.innerHTML = this._unitArr[newValue].example;
         this.mapSheetDD.set('value', '');
         this.xCoordTextBox.set('value', '');
         this.yCoordTextBox.set('value', '');
@@ -534,18 +534,7 @@ define([
           this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
           this.mapSheetDD.addOption(options);
       },
-
-      _refreshExamples: function (examples) {
-          this.ExamplesList.innerHTML = '';
-
-          var len = examples.length;
-          for (var i = 0; i < len; i++) {
-              var li = domConstruct.create('li', { innerHTML: examples[i], title: this.nls.exampleClickTooltip });
-              this.own(on(li, 'click', lang.hitch(this, this._useExampleText, examples[i])));
-              domConstruct.place(li, this.ExamplesList);
-          }
-      },
-
+      
       isSelTabVisible: function () {
         switch (this.selTab) {
           case this.nls.addresslabel:
@@ -754,7 +743,8 @@ define([
         locateResult.point = results[0];
       },
       
-      _useExampleText: function (example) {
+      _useExampleText: function () {
+          var example = this.CoordHintText.innerHTML;
           var selUnit = this._unitArr[this.unitdd.get('value')];
           if (selUnit.mapref) {
               var exampleArr = this._regexMatchAll(example, /(((?=[^0-9])\s-)?[a-zA-Z0-9.]+)/g); // The ((?=[^0-9])\s-)? allows us to discard - from "M35:8858-4457" but capture -43.607 from "172.715, -43.607"
@@ -883,19 +873,20 @@ define([
             html.setStyle(this.progressBar.domNode, 'display', 'block');
             html.setStyle(this.divResult, 'display', 'none');
             var point, wmPoint;
-              
-            if (selUnit.wkid == 4326) { // Flexible WGS84 coordinate format handling
-                var matchCoordFormats = [this._wgs84MatchCoordFormatD, this._wgs84MatchCoordFormatDM, this._wgs84MatchCoordFormatDMS];
 
-                for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
-                    numLong = matchCoordFormats[i](this, this.xCoordTextBox.get('value'));
-                    if (numLong) break;
+            if (selUnit.wkid == 4326) {
+                if (selUnit.wgs84option == "dms") {
+                    numLong = this._wgs84MatchCoordFormatDMS(this, this.xCoordTextBox.get('value'));
+                    numLat = this._wgs84MatchCoordFormatDMS(this, this.yCoordTextBox.get('value'));
                 }
-                for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
-                    numLat = matchCoordFormats[i](this, this.yCoordTextBox.get('value'));
-                    if (numLat) break;
+                else if (selUnit.wgs84option == "dm" || selUnit.wgs84option == "ddm") {
+                    numLong = this._wgs84MatchCoordFormatDM(this, this.xCoordTextBox.get('value'));
+                    numLat = this._wgs84MatchCoordFormatDM(this, this.yCoordTextBox.get('value'));
                 }
-                
+                else if (selUnit.wgs84option == "dd") {
+                    numLong = this._wgs84MatchCoordFormatD(this, this.xCoordTextBox.get('value'));
+                    numLat = this._wgs84MatchCoordFormatD(this, this.yCoordTextBox.get('value'));
+                }
                 point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
                 if (webMercatorUtils.canProject(point, this.map)) {
                     wmPoint = webMercatorUtils.project(point, this.map);
@@ -1001,50 +992,6 @@ define([
         console.info(err);
         html.setStyle(this.progressBar.domNode, 'display', 'none');
         html.setStyle(this.divResult, 'display', 'block');
-      },
-
-      dms_to_deg: function  (dmsStr) {
-        var negNum = false;
-        if(dmsStr.toLowerCase().indexOf("w") > -1){
-          negNum = true;
-        }
-        if(dmsStr.toLowerCase().indexOf("s") > -1){
-          negNum = true;
-        }
-        var myPattern = /[WwnNEeSs ]/g;
-        dmsStr = dmsStr.replace(myPattern, "");
-        var dmsArr = dmsStr.split("-");
-
-        //Compute degrees, minutes and seconds:
-        var sec = Number(dmsArr[2]) / 60;
-        var min = sec + Number(dmsArr[1]);
-        var dec = min / 60;
-        var fDeg = dec + Number(dmsArr[0]);
-        if(negNum){
-          fDeg = -Math.abs(fDeg);
-        }
-        return fDeg;
-      },
-
-      dm_to_deg: function (dmStr) {
-        var negNum = false;
-        if(dmStr.toLowerCase().indexOf("w") > -1){
-          negNum = true;
-        }
-        if(dmStr.toLowerCase().indexOf("s") > -1){
-          negNum = true;
-        }
-        var myPattern = /[WwnNEeSs ]/g;
-        dmStr = dmStr.replace(myPattern, "");
-        var dmArr = dmStr.split("-");
-        //Compute degrees, minutes:
-        var min = Number(dmArr[1]);
-        var dec = min / 60;
-        var fDeg = dec + Number(dmArr[0]);
-        if(negNum){
-          fDeg = -Math.abs(fDeg);
-        }
-        return fDeg;
       },
 
       locateCoordinates: function (){

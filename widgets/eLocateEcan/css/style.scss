@@ -1061,6 +1061,7 @@
 
   .DartTheme .xCoordTextBoxCls,
   .DartTheme .yCoordTextBoxCls,
+  .DartTheme .CoordHintTextCls,
   .DartTheme .unitSelect {
     width: 190px;
     line-height: 32px;
@@ -1072,21 +1073,10 @@
 
   .xCoordTextBoxCls,
   .yCoordTextBoxCls,
+  .CoordHintTextCls,
   .unitSelect {
     width: 200px;
     line-height: 32px;
-  }
-
-  ul.CoordHintTextCls {
-    list-style-type: none;
-    padding-left: 0;
-    margin-left: 90px;
-
-    li {
-      width: 200px;
-      line-height: 32px;
-      cursor: pointer;
-    }
   }
 
   .tab.jimu-vcenter-text {
