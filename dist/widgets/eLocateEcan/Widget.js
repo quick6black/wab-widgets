@@ -854,19 +854,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     numLong = parseFloat(parseInt(mapSheet.xmin.toString().substring(0, 2) + long + '0000000').toString().substring(0, 7));
                     numLat = parseFloat(parseInt(mapSheet.ymin.toString().substring(0, 2) + lat + '0000000').toString().substring(0, 7));
 
-                    point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
-                    if (webMercatorUtils.canProject(point, this.map)) {
-                      wmPoint = webMercatorUtils.project(point, this.map);
-                      this.projectCompleteHandler2([wmPoint]);
-                      return;
-                    }
+                    // Validate - make sure within sheet bounds
+                    if (numLong >= mapSheet.xmin && numLong <= mapSheet.xmax && numLat >= mapSheet.ymin && numLat <= mapSheet.ymax) {
+                      point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
+                      if (webMercatorUtils.canProject(point, this.map)) {
+                        wmPoint = webMercatorUtils.project(point, this.map);
+                        this.projectCompleteHandler2([wmPoint]);
+                        return;
+                      }
 
-                    break;
+                      break;
+                    }
                   }
                 }
                 break;
               }
             }
+
+            // If we got this far there was an issue with coords
+            this.projectCompleteHandler2([{}]); // Dummy point to trigger error message
           } else {
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
             if (webMercatorUtils.canProject(point, this.map)) {
