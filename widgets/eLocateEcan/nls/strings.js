@@ -12,6 +12,7 @@ define({
     noresultsfoundlabel: "No Results Found",
     resultsfoundlabel: "Results found:",
     clear: "Clear",
+    copytoclipboard: "Copy to clipboard",
     widgetversion: "Enhanced Locate Widget Version Info",
     widgetverstr: "Widget Version",
     wabversionmsg: "Widget is designed to run in Web AppBuilder version",

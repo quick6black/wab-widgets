@@ -46,7 +46,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.list.removeResultMsg = this.nls.removeresultmessage;
       this._initTabContainer();
       this._initProgressBar();
-      this._initCoordInputButtons();
+      this._initLocateButtons();
       this._initUnitsDD();
       this._initDraw();
       this._initLocator();
@@ -114,6 +114,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
       this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
       this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
+      this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
       this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
       this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function (evt) {
         var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -322,9 +323,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       });
     },
 
-    _initCoordInputButtons: function _initCoordInputButtons() {
-      // Locate button
-
+    _initLocateButtons: function _initLocateButtons() {
       this.locateButton = new LocateButton({
         map: this.map,
         theme: 'my-location-widget jimu-widget',
@@ -335,10 +334,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.locateButton.startup();
 
       this.own(on(this.locateButton, 'locate', lang.hitch(this, this._locateUpdate)));
-
-      // Map select
-
-      // TODO!
     },
 
     _locateUpdate: function _locateUpdate(event) {
@@ -727,6 +722,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       return false;
     },
 
+    _copyToClipboard: function _copyToClipboard() {
+      html.setStyle(this.copytoclipboardTextBox, 'display', '');
+      this.copytoclipboardTextBox.value = this._getCoordinateStringFromInputs();
+      this.copytoclipboardTextBox.select();
+      document.execCommand('copy');
+      html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+    },
+
+    _getCoordinateStringFromInputs: function _getCoordinateStringFromInputs() {
+      var selUnit = this._unitArr[this.unitdd.get('value')];
+
+      var x = this._strTrim(this.xCoordTextBox.get('value'));
+      var y = this._strTrim(this.yCoordTextBox.get('value'));
+
+      if (selUnit.mapref) {
+        return this.mapSheetDD.get('value') + ':' + x + '-' + y;
+      } else {
+        return x + ', ' + y;
+      }
+    },
+
     _removeResultItem: function _removeResultItem(index, item) {
       var locResult = this.list.items[this.list.selectedIndex];
       this.locateResultArr.splice(this.locateResultArr.indexOf(locResult), 1);
@@ -900,7 +916,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             var locateResult = {};
             locateResult.sym = this.coordMarkerSymbol;
             locateResult.title = this.nls.coordslabel;
-            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheet + ", " : "") + long + ", " + lat;
+            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getCoordinateStringFromInputs();
             locateResult.point = results[0];
             locateResult.alt = false;
             locateResult.id = 'id_1';

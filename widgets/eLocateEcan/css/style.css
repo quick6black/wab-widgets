@@ -778,6 +778,8 @@
   .widget-eLocate-ecan .unitSelect {
     width: 200px;
     line-height: 32px; }
+  .widget-eLocate-ecan .button-copytoclipboard {
+    margin-left: 90px; }
   .widget-eLocate-ecan .tab.jimu-vcenter-text {
     overflow: hidden; }
   .widget-eLocate-ecan .coord-input-btns {

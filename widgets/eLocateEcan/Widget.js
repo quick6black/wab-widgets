@@ -102,7 +102,7 @@ define([
         this.list.removeResultMsg =  this.nls.removeresultmessage;
         this._initTabContainer();
         this._initProgressBar();
-        this._initCoordInputButtons();
+        this._initLocateButtons();
         this._initUnitsDD();
         this._initDraw();
         this._initLocator();
@@ -165,6 +165,7 @@ define([
         this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
         this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
         this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
+        this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
         this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -375,9 +376,7 @@ define([
         return str.replace(/\w\S*/g, function(str){return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();});
       },
 
-      _initCoordInputButtons: function () {
-          // Locate button
-
+      _initLocateButtons: function () {
           this.locateButton = new LocateButton({
               map: this.map,
               theme: 'my-location-widget jimu-widget',
@@ -388,10 +387,6 @@ define([
           this.locateButton.startup();
 
           this.own(on(this.locateButton, 'locate', lang.hitch(this, this._locateUpdate)));
-
-          // Map select
-
-          // TODO!
       },
 
       _locateUpdate: function (event) {
@@ -790,6 +785,28 @@ define([
         return false;
       },
 
+      _copyToClipboard: function () {
+          html.setStyle(this.copytoclipboardTextBox, 'display', '');
+          this.copytoclipboardTextBox.value = this._getCoordinateStringFromInputs();
+          this.copytoclipboardTextBox.select();
+          document.execCommand('copy');
+          html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+      },
+
+      _getCoordinateStringFromInputs: function () {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+
+          var x = this._strTrim(this.xCoordTextBox.get('value'));
+          var y = this._strTrim(this.yCoordTextBox.get('value'));
+          
+          if (selUnit.mapref) {
+              return this.mapSheetDD.get('value') + ':' + x + '-' + y;
+          }
+          else {
+              return x + ', ' + y;
+          }
+      },
+
       _removeResultItem: function (index, item) {
         var locResult = this.list.items[this.list.selectedIndex];
         this.locateResultArr.splice(this.locateResultArr.indexOf(locResult), 1);
@@ -967,7 +984,7 @@ define([
               var locateResult = {};
               locateResult.sym = this.coordMarkerSymbol;
               locateResult.title = this.nls.coordslabel;
-              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheet + ", " : "") + long + ", " + lat;
+              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getCoordinateStringFromInputs();
               locateResult.point = results[0];
               locateResult.alt = false;
               locateResult.id = 'id_1';
