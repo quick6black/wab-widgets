@@ -115,6 +115,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
       this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
       this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
+      this.own(on(this.btnFullCopy, 'click', lang.hitch(this, this._copyToClipboard)));
       this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
       this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function (evt) {
         var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;

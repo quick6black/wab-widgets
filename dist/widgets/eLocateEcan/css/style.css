@@ -30,8 +30,8 @@
     top: 0; }
   .widget-eLocate-ecan .mapsheetSelect {
     width: 200px;
-    position: absolute;
-    left: 90px; }
+    line-height: 32px;
+    float: left; }
   .widget-eLocate-ecan .unitSelect .dijitSelectLabel, .widget-eLocate-ecan .mapsheetSelect .dijitSelectLabel {
     padding: 1px 0px;
     width: 161px;
@@ -51,6 +51,34 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap; }
+  .widget-eLocate-ecan .copy-btn-input {
+    display: inline-block;
+    background: url("../images/copy_black.png");
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: 8px 6px;
+    width: 26px;
+    height: 32px;
+    cursor: pointer; }
+    .widget-eLocate-ecan .copy-btn-input:hover {
+      background: url("../images/copy_black_hover.png");
+      background-repeat: no-repeat;
+      background-color: transparent;
+      background-position: 8px 6px; }
+  .widget-eLocate-ecan .copy-btn-link {
+    display: inline-block;
+    background: url("../images/copy_black.png");
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: 8px 0;
+    width: 26px;
+    height: 24px;
+    cursor: pointer; }
+    .widget-eLocate-ecan .copy-btn-link:hover {
+      background: url("../images/copy_black_hover.png");
+      background-repeat: no-repeat;
+      background-color: transparent;
+      background-position: 8px 0; }
   .widget-eLocate-ecan .errorMessage {
     margin-top: 10px;
     text-align: right;
@@ -777,9 +805,11 @@
   .widget-eLocate-ecan .CoordHintTextCls,
   .widget-eLocate-ecan .unitSelect {
     width: 200px;
-    line-height: 32px; }
+    line-height: 32px;
+    float: left; }
   .widget-eLocate-ecan .button-copytoclipboard {
-    margin-left: 90px; }
+    margin-left: 90px;
+    float: left; }
   .widget-eLocate-ecan .tab.jimu-vcenter-text {
     overflow: hidden; }
   .widget-eLocate-ecan .coord-input-btns {

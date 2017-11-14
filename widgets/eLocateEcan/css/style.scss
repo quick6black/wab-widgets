@@ -35,8 +35,8 @@
 
   .mapsheetSelect {
     width: 200px;
-    position: absolute;
-    left: 90px;
+    line-height: 32px;
+    float: left;
   }
 
   .unitSelect .dijitSelectLabel, .mapsheetSelect .dijitSelectLabel {
@@ -60,6 +60,42 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .copy-btn-input {
+    display: inline-block;
+    background: url('../images/copy_black.png');
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: 8px 6px;
+    width: 26px;
+    height: 32px;
+    cursor: pointer;
+
+    &:hover {
+      background: url('../images/copy_black_hover.png');
+      background-repeat: no-repeat;
+      background-color: transparent;
+      background-position: 8px 6px;
+    }
+  }
+
+  .copy-btn-link {
+    display: inline-block;
+    background: url('../images/copy_black.png');
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: 8px 0;
+    width: 26px;
+    height: 24px;
+    cursor: pointer;
+
+    &:hover {
+      background: url('../images/copy_black_hover.png');
+      background-repeat: no-repeat;
+      background-color: transparent;
+      background-position: 8px 0;
+    }
   }
 
   .errorMessage {
@@ -1077,10 +1113,12 @@
   .unitSelect {
     width: 200px;
     line-height: 32px;
+    float: left;
   }
 
   .button-copytoclipboard {
     margin-left: 90px;
+    float: left;
   }
 
   .tab.jimu-vcenter-text {
