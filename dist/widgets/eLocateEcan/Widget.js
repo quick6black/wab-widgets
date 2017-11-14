@@ -2,7 +2,7 @@
 // Robert Scheitlin WAB eLocate Widget
 ///////////////////////////////////////////////////////////////////////////
 /*global define, console, setTimeout, clearTimeout*/
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/dijit/LocateButton', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/dom-construct', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, domStyle, domAttr, domConstruct, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/dijit/TabContainer', './List', './CountryCodes', 'jimu/dijit/Message', 'esri/layers/GraphicsLayer', 'esri/tasks/GeometryService', 'esri/config', 'esri/graphic', 'esri/graphicsUtils', 'esri/geometry/Point', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/Color', 'esri/geometry/Extent', 'esri/geometry/Geometry', 'esri/symbols/SimpleFillSymbol', 'esri/renderers/SimpleRenderer', 'esri/dijit/PopupTemplate', 'esri/dijit/LocateButton', 'esri/request', 'esri/tasks/locator', 'esri/toolbars/draw', 'esri/symbols/jsonUtils', 'esri/tasks/AddressCandidate', 'dojo/i18n!esri/nls/jsapi', 'dojo/Deferred', 'dijit/ProgressBar', 'dojo/_base/lang', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/on', 'dojo/aspect', 'dojo/_base/html', 'dojo/dom-class', 'dojo/_base/array', 'jimu/utils', 'jimu/dijit/LoadingShelter', 'dojo/io-query', 'esri/SpatialReference', 'esri/tasks/ProjectParameters', 'esri/geometry/webMercatorUtils', 'jimu/WidgetManager', 'jimu/PanelManager', 'dijit/form/Select', 'jimu/dijit/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes, Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol, PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol, SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle, Deferred, ProgressBar, lang, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery, SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
     baseClass: 'widget-eLocate-ecan',
     progressBar: null,
@@ -46,7 +46,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.list.removeResultMsg = this.nls.removeresultmessage;
       this._initTabContainer();
       this._initProgressBar();
-      this._initCoordInputButtons();
+      this._initLocateButtons();
       this._initUnitsDD();
       this._initDraw();
       this._initLocator();
@@ -83,10 +83,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           var ax = [],
               bx = [];
 
-          a.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+          a.sheet.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
             ax.push([$1 || Infinity, $2 || ""]);
           });
-          b.sheetID.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
+          b.sheet.replace(/(\d+)|(\D+)/g, function (_, $1, $2) {
             bx.push([$1 || Infinity, $2 || ""]);
           });
 
@@ -113,6 +113,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.own(on(this.CoordInputBtns_Map, 'click', lang.hitch(this, this._toggleMapClickCapture)));
       this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
       this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
+      this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
+      this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
       this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
       this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function (evt) {
         var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -321,9 +323,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       });
     },
 
-    _initCoordInputButtons: function _initCoordInputButtons() {
-      // Locate button
-
+    _initLocateButtons: function _initLocateButtons() {
       this.locateButton = new LocateButton({
         map: this.map,
         theme: 'my-location-widget jimu-widget',
@@ -334,10 +334,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.locateButton.startup();
 
       this.own(on(this.locateButton, 'locate', lang.hitch(this, this._locateUpdate)));
-
-      // Map select
-
-      // TODO!
     },
 
     _locateUpdate: function _locateUpdate(event) {
@@ -388,7 +384,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           var lenSheets = this.config.mapSheets[i].sheets.length;
           for (var j = 0; j < lenSheets; j++) {
             if (point.x >= this.config.mapSheets[i].sheets[j].xmin && point.x <= this.config.mapSheets[i].sheets[j].xmax && point.y >= this.config.mapSheets[i].sheets[j].ymin && point.y <= this.config.mapSheets[i].sheets[j].ymax) {
-              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheetID);
+              this.mapSheetDD.set('value', this.config.mapSheets[i].sheets[j].sheet);
               this.xCoordTextBox.set('value', point.x.toString().substring(2, selUnit.precision + 2));
               this.yCoordTextBox.set('value', point.y.toString().substring(2, selUnit.precision + 2));
 
@@ -426,7 +422,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           this.xCoordLbl.innerHTML = this.config.pointunits.pointunit[i].xlabel;
           this.yCoordLbl.innerHTML = this.config.pointunits.pointunit[i].ylabel;
           this.CoordHintLbl.innerHTML = this.nls.example;
-          this._refreshExamples(this.config.pointunits.pointunit[i].examples);
+          this.CoordHintText.innerHTML = this.config.pointunits.pointunit[i].example;
         }
       }
       this.unitdd.addOption(options);
@@ -436,7 +432,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     _unitDDChanged: function _unitDDChanged(newValue) {
       this.xCoordLbl.innerHTML = this._unitArr[newValue].xlabel;
       this.yCoordLbl.innerHTML = this._unitArr[newValue].ylabel;
-      this._refreshExamples(this._unitArr[newValue].examples);
+      this.CoordHintText.innerHTML = this._unitArr[newValue].example;
       this.mapSheetDD.set('value', '');
       this.xCoordTextBox.set('value', '');
       this.yCoordTextBox.set('value', '');
@@ -459,28 +455,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           });
           var lenSheets = this.config.mapSheets[i].sheets.length;
           for (var j = 0; j < lenSheets; j++) {
-            var option = {
-              value: this.config.mapSheets[i].sheets[j].sheetID,
-              label: this.config.mapSheets[i].sheets[j].sheetID
-            };
-            options.push(option);
+            if (j == 0 || this.config.mapSheets[i].sheets[j].sheet != this.config.mapSheets[i].sheets[j - 1].sheet) {
+              // Avoid duplicate values
+              var option = {
+                value: this.config.mapSheets[i].sheets[j].sheet,
+                label: this.config.mapSheets[i].sheets[j].sheet
+              };
+              options.push(option);
+            }
           }
           break;
         }
       }
       this.mapSheetDD.removeOption(this.mapSheetDD.getOptions());
       this.mapSheetDD.addOption(options);
-    },
-
-    _refreshExamples: function _refreshExamples(examples) {
-      this.ExamplesList.innerHTML = '';
-
-      var len = examples.length;
-      for (var i = 0; i < len; i++) {
-        var li = domConstruct.create('li', { innerHTML: examples[i], title: this.nls.exampleClickTooltip });
-        this.own(on(li, 'click', lang.hitch(this, this._useExampleText, examples[i])));
-        domConstruct.place(li, this.ExamplesList);
-      }
     },
 
     isSelTabVisible: function isSelTabVisible() {
@@ -688,7 +676,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       locateResult.point = results[0];
     },
 
-    _useExampleText: function _useExampleText(example) {
+    _useExampleText: function _useExampleText() {
+      var example = this.CoordHintText.innerHTML;
       var selUnit = this._unitArr[this.unitdd.get('value')];
       if (selUnit.mapref) {
         var exampleArr = this._regexMatchAll(example, /(((?=[^0-9])\s-)?[a-zA-Z0-9.]+)/g); // The ((?=[^0-9])\s-)? allows us to discard - from "M35:8858-4457" but capture -43.607 from "172.715, -43.607"
@@ -731,6 +720,27 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this.list.clear();
       this.divResultMessage.textContent = this.nls.noresultsfoundlabel;
       return false;
+    },
+
+    _copyToClipboard: function _copyToClipboard() {
+      html.setStyle(this.copytoclipboardTextBox, 'display', '');
+      this.copytoclipboardTextBox.value = this._getCoordinateStringFromInputs();
+      this.copytoclipboardTextBox.select();
+      document.execCommand('copy');
+      html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+    },
+
+    _getCoordinateStringFromInputs: function _getCoordinateStringFromInputs() {
+      var selUnit = this._unitArr[this.unitdd.get('value')];
+
+      var x = this._strTrim(this.xCoordTextBox.get('value'));
+      var y = this._strTrim(this.yCoordTextBox.get('value'));
+
+      if (selUnit.mapref) {
+        return this.mapSheetDD.get('value') + ':' + x + '-' + y;
+      } else {
+        return x + ', ' + y;
+      }
     },
 
     _removeResultItem: function _removeResultItem(index, item) {
@@ -805,9 +815,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       this._hideError();
       var long = this.xCoordTextBox.get('value');
       var lat = this.yCoordTextBox.get('value');
-      var sheetID = this.mapSheetDD.get('value');
+      var sheet = this.mapSheetDD.get('value');
       var selUnit = this._unitArr[this.unitdd.get('value')];
-      if (long && lat && (sheetID || !selUnit.mapref)) {
+      if (long && lat && (sheet || !selUnit.mapref)) {
         var numLong = parseFloat(long);
         var numLat = parseFloat(lat);
         if (selUnit.wkid === this.map.spatialReference.wkid && !selUnit.mapref || selUnit.wgs84option == "map") {
@@ -819,18 +829,16 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           var point, wmPoint;
 
           if (selUnit.wkid == 4326) {
-            // Flexible WGS84 coordinate format handling
-            var matchCoordFormats = [this._wgs84MatchCoordFormatD, this._wgs84MatchCoordFormatDM, this._wgs84MatchCoordFormatDMS];
-
-            for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
-              numLong = matchCoordFormats[i](this, this.xCoordTextBox.get('value'));
-              if (numLong) break;
+            if (selUnit.wgs84option == "dms") {
+              numLong = this._wgs84MatchCoordFormatDMS(this, this.xCoordTextBox.get('value'));
+              numLat = this._wgs84MatchCoordFormatDMS(this, this.yCoordTextBox.get('value'));
+            } else if (selUnit.wgs84option == "dm" || selUnit.wgs84option == "ddm") {
+              numLong = this._wgs84MatchCoordFormatDM(this, this.xCoordTextBox.get('value'));
+              numLat = this._wgs84MatchCoordFormatDM(this, this.yCoordTextBox.get('value'));
+            } else if (selUnit.wgs84option == "dd") {
+              numLong = this._wgs84MatchCoordFormatD(this, this.xCoordTextBox.get('value'));
+              numLat = this._wgs84MatchCoordFormatD(this, this.yCoordTextBox.get('value'));
             }
-            for (var i = 0, len = matchCoordFormats.length; i < len; i++) {
-              numLat = matchCoordFormats[i](this, this.yCoordTextBox.get('value'));
-              if (numLat) break;
-            }
-
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
             if (webMercatorUtils.canProject(point, this.map)) {
               wmPoint = webMercatorUtils.project(point, this.map);
@@ -843,7 +851,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               if (this.config.mapSheets[i].wkid == selUnit.wkid) {
                 var lenSheets = this.config.mapSheets[i].sheets.length;
                 for (var j = 0; j < lenSheets; j++) {
-                  if (this.config.mapSheets[i].sheets[j].sheetID == sheetID) {
+                  if (this.config.mapSheets[i].sheets[j].sheet == sheet) {
                     var mapSheet = this.config.mapSheets[i].sheets[j];
 
                     // Convert the grid coordinates
@@ -851,19 +859,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     numLong = parseFloat(parseInt(mapSheet.xmin.toString().substring(0, 2) + long + '0000000').toString().substring(0, 7));
                     numLat = parseFloat(parseInt(mapSheet.ymin.toString().substring(0, 2) + lat + '0000000').toString().substring(0, 7));
 
-                    point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
-                    if (webMercatorUtils.canProject(point, this.map)) {
-                      wmPoint = webMercatorUtils.project(point, this.map);
-                      this.projectCompleteHandler2([wmPoint]);
-                      return;
-                    }
+                    // Validate - make sure within sheet bounds
+                    if (numLong >= mapSheet.xmin && numLong <= mapSheet.xmax && numLat >= mapSheet.ymin && numLat <= mapSheet.ymax) {
+                      point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
+                      if (webMercatorUtils.canProject(point, this.map)) {
+                        wmPoint = webMercatorUtils.project(point, this.map);
+                        this.projectCompleteHandler2([wmPoint]);
+                        return;
+                      }
 
-                    break;
+                      break;
+                    }
                   }
                 }
                 break;
               }
             }
+
+            // If we got this far there was an issue with coords
+            this.projectCompleteHandler2([{}]); // Dummy point to trigger error message
           } else {
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
             if (webMercatorUtils.canProject(point, this.map)) {
@@ -896,13 +910,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         try {
           var long = this.xCoordTextBox.get('value');
           var lat = this.yCoordTextBox.get('value');
-          var sheetID = this.mapSheetDD.get('value');
+          var sheet = this.mapSheetDD.get('value');
           var selUnit = this._unitArr[this.unitdd.get('value')];
-          if (long && lat && (sheetID || !selUnit.mapref)) {
+          if (long && lat && (sheet || !selUnit.mapref)) {
             var locateResult = {};
             locateResult.sym = this.coordMarkerSymbol;
             locateResult.title = this.nls.coordslabel;
-            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + (selUnit.mapref ? sheetID + ", " : "") + long + ", " + lat;
+            locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getCoordinateStringFromInputs();
             locateResult.point = results[0];
             locateResult.alt = false;
             locateResult.id = 'id_1';
@@ -925,50 +939,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       console.info(err);
       html.setStyle(this.progressBar.domNode, 'display', 'none');
       html.setStyle(this.divResult, 'display', 'block');
-    },
-
-    dms_to_deg: function dms_to_deg(dmsStr) {
-      var negNum = false;
-      if (dmsStr.toLowerCase().indexOf("w") > -1) {
-        negNum = true;
-      }
-      if (dmsStr.toLowerCase().indexOf("s") > -1) {
-        negNum = true;
-      }
-      var myPattern = /[WwnNEeSs ]/g;
-      dmsStr = dmsStr.replace(myPattern, "");
-      var dmsArr = dmsStr.split("-");
-
-      //Compute degrees, minutes and seconds:
-      var sec = Number(dmsArr[2]) / 60;
-      var min = sec + Number(dmsArr[1]);
-      var dec = min / 60;
-      var fDeg = dec + Number(dmsArr[0]);
-      if (negNum) {
-        fDeg = -Math.abs(fDeg);
-      }
-      return fDeg;
-    },
-
-    dm_to_deg: function dm_to_deg(dmStr) {
-      var negNum = false;
-      if (dmStr.toLowerCase().indexOf("w") > -1) {
-        negNum = true;
-      }
-      if (dmStr.toLowerCase().indexOf("s") > -1) {
-        negNum = true;
-      }
-      var myPattern = /[WwnNEeSs ]/g;
-      dmStr = dmStr.replace(myPattern, "");
-      var dmArr = dmStr.split("-");
-      //Compute degrees, minutes:
-      var min = Number(dmArr[1]);
-      var dec = min / 60;
-      var fDeg = dec + Number(dmArr[0]);
-      if (negNum) {
-        fDeg = -Math.abs(fDeg);
-      }
-      return fDeg;
     },
 
     locateCoordinates: function locateCoordinates() {

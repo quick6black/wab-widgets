@@ -199,10 +199,11 @@ define([
                 if (this.popupState === 'ADD') {
                     this.unitList.editRow(unitConfig[1], {
                         name: unitConfig[0].name,
-                        example: unitConfig[0].examples.join('; '),
+                        example: unitConfig[0].example,
                         xlabel: unitConfig[0].xlabel,
                         ylabel: unitConfig[0].ylabel,
                         wkid: unitConfig[0].wkid,
+                        wgs84option: unitConfig[0].wgs84option,
                         mapref: unitConfig[0].mapref,
                         precision: unitConfig[0].precision
                     });
@@ -211,10 +212,11 @@ define([
                 } else {
                     this.unitList.editRow(unitConfig[1], {
                         name: unitConfig[0].name,
-                        example: unitConfig[0].examples.join('; '),
+                        example: unitConfig[0].example,
                         xlabel: unitConfig[0].xlabel,
                         ylabel: unitConfig[0].ylabel,
                         wkid: unitConfig[0].wkid,
+                        wgs84option: unitConfig[0].wgs84option,
                         mapref: unitConfig[0].mapref,
                         precision: unitConfig[0].precision
                     });
@@ -297,10 +299,11 @@ define([
                 args.nls = this.nls;
                 var rowData = {
                     name: (args.config && args.config.name) || '',
-                    examples: (args.config && args.config.examples.join('; ')) || '',
+                    examples: (args.config && args.config.example) || '',
                     xlabel: (args.config && args.config.xlabel) || '',
                     ylabel: (args.config && args.config.ylabel) || '',
                     wkid: (args.config && args.config.wkid) || '',
+                    wgs84option: (args.config && args.config.wgs84option) || '',
                     mapref: (args.config && args.config.mapref) || '',
                     precision: (args.config && args.config.precision) || ''
                 };

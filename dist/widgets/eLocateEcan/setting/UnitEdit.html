@@ -25,6 +25,34 @@
             <span class="example" data-dojo-attach-point="wkidLabel">${nls.cName}</span>
           </td>
         </tr>
+        <tr style="display: none;" data-dojo-attach-point="unitWkid4326Ops1">
+          <td class="first">
+            <span>${nls.inputunits}</span>
+          </td>
+          <td class="second">
+            <input type="radio" data-dojo-type="dijit/form/RadioButton" name="wgsOption" id="radioOne" checked value="dd" />
+            <label for="radioOne">${nls.dd}</label>
+            <input type="radio" data-dojo-type="dijit/form/RadioButton" name="wgsOption" id="radioTwo" value="dms" />
+            <label for="radioTwo">${nls.dms}</label>
+          </td>
+        </tr>
+        <tr style="display: none;" data-dojo-attach-point="unitWkid4326Ops2">
+          <td class="first"></td>
+          <td class="second">
+            <input type="radio" data-dojo-type="dijit/form/RadioButton" name="wgsOption" id="radioThree" value="dm" />
+            <label for="radioThree">${nls.dm}</label>
+            <input type="radio" data-dojo-type="dijit/form/RadioButton" name="wgsOption" id="radioFour" value="ddm" />
+            <label for="radioFour">${nls.ddm}</label>
+          </td>
+        </tr>
+        <tr style="display: none;" data-dojo-attach-point="wkidMapRef">
+          <td class="first">
+            <span>${nls.mapref}</span>
+          </td>
+          <td class="second">
+            <input type="checkbox" data-dojo-attach-point="unitMapRefTB" data-dojo-type="dijit/form/CheckBox" />
+          </td>
+        </tr>
         <tr>
           <td class="first">
             <span>${nls.precision}</span>
@@ -39,14 +67,6 @@
               <option value="5">5</option>
               <option value="6">6</option>
             </select>
-          </td>
-        </tr>
-        <tr style="display: none;" data-dojo-attach-point="wkidMapRef">
-          <td class="first">
-            <span>${nls.mapref}</span>
-          </td>
-          <td class="second">
-            <input type="checkbox" data-dojo-attach-point="unitMapRefTB" data-dojo-type="dijit/form/CheckBox" />
           </td>
         </tr>
         <tr>
@@ -75,7 +95,6 @@
           <td class="first"></td>
           <td class="second">
             <span class="example">${nls.example}: ${nls.unitExample}</span>
-            <br/><span class="example">${nls.unitExampleNote}</span>
           </td>
         </tr>
         <tr>

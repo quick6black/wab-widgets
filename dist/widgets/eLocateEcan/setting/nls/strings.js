@@ -44,7 +44,6 @@ define({
     "autoclosetip": "If you do not specify a number of seconds here then the popup will not auto close",
     "nameExample": "NAD 1983 UTM 16N",
     "unitExample": "172.715, -43.607; 172- 40.33 E, 43-35.50 S",
-    "unitExampleNote": "(One or more coordinate examples seperated by semicolons)",
     "cName": "Coordinate System ID",
     "dd": "Decimal Degrees (DD)",
     "dms": "Degrees Minutes Seconds (DMS)",
