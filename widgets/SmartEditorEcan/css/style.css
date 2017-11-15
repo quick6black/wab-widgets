@@ -479,4 +479,7 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     height: 290px;
     overflow-y: scroll; }
 
+.link-btn {
+  margin-left: 8px; }
+
 /*# sourceMappingURL=style.css.map */

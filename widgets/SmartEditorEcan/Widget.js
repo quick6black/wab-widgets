@@ -1656,7 +1656,14 @@ define([
         if (layers.length > 0 && this._hasPresetValueFields(editLayerInfos)) {
           this._initPresetFieldsTable();
           this._fillPresetValueTable(editLayerInfos);
-          query(".presetFieldsTableDiv")[0].style.display = "block";
+
+          /* BEGIN: CHANGE ECAN - Hide presets but include in dom for system use */
+          //query(".presetFieldsTableDiv")[0].style.display = "block";
+
+          // TO - TIE TO HIDE CONFIG SETTING
+         query(".presetFieldsTableDiv")[0].style.display = "none";
+         /* EDN: CHANGE ECAN */
+
         } else {
           query(".presetFieldsTableDiv")[0].style.display = "none";
         }
