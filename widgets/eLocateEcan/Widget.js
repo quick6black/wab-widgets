@@ -34,7 +34,9 @@ define([
   'dojo/i18n!esri/nls/jsapi',
   'dojo/Deferred',
   'dijit/ProgressBar',
+  'dijit/Tooltip',
   'dojo/_base/lang',
+  'dojo/dom',
   'dojo/dom-style',
   'dojo/dom-attr',
   'dojo/on',
@@ -51,12 +53,13 @@ define([
   'jimu/WidgetManager',
   'jimu/PanelManager',
   'dijit/form/Select',
-  'jimu/dijit/CheckBox'],
+  'jimu/dijit/CheckBox',
+  'dojo/domReady!'],
   function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes,
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, Tooltip, lang, dojoDom, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -165,8 +168,11 @@ define([
         this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
         this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
         this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
-        this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
-        this.own(on(this.btnFullCopy, 'click', lang.hitch(this, this._copyToClipboard)));
+        this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyFullCoordsToClipboard)));
+        this.own(on(this.btnCopyFullCoords, 'click', lang.hitch(this, this._copyFullCoordsToClipboard)));
+        this.own(on(this.btnCopyMapSheet, 'click', lang.hitch(this, this._copyMapSheetToClipboard)));
+        this.own(on(this.btnCopyXCoord, 'click', lang.hitch(this, this._copyXCoordToClipboard)));
+        this.own(on(this.btnCopyYCoord, 'click', lang.hitch(this, this._copyYCoordToClipboard)));
         this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -786,15 +792,48 @@ define([
         return false;
       },
 
-      _copyToClipboard: function () {
-          html.setStyle(this.copytoclipboardTextBox, 'display', '');
-          this.copytoclipboardTextBox.value = this._getCoordinateStringFromInputs();
-          this.copytoclipboardTextBox.select();
-          document.execCommand('copy');
-          html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+      _copyFullCoordsToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._getFullCoordsStringFromInputs());
       },
 
-      _getCoordinateStringFromInputs: function () {
+      _copyXCoordToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._strTrim(this.xCoordTextBox.get('value')));
+      },
+
+      _copyYCoordToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._strTrim(this.yCoordTextBox.get('value')));
+      },
+
+      _copyMapSheetToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this.mapSheetDD.get('value'));
+      },
+
+      _copyToClipboard: function (tooltipTarget, textToCopy) {
+          var s;
+
+          html.setStyle(this.copytoclipboardTextBox, 'display', '');
+          this.copytoclipboardTextBox.value = textToCopy;
+          this.copytoclipboardTextBox.select();
+          try {
+              s = document.execCommand('copy');
+          } catch (err) {
+              s = false;
+          }
+          document.execCommand('copy');
+          html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+
+          var t = s ? this.nls.copysuccessful : this.nls.copyfailed;
+          this.showToolTip(tooltipTarget, t);
+      },
+
+      showToolTip: function (target, withText) {
+          Tooltip.show(withText, target);
+          setTimeout(function () {
+              Tooltip.hide(target);
+          }, 1000);
+      },
+
+      _getFullCoordsStringFromInputs: function () {
           var selUnit = this._unitArr[this.unitdd.get('value')];
 
           var x = this._strTrim(this.xCoordTextBox.get('value'));
@@ -985,7 +1024,7 @@ define([
               var locateResult = {};
               locateResult.sym = this.coordMarkerSymbol;
               locateResult.title = this.nls.coordslabel;
-              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getCoordinateStringFromInputs();
+              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getFullCoordsStringFromInputs();
               locateResult.point = results[0];
               locateResult.alt = false;
               locateResult.id = 'id_1';
