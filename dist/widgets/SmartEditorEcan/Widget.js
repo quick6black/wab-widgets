@@ -436,6 +436,24 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
     },
     onDeActive: function onDeActive() {
+      /* BEGIN: ECAN CHANGE - handle bug when widget is made inactive while edit tools are in process */
+
+      if (this._attrInspIsCurrentlyDisplayed) {
+        if (this.map.infoWindow.isShowing) {
+          this.map.infoWindow.hide();
+        }
+
+        if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
+          this._promptToResolvePendingEdit(true, null, true);
+        } else {
+          this._cancelEditingFeature(true);
+        }
+
+        this._removeLayerVisibleHandler();
+      }
+
+      /* END: ECAN CHANGE */
+
       if (domClass.contains(this.widgetActiveIndicator, "widgetActive")) {
         domClass.remove(this.widgetActiveIndicator, "widgetActive");
       }
@@ -512,6 +530,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //});
       this._createEditor();
       this.fetchDataByName('GroupFilter');
+
+      /* BEGIN: CHANGE ECAN - Call to EditFilter widget */
+      this.fetchDataByName('EditFilter');
+      /* END: CHANGE ECAN */
+
       this.widgetManager.activateWidget(this);
       this._createOverDef.resolve();
       //this.loaded_state.set("loaded", true);
