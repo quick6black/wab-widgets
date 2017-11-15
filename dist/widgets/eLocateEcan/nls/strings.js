@@ -13,6 +13,8 @@ define({
     resultsfoundlabel: "Results found:",
     clear: "Clear",
     copytoclipboard: "Copy to clipboard",
+    copysuccessful: "Copy successful",
+    copyfailed: "Unable to copy",
     widgetversion: "Enhanced Locate Widget Version Info",
     widgetverstr: "Widget Version",
     wabversionmsg: "Widget is designed to run in Web AppBuilder version",

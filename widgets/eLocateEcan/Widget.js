@@ -34,7 +34,9 @@ define([
   'dojo/i18n!esri/nls/jsapi',
   'dojo/Deferred',
   'dijit/ProgressBar',
+  'dijit/Tooltip',
   'dojo/_base/lang',
+  'dojo/dom',
   'dojo/dom-style',
   'dojo/dom-attr',
   'dojo/on',
@@ -51,12 +53,13 @@ define([
   'jimu/WidgetManager',
   'jimu/PanelManager',
   'dijit/form/Select',
-  'jimu/dijit/CheckBox'],
+  'jimu/dijit/CheckBox',
+  'dojo/domReady!'],
   function (declare, _WidgetsInTemplateMixin, BaseWidget, TabContainer, List, CountryCodes,
     Message, GraphicsLayer, GeometryService, esriConfig, Graphic, graphicsUtils, Point, SimpleMarkerSymbol,
     PictureMarkerSymbol, SimpleLineSymbol, Color, Extent, Geometry, SimpleFillSymbol,
     SimpleRenderer, PopupTemplate, LocateButton, esriRequest, locator, Draw, jsonUtils, AddressCandidate, esriBundle,
-    Deferred, ProgressBar, lang, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
+    Deferred, ProgressBar, Tooltip, lang, dojoDom, domStyle, domAttr, on, aspect, html, domClass, array, utils, LoadingShelter, ioquery,
     SpatialReference, ProjectParameters, webMercatorUtils, WidgetManager, PanelManager
   ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], { /*jshint unused: false*/
@@ -165,7 +168,11 @@ define([
         this.own(on(this.btnCoordLocate, 'click', lang.hitch(this, this.prelocateCoords)));
         this.own(on(this.revGeocodeBtn, 'click', lang.hitch(this, this._reverseGeocodeToggle)));
         this.own(on(this.CoordHintText, "click", lang.hitch(this, this._useExampleText)));
-        this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyToClipboard)));
+        this.own(on(this.btnCopyToClipboard, 'click', lang.hitch(this, this._copyFullCoordsToClipboard)));
+        this.own(on(this.btnCopyFullCoords, 'click', lang.hitch(this, this._copyFullCoordsToClipboard)));
+        this.own(on(this.btnCopyMapSheet, 'click', lang.hitch(this, this._copyMapSheetToClipboard)));
+        this.own(on(this.btnCopyXCoord, 'click', lang.hitch(this, this._copyXCoordToClipboard)));
+        this.own(on(this.btnCopyYCoord, 'click', lang.hitch(this, this._copyYCoordToClipboard)));
         this.own(on(this.btnAddressLocate, 'click', lang.hitch(this, this._locateAddress)));
         this.own(on(this.AddressTextBox, 'keydown', lang.hitch(this, function(evt){
           var keyNum = evt.keyCode !== undefined ? evt.keyCode : evt.which;
@@ -389,6 +396,78 @@ define([
           this.own(on(this.locateButton, 'locate', lang.hitch(this, this._locateUpdate)));
       },
 
+      _getCoordPartFormattedString: function (coordPart, part) {
+          var selUnit = this._unitArr[this.unitdd.get('value')];
+
+          if (selUnit.wkid == 4326 && (selUnit.wgs84option == 'dm' || selUnit.wgs84option == 'ddm' || selUnit.wgs84option == 'dms')) {
+              var value = parseFloat(coordPart);
+              var format = selUnit.wgs84option;
+              if (format == 'ddm') format = 'dm';
+              if (part == 'x') {
+                  return this._getWgs84LonCoordFormattedString(value, format, selUnit.precision);
+              }
+              else if (part == 'y') {
+                  return this._getWgs84LatCoordFormattedString(value, format, selUnit.precision);
+              }
+          }
+          else {
+              return parseFloat(parseFloat(coordPart).toFixed(selUnit.precision)).toString();
+          }
+      },
+
+      _getWgs84LatCoordFormattedString: function (deg, format, dp) {
+          var lat = this._getWgs84CoordFormattedString(deg, format, dp);
+          return lat == '' ? '' : lat.slice(1) + (deg < 0 ? 'S' : 'N');  // knock off initial '0' for lat!
+      },
+
+      _getWgs84LonCoordFormattedString: function (deg, format, dp) {
+          var lon = this._getWgs84CoordFormattedString(deg, format, dp);
+          return lon == '' ? '' : lon + (deg < 0 ? 'W' : 'E');
+      },
+      
+      _getWgs84CoordFormattedString: function (deg, format, dp) {
+          if (isNaN(deg)) return 'NaN';  // give up here if we can't make a number from deg
+
+          // default values
+          if (typeof format == 'undefined') format = 'dms';
+          if (typeof dp == 'undefined') {
+              switch (format) {
+                  case 'dm': dp = 2; break;
+                  case 'dms': dp = 0; break;
+                  default: format = 'dms'; dp = 0;  // be forgiving on invalid format
+              }
+          }
+
+          deg = Math.abs(deg);  // (unsigned result ready for appending compass dir'n)
+
+          switch (format) {
+              case 'dm':
+                  var min = (deg * 60).toFixed(dp);  // convert degrees to minutes & round
+                  var d = Math.floor(min / 60);    // get component deg/min
+                  var m = (min % 60).toFixed(dp);  // pad with trailing zeros
+                  if (d < 100) d = '0' + d;          // pad with leading zeros
+                  if (d < 10) d = '0' + d;
+                  if (m < 10) m = '0' + m;
+                  dms = d + '\u00B0' + m + '\u2032';  // add º, ' symbols
+                  //dms = d + '\u00B0 ' + m + '\u2032 ';  // add º, ' symbols // NOTE: Added spaces for formatting
+                  break;
+              case 'dms':
+                  var sec = (deg * 3600).toFixed(dp);  // convert degrees to seconds & round
+                  var d = Math.floor(sec / 3600);    // get component deg/min/sec
+                  var m = Math.floor(sec / 60) % 60;
+                  var s = (sec % 60).toFixed(dp);    // pad with trailing zeros
+                  if (d < 100) d = '0' + d;            // pad with leading zeros
+                  if (d < 10) d = '0' + d;
+                  if (m < 10) m = '0' + m;
+                  if (s < 10) s = '0' + s;
+                  dms = d + '\u00B0' + m + '\u2032' + s + '\u2033';  // add º, ', " symbols
+                  //dms = d + '\u00B0 ' + m + '\u2032 ' + s + '\u2033 ';  // add º, ', " symbols // NOTE: Added spaces for formatting
+                  break;
+          }
+
+          return dms;
+      },
+
       _locateUpdate: function (event) {
           if (event.error == null && event.position != null && event.position.coords != null) {
               this._useWgs84Coords(event.position.coords);
@@ -399,8 +478,9 @@ define([
           var selUnit = this._unitArr[this.unitdd.get('value')];
 
           if (selUnit.wkid == 4326) {
-              this.xCoordTextBox.set('value', parseFloat(coords.longitude.toFixed(selUnit.precision)));
-              this.yCoordTextBox.set('value', parseFloat(coords.latitude.toFixed(selUnit.precision)));
+              this._getCoordPartFormattedString(coords.longitude)
+              this.xCoordTextBox.set('value', this._getCoordPartFormattedString(coords.longitude, 'x'));
+              this.yCoordTextBox.set('value', this._getCoordPartFormattedString(coords.latitude, 'y'));
           }
           else {
               var point = new Point(coords.longitude, coords.latitude, new SpatialReference(4326));
@@ -420,8 +500,8 @@ define([
                   this._displayAsMapRef(point);
               }
               else {
-                this.xCoordTextBox.set('value', parseFloat(point.x.toFixed(selUnit.precision)));
-                this.yCoordTextBox.set('value', parseFloat(point.y.toFixed(selUnit.precision)));
+                  this.xCoordTextBox.set('value', this._getCoordPartFormattedString(point.x, 'x'));
+                  this.yCoordTextBox.set('value', this._getCoordPartFormattedString(point.y, 'y'));
               }
           }
           else {
@@ -460,8 +540,8 @@ define([
               this._displayAsMapRef(results[0]);
           }
           else {
-              this.xCoordTextBox.set('value', parseFloat(results[0].x.toFixed(selUnit.precision)));
-              this.yCoordTextBox.set('value', parseFloat(results[0].y.toFixed(selUnit.precision)));
+              this.xCoordTextBox.set('value', this._getCoordPartFormattedString(results[0].x, 'x'));
+              this.yCoordTextBox.set('value', this._getCoordPartFormattedString(results[0].y, 'y'));
           }
       },
 
@@ -785,15 +865,48 @@ define([
         return false;
       },
 
-      _copyToClipboard: function () {
-          html.setStyle(this.copytoclipboardTextBox, 'display', '');
-          this.copytoclipboardTextBox.value = this._getCoordinateStringFromInputs();
-          this.copytoclipboardTextBox.select();
-          document.execCommand('copy');
-          html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+      _copyFullCoordsToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._getFullCoordsStringFromInputs());
       },
 
-      _getCoordinateStringFromInputs: function () {
+      _copyXCoordToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._strTrim(this.xCoordTextBox.get('value')));
+      },
+
+      _copyYCoordToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this._strTrim(this.yCoordTextBox.get('value')));
+      },
+
+      _copyMapSheetToClipboard: function (evt) {
+          this._copyToClipboard(evt.currentTarget, this.mapSheetDD.get('value'));
+      },
+
+      _copyToClipboard: function (tooltipTarget, textToCopy) {
+          var s;
+
+          html.setStyle(this.copytoclipboardTextBox, 'display', '');
+          this.copytoclipboardTextBox.value = textToCopy;
+          this.copytoclipboardTextBox.select();
+          try {
+              s = document.execCommand('copy');
+          } catch (err) {
+              s = false;
+          }
+          document.execCommand('copy');
+          html.setStyle(this.copytoclipboardTextBox, 'display', 'none');
+
+          var t = s ? this.nls.copysuccessful : this.nls.copyfailed;
+          this.showToolTip(tooltipTarget, t);
+      },
+
+      showToolTip: function (target, withText) {
+          Tooltip.show(withText, target);
+          setTimeout(function () {
+              Tooltip.hide(target);
+          }, 1000);
+      },
+
+      _getFullCoordsStringFromInputs: function () {
           var selUnit = this._unitArr[this.unitdd.get('value')];
 
           var x = this._strTrim(this.xCoordTextBox.get('value'));
@@ -806,7 +919,7 @@ define([
               return x + ', ' + y;
           }
       },
-
+      
       _removeResultItem: function (index, item) {
         var locResult = this.list.items[this.list.selectedIndex];
         this.locateResultArr.splice(this.locateResultArr.indexOf(locResult), 1);
@@ -984,7 +1097,7 @@ define([
               var locateResult = {};
               locateResult.sym = this.coordMarkerSymbol;
               locateResult.title = this.nls.coordslabel;
-              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getCoordinateStringFromInputs();
+              locateResult.content = locateResult.rsltcontent = "<em>" + this.nls.location + "</em>: " + this._getFullCoordsStringFromInputs();
               locateResult.point = results[0];
               locateResult.alt = false;
               locateResult.id = 'id_1';

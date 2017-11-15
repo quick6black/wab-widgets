@@ -32,19 +32,23 @@
       <div style="width: 100%;height: 32px;margin-top: 8px;clear:both;display: none;" data-dojo-attach-point="mapSheetDiv">
         <label class="mapsheetDDLbl">${nls.mapSheetLbl}</label>
         <select data-dojo-attach-point="mapSheetDD" data-dojo-type="dijit/form/Select" class="mapsheetSelect"></select>
+        <div title="${nls.copytoclipboard}" data-dojo-attach-point="btnCopyMapSheet" class="copy-btn-input"></div>
       </div>
       <div style="width: 100%;height: 32px;margin-top: 8px;clear:both;">
         <label data-dojo-attach-point="xCoordLbl" class="xCoordLblCls"></label>
         <input data-dojo-attach-point="xCoordTextBox" data-dojo-type="dijit/form/TextBox"
                data-dojo-props="required:false,trim:true" class="xCoordTextBoxCls" />
+        <div title="${nls.copytoclipboard}" data-dojo-attach-point="btnCopyXCoord" class="copy-btn-input"></div>
       </div>
       <div style="width: 100%;height: 32px;margin-top: 8px;clear:both;">
         <label data-dojo-attach-point="yCoordLbl" class="yCoordLblCls"></label>
         <input data-dojo-attach-point="yCoordTextBox" data-dojo-type="dijit/form/TextBox"
                data-dojo-props="required:false,trim:true" class="yCoordTextBoxCls" />
+        <div title="${nls.copytoclipboard}" data-dojo-attach-point="btnCopyYCoord" class="copy-btn-input"></div>
       </div>
       <div style="width: 100%;margin-top: 8px;clear:both;" data-dojo-attach-point="copytoclipboardDiv">
         <a class="button-copytoclipboard" href="#" data-dojo-attach-point="btnCopyToClipboard">${nls.copytoclipboard}</a>
+        <div title="${nls.copytoclipboard}" data-dojo-attach-point="btnCopyFullCoords" class="copy-btn-link"></div>
         <input data-dojo-attach-point="copytoclipboardTextBox" style="display:none;" />
       </div>
       <div style="clear:both;margin-top: 10px;">
