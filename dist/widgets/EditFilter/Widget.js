@@ -1,7 +1,7 @@
 define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'dijit', 'jimu/dijit/FilterParameters', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/on', 'dojo/query', 'dojo/string', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/date/locale', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dijit/registry', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', 'jimu/FilterManager', 'esri/tasks/query', 'esri/tasks/QueryTask', 'esri/geometry/geometryEngine', 'esri/layers/FeatureLayer', './SaveJSON', './ReadJSON', './LayersHandler', 'dojox/html/entities',
 
 /* ECAN ADDITION REQUIRES */
-'esri/urlUtils', 'esri/geometry/Point', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point) {
+'esri/urlUtils', 'esri/geometry/Point', 'jimu/WidgetManager', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point, WidgetManager, Checkbox) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -63,6 +63,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
 
       this.createMapLayerList();
+
+      if (this.config.showEditButton) {
+        domClass.remove(this.btnLaunchEditor, "hide-items");
+      }
     },
 
     /*
@@ -1304,6 +1308,37 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
 
       return filter;
+    },
+
+    launchEditor: function launchEditor(e) {
+      var wm = WidgetManager.getInstance();
+
+      var editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
+      if (editConfig) {
+        wm.triggerWidgetOpen(editConfig.id);
+      }
+
+      //"widgets_SmartEditorEcan_Widget_23"
+
+      //var editWidget = wm.getWidgetByLabel("Smart Editor Ecan");
+      //if (editWidget) {
+      //wm.closeWidget(editWidget);
+      //} else {
+      //  console.log('btnLaunchEditor: No Editor Found');
+      //}
+    },
+
+    _findWidgetConfigInstance: function _findWidgetConfigInstance(widgetType) {
+      var widgets = this.appConfig.widgetOnScreen.widgets.filter(function (widget) {
+        return widget.name === widgetType;
+      });
+
+      if (widgets.length === 0) {
+        widgets = this.appConfig.widgetPool.widgets.filter(function (widget) {
+          return widget.name === widgetType;
+        });
+      }
+      return widgets[0];
     },
 
     // END: ECAN CUSTOM CODE

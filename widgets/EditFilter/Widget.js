@@ -35,13 +35,14 @@ define([
   /* ECAN ADDITION REQUIRES */
   'esri/urlUtils',
   'esri/geometry/Point',
+  'jimu/WidgetManager',
 
   'dijit/form/CheckBox'
 ],
 function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom,
   domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox,
   DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask,
-  geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point) {
+  geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point, WidgetManager, Checkbox) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -104,6 +105,10 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       }
 
       this.createMapLayerList();
+
+      if(this.config.showEditButton) {
+        domClass.remove(this.btnLaunchEditor, "hide-items");
+      }
 
     },
 
@@ -1477,6 +1482,38 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
 
       return filter;
     },
+
+    launchEditor: function (e) {
+      var wm = WidgetManager.getInstance();
+
+      var editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
+      if (editConfig) {
+        wm.triggerWidgetOpen(editConfig.id);
+      }
+
+      //"widgets_SmartEditorEcan_Widget_23"
+
+      //var editWidget = wm.getWidgetByLabel("Smart Editor Ecan");
+      //if (editWidget) {
+        //wm.closeWidget(editWidget);
+      //} else {
+      //  console.log('btnLaunchEditor: No Editor Found');
+      //}
+    },
+
+    _findWidgetConfigInstance: function(widgetType) {
+      var widgets = this.appConfig.widgetOnScreen.widgets.filter(function (widget) {
+        return widget.name === widgetType;
+      });
+
+      if (widgets.length === 0) {
+          widgets = this.appConfig.widgetPool.widgets.filter(function (widget) {
+          return widget.name === widgetType;
+        });
+      }
+      return widgets[0];
+    },
+
 
     // END: ECAN CUSTOM CODE
 
