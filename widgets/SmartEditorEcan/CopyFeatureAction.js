@@ -37,8 +37,11 @@ define([
     },
 
     onExecute: function(featureSet){
-      WidgetManager.getInstance().triggerWidgetOpen(this.widgetId)
+      var wm =  WidgetManager.getInstance();
+      wm.triggerWidgetOpen(this.widgetId)
       .then(lang.hitch(this, function(myWidget) {
+        wm.activateWidget(myWidget);
+
         if (this._checkForFeatureLayers(featureSet)) {
             // Query the source layer to get the ungeneralised version of the feature
             this._queryForFeatures(featureSet)
