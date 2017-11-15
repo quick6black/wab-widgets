@@ -60,6 +60,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       this.slAppendChoice.set('value', this.config.slAppendChoice);
       this.chkZoomMode.set('checked', this.config.zoomMode);
       this.chkPersistOnClose.set('checked', this.config.persistOnClose);
+
+      this.chkShowEditButton.set('checked', this.config.showEditButton);
+
       this.createMapLayerList();
     },
 
@@ -82,6 +85,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
           this.config.slAppendChoice = this.slAppendChoice.get('value');
           this.config.zoomMode = this.chkZoomMode.checked;
           this.config.persistOnClose = this.chkPersistOnClose.checked;
+
+          this.config.showEditButton = this.chkShowEditButton.checked;
+
           this.config.groups = [];
           array.forEach(this.groupLayerName, lang.hitch(this, function (groupName, i) {
             if (groupName !== null) {

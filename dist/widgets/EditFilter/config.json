@@ -1,4 +1,5 @@
 {
 	"groups":[],
-	"persistOnClose":false
+	"persistOnClose":false,
+	"showEditButton": false
 }
