@@ -2329,7 +2329,6 @@ define([
                 if (elem.get("name") === fieldName) {
                   elem.set("value", value);
                 }
-
               }
               //else {
               //  var element = query("input[type='hidden']", ele);
@@ -3274,6 +3273,46 @@ define([
             this._createSmartAttributes();
             this._createAttributeInspectorTools();
             this.attrInspector.refresh();
+
+            var attTable = query("td.atiLabel", this.attrInspector.domNode);
+            var presets = this._getPresetValues();
+            array.forEach(presets, lang.hitch(this, function (preset) {
+              if (attTable !== undefined && attTable !== null) {
+                var fieldName = preset.fieldName;
+                var row = dojo.filter(attTable, lang.hitch(this, function (row) {
+                if (row.childNodes) {
+                  if (row.childNodes.length > 0) {
+                    //if (this.useFieldName === true) {
+                      if (row.hasAttribute("data-fieldname")) {
+                        return row.getAttribute("data-fieldname") === fieldName;
+                      }
+                      else {
+                        return row.childNodes[0].data === fieldName;
+                      }
+                    }
+                    //else {
+                    //  return row.childNodes[0].data === fieldName;
+                    //}
+                  //}
+                  }
+                  return false;
+                }));
+              
+                var nl = null;
+                if (row !== null) {
+                  if (row.length > 0) {
+                    var rowInfo = this._getRowInfo(row[0]);
+
+                    var valueCell = rowInfo[0];
+                    var valueCell2 = rowInfo[4];
+                    var parent = rowInfo[1];
+                    var widget = rowInfo[2];
+                    domClass.add(parent, "hideField");
+                  }
+                }
+              } 
+            }));
+
             this._attributeInspectorTools.triggerFormValidation();
             //this._sytleFields(this.attrInspector);
             if (this.currentFeature.getLayer().originalLayerId) {
@@ -3301,8 +3340,6 @@ define([
           }
           this._recordLoadeAttInspector();
         }
-
-
       },
       _createAttributeInspectorTools: function () {
         if (this.currentFeature === undefined || this.currentFeature === null) {
@@ -4287,7 +4324,37 @@ define([
       }
 
       return templatesString;      
-    }
+    },
+
+    /* END: Ecan Changes */
+
+
+    /* BEGIN: Ecan Changes - Hide Attribute display on preset fields */
+
+    _getRowInfo: function (row) {
+      var valueCell = row.parentNode.childNodes[1].childNodes[0];
+      var valueCell2 = null;
+      if (row.parentNode.childNodes[1].childNodes.length > 1) {
+        valueCell2 = row.parentNode.childNodes[1].childNodes[1];
+      }
+      var label;
+      if (this.useFieldName === true) {
+        if (row.hasAttribute("data-fieldname")) {
+          label = row.getAttribute("data-fieldname");
+        }
+        else {
+          label = row.childNodes[0].data;
+        }
+      }
+      else {
+        label = row.childNodes[0].data;
+      }
+
+      var parent = row.parentNode;
+      var widget = registry.getEnclosingWidget(valueCell);
+
+      return [valueCell, parent, widget, label, valueCell2];
+    },
 
     /* END: Ecan Changes */
 
