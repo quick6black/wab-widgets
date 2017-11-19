@@ -109,7 +109,6 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       if(this.config.showEditButton) {
         domClass.remove(this.btnLaunchEditor, "hide-items");
       }
-
     },
 
     /*
@@ -263,12 +262,21 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
     createGroupSelection: function() {
       var ObjList = [];
       var descLabel = '';
+
+      /* BEGIN: CHANGE ECAN */
+
+      var showGroups = false;
+
+      /* END: CHANGE ECAN */
+
       array.forEach(this.config.groups, lang.hitch(this, function(group) {
         var grpObj = {};
         grpObj.value = group.name;
         grpObj.label = group.name;
         grpObj.selected = false;
         ObjList.push(grpObj);
+
+        showGroups = showGroups || group.displayPreset;
       }));
 
       this.grpSelect = new Select({
@@ -284,6 +292,17 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         this.reconstructRows(val);
         this.updateGroupDesc(val);
         this.groupCurrVal = val;
+
+      if (val.displayPreset !== 'undefined' && !val.displayPreset) {
+        //if (!domClass.contains(this.btnApply,"hide-items")) domClass.add(this.btnApply, "hide-items");
+        if (!domClass.contains(this.btnReset,"hide-items")) domClass.add(this.btnReset, "hide-items");
+        if (!domClass.contains(this.filterBlock,"hide-items")) domClass.add(this.filterBlock, "hide-items");
+      } else {
+        //if (domClass.contains(this.btnApply,"hide-items")) domClass.remove(this.btnApply, "hide-items");
+        if (domClass.contains(this.btnReset,"hide-items")) domClass.remove(this.btnReset, "hide-items");
+        if (domClass.contains(this.filterBlock,"hide-items")) domClass.remove(this.filterBlock, "hide-items");
+      }
+
         setTimeout(lang.hitch(this, this.setFilterLayerDef), 1000);
       })));
       this.checkDomainUse({group: this.grpSelect.value});
@@ -298,6 +317,22 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       var defaultVal = this.checkDefaultValue(this.config.groups[0]);
       var defaultOp = this.checkDefaultOperator(this.config.groups[0]);
       this.createNewRow({operator:defaultOp, value:defaultVal, conjunc:"OR", state:"new"});
+    
+      /* BEGIN: ECAN CHANGE - Hide group filter settings if a) all configured groups are marked as hidden */
+      
+      if (!showGroups) {
+        domClass.add(this.widgetIntro, "hide-items");
+        domClass.add(this.filterBlock, "hide-items");
+      }
+
+      var defGroup = this.config.groups[0];
+      if (defGroup && defGroup.displayPreset !== 'undefined' && !defGroup.displayPreset) {
+        //domClass.add(this.btnApply, "hide-items");
+        domClass.add(this.btnReset, "hide-items");
+        domClass.add(this.filterBlock, "hide-items");        
+      }
+
+      /* END: ECAN CHANGE */
     },
 
     createNewRow: function(pValue) {
@@ -1146,6 +1181,13 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       }
       array.forEach(this.config.groups, lang.hitch(this, function(group) {
         if(group.name === pParam.group) {
+
+          if (group.displayPreset) {
+            domStyle.set(this.filterBlock,"display","none");
+          } else {
+            domStyle.set(this.filterBlock,"display","");
+          }
+
           array.forEach(group.layers, lang.hitch(this, function(grpLayer) {
             array.forEach(this.layerList, lang.hitch(this, function(layer) {
               var flag = false;
