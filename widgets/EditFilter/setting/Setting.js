@@ -36,10 +36,12 @@ define([
   'dojox/html/entities',
   '../LayersHandler',
   './presetValuePicker'
+
+   ,'dijit/form/CheckBox'
 ],
   function(declare, BaseWidgetSetting, _WidgetsInTemplateMixin, SimpleTable, dom, domConstruct,
     on, query, domAttr, lang, array, Select, TextBox, ValidationTextBox,
-    utils, LayerInfos, Message, Popup, entities, LayersHandler, presetValuePicker) {
+    utils, LayerInfos, Message, Popup, entities, LayersHandler, presetValuePicker, CheckBox) {
     return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
 
       //these two properties is defined in the BaseWidget
@@ -77,6 +79,13 @@ define([
         this.groupLayerDesc = [];
         this.groupLayerOperator = [];
         this.groupLayerDefault = [];
+
+        /* BEGIN: CHANGE ECAN - Display settings array */
+
+        this.groupDisplayPresets = [];
+
+        /* END: CHANGE ECAN */
+
         //this.groupAppendSame = [];
         this.groupAppendSameConjunc = [];
         this.chkSimpleMode.set('checked', this.config.simpleMode);
@@ -127,6 +136,7 @@ define([
                   groupObj.appendSameLayer = true;
                   groupObj.appendSameLayerConjunc = this.groupAppendSameConjunc[i].value;
                   groupObj.layers = [];
+                  groupObj.displayPreset = this.groupDisplayPresets[i].checked;
 
                   array.forEach(this.groupLayerContainer[i].getRows(), lang.hitch(this, function(row) {
                     var layerStruct = {};
@@ -238,6 +248,16 @@ define([
         domAttr.set(rowAppend, 'id', 'appendLayers_' + this.groupCounter);
         //domStyle.set(rowAppend, 'display', 'none');
 
+        /* BEGIN: CHANGE ECAN - Optional hide group settings */
+
+        var groupDisplayPreset = true;
+        var rowDisplayPreset = groupSettingTable.insertRow(-1);
+        var cellDisplayPreset = rowDisplayPreset.insertCell(0);
+        domAttr.set(cellDisplayPreset, "colspan", "5");
+        cellDisplayPreset.innerHTML = this.nls.inputs.groupDisplayDetails;
+
+        /* END: CHANGE ECAN */
+
         cellNameLabel.innerHTML = this.nls.labels.groupName;
         cellDescLabel.innerHTML = this.nls.labels.groupDesc;
         cellOperatorLabel.innerHTML = this.nls.labels.groupOperator;
@@ -262,7 +282,22 @@ define([
           if(typeof(pParam.group.appendSameLayerConjunc) !== 'undefined') {
             groupAppendConjunc = pParam.group.appendSameLayerConjunc;
           }
+          if(typeof(pParam.group.displayPreset) !== 'undefined') {
+            groupDisplayPreset = pParam.group.displayPreset;
+          }        
         }
+
+        /* BEGIN: CHANGE ECAN - Optional hide group settings */
+
+        var chkDisplayPreset = new CheckBox({
+          name: "chkDisplayPreset",
+          value: '',
+          checked: groupDisplayPreset
+        });
+        domConstruct.place(chkDisplayPreset.domNode, cellDisplayPreset,"first");
+        this.groupDisplayPresets.push(chkDisplayPreset);
+
+        /* END: CHANGE ECAN */
 
         var txtGroupName = new ValidationTextBox({
           name: "txtGroupName",
@@ -377,7 +412,6 @@ define([
         opSelect.set('value', entities.decode(params.value));
         this.groupAppendSameConjunc.push(opSelect);
       },
-
 
       createTableObject: function(pParam) {
         var fields = null;

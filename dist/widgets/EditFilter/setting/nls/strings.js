@@ -45,7 +45,8 @@ define({
       optionNOTLIKE : "DOES NOT CONTAIN",
       optionONORBEFORE: "IS ON OR BEFORE",
       optionONORAFTER: "IS ON OR AFTER",
-      optionNONE : "NONE"
+      optionNONE : "NONE",
+      groupDisplayDetails: "Show search filter inputs if value populated from URL parameter"
     },
     tables : {
       layer : "Layers",
