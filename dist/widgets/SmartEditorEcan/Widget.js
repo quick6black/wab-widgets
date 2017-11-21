@@ -68,6 +68,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       /* BEGIN: Ecan Changes */
 
       this._setLinkInfo();
+      this._mapAddRemoveLayerHandler(true);
 
       /* END: Ecan Changes */
     },
@@ -390,6 +391,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.drawingTool = null;
       }
       this._enableFeatureReduction();
+
+      /* BEGIN: Ecan Changes */
+
+      this._mapAddRemoveLayerHandler(false);
+
+      /* END: Ecan Changes */
+
       this.inherited(arguments);
     },
     onActive: function onActive() {
@@ -3906,5 +3914,86 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     var widget = registry.getEnclosingWidget(valueCell);
 
     return [valueCell, parent, widget, label, valueCell2];
+  }), _defineProperty(_declare, '_mapAddRemoveLayerHandler', function _mapAddRemoveLayerHandler(action) {
+
+    if (action) {
+      if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
+        this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+      }
+      if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
+        this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+      }
+    } else {
+      if (this._mapAddLayer) {
+        this._mapAddLayer.remove();
+      }
+      if (this._mapRemoveLayer) {
+        this._mapRemoveLayer.remove();
+      }
+    }
+  }), _defineProperty(_declare, '_onMapAddLayer', function _onMapAddLayer(result) {
+    var gl = false;
+
+    switch (result.layer.declaredClass) {
+      case "esri.layers.FeatureLayer":
+      case "esri.layers.GraphicsLayer":
+      case "esri.layers.CSVLayer":
+        gl = true;
+        break;
+
+      default:
+        // Do Nothing
+        break;
+    }
+
+    if (this.map.snappingManager && gl) {
+      // Check if layer existing in snapping manager layer infos
+      var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+        return layerInfo.layer.id === result.layer.id;
+      })).length > 0;
+
+      if (!isSnap) {
+        var layerInfos = [];
+        array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+          layerInfos.push(layerInfo);
+        });
+        layerInfos.push({
+          layer: result.layer
+        });
+
+        this.map.snappingManager.setLayerInfos(layerInfos);
+      }
+    }
+  }), _defineProperty(_declare, '_onMapRemoveLayer', function _onMapRemoveLayer(result) {
+    var gl = false;
+
+    switch (result.layer.declaredClass) {
+      case "esri.layers.FeatureLayer":
+      case "esri.layers.GraphicsLayer":
+      case "esri.layers.CSVLayer":
+        gl = true;
+        break;
+
+      default:
+        // Do Nothing
+        break;
+    }
+
+    if (this.map.snappingManager && gl) {
+      // Check if layer existing in snapping manager layer infos
+      var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+        return layerInfo.layer.id === result.layer.id;
+      })).length > 0;
+
+      if (isSnap) {
+        var layerInfos = [];
+        array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+          if (layerInfo.layer.id !== result.layer.id) {
+            layerInfos.push(layerInfo);
+          }
+        });
+        this.map.snappingManager.setLayerInfos(layerInfos);
+      }
+    }
   }), _declare));
 });
