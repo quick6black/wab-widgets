@@ -15,7 +15,8 @@ define({
       save: "Save",
       addCriteria: "Add Criteria",
       applyCriteria: "Apply",
-      removeCriteria: "Reset"
+      removeCriteria: "Reset",
+      launchEditor: "Start Editing"
     },
     inputs: {
       optionOR: "OR",

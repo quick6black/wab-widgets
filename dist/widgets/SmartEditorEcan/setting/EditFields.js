@@ -156,6 +156,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", 'dojo/on', 
       this._fieldValid = new FieldValidation({
         nls: this.nls,
         _layerDefinition: layerDefinition,
+        _layerId: this._configInfo.layerInfo.layerObject.id,
         _url: this._configInfo.layerInfo.layerObject.url,
         _fieldValidations: this._fieldValidations,
         _fieldName: rowData.fieldName,
@@ -166,13 +167,17 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", 'dojo/on', 
     },
     _setFiedsTable: function _setFiedsTable(fieldInfos) {
       array.forEach(fieldInfos, function (fieldInfo) {
+        var displayEditFlag = fieldInfo.visible;
         if (fieldInfo.type !== "esriFieldTypeGeometry" && fieldInfo.type !== "esriFieldTypeOID" && fieldInfo.type !== "esriFieldTypeBlob" && fieldInfo.type !== "esriFieldTypeGlobalID" && fieldInfo.type !== "esriFieldTypeRaster" && fieldInfo.type !== "esriFieldTypeXML") {
+          if (fieldInfo.visible === false && fieldInfo.isEditable === true) {
+            displayEditFlag = true; //if field is editable, force display
+          }
           var newRow = {
             fieldName: fieldInfo.fieldName,
             isEditable: fieldInfo.isEditable,
             canPresetValue: fieldInfo.canPresetValue,
             label: fieldInfo.label,
-            visible: fieldInfo.visible
+            visible: displayEditFlag
           };
           if (fieldInfo.hasOwnProperty('nullable') && fieldInfo.nullable === false) {
             newRow.required = "*";

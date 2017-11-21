@@ -6,6 +6,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", 'dojo/on', 
     _url: null,
     _fieldName: null,
     _fieldValidations: null,
+    _layerId: null,
+
     postCreate: function postCreate() {
       this.inherited(arguments);
       this._initActionsTable();
@@ -250,6 +252,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", 'dojo/on', 
         nls: this.nls,
         _resourceInfo: this._resourceInfo,
         _url: this._url,
+        _layerId: this._layerId,
         _validationTable: this._validationTable
       });
       this._filterPage.popup(tr);

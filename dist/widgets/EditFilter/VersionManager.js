@@ -21,6 +21,13 @@ define(['jimu/shared/BaseVersionManager'], function (BaseVersionManager) {
         }
         return newConfig;
       }
+    }, {
+      version: '2.5',
+      upgrader: function upgrader(oldConfig) {
+        var newConfig = oldConfig;
+        newConfig.persistOnClose = true;
+        return newConfig;
+      }
     }];
   }
 

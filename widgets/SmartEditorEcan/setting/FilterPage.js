@@ -1,3 +1,4 @@
+// jscs:disable validateIndentation
 define(
   ["dojo/_base/declare",
     "dojo/_base/lang",
@@ -31,8 +32,10 @@ define(
       templateString: template,
       _filter: null,
       _url: null,
+      _layerId: null,
       _layerDefinition: null,
       _validationTable: null,
+
       postCreate: function () {
         this.inherited(arguments);
         this._init();
@@ -136,12 +139,24 @@ define(
           if (rowData.filter === undefined ||
               rowData.filter === null ||
             rowData.filter === '') {
-            this._filter.buildByExpr(this._url, null, this._layerDefinition);
+            // this._filter.buildByExpr(this._url, null, this._layerDefinition);
+            this._filter.build({
+              url: this._url,
+              expr: null,
+              layerDefinition: this._layerDefinition,
+              featureLayerId: this._layerId
+            });
           }
           else {
 
-            this._filter.buildByExpr(this._url, entities.decode(rowData.expression),
-              this._layerDefinition);
+            // this._filter.buildByExpr(this._url, entities.decode(rowData.expression),
+            //   this._layerDefinition);
+            this._filter.build({
+              url: this._url,
+              expr: entities.decode(rowData.expression),
+              layerDefinition: this._layerDefinition,
+              featureLayerId: this._layerId
+            });
 
           }
 

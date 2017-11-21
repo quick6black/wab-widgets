@@ -77,6 +77,22 @@ define(['jimu/shared/BaseVersionManager'], function (BaseVersionManager) {
         }
         return newConfig;
       }
+    }, {
+      version: '2.5',
+      upgrader: function upgrader(oldConfig) {
+        var newConfig = oldConfig;
+        newConfig.editor.editGeometryDefault = false;
+        newConfig.editor.autoSaveEdits = false;
+        return newConfig;
+      }
+    }, {
+      version: '2.6',
+      upgrader: function upgrader(oldConfig) {
+        var newConfig = oldConfig;
+        newConfig.editor.displayPresetTop = false;
+        newConfig.editor.displayShapeSelector = false;
+        return newConfig;
+      }
     }];
   }
 

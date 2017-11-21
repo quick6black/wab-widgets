@@ -13,9 +13,23 @@
             <div class="generalSettingsOptions">
                 <div class="checkOption">
 
+                    <input class="check" data-dojo-attach-point="displayShapeSelector" id="displayShapeSelector"
+                           data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.displayShapeSelectorTip}" />
+                    <label class="checkLabel" for="displayShapeSelector" title="${nls.layersPage.displayShapeSelectorTip}">${nls.layersPage.displayShapeSelector}</label>
+
+                </div>
+                <div class="checkOption">
+
+                    <input class="check" data-dojo-attach-point="displayPresetTop" id="displayPresetTop"
+                           data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.displayPresetTopTip}" />
+                    <label class="checkLabel" for="displayPresetTop" title="${nls.layersPage.displayPresetTopTip}">${nls.layersPage.displayPresetTop}</label>
+
+                </div>
+                <div class="checkOption">
+
                     <input class="check" data-dojo-attach-point="useFilterEditor" id="useFilterEditor"
                            data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.useFilterEditorTip}" />
-                    <label class="checkLabel" for="useFilterEditor" title="${nls.layersPage.useFilterEditor}">${nls.layersPage.useFilterEditor}</label>
+                    <label class="checkLabel" for="useFilterEditor" title="${nls.layersPage.useFilterEditorTip}">${nls.layersPage.useFilterEditor}</label>
 
                 </div>
                 <div class="checkOption">
@@ -30,10 +44,16 @@
 
                     <input class="check" data-dojo-attach-point="displayPromptOnDelete" id="displayPromptOnDelete"
                            data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.promptOnDeleteTip}" />
-                    <label class="checkLabel" for="displayPromptOnDelete" title="${nls.layersPage.promptOnDelete}">${nls.layersPage.promptOnDelete}</label>
+                    <label class="checkLabel" for="displayPromptOnDelete" title="${nls.layersPage.promptOnDeleteTip}">${nls.layersPage.promptOnDelete}</label>
 
                 </div>
+                <div class="checkOption">
 
+                    <input class="check" data-dojo-attach-point="autoSaveEdits" id="autoSaveEdits"
+                           data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.autoSaveEdits}" />
+                    <label class="checkLabel" for="autoSaveEdits" title="${nls.layersPage.autoSaveEdits}">${nls.layersPage.autoSaveEdits}</label>
+
+                </div>
                 <div class="checkOption">
 
                     <input class="check" data-dojo-attach-point="removeOnSave" id="removeOnSave"
@@ -53,6 +73,13 @@
                     <input class="check" data-dojo-attach-point="keepTemplateSelected" id="keepTemplateSelected"
                            data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.keepTemplateActiveTip}" />
                     <label class="checkLabel" for="keepTemplateSelected" title="${nls.layersPage.keepTemplateActiveTip}">${nls.layersPage.keepTemplateActive}</label>
+
+                </div>
+                <div class="checkOption">
+
+                    <input class="check" data-dojo-attach-point="editGeometryDefault" id="editGeometryDefault"
+                           data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.geometryEditDefault}" />
+                    <label class="checkLabel" for="editGeometryDefault" title="${nls.layersPage.geometryEditDefault}">${nls.layersPage.geometryEditDefault}</label>
 
                 </div>
             </div>

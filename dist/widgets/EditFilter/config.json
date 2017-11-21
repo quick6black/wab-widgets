@@ -1,3 +1,5 @@
 {
-	"groups":[]
+	"groups":[],
+	"persistOnClose":false,
+	"showEditButton": false
 }

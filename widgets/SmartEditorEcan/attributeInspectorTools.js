@@ -1,21 +1,19 @@
-/*
-Copyright ©2014 Esri. All rights reserved.
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
-Unpublished material - all rights reserved under the
-Copyright Laws of the United States and applicable international
-laws, treaties, and conventions.
-
-For additional information, contact:
-Attn: Contracts and Legal Department
-Environmental Systems Research Institute, Inc.
-380 New York Street
-Redlands, California, 92373
-USA
-
-email: contracts@esri.com
-*/
-
+// jscs:disable validateIndentation
 define([
   "dojo/_base/declare",
   'dojo/_base/lang',
@@ -57,6 +55,14 @@ define([
       lang.mixin(this, arguments[0]);
       this._mapLayer = this._feature.getLayer();
       this._processLayer();
+      //Added to handle issue with attribute inspector when no field are included, it adds the edit tracking fields to the field collection
+      this._fieldInfo = array.filter(this._fieldInfo, function (field) {
+        if (field.label) {
+          return true;
+        } else {
+          return false;
+        }
+      });
       this._attTable = query("td.atiLabel", this._attrInspector.domNode);
       if (this._attTable === undefined || this._attTable === null) {
         return;
@@ -118,37 +124,39 @@ define([
       this._requiredNonDomainIntFields = [];
       this._requiredNonDomainDecFields = [];
       array.forEach(this._fieldInfo, function (finfo) {
-        var fieldLabel = finfo.label;
-        if (fieldLabel.indexOf('<a class="asteriskIndicator"> *</a>') >= 0) {
-          fieldLabel = fieldLabel.replace('<a class="asteriskIndicator"> *</a>', '');
-        }
-        switch (finfo.type) {
-          case "esriFieldTypeString":
-            this._stringFields.push(finfo.fieldName);
-            break;
-          case "esriFieldTypeGUID":
-            this._guidFields.push(fieldLabel);
-            this._guidFieldNames.push(finfo.fieldName);
-            break;
-          case "esriFieldTypeSingle":
-          case "esriFieldTypeDouble":
-            if (finfo.nullable === false && (finfo.domain === undefined ||
-             finfo.domain === null)) {
-              this._requiredNonDomainDecFields.push(fieldLabel);
-            }
-            this._dblFieldNames.push(finfo.fieldName);
-            break;
-          case "esriFieldTypeDate":
-            this._dateFieldNames.push(finfo.fieldName);
-            break;
-          case "esriFieldTypeSmallInteger":
-          case "esriFieldTypeInteger":
-            if (finfo.nullable === false && (finfo.domain === undefined ||
-              finfo.domain === null)) {
-              this._requiredNonDomainIntFields.push(fieldLabel);
-            }
-            this._intFieldNames.push(finfo.fieldName);
-            break;
+        if (finfo.hasOwnProperty('label') && finfo.hasOwnProperty('type')) {
+          var fieldLabel = finfo.label;
+          if (fieldLabel.indexOf('<a class="asteriskIndicator"> *</a>') >= 0) {
+            fieldLabel = fieldLabel.replace('<a class="asteriskIndicator"> *</a>', '');
+          }
+          switch (finfo.type) {
+            case "esriFieldTypeString":
+              this._stringFields.push(finfo.fieldName);
+              break;
+            case "esriFieldTypeGUID":
+              this._guidFields.push(fieldLabel);
+              this._guidFieldNames.push(finfo.fieldName);
+              break;
+            case "esriFieldTypeSingle":
+            case "esriFieldTypeDouble":
+              if (finfo.nullable === false && (finfo.domain === undefined ||
+               finfo.domain === null)) {
+                this._requiredNonDomainDecFields.push(fieldLabel);
+              }
+              this._dblFieldNames.push(finfo.fieldName);
+              break;
+            case "esriFieldTypeDate":
+              this._dateFieldNames.push(finfo.fieldName);
+              break;
+            case "esriFieldTypeSmallInteger":
+            case "esriFieldTypeInteger":
+              if (finfo.nullable === false && (finfo.domain === undefined ||
+                finfo.domain === null)) {
+                this._requiredNonDomainIntFields.push(fieldLabel);
+              }
+              this._intFieldNames.push(finfo.fieldName);
+              break;
+          }
         }
       }, this);
     },
@@ -331,7 +339,7 @@ define([
       return this.isNumeric(value);
     },
     _getRowInfo: function (row) {
-      try{
+      try {
         if (row) {
           if (row.parentNode) {
             var valueCell = row.parentNode.childNodes[1].childNodes[0];

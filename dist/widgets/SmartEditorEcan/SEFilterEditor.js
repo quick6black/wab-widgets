@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-
+// jscs:disable validateIndentation
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/dom-construct", "dijit/_TemplatedMixin", "dijit/_WidgetBase"], function (declare, lang, array, domConstruct, _TemplatedMixin, _WidgetBase) {
   return declare([_WidgetBase, _TemplatedMixin], {
     name: "SEFilterEditor",
@@ -121,30 +121,42 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/dom-c
         items = this._origGetItemsFromLayerFunc.apply(this._templatePicker, arguments);
         var filterText = this.filterTextBox.value;
         if (filterText) {
+
+          /* BEGIN: Ecan Changes - Include multiple filter options for "OR" filter */
+          var filterVals = filterText.split(',');
+
           items = array.filter(items, function (item) {
             var match = false;
-            var regex = new RegExp(filterText, "ig");
-            // Search using item label
-            if (item.hasOwnProperty("label")) {
-              if (item.label.match(regex)) {
-                if (item.label.match(regex).length > 0) {
-                  match = true;
+
+            array.forEach(filterVals, function (filterValText) {
+              if (filterValText.length > 1) {
+                var regex = new RegExp(filterValText, "ig");
+                // Search using item label
+                if (item.hasOwnProperty("label")) {
+                  if (item.label.match(regex)) {
+                    if (item.label.match(regex).length > 0) {
+                      match = true;
+                    }
+                  }
                 }
-              }
-            }
-            // Search using the name from the
-            // item template property
-            if (item.hasOwnProperty("template")) {
-              if (item.template.hasOwnProperty("name")) {
-                if (item.template.name.match(regex)) {
-                  if (item.template.name.match(regex).length > 0) {
-                    match = true;
+                // Search using the name from the
+                // item template property
+                if (item.hasOwnProperty("template")) {
+                  if (item.template.hasOwnProperty("name")) {
+                    if (item.template.name.match(regex)) {
+                      if (item.template.name.match(regex).length > 0) {
+                        match = true;
+                      }
+                    }
                   }
                 }
               }
-            }
+            });
+
             return match;
           });
+
+          /* END: Ecan Changes */
         }
 
         if (items.length === 0) {

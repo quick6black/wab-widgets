@@ -1,7 +1,7 @@
 define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'dijit', 'jimu/dijit/FilterParameters', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-attr', 'dojo/dom-style', 'dojo/on', 'dojo/query', 'dojo/string', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/date/locale', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/DateTextBox', 'dijit/form/NumberTextBox', 'dijit/registry', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', 'jimu/FilterManager', 'esri/tasks/query', 'esri/tasks/QueryTask', 'esri/geometry/geometryEngine', 'esri/layers/FeatureLayer', './SaveJSON', './ReadJSON', './LayersHandler', 'dojox/html/entities',
 
 /* ECAN ADDITION REQUIRES */
-'esri/urlUtils', 'esri/geometry/Point', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point) {
+'esri/urlUtils', 'esri/geometry/Point', 'jimu/WidgetManager', 'dijit/form/CheckBox'], function (declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, dom, domConstruct, domClass, domAttr, domStyle, on, query, string, lang, array, locale, Select, TextBox, DateTextBox, NumberTextBox, registry, LayerInfos, utils, FilterManager, Query, QueryTask, geometryEngine, FeatureLayer, saveJson, readJson, LayersHandler, entities, esriUrlUtils, Point, WidgetManager, Checkbox) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -21,6 +21,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     graphicsHolder: null,
     slAppendChoice: null,
     chkAppendToDef: null,
+    persistOnClose: true,
     filterExt: null,
     dayInMS: 24 * 60 * 60 * 1000 - 1000, // 1 sec less than 1 day
 
@@ -52,7 +53,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.slAppendChoice.value = this.config.slAppendChoice;
       }
 
+      if (typeof this.config.persistOnClose !== 'undefined') {
+        this.persistOnClose = this.config.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
+      } else {
+        //if key does not exist, take the default value of the wisget
+        this.config.persistOnClose = this.persistOnClose;
+        this.chkPersistDef.set('checked', this.persistOnClose);
+      }
+
       this.createMapLayerList();
+
+      if (this.config.showEditButton) {
+        domClass.remove(this.btnLaunchEditor, "hide-items");
+      }
     },
 
     /*
@@ -197,12 +211,21 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     createGroupSelection: function createGroupSelection() {
       var ObjList = [];
       var descLabel = '';
+
+      /* BEGIN: CHANGE ECAN */
+
+      var showGroups = false;
+
+      /* END: CHANGE ECAN */
+
       array.forEach(this.config.groups, lang.hitch(this, function (group) {
         var grpObj = {};
         grpObj.value = group.name;
         grpObj.label = group.name;
         grpObj.selected = false;
         ObjList.push(grpObj);
+
+        showGroups = showGroups || group.displayPreset;
       }));
 
       this.grpSelect = new Select({
@@ -218,6 +241,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.reconstructRows(val);
         this.updateGroupDesc(val);
         this.groupCurrVal = val;
+
+        if (val.displayPreset !== 'undefined' && !val.displayPreset) {
+          //if (!domClass.contains(this.btnApply,"hide-items")) domClass.add(this.btnApply, "hide-items");
+          if (!domClass.contains(this.btnReset, "hide-items")) domClass.add(this.btnReset, "hide-items");
+          if (!domClass.contains(this.filterBlock, "hide-items")) domClass.add(this.filterBlock, "hide-items");
+        } else {
+          //if (domClass.contains(this.btnApply,"hide-items")) domClass.remove(this.btnApply, "hide-items");
+          if (domClass.contains(this.btnReset, "hide-items")) domClass.remove(this.btnReset, "hide-items");
+          if (domClass.contains(this.filterBlock, "hide-items")) domClass.remove(this.filterBlock, "hide-items");
+        }
+
         setTimeout(lang.hitch(this, this.setFilterLayerDef), 1000);
       })));
       this.checkDomainUse({ group: this.grpSelect.value });
@@ -232,6 +266,22 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       var defaultVal = this.checkDefaultValue(this.config.groups[0]);
       var defaultOp = this.checkDefaultOperator(this.config.groups[0]);
       this.createNewRow({ operator: defaultOp, value: defaultVal, conjunc: "OR", state: "new" });
+
+      /* BEGIN: ECAN CHANGE - Hide group filter settings if a) all configured groups are marked as hidden */
+
+      if (!showGroups) {
+        domClass.add(this.widgetIntro, "hide-items");
+        domClass.add(this.filterBlock, "hide-items");
+      }
+
+      var defGroup = this.config.groups[0];
+      if (defGroup && defGroup.displayPreset !== 'undefined' && !defGroup.displayPreset) {
+        //domClass.add(this.btnApply, "hide-items");
+        domClass.add(this.btnReset, "hide-items");
+        domClass.add(this.filterBlock, "hide-items");
+      }
+
+      /* END: ECAN CHANGE */
     },
 
     createNewRow: function createNewRow(pValue) {
@@ -931,7 +981,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           else {
           */
           // layer.layerObject.setDefinitionExpression(expr.trim());
-          this._applyFilter(layer.layerObject, expr.trim());
+          this._applyFilter(layer.layerObject, expr.trim(), false);
           //}
           layer.layerObject.setVisibility(true);
         }
@@ -965,6 +1015,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       //do nothing, not a valid service
 
       //}
+
     },
 
     resetLayerDef: function resetLayerDef(pParam) {
@@ -973,6 +1024,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
       array.forEach(this.config.groups, lang.hitch(this, function (group) {
         if (group.name === pParam.group) {
+
+          if (group.displayPreset) {
+            domStyle.set(this.filterBlock, "display", "none");
+          } else {
+            domStyle.set(this.filterBlock, "display", "");
+          }
+
           array.forEach(group.layers, lang.hitch(this, function (grpLayer) {
             array.forEach(this.layerList, lang.hitch(this, function (layer) {
               var flag = false;
@@ -994,14 +1052,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     if (typeof layer.layerObject.defaultDefinitionExpression !== 'undefined') {
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     } else if (typeof layer.layerObject.layerDefinitions !== 'undefined') {
                       //layer.layerObject.setDefaultLayerDefinitions();
                       layer.layerObject.setLayerDefinitions(def.definition);
                     } else {
                       // layer.layerObject.setDefinitionExpression(def.definition);
 
-                      this._applyFilter(layer.layerObject, def.definition);
+                      this._applyFilter(layer.layerObject, def.definition, true);
                     }
 
                     layer.layerObject.setVisibility(def.visible);
@@ -1138,13 +1196,15 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
     },
 
-    _applyFilter: function _applyFilter(layer, exp) {
+    _applyFilter: function _applyFilter(layer, exp, destory) {
       var howAppend = false;
       if (this.slAppendChoice.value === "AND") {
         howAppend = true;
       }
       FilterManager.getInstance().applyWidgetFilter(layer.id, this.id, exp, this.chkAppendToDef.checked, howAppend);
-      this._zoomOnFilter(layer);
+      if (!destory) {
+        this._zoomOnFilter(layer);
+      }
     },
 
     _zoomOnFilter: function _zoomOnFilter(layer) {
@@ -1208,10 +1268,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
             newExt = geometryEngine.buffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
           } else {
-            newExt = geometryEngine.buffer(ext2, 10, 9002, false).getExtent();
+            newExt = geometryEngine.buffer(ext, 10, 9002, false).getExtent();
           }
           // END: ECAN CUSTOM CODE
         } else {
+
           // BEGIN: ECAN CUSTOM CODE
           if (ext.xmin === ext.xmax || ext.ymin === ext.ymax) {
             newExt = geometryEngine.geodesicBuffer(new Point(ext.xmin, ext.ymin, ext.spatialReference), 10, 9002, false).getExtent();
@@ -1236,7 +1297,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           newExt = geometryEngine.geodesicBuffer(newExt, 200, 9002, false).getExtent();
         }
         this.filterExt = newExt;
-        this.map.setExtent(newExt);
+        this.map.setExtent(newExt, true);
       }
     },
 
@@ -1290,6 +1351,37 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }
 
       return filter;
+    },
+
+    launchEditor: function launchEditor(e) {
+      var wm = WidgetManager.getInstance();
+
+      var editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
+      if (editConfig) {
+        wm.triggerWidgetOpen(editConfig.id);
+      }
+
+      //"widgets_SmartEditorEcan_Widget_23"
+
+      //var editWidget = wm.getWidgetByLabel("Smart Editor Ecan");
+      //if (editWidget) {
+      //wm.closeWidget(editWidget);
+      //} else {
+      //  console.log('btnLaunchEditor: No Editor Found');
+      //}
+    },
+
+    _findWidgetConfigInstance: function _findWidgetConfigInstance(widgetType) {
+      var widgets = this.appConfig.widgetOnScreen.widgets.filter(function (widget) {
+        return widget.name === widgetType;
+      });
+
+      if (widgets.length === 0) {
+        widgets = this.appConfig.widgetPool.widgets.filter(function (widget) {
+          return widget.name === widgetType;
+        });
+      }
+      return widgets[0];
     },
 
     // END: ECAN CUSTOM CODE

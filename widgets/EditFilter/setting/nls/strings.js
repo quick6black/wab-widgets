@@ -27,6 +27,8 @@ define({
       simpleModeTip : "Option to simplify the configured widget interface. When checked, the operator drop-down list and add criteria buttons are removed from the interface.",
       webmapAppendMode : "Append Filter to Existing Web Map Filter Using ",
       webmapAppendModeTip : "Option to append the filter set to an existing web map filter. Operators that are supported are OR and AND.",
+      persistOnClose: "Persist After Widget is Closed.",
+      showEditButton: "Show Open Edit Tool Button. If checked, a button which will open the Smart Edit (Ecan) widget will be displayed if configured in the app.",
       optionsMode : "Hide Widget Options",
       optionsModeTip : "Option to expose additional widget settings. If checked, saving and loading defined filters and persisting the filter after the widget is closed are removed from the interface.",
       optionOR : "OR",
@@ -43,7 +45,8 @@ define({
       optionNOTLIKE : "DOES NOT CONTAIN",
       optionONORBEFORE: "IS ON OR BEFORE",
       optionONORAFTER: "IS ON OR AFTER",
-      optionNONE : "NONE"
+      optionNONE : "NONE",
+      groupDisplayDetails: "Show search filter inputs if value populated from URL parameter"
     },
     tables : {
       layer : "Layers",

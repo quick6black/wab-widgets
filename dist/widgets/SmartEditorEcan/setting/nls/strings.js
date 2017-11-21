@@ -14,10 +14,17 @@ define({
       removeOnSaveTip: "Option to remove the feature from the selection set when the record is saved.  If it is the only selected record, the panel is switched back to the template page.",
       useFilterEditor: "Use feature template filter",
       useFilterEditorTip: "Option to use the Filter Template picker which provides the ability to view one layers templates or search for templates by name.",
+      displayShapeSelector:"Show drawing options",
+      displayShapeSelectorTip: "Option to show a list of valid drawing options for the selected template.",
+      displayPresetTop: "Display preset value list on top",
+      displayPresetTopTip: "Option to show the preset value list above the template picker.",
+      
       listenToGroupFilter: "Apply filter values from Group Filter widget to Preset fields",
       listenToGroupFilterTip: "When a filter is applied in the Group Filter widget, apply the value to a matching field in the Preset value list.",
       keepTemplateActive: "Keep selected template active",
       keepTemplateActiveTip: "When the template picker is shown, if a template was previously selected, reselect it.",
+      geometryEditDefault: "Enable geometry edit by default",
+      autoSaveEdits: "Saves the edit automatically",
       layerSettingsTable: {
         allowDelete: "Allow Delete",
         allowDeleteTip: "Option to allow the user to delete a feature; disabled if the layer does not support delete",
@@ -88,7 +95,7 @@ define({
       addLinks: "Add Returning URL(s)",
       linkTitle: "Link Text",
       linkHref: "URL Prefix",
-      linkAttribute: "Linking Attribute",
+      linkAttribute: "Linking Attribute/Url Parameter Name",
       editTag: "Edit",
     }
   }),

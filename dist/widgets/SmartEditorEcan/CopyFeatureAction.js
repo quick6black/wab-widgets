@@ -30,7 +30,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     },
 
     onExecute: function onExecute(featureSet) {
-      WidgetManager.getInstance().triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
+      var wm = WidgetManager.getInstance();
+      wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
+        wm.activateWidget(myWidget);
+
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
