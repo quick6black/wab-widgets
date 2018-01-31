@@ -293,7 +293,15 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         this.updateGroupDesc(val);
         this.groupCurrVal = val;
 
-      if (val.displayPreset !== 'undefined' && !val.displayPreset) {
+        /* BEGIN: CHANGE ECAN */
+
+        // Get the group item asociated with the newly selected feature
+        var selectedGroup = this.config.groups.filter(function (grp) {
+          return grp.name === val;
+        })[0];
+
+
+      if (selectedGroup !== undefined && selectedGroup.displayPreset !== undefined && !selectedGroup.displayPreset) {
         //if (!domClass.contains(this.btnApply,"hide-items")) domClass.add(this.btnApply, "hide-items");
         if (!domClass.contains(this.btnReset,"hide-items")) domClass.add(this.btnReset, "hide-items");
         if (!domClass.contains(this.filterBlock,"hide-items")) domClass.add(this.filterBlock, "hide-items");
@@ -302,6 +310,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         if (domClass.contains(this.btnReset,"hide-items")) domClass.remove(this.btnReset, "hide-items");
         if (domClass.contains(this.filterBlock,"hide-items")) domClass.remove(this.filterBlock, "hide-items");
       }
+
+        /* END: CHANGE ECAN */
 
         setTimeout(lang.hitch(this, this.setFilterLayerDef), 1000);
       })));
@@ -1183,9 +1193,11 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         if(group.name === pParam.group) {
 
           if (group.displayPreset) {
-            domStyle.set(this.filterBlock,"display","none");
+            //domStyle.set(this.filterBlock, "display", "none");
+            if (domClass.contains(this.filterBlock, "hide-items")) domClass.remove(this.filterBlock, "hide-items");
           } else {
-            domStyle.set(this.filterBlock,"display","");
+            if (!domClass.contains(this.filterBlock, "hide-items")) domClass.add(this.filterBlock, "hide-items");
+            //domStyle.set(this.filterBlock, "display", "");
           }
 
           array.forEach(group.layers, lang.hitch(this, function(grpLayer) {

@@ -1035,20 +1035,29 @@ define([
 
                                 // Convert the grid coordinates
                                 // NOTE: parseInt is used to remove any decimal places before padding with 0's
-                                numLong = parseFloat(parseInt((mapSheet.xmin.toString().substring(0, 2) + long + '0000000')).toString().substring(0, 7));
-                                numLat = parseFloat(parseInt((mapSheet.ymin.toString().substring(0, 2) + lat + '0000000')).toString().substring(0, 7));
+                                //numLong = parseFloat(parseInt((mapSheet.xmin.toString().substring(0, 2) + long + '0000000')).toString().substring(0, 7));
+                                //numLat = parseFloat(parseInt((mapSheet.ymin.toString().substring(0, 2) + lat + '0000000')).toString().substring(0, 7));
 
-                                // Validate - make sure within sheet bounds
-                                if (numLong >= mapSheet.xmin && numLong <= mapSheet.xmax && numLat >= mapSheet.ymin && numLat <= mapSheet.ymax) {
-                                    point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
-                                    if (webMercatorUtils.canProject(point, this.map)) {
-                                        wmPoint = webMercatorUtils.project(point, this.map);
-                                        this.projectCompleteHandler2([wmPoint]);
-                                        return;
-                                    }
+                                // Check for rollover in map sheet when determining what prefix to use in constructing coordinates
+                                var coords = this.gridReferenceCoordinateExtraction(long,lat,mapSheet);
+                                if (coords) {
+                                  numLong = coords.x;
+                                  numLat = coords.y;
 
-                                    break;
+                                  // Validate - make sure within sheet bounds
+                                  if (numLong >= mapSheet.xmin && numLong <= mapSheet.xmax && numLat >= mapSheet.ymin && numLat <= mapSheet.ymax) {
+                                      point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
+                                      if (webMercatorUtils.canProject(point, this.map)) {
+                                          wmPoint = webMercatorUtils.project(point, this.map);
+                                          this.projectCompleteHandler2([wmPoint]);
+                                          return;
+                                      }
+
+                                      break;
+                                  }
+
                                 }
+                                break;
                             }
                         }
                         break;
@@ -1073,6 +1082,49 @@ define([
                                          lang.hitch(this, this.geometryService_faultHandler));
           }
         }
+      },
+
+      gridReferenceCoordinateExtraction: function (xText, yText, mapSheet) {
+        if (!xText || !yText || !mapSheet) {
+          return null;
+        }
+
+        var x,y;
+
+        var xVal = (xText + "00000").substring(0,5);
+        var yVal = (yText + "00000").substring(0,5);
+
+        var minYPref = mapSheet.ymin.toString().substring(0, 2);
+        var minXPref = mapSheet.xmin.toString().substring(0, 2);
+        var maxYPref = mapSheet.ymax.toString().substring(0, 2);
+        var maxXPref = mapSheet.xmax.toString().substring(0, 2);
+
+        var minY = parseInt(mapSheet.ymin.toString().substring(2, 5));
+        var minX = parseInt(mapSheet.xmin.toString().substring(2, 5));
+        var maxY = parseInt(mapSheet.ymax.toString().substring(2, 5));
+        var maxX = parseInt(mapSheet.xmax.toString().substring(2, 5));
+
+        if(minY > maxY || minX > maxX) {
+          if (minY <= parseInt(yVal) && parseInt(yVal) < 10000) {
+            y = parseFloat(parseInt(minYPref + yVal));
+          } else {
+            y = parseFloat(parseInt(maxYPref + yVal));
+          }
+
+          if (minX <= parseInt(xVal) && parseInt(xVal) < 10000) {
+            x = parseFloat(parseInt(minXPref + xVal));
+          } else {
+            x = parseFloat(parseInt(maxXPref + xVal));
+          }
+        } else {
+            y = parseFloat(parseInt(minYPref + yVal));
+            x = parseFloat(parseInt(minXPref + xVal));
+        }
+
+        return {
+          "x":x,
+          "y":y
+        };
       },
 
       projectCompleteHandler2: function (results){
