@@ -958,6 +958,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
           } else if (selUnit.mapref) {
             var lenWkids = this.config.mapSheets.length;
+            var validCoords = true;
             for (var i = 0; i < lenWkids; i++) {
               if (this.config.mapSheets[i].wkid == selUnit.wkid) {
                 var lenSheets = this.config.mapSheets[i].sheets.length;
@@ -984,8 +985,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                           this.projectCompleteHandler2([wmPoint]);
                           return;
                         }
-
                         break;
+                      } else {
+                        validCoords = false;
                       }
                     }
                     break;
@@ -996,7 +998,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
 
             // If we got this far there was an issue with coords
-            this.projectCompleteHandler2([{}]); // Dummy point to trigger error message
+            if (!validCoords) {
+              this.projectCompleteHandler2([{}]); // Dummy point to trigger error message
+              return;
+            }
           } else {
             point = new Point(numLong, numLat, new SpatialReference(parseInt(selUnit.wkid)));
             if (webMercatorUtils.canProject(point, this.map)) {
