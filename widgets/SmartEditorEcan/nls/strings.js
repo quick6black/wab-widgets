@@ -36,6 +36,28 @@ define({
       multipleFeaturesMessage: "Multiple features have been selected to be copied.  In this situation you cannot alter the field details prior to saving to the target layer."
     },
 
+    mergeFeaturesPopup: {
+      ok: "OK",
+      cancel: "Cancel",
+      titleLabel: "Merge Selected Features"
+    },
+
+    tools: {
+      mergeFeatures: "Merge",
+      mergeToolTitle: "Merge Multiple Features",
+      mergeErrors: {
+        multipleLayersError: "Merging features can only be performed on the features from one layer.",
+        unsupportedGeometryError: "Merging is only available on line and polygon features.",
+        numberOfFeaturesError: "A minimum of two features must be selected before merge tool can be used.",
+        generalError: "The merge tool is disabled."
+      },
+      explodeMultipartFeatures: "Explode",
+      explodeToolTitle: "Explode Multipart Feature",
+      explodeErrors: {
+        generalError: "The explode tool is disbaled."
+      }
+    },
+
     _featureAction_Copy: "Copy to Edit Layer"
   }),
   "ar": 1,

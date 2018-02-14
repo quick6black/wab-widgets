@@ -26,6 +26,10 @@
     "hasVersionManager": true
   },
   "featureActions": [{
+    "name": "SmartEditor",
+    "uri": "SmartEditorFeatureAction"
+  },
+  {
     "name": "Copy",
     "uri": "CopyFeatureAction"
   }]

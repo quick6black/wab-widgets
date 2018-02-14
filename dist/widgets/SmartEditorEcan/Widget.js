@@ -21,7 +21,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil',
 
 /* ECAN ADDITION REQUIRES */
-'esri/urlUtils', './components/operationLink', './components/copyFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, OperationLink, CopyFeaturesPopup) {
+'esri/urlUtils', 'esri/geometry/geometryEngine', 'dojo/dom-attr', './components/operationLink', './components/copyFeaturesPopup', './components/mergeFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, geometryEngine, domAttr, OperationLink, CopyFeaturesPopup, MergeFeaturesPopup) {
   var _declare;
 
   return declare([BaseWidget, _WidgetsInTemplateMixin], (_declare = {
@@ -217,7 +217,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (this.state !== 'active') {
         this.widgetManager.activateWidget(this);
       }
-      var firstFeature = features[0];
+
+      /* BEGIN CHANGE - Handle multiple selected features 
+        // ORIGINAL CODE
+        var firstFeature = features[0];
       if (this._validateFeatureChanged() && this.currentFeature) {
         // do not show templatePicker after saving
         if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
@@ -225,6 +228,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       } else {
         this.load_from_featureaction(featureLayer, firstFeature);
+      }
+        */
+
+      if (this._validateFeatureChanged() && this.currentFeature) {
+        // do not show templatePicker after saving
+        if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
+          this._promptToResolvePendingEdit(false, { featureLayer: featureLayer, feature: features }, false, true);
+        }
+      } else {
+        this.load_from_featureaction(featureLayer, features);
       }
     },
     load_from_featureaction: function load_from_featureaction(featureLayer, feature) {
@@ -244,13 +257,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this._createAttributeInspector(this.config.editor.configInfos);
       if (feature) {
 
-        SelectionManager.getInstance().setSelection(featureLayer, [feature]).then(lang.hitch(this, function () {
+        /* BEGIN CHANGE - Handle multiple selected features */
+
+        var selFeatures = lang.isArray(feature) ? feature : [feature];
+
+        SelectionManager.getInstance().setSelection(featureLayer, selFeatures).then(lang.hitch(this, function () {
           var selectedFeatures = featureLayer.getSelectedFeatures();
           this.updateFeatures = selectedFeatures;
           if (this.updateFeatures.length > 0) {
             this._showTemplate(false);
           }
         }));
+
+        /* END CHANGE */
       }
     },
     //Function from the feature action
@@ -2940,6 +2959,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this._createAttributeInspectorTools();
           this.attrInspector.refresh();
 
+          /* BEGIN CHANGE - Configure feature editing tools */
+          this._createFeatureEditTools();
+
+          /* END CHANGE */
+
           var attTable = query("td.atiLabel", this.attrInspector.domNode);
           var presets = this._getPresetValues();
           array.forEach(presets, lang.hitch(this, function (preset) {
@@ -3016,6 +3040,41 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         _fieldInfo: this.currentLayerInfo.fieldInfos
       };
       this._attributeInspectorTools = new attributeInspectorTools(attributeInspectorToolsParams);
+    },
+    _createFeatureEditTools: function _createFeatureEditTools() {
+      if (this.currentFeature === undefined || this.currentFeature === null) {
+        return;
+      }
+
+      // Merge Button - verify multple features selected from a single dataset
+      var selLayers = [];
+      array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
+        var layer = feature.getLayer();
+        if (selLayers && selLayers.indexOf(layer.id) === -1) {
+          selLayers.push(layer.id);
+        }
+      }));
+
+      if (selLayers.length !== 1) {
+        // Disable the merge tool and show multi layer error message value
+        this._setMergeHandler(false, "multiple layers");
+        return;
+      }
+
+      // Check geometry is line or polygon
+      if (this.currentFeature.geometry.type === 'Point') {
+        // Disable the merge tool and show unsupported geometry error message value
+        this._setMergeHandler(false, "unsupported geometry");
+        return;
+      }
+
+      // Ensure multiple features
+      if (this.updateFeatures.length === 1) {
+        // Disable the merge tool and show requires two or more error message value
+        this._setMergeHandler(false, "number of features");
+      } else {
+        this._setMergeHandler(true);
+      }
     },
     _createSmartAttributes: function _createSmartAttributes() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
@@ -3303,6 +3362,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }, this);
       return layerInfos;
     },
+
     getLayerObjectFromMapByUrl: function getLayerObjectFromMapByUrl(map, layerUrl) {
       var resultLayerObject = null;
       for (var i = 0; i < map.graphicsLayerIds.length; i++) {
@@ -3434,6 +3494,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     resize: function resize() {
       this._update();
     },
+
     onNormalize: function onNormalize() {
       setTimeout(lang.hitch(this, this._update), 100);
     },
@@ -3805,6 +3866,101 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     }
 
     return isValid;
+  }), _defineProperty(_declare, '_setMergeHandler', function _setMergeHandler(create, error) {
+    if (create) {
+      // Remove disable button style
+      if (domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+        domClass.remove(this.featureMergeBtnNode, "jimu-state-disabled");
+      }
+
+      domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeToolTitle);
+
+      // Apply the click event
+      if (!this._mergeClick) {
+        this._mergeClick = on(this.featureMergeBtnNode, "click", lang.hitch(this, this._startMerge));
+      }
+    } else {
+      // Apply disable button style
+      if (!domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+        domClass.add(this.featureMergeBtnNode, "jimu-state-disabled");
+      }
+
+      // Deactiviate the click event
+      if (this._mergeClick) {
+        this._mergeClick.remove();
+        this._mergeClick = null;
+      }
+
+      switch (error) {
+        case "multiple layers":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.multipleLayersError);
+          break;
+
+        case "unsupported geometry":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.unsupportedGeometryError);
+          break;
+
+        case "number of features":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.numberOfFeaturesError);
+          break;
+
+        default:
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.generalError);
+          break;
+      }
+    }
+  }), _defineProperty(_declare, '_startMerge', function _startMerge() {
+
+    var mergePopup, param;
+    param = {
+      map: this.map,
+      nls: this.nls,
+      config: this.config,
+      features: this.updateFeatures,
+      currentFeature: this.currentFeature
+    };
+
+    mergePopup = new MergeFeaturesPopup(param);
+    mergePopup.startup();
+
+    mergePopup.onOkClick = lang.hitch(this, function () {
+      this._mergeFeatures();
+      mergePopup.popup.close();
+    });
+  }), _defineProperty(_declare, '_mergeFeatures', function _mergeFeatures() {
+    var geometries = [];
+    var removeFeatures = [];
+    for (var i = 0, il = this.updateFeatures.length; i < il; i++) {
+      var feature = this.updateFeatures[i];
+      geometries.push(feature.geometry);
+
+      if (feature !== this.currentFeature) removeFeatures.push(feature);
+    }
+
+    var newGeometry = geometryEngine.union(geometries);
+    var newFeature = new Graphic(this.currentFeature.toJson());
+    newFeature.setGeometry(newGeometry);
+
+    // Apply the changes
+    var layer = this.currentFeature.getLayer();
+    layer.applyEdits(null, [newFeature], removeFeatures, lang.hitch(this, function (adds, updates, deletes) {
+      if (updates && updates.length > 0 && updates[0].hasOwnProperty("error")) {
+        Message({
+          message: updates[0].error.toString()
+        });
+      }
+      if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+        Message({
+          message: deletes[0].error.toString()
+        });
+      }
+
+      this.load_from_featureaction(layer, newFeature);
+    }), lang.hitch(this, function (err) {
+      Message({
+        message: err.message.toString() + "\n" + err.details
+      });
+    }));
   }), _defineProperty(_declare, '_initURLPresetValues', function _initURLPresetValues() {
     var loc = window.location;
     var urlObject = esriUrlUtils.urlToObject(loc.href);
