@@ -51,6 +51,7 @@ define([
     "esri/Color",
     "esri/geometry/jsonUtils",
     "esri/geometry/Polyline",
+    "esri/geometry/Polygon",
     "dijit/registry",
     "./utils",
     "./smartAttributes",
@@ -92,6 +93,7 @@ define([
     './components/operationLink',
     './components/copyFeaturesPopup',
     './components/mergeFeaturesPopup',
+    './components/explodeFeaturesPopup',
 
     'jimu/dijit/LoadingShelter'
 
@@ -131,6 +133,7 @@ define([
     Color,
     geometryJsonUtil,
     Polyline,
+    Polygon,
     registry,
     editUtils,
     smartAttributes,
@@ -168,7 +171,8 @@ define([
     domAttr,
     OperationLink,
     CopyFeaturesPopup,
-    MergeFeaturesPopup
+    MergeFeaturesPopup,
+    ExplodeFeaturesPopup
 
     ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -3406,6 +3410,13 @@ define([
           return;
         }
 
+        // Prepare merge tool
+        this._createMergeTool();
+
+        // Prepare explode tool
+        this._createExplodeTool();
+      },
+      _createMergeTool: function () {
         // Merge Button - verify multple features selected from a single dataset
         var selLayers = [];
         array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
@@ -3436,6 +3447,41 @@ define([
           this._setMergeHandler(true);
         }
       },
+
+      _createExplodeTool: function () {
+        // Check geometry is line or polygon
+        if (this.currentFeature.geometry.type === 'Point') {
+          // Disable the explode tool and show unsupported geometry error message value
+          this._setExplodeHandler(false,"unsupported geometry");
+          return;
+        } 
+
+        // Check for multipart geometry
+        var feature = null, process = '', geometry = null, newFeatures = [];
+        feature = this.currentFeature;
+        switch (feature.geometry.type) {
+            case 'polyline':
+                if (feature.geometry.paths.length > 0)
+                    process = 'paths';
+                break;
+
+            case 'polygon':
+                if (feature.geometry.rings.length > 0)
+                    process = 'rings';
+                break;
+
+            default:
+                break;
+        }
+
+        if (feature.geometry[process].length === 1) {
+          // Disable the explode tool and show not multipart error message value
+          this._setExplodeHandler(false,"not multipart");          
+        } else {
+          this._setExplodeHandler(true);
+        }
+      },
+
       _createSmartAttributes: function () {
         if (this.currentFeature === undefined || this.currentFeature === null) {
           return;
@@ -3560,6 +3606,7 @@ define([
 
         }
       },
+
       _validateFeatureChanged: function () {
 
         if (this.currentFeature) {
@@ -4351,7 +4398,6 @@ define([
     },
 
     _startMerge: function () {
-
       var mergePopup, param;
       param = {
           map: this.map,
@@ -4368,7 +4414,6 @@ define([
         this._mergeFeatures();
         mergePopup.popup.close();
       });
-
     },
 
     _mergeFeatures: function () {
@@ -4409,6 +4454,150 @@ define([
           });
         }));
     },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Explode Features */
+
+    _setExplodeHandler: function (create, error) {
+      if (create) {
+          // Remove disable button style
+          if (domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+            domClass.remove(this.featureExplodeBtnNode, "jimu-state-disabled");
+          }
+
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeToolTitle);
+
+          // Apply the click event
+          if (!this._explodeClick) {
+            this._explodeClick = on(this.featureExplodeBtnNode, "click", lang.hitch(this, this._startExplode));
+          }
+
+
+      } else {
+          // Apply disable button style
+          if (!domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+            domClass.add(this.featureExplodeBtnNode, "jimu-state-disabled");
+          }
+
+          // Deactiviate the click event
+          if (this._explodeClick) {
+            this._explodeClick.remove();
+            this._explodeClick = null;
+          }
+
+          switch (error) {
+            case "unsupported geometry":
+              domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
+              break;
+
+            case "not multipart":
+              domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.notMultipartError);
+              break;
+
+            default:
+              domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.generalError);
+              break;
+        }
+
+      }
+    },
+
+    _startExplode: function () {
+      var explodePopup, param;
+      param = {
+          map: this.map,
+          nls: this.nls,
+          config: this.config,
+          features: this.updateFeatures,
+          currentFeature: this.currentFeature
+      };
+
+      explodePopup = new ExplodeFeaturesPopup(param);
+      explodePopup.startup();
+
+      explodePopup.onOkClick = lang.hitch(this, function() {
+        this._explodeFeatures();
+        explodePopup.popup.close();
+      });
+    },
+
+    _explodeFeatures: function () {
+
+        // Check for multipart geometry
+        var feature = null, process = '', geometry = null, newFeatures = [];
+        feature = this.currentFeature;
+        switch (feature.geometry.type) {
+            case 'polyline':
+                if (feature.geometry.paths.length > 0)
+                    process = 'paths';
+                break;
+
+            case 'polygon':
+                if (feature.geometry.rings.length > 0)
+                    process = 'rings';
+                break;
+
+            default:
+                break;
+        }
+
+        if (process !== '') {
+            geometry = feature.geometry;
+            for(var p=0,pl = geometry[process].length;p<pl;p++) {
+                var newFeature = new Graphic(feature.toJson());
+                var newGeometry = null;
+
+                switch(process) {
+                    case 'rings':
+                        newGeometry = new Polygon({ 
+                            "rings":[
+                                JSON.parse(JSON.stringify(geometry[process][p]))
+                            ],
+                            "spatialReference": geometry.spatialReference.toJson()
+                        });
+                        break;
+
+                    case 'paths':
+                        newGeometry = new Polyline({ 
+                            "paths":[
+                                JSON.parse(JSON.stringify(geometry[process][p]))
+                            ],
+                            "spatialReference": geometry.spatialReference.toJson()
+                        });
+                        break;
+                }
+                newFeature.setGeometry(newGeometry);
+                newFeatures.push(newFeature); 
+            }
+        } else {
+            newFeatures.push(feature);
+        }
+
+        // Apply the changes
+        var layer = this.currentFeature.getLayer();
+        layer.applyEdits(newFeatures, null, [feature],
+          lang.hitch(this, function (adds, updates, deletes) {
+            if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+              Message({
+                message: adds[0].error.toString()
+              });
+            }
+            if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+              Message({
+                message: deletes[0].error.toString()
+              });
+            }
+
+            // Return to templates 
+            this._showTemplate(true);
+
+          }), lang.hitch(this, function (err) {
+            Message({
+              message: err.message.toString() + "\n" + err.details
+            });
+          }));
+      },
 
 
     /* END: Ecan Changes */

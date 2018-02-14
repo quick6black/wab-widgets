@@ -18,10 +18,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 // jscs:disable validateIndentation
 
-define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil',
+define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil',
 
 /* ECAN ADDITION REQUIRES */
-'esri/urlUtils', 'esri/geometry/geometryEngine', 'dojo/dom-attr', './components/operationLink', './components/copyFeaturesPopup', './components/mergeFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, geometryEngine, domAttr, OperationLink, CopyFeaturesPopup, MergeFeaturesPopup) {
+'esri/urlUtils', 'esri/geometry/geometryEngine', 'dojo/dom-attr', './components/operationLink', './components/copyFeaturesPopup', './components/mergeFeaturesPopup', './components/explodeFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, geometryEngine, domAttr, OperationLink, CopyFeaturesPopup, MergeFeaturesPopup, ExplodeFeaturesPopup) {
   var _declare;
 
   return declare([BaseWidget, _WidgetsInTemplateMixin], (_declare = {
@@ -3046,6 +3046,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         return;
       }
 
+      // Prepare merge tool
+      this._createMergeTool();
+
+      // Prepare explode tool
+      this._createExplodeTool();
+    },
+    _createMergeTool: function _createMergeTool() {
       // Merge Button - verify multple features selected from a single dataset
       var selLayers = [];
       array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
@@ -3076,6 +3083,42 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._setMergeHandler(true);
       }
     },
+
+    _createExplodeTool: function _createExplodeTool() {
+      // Check geometry is line or polygon
+      if (this.currentFeature.geometry.type === 'Point') {
+        // Disable the explode tool and show unsupported geometry error message value
+        this._setExplodeHandler(false, "unsupported geometry");
+        return;
+      }
+
+      // Check for multipart geometry
+      var feature = null,
+          process = '',
+          geometry = null,
+          newFeatures = [];
+      feature = this.currentFeature;
+      switch (feature.geometry.type) {
+        case 'polyline':
+          if (feature.geometry.paths.length > 0) process = 'paths';
+          break;
+
+        case 'polygon':
+          if (feature.geometry.rings.length > 0) process = 'rings';
+          break;
+
+        default:
+          break;
+      }
+
+      if (feature.geometry[process].length === 1) {
+        // Disable the explode tool and show not multipart error message value
+        this._setExplodeHandler(false, "not multipart");
+      } else {
+        this._setExplodeHandler(true);
+      }
+    },
+
     _createSmartAttributes: function _createSmartAttributes() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
         return;
@@ -3196,6 +3239,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }), 2);
       }
     },
+
     _validateFeatureChanged: function _validateFeatureChanged() {
 
       if (this.currentFeature) {
@@ -3910,7 +3954,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
     }
   }), _defineProperty(_declare, '_startMerge', function _startMerge() {
-
     var mergePopup, param;
     param = {
       map: this.map,
@@ -3956,6 +3999,132 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
 
       this.load_from_featureaction(layer, newFeature);
+    }), lang.hitch(this, function (err) {
+      Message({
+        message: err.message.toString() + "\n" + err.details
+      });
+    }));
+  }), _defineProperty(_declare, '_setExplodeHandler', function _setExplodeHandler(create, error) {
+    if (create) {
+      // Remove disable button style
+      if (domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+        domClass.remove(this.featureExplodeBtnNode, "jimu-state-disabled");
+      }
+
+      domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeToolTitle);
+
+      // Apply the click event
+      if (!this._explodeClick) {
+        this._explodeClick = on(this.featureExplodeBtnNode, "click", lang.hitch(this, this._startExplode));
+      }
+    } else {
+      // Apply disable button style
+      if (!domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+        domClass.add(this.featureExplodeBtnNode, "jimu-state-disabled");
+      }
+
+      // Deactiviate the click event
+      if (this._explodeClick) {
+        this._explodeClick.remove();
+        this._explodeClick = null;
+      }
+
+      switch (error) {
+        case "unsupported geometry":
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
+          break;
+
+        case "not multipart":
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.notMultipartError);
+          break;
+
+        default:
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.generalError);
+          break;
+      }
+    }
+  }), _defineProperty(_declare, '_startExplode', function _startExplode() {
+    var explodePopup, param;
+    param = {
+      map: this.map,
+      nls: this.nls,
+      config: this.config,
+      features: this.updateFeatures,
+      currentFeature: this.currentFeature
+    };
+
+    explodePopup = new ExplodeFeaturesPopup(param);
+    explodePopup.startup();
+
+    explodePopup.onOkClick = lang.hitch(this, function () {
+      this._explodeFeatures();
+      explodePopup.popup.close();
+    });
+  }), _defineProperty(_declare, '_explodeFeatures', function _explodeFeatures() {
+
+    // Check for multipart geometry
+    var feature = null,
+        process = '',
+        geometry = null,
+        newFeatures = [];
+    feature = this.currentFeature;
+    switch (feature.geometry.type) {
+      case 'polyline':
+        if (feature.geometry.paths.length > 0) process = 'paths';
+        break;
+
+      case 'polygon':
+        if (feature.geometry.rings.length > 0) process = 'rings';
+        break;
+
+      default:
+        break;
+    }
+
+    if (process !== '') {
+      geometry = feature.geometry;
+      for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+        var newFeature = new Graphic(feature.toJson());
+        var newGeometry = null;
+
+        switch (process) {
+          case 'rings':
+            newGeometry = new Polygon({
+              "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
+              "spatialReference": geometry.spatialReference.toJson()
+            });
+            break;
+
+          case 'paths':
+            newGeometry = new Polyline({
+              "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
+              "spatialReference": geometry.spatialReference.toJson()
+            });
+            break;
+        }
+        newFeature.setGeometry(newGeometry);
+        newFeatures.push(newFeature);
+      }
+    } else {
+      newFeatures.push(feature);
+    }
+
+    // Apply the changes
+    var layer = this.currentFeature.getLayer();
+    layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
+      if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+        Message({
+          message: adds[0].error.toString()
+        });
+      }
+      if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+        Message({
+          message: deletes[0].error.toString()
+        });
+      }
+
+      // Return to templates 
+      this._showTemplate(true);
     }), lang.hitch(this, function (err) {
       Message({
         message: err.message.toString() + "\n" + err.details

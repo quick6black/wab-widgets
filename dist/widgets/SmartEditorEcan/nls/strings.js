@@ -42,6 +42,12 @@ define({
       titleLabel: "Merge Selected Features"
     },
 
+    explodeFeaturesPopup: {
+      ok: "OK",
+      cancel: "Cancel",
+      titleLabel: "Explode Selected Feature"
+    },
+
     tools: {
       mergeFeatures: "Merge",
       mergeToolTitle: "Merge Multiple Features",
@@ -54,6 +60,8 @@ define({
       explodeMultipartFeatures: "Explode",
       explodeToolTitle: "Explode Multipart Feature",
       explodeErrors: {
+        unsupportedGeometryError: "Exploding is only available on line and polygon features.",
+        notMultipartError: "The current feature does not have multipart geometry.",
         generalError: "The explode tool is disbaled."
       }
     },
