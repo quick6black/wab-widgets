@@ -63,7 +63,15 @@ define({
         unsupportedGeometryError: "Exploding is only available on line and polygon features.",
         notMultipartError: "The current feature does not have multipart geometry.",
         generalError: "The explode tool is disbaled."
-      }
+      },
+      cutFeatures: "Cut",
+      cutToolTitle: "Cut Feature into Parts",
+      cutErrors: {
+        invalidCutGeometryError: "There was a problem with the shape drawn to cut the selected feature.",
+        noFeaturesCutError: "The shape drawn did not intersect the selected feature.",
+        unsupportedGeometryError: "Cut is only available on line and polygon features.",
+        generalError: "The cut tool is disabled."
+      },
     },
 
     _featureAction_Copy: "Copy to Edit Layer"

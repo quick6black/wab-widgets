@@ -212,6 +212,7 @@ define([
       //  }
       //}),
       _copyExistingValues: false,
+      _drawToolEditMode: false,
     postCreate: function() {
       this.inherited(arguments);
       console.log('SmartEditorEcan::postCreate');
@@ -281,7 +282,17 @@ define([
         // draw event
         this.own(on(this.drawToolbar, "draw-end", lang.hitch(this, function (evt) {
           this.drawToolbar.deactivate();
-          this._addGraphicToLocalLayer(evt);
+
+          /* BEGIN: Ecan Changes - Handle edit tools using the draw tool i.e. cut, reshape */
+
+          if (this._drawToolEditMode) {
+            this._actionEditTool(evt);
+          } else {
+            this._addGraphicToLocalLayer(evt);
+          }
+
+          /* END: Ecan Changes */
+
         })));
 
 
@@ -1279,6 +1290,12 @@ define([
       },
 
       _activateTemplateToolbar: function (override) {
+
+        /* BEGIN: Ecan Changes - Handling draw tool use by edit tools for cut, reshape */
+
+        this._drawToolEditMode = false;
+
+        /* END: Ecan Changes */
 
         var draw_type = override || null;
         var shape_type = null;
@@ -3405,6 +3422,7 @@ define([
         this._attributeInspectorTools = new attributeInspectorTools(attributeInspectorToolsParams);
 
       },
+
       _createFeatureEditTools: function() {
         if (this.currentFeature === undefined || this.currentFeature === null) {
           return;
@@ -3415,7 +3433,11 @@ define([
 
         // Prepare explode tool
         this._createExplodeTool();
+
+        // Prepare cut tool
+        this._createCutTool();
       },
+
       _createMergeTool: function () {
         // Merge Button - verify multple features selected from a single dataset
         var selLayers = [];
@@ -3479,6 +3501,16 @@ define([
           this._setExplodeHandler(false,"not multipart");          
         } else {
           this._setExplodeHandler(true);
+        }
+      },
+
+      _createCutTool: function () {
+        // Check geometry is line or polygon
+        if (this.currentFeature.geometry.type === 'Point') {
+          // Disable the explode tool and show unsupported geometry error message value
+          this._setCutHandler(false,"unsupported geometry");
+        } else {
+          this._setCutHandler(true);
         }
       },
 
@@ -3743,7 +3775,6 @@ define([
             layerObject = this.getLayerObjectFromMapByUrl(this.map, layerInfo.featureLayer.url);
             if (layerObject) {
               layerInfo.featureLayer.id = layerObject.id;
-
             }
           }
           else {
@@ -4523,7 +4554,6 @@ define([
     },
 
     _explodeFeatures: function () {
-
         // Check for multipart geometry
         var feature = null, process = '', geometry = null, newFeatures = [];
         feature = this.currentFeature;
@@ -4597,8 +4627,173 @@ define([
               message: err.message.toString() + "\n" + err.details
             });
           }));
-      },
+    },
 
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Edit DrawTools */
+
+    _applyEditToolButtonStyle: function (tool, active) {
+      // Update cut tool state
+      if (tool !== 'CUT' || (tool === 'CUT' && !active)) {
+        if (domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+          domClass.remove(this.featureCutBtnNode, "btn-toggle");
+        }
+      } else {
+        if (!domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+          domClass.add(this.featureCutBtnNode, "btn-toggle");
+        }        
+      }
+    },
+
+    _actionEditTool: function (evt) {
+      switch (this._drawToolEditType) {
+        case 'CUT':
+          this._cutFeatures(evt);
+          break;
+        default:
+          alert('_actionEditTool: Not finished');
+          break;
+      }
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Cut Tool */
+
+    _setCutHandler: function (create, error) {
+      if (create) {
+          // Remove disable button style
+          if (domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+            domClass.remove(this.featureCutBtnNode, "jimu-state-disabled");
+          }
+
+          domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutToolTitle);
+
+          // Apply the click event
+          if (!this._cutClick) {
+            this._cutClick = on(this.featureCutBtnNode, "click", lang.hitch(this, this._setCutMode));
+          }
+
+
+      } else {
+          // Apply disable button style
+          if (!domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+            domClass.add(this.featureCutBtnNode, "jimu-state-disabled");
+          }
+
+          // Deactiviate the click event
+          if (this._cutClick) {
+            this._cutClick.remove();
+            this._cutClick = null;
+          }
+
+          switch (error) {
+            case "unsupported geometry":
+              domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.unsupportedGeometryError);
+              break;
+
+
+            default:
+              domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.generalError);
+              break;
+        }
+
+      }
+    },
+
+    _setCutMode: function (reset) {
+      if(reset === true|| this._drawToolEditMode && this._drawToolEditType && this._drawToolEditType === 'CUT') {
+          // Deactivate the cut tool
+          this._drawToolEditMode = false;
+          this._drawToolEditType = null;
+          this.drawToolbar.deactivate();     
+
+          this.map.setInfoWindowOnClick(true);
+
+          // Remove active style on button
+          this._applyEditToolButtonStyle('CUT', false);
+
+      } else {
+
+        // Check if another edit tool is active
+        if (this._drawToolEditType !== 'CUT') {
+          // disable this tool
+        }
+
+        // Activate the draw tool to define the cut line
+        this._drawToolEditType = 'CUT';
+        this._drawToolEditMode = true;
+        this.drawToolbar.activate(Draw.POLYLINE, null);  
+
+        this.map.setInfoWindowOnClick(false);
+
+        // Remove active style on button
+        this._applyEditToolButtonStyle('CUT', true);
+      }
+    },
+
+    _cutFeatures: function (evt) {
+      // Check for line feature
+      if (this.currentFeature && evt && evt.geometry) {
+        var cutLine = evt.geometry;
+
+        // Reset the cut tool
+        this._setCutMode(true);
+
+        if (cutLine.type !== 'polyline') {
+             Message({
+                message: this.nls.tools.cutErrors.invalidCutGeometryError
+              });
+
+          // stop here and reset tool
+          return;
+        }
+
+        var feature = this.currentFeature;
+        var newShapes = geometryEngine.cut(feature.geometry, cutLine);
+
+        if (newShapes.length === 0) {
+             Message({
+                message: this.nls.tools.cutErrors.noFeaturesCutError
+              });
+
+        } else {
+          // Create new records based on the original and remove the original record
+          var newFeatures = [], newGeometry = null;
+          for(var p=0,pl = newShapes.length;p<pl;p++) {
+              var newFeature = new Graphic(feature.toJson());
+              newGeometry = newShapes[p];
+              newFeature.setGeometry(newGeometry);
+              newFeatures.push(newFeature); 
+          }
+
+          var layer = feature.getLayer();
+          layer.applyEdits(newFeatures, null, [feature],
+            lang.hitch(this, function (adds, updates, deletes) {
+              if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+                Message({
+                  message: adds[0].error.toString()
+                });
+              }
+              if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+                Message({
+                  message: deletes[0].error.toString()
+                });
+              }
+
+              // Return to templates 
+              this._showTemplate(true);
+
+            }), lang.hitch(this, function (err) {
+              Message({
+                message: err.message.toString() + "\n" + err.details
+              });
+            }));
+
+        }
+      }
+    },
 
     /* END: Ecan Changes */
 
