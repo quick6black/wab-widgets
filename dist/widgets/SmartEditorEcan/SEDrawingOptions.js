@@ -22,7 +22,22 @@ define(["esri/toolbars/draw"], function (Draw) {
     select: [{
       id: "seNewSelection",
       iconClass: "seToolbarIcon seNewSelectionIcon",
-      label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl
+      label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_pointLbl
+    }, {
+      id: "seNewSelectionRect",
+      iconClass: "seToolbarIcon seRectangleIcon",
+      _drawType: Draw.RECTANGLE,
+      label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_rectangleLbl
+    }, {
+      id: "seNewSelectionPolygon",
+      iconClass: "seToolbarIcon sePolygonIcon",
+      _drawType: Draw.POLYGON,
+      label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_polygonLbl
+    }, {
+      id: "seNewSelectionPolyline",
+      iconClass: "seToolbarIcon sePolylineIcon",
+      _drawType: Draw.POLYLINE,
+      label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_polylineLbl
     }],
     esriGeometryPoint: [{
       id: "sePointTool",

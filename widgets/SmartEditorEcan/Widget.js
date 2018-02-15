@@ -288,8 +288,14 @@ define([
           if (this._drawToolEditMode) {
             this._actionEditTool(evt);
           } else {
-            this._addGraphicToLocalLayer(evt);
-          }
+            if (this.templatePicker !== undefined && this.templatePicker !== null && this.templatePicker.getSelected() === null) {
+              // In select mode - use as select geometry
+              this._processOnMapClick(evt);
+            } else {
+              // In create featuyre mode - process to layers
+              this._addGraphicToLocalLayer(evt);
+            }
+        }
 
           /* END: Ecan Changes */
 
@@ -480,8 +486,6 @@ define([
         //}
 
       },
-
-
 
       onReceiveData: function (name, widgetId, data, historyData) {
         if (this.config.editor) {
@@ -1425,6 +1429,13 @@ define([
       _drawingToolClick: function (shapeType, options) {
         return function () {
           if (shapeType !== "select") {
+            /* BEGIN: Ecan Change - Check for a select method so we can disable the map info popup */
+            if (options.label.indexOf(window.apiNls.widgets.editor.tools.NLS_selectionNewLbl) >= 0) {
+              this._mapClickHandler(false);
+              this.map.setInfoWindowOnClick(false);              
+            }
+            /* END: ECan Change  */
+
             this.drawingTool.set('label', options.label);
             this.drawingTool.set('iconClass', options.iconClass);
             this.drawToolbar.activate(options._drawType);
@@ -2860,7 +2871,17 @@ define([
           // set selection symbol
           layer.setSelectionSymbol(this._getSelectionSymbol(layer.geometryType, false));
           var selectQuery = new Query();
-          selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+
+          /* BEGIN: Ecan Change - Altered to support polyline and polygon inputs rather than assuming just the map point */
+
+          if (evt.mapPoint) {
+            selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+          } else {
+            selectQuery.geometry = evt.geometry;
+          }
+
+          /* END: Ecan Change */
+
           var deferred = layer.selectFeatures(selectQuery,
             FeatureLayer.SELECTION_NEW,
             lang.hitch(this, function (features) {
@@ -3455,7 +3476,7 @@ define([
         } 
 
         // Check geometry is line or polygon
-        if (this.currentFeature.geometry.type === 'Point') {
+        if (this.currentFeature.geometry.type === 'point') {
           // Disable the merge tool and show unsupported geometry error message value
           this._setMergeHandler(false,"unsupported geometry");
           return;
@@ -3472,7 +3493,7 @@ define([
 
       _createExplodeTool: function () {
         // Check geometry is line or polygon
-        if (this.currentFeature.geometry.type === 'Point') {
+        if (this.currentFeature.geometry.type === 'point') {
           // Disable the explode tool and show unsupported geometry error message value
           this._setExplodeHandler(false,"unsupported geometry");
           return;
@@ -3506,7 +3527,7 @@ define([
 
       _createCutTool: function () {
         // Check geometry is line or polygon
-        if (this.currentFeature.geometry.type === 'Point') {
+        if (this.currentFeature.geometry.type === 'point') {
           // Disable the explode tool and show unsupported geometry error message value
           this._setCutHandler(false,"unsupported geometry");
         } else {
@@ -3540,10 +3561,9 @@ define([
           _fieldInfo: this.currentLayerInfo.fieldInfos
         };
         this._smartAttributes = new smartAttributes(smartAttParams);
-
       },
-      _showTemplatePicker: function () {
 
+      _showTemplatePicker: function () {
         // hide the attr inspector and show the main template picker div
         query(".jimu-widget-smartEditor-ecan .attributeInspectorMainDiv")[0].style.display = "none";
         query(".jimu-widget-smartEditor-ecan .templatePickerMainDiv")[0].style.display = "block";
@@ -3611,15 +3631,18 @@ define([
           }
         }
       },
+
       _setPresetValue: function () {
         var sw = registry.byId("savePresetValueSwitch");
         this._usePresetValues = sw.checked;
       },
+
       _toggleUsePresetValues: function (checked) {
         var sw = registry.byId("savePresetValueSwitch");
         sw.set('checked', checked === null ? !sw.checked : checked);
         this._usePresetValues = sw.checked;
       },
+
       _turnEditGeometryToggleOff: function () {
 
         if (this._editGeomSwitch && this._editGeomSwitch.checked) {
@@ -3660,6 +3683,7 @@ define([
         }
         return true;
       },
+
       // todo: modify to feature as input parameter?
       _validateRequiredFields: function () {
         var errorObj = {};
@@ -3709,7 +3733,6 @@ define([
       },
 
       _workBeforeCreate: function () {
-
         // change string of mouse tooltip
         var additionStr = "<br/>" + "(" + this.nls.pressStr + "<b>" +
           this.nls.ctrlStr + "</b> " + this.nls.snapStr + ")";
@@ -3878,6 +3901,7 @@ define([
         }
         return foundInfo;
       },
+
       getConfigDefaults: function () {
         if (this.config.editor.hasOwnProperty("editGeometryDefault") &&
           this.config.editor.editGeometryDefault === true) {
@@ -3917,6 +3941,7 @@ define([
           }
         }, this);
       },
+
       onClose: function () {
         this._worksAfterClose();
 
@@ -3945,6 +3970,7 @@ define([
         // close method will call onDeActive automaticlly
         // so do not need to call onDeActive();
       },
+      
       _update: function () {
         //if (this.templatePicker) {
         //comments out, this results in teh scroll bar disappearing, unsure why
