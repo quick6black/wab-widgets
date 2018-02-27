@@ -33,6 +33,11 @@ define(["dojo/_base/declare",
       curated3Filter: null,
       curated4Filter: null,
       curated5Filter: null,
+      curated6Filter: null,
+      curated7Filter: null,
+      curated8Filter: null,
+      curated9Filter: null,
+      curated10Filter: null,
 
       postCreate: function() {
         this.inherited(arguments);
@@ -62,6 +67,11 @@ define(["dojo/_base/declare",
         this.curated3Filter = options.Curated3.filter;
         this.curated4Filter = options.Curated4.filter;
         this.curated5Filter = options.Curated5.filter;
+        this.curated6Filter = options.Curated6.filter;
+        this.curated7Filter = options.Curated7.filter;
+        this.curated8Filter = options.Curated8.filter;
+        this.curated9Filter = options.Curated9.filter;
+        this.curated10Filter = options.Curated10.filter;
         var activeNode = null;
 
         var initOption = function(name, node) {
@@ -89,6 +99,11 @@ define(["dojo/_base/declare",
         initOption("Curated3", this.Curated3Toggle);
         initOption("Curated4", this.Curated4Toggle);
         initOption("Curated5", this.Curated5Toggle);
+        initOption("Curated6", this.Curated6Toggle);
+        initOption("Curated7", this.Curated7Toggle);
+        initOption("Curated8", this.Curated8Toggle);
+        initOption("Curated9", this.Curated9Toggle);
+        initOption("Curated10", this.Curated10Toggle);
         initOption("ArcGISOnline", this.ArcGISOnlineToggle);
 
         if (!activeNode) {
@@ -106,6 +121,16 @@ define(["dojo/_base/declare",
               activeNode = this.Curated4Toggle;
           } else if (options.Curated5.allow) {
               activeNode = this.Curated5Toggle;
+          } else if (options.Curated6.allow) {
+              activeNode = this.Curated6Toggle;
+          } else if (options.Curated7.allow) {
+              activeNode = this.Curated7Toggle;
+          } else if (options.Curated8.allow) {
+              activeNode = this.Curated8Toggle;
+          } else if (options.Curated9.allow) {
+              activeNode = this.Curated9Toggle;
+          } else if (options.Curated10.allow) {
+              activeNode = this.Curated10Toggle;
           } else if (options.MyContent.allow) {
             activeNode = this.MyContentToggle;
           }
@@ -166,6 +191,11 @@ define(["dojo/_base/declare",
         var curated3Filter = this.curated3Filter;
         var curated4Filter = this.curated4Filter;
         var curated5Filter = this.curated5Filter;
+        var curated6Filter = this.curated6Filter;
+        var curated7Filter = this.curated7Filter;
+        var curated8Filter = this.curated8Filter;
+        var curated9Filter = this.curated9Filter;
+        var curated10Filter = this.curated10Filter;
         var context = this.searchPane.searchContext;
         var username = context.username;
         var orgId = context.orgId;
@@ -207,6 +237,31 @@ define(["dojo/_base/declare",
         } else if (scope === "Curated5") {
             if (typeof curated5Filter === "string" && curated5Filter.length > 0) {
                 q = curated5Filter;
+            }
+
+        } else if (scope === "Curated6") {
+            if (typeof curated6Filter === "string" && curated5Filter.length > 0) {
+                q = curated6Filter;
+            }        
+
+        } else if (scope === "Curated7") {
+            if (typeof curated7Filter === "string" && curated5Filter.length > 0) {
+                q = curated7Filter;
+            }        
+
+        } else if (scope === "Curated8") {
+            if (typeof curated8Filter === "string" && curated5Filter.length > 0) {
+                q = curated8Filter;
+            }        
+
+        } else if (scope === "Curated9") {
+            if (typeof curated9Filter === "string" && curated5Filter.length > 0) {
+                q = curated9Filter;
+            }        
+
+        } else if (scope === "Curated10") {
+            if (typeof curated10Filter === "string" && curated5Filter.length > 0) {
+                q = curated10Filter;
             }
 
         } else if (scope === "ArcGISOnline") {

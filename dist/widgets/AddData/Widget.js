@@ -83,7 +83,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
         if (typeof opt.allow !== "boolean") {
           opt.allow = true;
         }
-        if (name === "Curated1" || name === "Curated2" || name === "Curated3" || name === "Curated4" || name === "Curated5") {
+
+        var curatedNames = ["Curated1", "Curated2", "Curated3", "Curated4", "Curated5", "Curated6", "Curated7", "Curated8", "Curated9", "Curated10"];
+
+        if (curatedNames.indexOf(name) >= 0) {
           if (typeof opt.filter !== "string" || lang.trim(opt.filter).length === 0) {
             opt.allow = false;
           }
@@ -101,6 +104,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
       initOption(options, "Curated3");
       initOption(options, "Curated4");
       initOption(options, "Curated5");
+      initOption(options, "Curated6");
+      initOption(options, "Curated7");
+      initOption(options, "Curated8");
+      initOption(options, "Curated9");
+      initOption(options, "Curated10");
       initOption(options, "ArcGISOnline");
       initOption(config, "addFromUrl");
       initOption(config, "addFromFile");
@@ -288,6 +296,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
       chkAllowSearch("Curated3");
       chkAllowSearch("Curated4");
       chkAllowSearch("Curated5");
+      chkAllowSearch("Curated6");
+      chkAllowSearch("Curated7");
+      chkAllowSearch("Curated8");
+      chkAllowSearch("Curated9");
+      chkAllowSearch("Curated10");
       chkAllowSearch("ArcGISOnline");
 
       if (allowSearch) {
