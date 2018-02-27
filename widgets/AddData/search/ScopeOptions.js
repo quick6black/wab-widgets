@@ -240,27 +240,27 @@ define(["dojo/_base/declare",
             }
 
         } else if (scope === "Curated6") {
-            if (typeof curated6Filter === "string" && curated5Filter.length > 0) {
+            if (typeof curated6Filter === "string" && curated6Filter.length > 0) {
                 q = curated6Filter;
             }        
 
         } else if (scope === "Curated7") {
-            if (typeof curated7Filter === "string" && curated5Filter.length > 0) {
+            if (typeof curated7Filter === "string" && curated7Filter.length > 0) {
                 q = curated7Filter;
             }        
 
         } else if (scope === "Curated8") {
-            if (typeof curated8Filter === "string" && curated5Filter.length > 0) {
+            if (typeof curated8Filter === "string" && curated8Filter.length > 0) {
                 q = curated8Filter;
             }        
 
         } else if (scope === "Curated9") {
-            if (typeof curated9Filter === "string" && curated5Filter.length > 0) {
+            if (typeof curated9Filter === "string" && curated9Filter.length > 0) {
                 q = curated9Filter;
             }        
 
         } else if (scope === "Curated10") {
-            if (typeof curated10Filter === "string" && curated5Filter.length > 0) {
+            if (typeof curated10Filter === "string" && curated10Filter.length > 0) {
                 q = curated10Filter;
             }
 
