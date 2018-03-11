@@ -1,4 +1,10 @@
 .jimu-widget-edraw-ecan {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
     font-size: 14px;
     height: 100%;
     min-height: 192px;
@@ -16,6 +22,7 @@
         font-style: italic;
     }
 
+    .save-section,
     .measure-section {
         margin-top: 12px;
         width: 100%;
@@ -24,13 +31,15 @@
         padding-bottom: 10px;
     }
 
-    .area-units-tip {
-        height: 30px;
-        line-height: 30px;
-        padding-left: 17px;
+    .save-section {
+        .jimu-input {
+            padding: 0;
+        }
     }
 
-    .distance-units-tip {
+    .area-units-tip,
+    .distance-units-tip,
+    .drawing-name-tip {
         height: 30px;
         line-height: 30px;
         padding-left: 17px;
@@ -62,9 +71,8 @@
     }
 
     .menu {
-        border-bottom: 2px solid rgb(72, 85, 102);
+        border-bottom: 1px solid #ccc;
         height: 36px;
-        margin-bottom: 10px;
         width: 100%;
     }
 
@@ -112,36 +120,46 @@
         display: none;
     }
 
-    .draw-table tr {
-        border: 1px solid white;
-        cursor: move;
+    .draw-items {
+        .draw-item {
+            cursor: pointer;
+        }
     }
 
-    .draw-table th {
-        background-color: #8d989e;
-        font-weight: bold;
-        text-align: center;
-        cursor: auto;
-    }
+    .draw-table {
+        tr {
+            /*border: 1px solid white;*/
+            /*cursor: move;*/
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-color: #cccccc;
+        }
 
-    .draw-table tr:hover th {
-        background-color: #8d989e;
-    }
+        th {
+            font-weight: bold;
+            background-color: #f8f8f8;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            font-size: 11px;
+            text-align: center;
+            cursor: auto;
+        }
 
-    .draw-table .td-center {
-        text-align: center;
-    }
+        .td-center {
+            text-align: center;
+        }
 
-    .draw-table .td-checkbox {
-        width: 30px;
-    }
+        .td-checkbox {
+            width: 30px;
+        }
 
-    .draw-table .selected td {
-        background-color: rgba(15, 108, 159, 0.2);
-    }
+        .selected td {
+            background-color: rgba(15, 108, 159, 0.2);
+        }
 
-    .draw-table .selected:hover td {
-        background-color: rgba(15, 108, 159, 0.3);
+        .selected:hover td {
+            background-color: rgba(15, 108, 159, 0.3);
+        }
     }
 
     .list-draw-actions {
@@ -150,11 +168,18 @@
         width: 192px;
     }
 
+    .edit-draw-actions {
+        vertical-align: middle;
+        width: 100%;
+    }
+
     .light {
         width: 120px !important;
     }
 
+    .edit-draw-actions span,
     .list-draw-actions span {
+        cursor: pointer;
         border-radius: 5px;
         color: white;
         display: block;
@@ -169,6 +194,7 @@
         width: 30px;
     }
 
+    .edit-draw-actions span.text,
     .list-draw-actions span.text {
         background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
         color: black;
@@ -211,6 +237,14 @@
         background-image: url("images/down.png");
     }
 
+    .edit-draw-actions span.cut {
+        background-image: url("images/cut.png");
+    }
+
+    .edit-draw-actions span.reshape {
+        background-image: url("images/reshape.png");
+    }
+
     .list-draw-actions span.export {
         background-image: url("images/download.png");
     }
@@ -225,6 +259,18 @@
 
     .list-draw-actions span.open {
         background-image: url("images/open.png");
+    }
+
+    .list-draw-actions span.merge {
+        background-image: url("images/merge.png");
+    }
+
+    .list-draw-actions span.explode {
+        background-image: url("images/explode.png");
+    }
+
+    .list-draw-actions span.buffer {
+        background-image: url("images/buffer.png");
     }
 
     .list-draw-actions span:hover {
@@ -262,8 +308,13 @@
     }
 
     h2 {
-        margin-bottom: 0;
-        margin-top: 2px;
+        margin: 0;
+        padding: 7px 15px;
+        border-bottom: 1px solid #ccc;
+        color: #898989;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 2;
     }
 
     .draw-import {
@@ -320,23 +371,24 @@
     }
 
     .content {
-        background-color: rgba(78, 130, 138, 0.1);
-        height: calc(100% - 100px);
+        /*background-color: rgba(78, 130, 138, 0.1);*/
+        height: calc(100% - 120px);
         overflow-x: hidden;
         overflow-y: auto;
         position: absolute;
         width: calc(100%);
     }
 
-    .bloc {
-        background-color: rgba(78, 130, 138, 0.1);
-    }
-
     .content hr {
         color: rgba(78, 130, 138, 0.6);
     }
 
+    .bloc {
+        padding: 10px;
+    }
+
     .footer {
+        border-top: 1px solid #ccc;
         bottom: 0;
         position: absolute;
         width: 100%;
@@ -533,6 +585,97 @@
         text-align: right;
         padding-top: 10px;
     }
+
+    .item-card {
+        .thumbnail {
+            float: left;
+            margin-right: 10px;
+
+            img {
+                height: 60px;
+                width: 90px;
+            }
+        }
+
+        h3.title {
+            /*min-height: 35px;*/
+            margin: 0 5px;
+            padding: 0;
+            font-size: 12px;
+            font-weight: bold;
+            color: #4c4c4c;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        div.info {
+            color: #898989;
+            font-size: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            padding-top: 3px;
+        }
+
+        .action-bar {
+            text-align: right;
+
+            a {
+                display: inline-block;
+                font-size: 11px;
+                text-transform: uppercase;
+                padding: 5px;
+                margin-right: 5px;
+                color: #196fa6;
+                text-decoration: none;
+                line-height: 20px;
+                padding: 0px 5px 5px 5px;
+            }
+        }
+
+        .item-card-inner {
+            margin-bottom: 0;
+            height: 75px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-bottom-color: #cccccc;
+            padding: 5px;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+    }
+
+    .action-bar {
+        text-align: right;
+    }
+
+    .section-footer {
+        padding-left: 10px;
+        padding-right: 10px;
+        background-color: #f8f8f8;
+
+        a {
+            display: inline-block;
+            color: #196fa6;
+            text-decoration: none;
+            line-height: 20px;
+            padding: 10px 5px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .back-button {
+            float: right;
+        }
+    }
+
+    .text-area {
+        font-family: inherit;
+        font-size: 14px;
+        color: #000000;
+        padding: 3px 10px !important;
+    }
 }
 
 .jimu-rtl .jimu-widget-edraw-ecan .area-units-tip {
@@ -586,4 +729,50 @@
 
 .eDraw-import-message:hover .eDraw-import-draganddrop-message {
     display: block;
+}
+
+.edraw-buffer {
+    .dijitTextBox, .dijitSelect {
+        width: 150px;
+    }
+
+    table.buffer-set-table {
+        tr {
+            padding: 3px;
+        }
+    }
+}
+
+.edraw-drawing-details {
+    table.drawing-set-table {
+        width: 100%;
+
+        tr {
+            padding: 3px;
+        }
+
+        td {
+            .label-text {
+                color: #333;
+                font-size: 13px;
+            }
+
+            .input-control {
+                width: 100%;
+                color: #000000;
+            }
+
+            .text-area {
+                font-family: inherit;
+                font-size: 14px;
+                color: #000000;
+                padding: 3px 10px !important;
+            }
+        }
+    }
+}
+
+/* Remove close button from textbox in IE */
+input[type=text]::-ms-clear {
+    display: none;
 }

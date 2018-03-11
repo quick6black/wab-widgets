@@ -1,0 +1,490 @@
+.jimu-widget-sefilterEditor .flDropDown {
+  height: 30px !important;
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 10px; }
+
+.jimu-widget-sefilterEditor .searchtextbox {
+  height: 30px !important;
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 5px; }
+
+.seToolbarIcon {
+  background-image: url(../images/toolbar_icons.png);
+  width: 16px;
+  height: 16px; }
+
+.sePointIcon {
+  background-position: 0px 0px; }
+
+.sePointIconDisabled {
+  background-position: -16px 0px; }
+
+.sePolylineIcon {
+  background-position: -34px 0px; }
+
+.sePolylineIconDisabled {
+  background-position: -50px 0px; }
+
+.sePolygonIcon {
+  background-position: -69px 0px; }
+
+.sePolygonIconDisabled {
+  background-position: -84px 0px; }
+
+.seFreehandPolylineIcon {
+  background-position: -101px 0px; }
+
+.seFreehandPolylineIconDisabled {
+  background-position: -118px 0px; }
+
+.seFreehandPolygonIcon {
+  background-position: -135px 0px; }
+
+.seFreehandPolygonIconDisabled {
+  background-position: -152px 0px; }
+
+.seRectangleIcon {
+  background-position: -339px 0px; }
+
+.seTriangleIcon {
+  background-position: -356px 0px; }
+
+.seEllipseIcon {
+  background-position: -373px 0px; }
+
+.seCircleIcon {
+  background-position: -390px 0px; }
+
+.seArrowIcon {
+  background-position: -407px 0px; }
+
+.seArrowDownIcon {
+  background-position: -424px 0px; }
+
+.seArrowLeftIcon {
+  background-position: -441px 0px; }
+
+.seArrowUpIcon {
+  background-position: -458px 0px; }
+
+.seNewSelectionIcon {
+  background-position: -237px 0px; }
+
+.seAddToSelectionIcon {
+  background-position: -254px 0px; }
+
+.seRemoveFromSelectionIcon {
+  background-position: -271px 0px; }
+
+.seClearSelectionIcon {
+  background-position: -288px 0px; }
+
+/* dropdown */
+.drawingOptionsDiv .dijitDropDownButton {
+  margin: 0;
+  width: 100%;
+  text-align: left; }
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+  background: transparent;
+  border: 1px solid #7EABCD;
+  padding: 4px;
+  margin-top: 2px;
+  font-weight: bold;
+  box-shadow: none;
+  border-radius: 4px;
+  text-align: left;
+  width: 100%; }
+
+.jimu-rtl .drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+  text-align: right; }
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitButtonContents {
+  border-color: transparent; }
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitInputField {
+  padding: 0 5px; }
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitArrowButton {
+  background: transparent;
+  border: 0; }
+
+/*.drawingOptionsDiv .dijitMenuItemLabel {
+    text-align: left;
+}
+
+.jimu-rtl .drawingOptionsDiv .dijitMenuItemLabel {
+    text-align: right;
+}
+
+.drawingOptionsDiv .dijitReset .dijitMenuItemIconCell {
+    text-align: left;
+    width: 20px;
+}
+
+.jimu-rtl .drawingOptionsDiv .dijitReset .dijitMenuItemIconCell {
+    text-align: right;
+    width: 20px;
+}*/
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode.dijitSelectFocused .dijitArrowButton {
+  padding: 0; }
+
+.drawingOptionsDiv .dijitDownArrowButton {
+  position: relative; }
+
+.drawingOptionsDiv .dijitArrowButtonInner {
+  position: absolute;
+  right: 8px;
+  top: 3px;
+  background-image: none; }
+
+.drawingOptionsDiv .dijitArrowButtonInner:after {
+  content: "\e681";
+  font-family: 'CalciteWebCoreIcons' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: bold;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; }
+
+div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
+  width: 20px; }
+
+.processing-indicator-panel {
+  display: none;
+  width: 100%;
+  height: 100%;
+  z-index: 500;
+  top: 0;
+  left: 0;
+  position: absolute;
+  background-position: center center;
+  background-image: url(../images/busy.gif);
+  background-repeat: no-repeat; }
+  .processing-indicator-panel .panel {
+    display: block; }
+
+.jimu-widget-smartEditor-ecan {
+  position: relative;
+  /***********about templatePicker**************/
+  /********about attributeInspector*********/
+  /*********about preset values table*********/ }
+  .jimu-widget-smartEditor-ecan .hideField {
+    display: none; }
+  .jimu-widget-smartEditor-ecan .templatePicker {
+    position: relative;
+    height: 296px; }
+  .jimu-widget-smartEditor-ecan .grid {
+    height: 100% !important; }
+  .jimu-widget-smartEditor-ecan .dojoxGridMasterHeader {
+    height: 0 !important; }
+  .jimu-widget-smartEditor-ecan .dojoxGridContent {
+    width: 100% !important; }
+  .jimu-widget-smartEditor-ecan .dojoxGridContent div[role=presentation] {
+    right: 0; }
+  .jimu-widget-smartEditor-ecan .dojoxGridRowTable {
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .dojoxGridRow {
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .dojoxGridView {
+    width: 100% !important; }
+  .jimu-widget-smartEditor-ecan .esriAttributeInspector {
+    height: 100%;
+    width: 100%; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector td {
+      display: block;
+      clear: both;
+      height: auto;
+      width: 100%;
+      float: left; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .atiNavButtons {
+      position: absolute;
+      left: 50%;
+      margin-left: -90px;
+      top: -10px; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .asteriskIndicator {
+      color: red !important; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .saveButton {
+      float: right;
+      display: inline; }
+      .jimu-widget-smartEditor-ecan .esriAttributeInspector .saveButton .jimu-rtl {
+        float: left;
+        display: inline; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .deleteButton {
+      float: right;
+      margin-right: 20px; }
+      .jimu-widget-smartEditor-ecan .esriAttributeInspector .deleteButton .jimu-rtl {
+        float: left;
+        display: inline; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .atiField {
+      width: 100%; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitTextBox {
+      width: 100% !important; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitTextArea {
+      width: 100% !important;
+      min-height: 70px;
+      resize: vertical;
+      overflow: auto;
+      font-family: inherit;
+      line-height: 20px !important;
+      font-size: 14px; }
+  .jimu-widget-smartEditor-ecan .ee-presetValueTableDiv {
+    height: 100%;
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .ee-presetValueHeaderTable {
+    color: #000000;
+    font-size: 14px;
+    padding: 8px;
+    background-color: #E3E3E3;
+    vertical-align: middle;
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .ee-presetValueBodyTable td {
+    display: block;
+    clear: both;
+    height: auto;
+    width: 100%;
+    float: left; }
+  .jimu-widget-smartEditor-ecan .ee-atiLabel {
+    width: 100%;
+    margin-bottom: 3px; }
+  .jimu-widget-smartEditor-ecan .atiLabel {
+    width: 100%;
+    margin-top: 6px !important;
+    margin-bottom: 3px !important; }
+  .jimu-widget-smartEditor-ecan .ee-presetValueBody {
+    vertical-align: top; }
+  .jimu-widget-smartEditor-ecan .ee-presetValueBodyTable {
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .ee-presetValue-label-header-field,
+  .jimu-widget-smartEditor-ecan .field-alias-label {
+    width: 40%; }
+  .jimu-widget-smartEditor-ecan .ee-presetValue-value-header-field,
+  .jimu-widget-smartEditor-ecan .preset-value-editable {
+    width: 100%;
+    margin-bottom: 6px; }
+  .jimu-widget-smartEditor-ecan .ee-inputField {
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .ee-inputFieldTextArea {
+    width: 100% !important;
+    resize: vertical;
+    overflow: auto;
+    font-family: inherit;
+    line-height: 20px !important;
+    font-size: 14px;
+    min-height: 70px; }
+  .jimu-widget-smartEditor-ecan .ee-inputFieldRichText {
+    width: 100% !important;
+    margin: 5px auto; }
+  .jimu-widget-smartEditor-ecan .spacer {
+    height: 12px; }
+  .jimu-widget-smartEditor-ecan .spacerSmall {
+    height: 8px; }
+  .jimu-widget-smartEditor-ecan .attributeInspectorDiv {
+    padding-top: 8px; }
+  .jimu-widget-smartEditor-ecan div.atiAttributes table {
+    width: 98%; }
+  .jimu-widget-smartEditor-ecan .processing-indicator {
+    display: none;
+    float: right;
+    width: 40px;
+    height: 40px;
+    background-position: center center;
+    background-image: url(../images/busy.gif);
+    background-repeat: no-repeat;
+    z-index: 999; }
+    .jimu-widget-smartEditor-ecan .processing-indicator.busy {
+      display: inline; }
+  .jimu-widget-smartEditor-ecan .processing-indicator-panel {
+    display: none;
+    width: 100%;
+    height: 100%;
+    z-index: 500;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-position: center center;
+    background-image: url(../images/busy.gif);
+    background-repeat: no-repeat; }
+    .jimu-widget-smartEditor-ecan .processing-indicator-panel.busy {
+      display: block; }
+  .jimu-widget-smartEditor-ecan .updateOnlyText {
+    vertical-align: middle;
+    padding: 10px; }
+  .jimu-widget-smartEditor-ecan .attInput {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    display: inline-block; }
+  .jimu-widget-smartEditor-ecan .deleteAttachment {
+    padding-right: 5px;
+    cursor: pointer;
+    color: red !important;
+    font-weight: bold; }
+  .jimu-widget-smartEditor-ecan .atiNavMessage {
+    display: inline-block;
+    float: none; }
+  .jimu-widget-smartEditor-ecan .dijitButtonHover .dijitButtonNode {
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important; }
+  .jimu-widget-smartEditor-ecan .dijitButton {
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important; }
+    .jimu-widget-smartEditor-ecan .dijitButton .dijitButtonNode {
+      background-color: transparent !important;
+      background-image: none !important;
+      border: none !important;
+      -webkit-box-shadow: none !important;
+      -moz-box-shadow: none !important;
+      box-shadow: none !important; }
+  .jimu-widget-smartEditor-ecan .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton {
+    width: 25px !important; }
+  .jimu-widget-smartEditor-ecan .dijitTextBox .dijitInputField {
+    height: 100% !important; }
+  .jimu-widget-smartEditor-ecan .dijitComboBox > div.dijitArrowButton.dijitDownArrowButton > input {
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .attwarning {
+    margin-top: 2px;
+    color: brown; }
+  .jimu-widget-smartEditor-ecan .presetFieldsTableDiv {
+    display: none; }
+  .jimu-widget-smartEditor-ecan .linksBarDiv {
+    height: 30px !important; }
+  .jimu-widget-smartEditor-ecan .links-bar {
+    text-align: right; }
+    .jimu-widget-smartEditor-ecan .links-bar a {
+      display: inline-block;
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 5px;
+      margin-right: 5px;
+      color: #196fa6;
+      text-decoration: none;
+      line-height: 20px;
+      padding: 0px 5px 5px 5px; }
+
+.widgetIndicator {
+  height: 4px;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  overflow: hidden;
+  overflow-x: hidden;
+  /*width: 94%;
+        border-radius: 3px;
+        padding-left: 3px;
+        padding-right: 3px;
+        margin-left: 3%;
+        margin-right: 3%;*/ }
+
+.widgetActive {
+  background: #73AD21; }
+
+.widgetNotActive {
+  background: red; }
+
+/*.jimu-widget-smartEditor .widgetActive {
+        width: 22px;
+        height: 22px;
+        background-position: center center;
+        background-image: url(../images/widgetActive.png);
+        background-repeat: no-repeat;
+        position: absolute;
+        left: 1px;
+        top: 1px;
+    }
+
+    .jimu-widget-smartEditor .widgetNotActive {
+        width: 22px;
+        height: 22px;
+        background-position: center center;
+        background-image: url(../images/widgetNotActive.png);
+        background-repeat: no-repeat;
+        position: absolute;
+        left: 1px;
+        top: 1px;
+    }*/
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden; }
+
+.clearfix {
+  display: inline-block; }
+
+* html .clearfix {
+  height: 1%; }
+
+/* Hides from IE-mac \*/
+.clearfix {
+  display: block; }
+
+.clear:after {
+  clear: both;
+  content: ".";
+  display: block;
+  height: 0;
+  visibility: hidden; }
+
+/*tr td {
+      padding: 20px 40px;
+      border: 1px solid black;
+      display: block;
+    }*/
+.dijitCalendarDateTemplate.dijitCalendarCurrentDate .dijitCalendarDateLabel {
+  color: red;
+  border-color: red; }
+
+/* hover */
+.dijitCalendarDateTemplate.dijitCalendarHoveredDate .dijitCalendarDateLabel,
+.dijitCalendarDateTemplate.dijitCalendarEnabledDate:hover .dijitCalendarDateLabel {
+  background-color: greenyellow; }
+
+/* active 
+
+.dijitCalendarDateTemplate.dijitCalendarActiveDate .dijitCalendarDateLabel,
+.dijitCalendarDateTemplate.dijitCalendarEnabledDate:active .dijitCalendarDateLabel {
+    background-color: darkslategray;
+}
+*/
+/* selected */
+.dijitCalendarDateTemplate.dijitCalendarSelectedDate .dijitCalendarDateLabel,
+.dijitCalendarDateTemplate.dijitCalendarSelectedDate.dijitCalendarHoveredDate .dijitCalendarDateLabel {
+  background-color: cyan; }
+
+.copy-features {
+  font-size: 12px;
+  font-weight: normal;
+  color: #000; }
+  .copy-features > .content > .multipleFeaturesMessage {
+    color: red;
+    font-style: italic;
+    padding-bottom: 10px; }
+  .copy-features > .content > .esriTemplatePicker {
+    width: 100%;
+    height: 290px;
+    overflow-y: scroll; }
+
+.link-btn {
+  margin-left: 8px; }
+
+.btn-toggle {
+  background-color: #73AD21;
+  color: #ffffff;
+  border: 1px solid #cbcbcb; }
+
+/*# sourceMappingURL=style.css.map */

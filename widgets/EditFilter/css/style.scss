@@ -1,0 +1,330 @@
+.jimu-widget-map-filter {
+	width:100%;
+	height:100%;
+
+	.groupContainer {
+		display: block;
+	}
+
+	.container {
+		border-color: #e1e1e1;
+		border-top: 3px solid;
+		width: 100%;
+		height: 60%;
+		position:relative;
+		overflow-y: auto;
+		overflow-x: auto;
+		display: block;
+	}
+
+	.saveContainer {
+		width: 100%;
+		height: 100%;
+		position:absolute;
+		top: 0px;
+		left: 0px;
+		z-index: 999;
+		overflow-y: auto;
+		overflow-x: auto;
+		display: none;
+	}
+
+	.save-block {
+		position: absolute;
+		left: 5px;
+	}
+
+	.close-save {
+		position:relative;
+		float: right;
+		content: url("../images/setting_default.png");
+	    cursor: hand;
+	    cursor: pointer;
+
+	    &:after {
+			position:relative;
+			float: right;
+			content: url("../images/setting_default.png");
+		    cursor: hand;
+		    cursor: pointer;    	
+	    }
+	}
+
+	.headerTable {
+		width: 100%;
+	}
+
+	.groupHeader {
+		font-size: 10pt;
+		padding-left: 0px;
+		padding-bottom: 5px;
+		width: 100%;
+	}
+
+	.saveTD {
+		content: url("../images/setting_disabled.png");
+	    cursor: hand;
+	    cursor: pointer;
+
+	    &:after {
+    		content: url("../images/setting_default.png");
+		    cursor: hand;
+		    cursor: pointer;
+	    }
+	}
+
+	.saveTDClose {
+		content: url("../images/setting_default.png");
+	    cursor: hand;
+	    cursor: pointer;
+
+	    &:after {
+    		content: url("../images/setting_default.png");
+		    cursor: hand;
+		    cursor: pointer;
+	    }
+	}
+
+	.group-picker {
+		padding-bottom: 5px;
+	}
+
+	.filter-block {
+		position: absolute;
+		left: 0px;
+		top: 5px;
+	}
+
+	.filter-row {
+		position: relative;
+		width: 100%;
+	}
+
+	.tableFormat {
+		table-layout: fixed;
+		width:100%;
+	}
+
+	.rowHeader {
+		color: #000000;
+	}
+
+	.saveFunction {
+		margin-top: 5px;
+	}
+
+	.tableRow {
+		background-color: #E3E3E3;
+	}
+
+	.tdOperatorHide {
+		display: block;
+		width: 75px;
+	}
+
+	.operatorSelect {
+
+	}
+
+	.tdValue {
+		width: 200px;
+		height: 20px;
+		padding-left: 5px;
+	}
+
+	.userInputNormal {
+		width: 95%;
+	}
+
+	.conjuncSelect {
+		width: 70px;
+	}
+
+	.tdRemove {
+		width: 16px;
+		text-align: right;
+	}
+
+	.tdFirstLabel {
+		text-align: left;
+		padding-left: 5px;
+		padding-top: 5px;
+		padding-bottom: 0px;
+		padding-right: 5px;
+		width: 100%;
+	}
+
+	.tdLabel {
+		text-align: left;
+		padding-left: 5px;
+		padding-top: 15px;
+		padding-bottom: 2px;
+		padding-right: 5px;
+		width: 100%;
+	}
+
+	.tdData {
+		text-align: left;
+		padding-left: 5px;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		padding-right: 5px;
+		width: 100%;
+	}
+
+	.tdUploadData {
+		text-align: left;
+		padding-left: 5px;
+		padding-top: 10px;
+		padding-bottom: 0px;
+		padding-right: 5px;
+		width: 100%;
+	}
+
+	.tdSave {
+		text-align: right;
+		padding-right: 5px;
+		width: 100%;
+	}
+
+	.loadProgressHeader {
+		display: none;
+		width: 16px;
+	}
+
+	.loadProgressShow {
+		content: url("../images/validating.gif");
+		display: none;
+		width: 16px;
+
+		&:after {
+			content: url("../images/validating.gif");
+			display: none;
+			width: 16px;		
+		}
+	}
+
+	.advModeOffset {
+	    content: url("../images/setting_default.png");
+	    padding-right: 10px;
+	    cursor: hand;
+	    cursor: pointer;
+
+	    &:after {
+			content: url("../images/setting_default.png");
+		    padding-right: 10px;
+		    cursor: hand;
+		    cursor: pointer;    	
+	    }
+	}
+
+	.advModeClose {
+	    content: url("../images/setting_disabled.png");
+	    cursor: hand;
+	    cursor: pointer;
+	    width: 16px;
+	    height: 16px;
+
+	    &:after {
+		    content: url("../images/setting_disabled.png");
+		    cursor: hand;
+		    cursor: pointer;
+		    width: 16px;
+		    height: 16px;    	
+	    }
+	}
+
+	.advModeOpen {
+		content: url("");
+	    cursor: hand;
+	    cursor: pointer;
+	    width: 16px;
+	    height: 16px;
+	}
+
+	.deleteCell {
+	    content: url("../images/delete.png");
+	    width: 16px;
+	    height: 16px;
+	    cursor: hand;
+	    cursor: pointer;
+
+	    &:after {
+		    content: url("../images/delete.png");
+		    width: 16px;
+		    height: 16px;
+		    cursor: hand;
+		    cursor: pointer;    	
+	    }
+
+	    &:hover {
+		    content: url("../images/delete_hover.png");
+		    width: 16px;
+		    height: 16px;
+		    cursor: hand;
+		    cursor: pointer;    	
+	    }
+	}
+
+	.buttonContainer {
+		position: absolute;
+		left: 0px;
+		bottom: 0px;
+		width: 100%;
+	}
+
+	.buttonContainerTable {
+		width: 100%;
+	}
+
+	.buttonContainerSubtable {
+		float: right;
+	}
+
+	.filter-add-criteria {
+		text-align: left;
+	}
+
+	.filter-button-apply {
+		text-align: right;
+		padding-right: 5px;
+	}
+
+	.filter-button-cancel {
+		text-align: right;
+	}
+
+	.criteriaCellSize {
+		width: 90%;
+		vertical-align: top;
+		padding-top: 5px;
+		padding-left: 2px;
+	}
+
+	.deleteCellSize {
+		width: 20px;
+		text-align: right;
+		vertical-align: top;
+		padding-top: 5px;
+	}
+
+	.hide-items {
+		display: none;
+	}
+
+	.operator-class {
+
+	}
+
+	.value-class {
+
+	}
+
+	/* CUSTOM ECAN CLASSES  */
+
+	.launch-editor-button {
+		text-align: left;
+		padding-right: 5px;
+	}
+
+}

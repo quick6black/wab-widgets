@@ -1,37 +1,19 @@
-# esri-webappbuilder-widget-eDraw
-Ehanced draw widget for WebApp Builder for Arcgis.
+# esri-webappbuilder-widget-eDraw-Ecan
+Enhanced draw widget for WebApp Builder for ArcGIS.
 
-Fork and modifications of the official widget draw for WebApp Builder for Arcgis :
-http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-draw.htm
+This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
 
-The widget use the proj4js library (https://github.com/proj4js/proj4js) for point's lat/lon measure (for non mercator maps) :
-https://github.com/proj4js/proj4js
+## Improvements :
+#### Changes made include:  
 
-## Improvments :
-- add name and description fields on drawings
-- enable infowindow on drawings (selection)
-- on text drawing, no insert if no name.
-- on modification : enable geometry update (with snapping if wanted : CTRL) and preview symbology changes on the fly
-- list
-    - add list of all drawings
-    - actions on each drawing : modify / delete / [up / down] / zoom
-    - all drawings : zoom, copy, delete, export
-    - on drawing infowindow -> select drawing in list
-    - on zoom on a drawing -> select drawing on map (and show infoWindow)
-    - re-order graphics with drag&drop
-- import/export : allow users to export or import drawings (json format)
-    - import can be done with file drag&drop in import popup
-- localStorage
-    - dynamic saving on each drawing add/delete/update
-    - on widget load : load drawings saved in local Storage
-- draws plus (initially from Larry Stout https://geonet.esri.com/people/Larry_Stout)
-    - preview under mouse when adding text or point
-    - for text, add font choice, font angle, bold, italic, placement and underline options.
-- checkbox to hide drawing's layer (and therefore widget UI)
-- add of Nautical unit
-- measure's for points/polylines/polygons with automatic update on element's update (or delete). Measure's can be indidualy disabled/enabled on any graphic.
-- defaults symbols can be specified in config's file
-
+- Some styling changes (import and export button images)  
+- Import functionality will now handle the file type from the advanced draw widget for the Flex Viewer for ArcGIS.  
+- The drawing graphics are now separated into point, polyline, polygon and text layers in the same manner as the standard ESRI draw widget, and can be displayed as operational layers.  Consequently the re-order up and down functionality only works within the context of the layer for the specific geometry types.
+- There is now capability to save drawings as a Feature Collection to an ArcGIS Portal/ArcGIS Online if user is logged in and has create permissions.  Drawings are saved to a content folder in the user's **My Content** section which is created if it does not exist.  The folder name can be configured in the widget's settings, as can whether this functionality is enabled or not. Saved drawings in portal can also be reloaded into a map.  User can supply a drawing name and brief description for the drawing that maps to the item title and snipped in portal/ArcGIS online.
+- UI added to display a list of all saved drawings in portal/ArcGIS online.  Users can manage saved drawings from UI including deleting them.  A placeholder option for and action that can show details and allow user to rename a drawing is in place, thought this functionality is not developed yet.     
+- Advanced geometry options for union of polyline or polygon drawings added, as is a function to explode multipart geometry drawings into individual drawings.  Functionality for creating buffer graphics added.
+- Custom feature action in widget now allows features in popups or other widgets to be sent to the eDraw widget and converted to drawing objects.
+- 
 ## configuration :
 - export file name.
 - Confirm on delete. A confirm dialog when user delete drawing(s) ?
@@ -48,9 +30,20 @@ https://github.com/proj4js/proj4js
 - measure's labels patterns
         
 ## Installation :
-Add eDraw folder in your webApp Builder client\stemapp\widgets folder.
+Add eDrawEcan folder in your webApp Builder client\stemapp\widgets folder.
 Download Release here : 
-https://github.com/magis-nc/esri-webappbuilder-widget-eDraw/releases/latest
+https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest
 
 ## Demo :
-http://apps.magis.nc/maps/wab-widgets/?extent=17918900%2C-2706198%2C19092972%2C-2154016%2C102100
+To be created
+
+
+### Changes
+
+**27 September 2017**     
+
+
+- Alteration to following functions to **Widget.js** in section marked *BEGIN:CHANGE 27 Sep 2017*:  
+    -  **\_initLayers** function altered to bypass creating a feature collection and adding it to the map in favour of adding the point, line, area and label features layers to the map ungrouped.  Change made to correct issue found when code ported to WAB 2.5 where it was discovered the when used in conjunction with AddLayers widget and Layers Widget, newly added layers from AddLayers are appearing in the feature collection group in the layers list if the drawing layers are located at the top of the layer stack.   Label for layer that holds text label drawings changed to use new proeprty in nls strings file called "labels" nls"
+
+-- New parameter added to nls strings.js file for text labels to bbe used in preference to "text" value used for title of the layer which holds the text label graphics 

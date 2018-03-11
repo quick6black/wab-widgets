@@ -1,7 +1,10 @@
 {
  	"exportFileName" : "myDrawing",
 	"confirmOnDelete" : true,
+	"convertWarningScale":25000,
 	"allowLocalStorage" : true,
+	"allowSaveToPortal" : true,
+	"portalDrawingFolderName" : "My Drawings",
 	"localStorageKey" : false,
 	"isOperationalLayer": true,
 	"drawPlus" : {
@@ -63,10 +66,33 @@
 			"abbr" : "sq yd"
 		}
 	],
+	"bufferOptions" : [{
+			"distance" : 50,
+			"unit" : "METERS",
+			"label" : "50 metres"
+		}, {
+			"distance" : 100,
+			"unit" : "METERS",
+			"label" : "100 metres"
+		}, {
+			"distance" : 500,
+			"unit" : "METERS",
+			"label" : "500 metres"
+		}, {
+			"distance" : 1000,
+			"unit" : "METERS",
+			"label" : "1000 metres",
+			"default": true
+		}, {
+			"distance" : 5,
+			"unit" : "KILOMETERS",
+			"label" : "5 kilometres"
+		}
+	],
 	"useGeometryEngine": true,
 	"geometryService": "//tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 	"measureEnabledByDefault" : false,
-	"measurePolygonLabel" : "{{area}} {{areaUnit}}    {{length}} {{lengthUnit}}",
+	"measurePolygonLabel" : "{{area}} {{areaUnit}}; {{length}} {{lengthUnit}}",
 	"measurePolylineLabel" : "{{length}} {{lengthUnit}}",
 	"defaultSymbols":{
 		"SimpleMarkerSymbol": {"color":[255,199,198,148],"size":15,"angle":0,"xoffset":0,"yoffset":0,"type":"esriSMS","style":"esriSMSCircle","outline":{"color":[207,101,99,255],"width":0.75,"type":"esriSLS","style":"esriSLSSolid"}},

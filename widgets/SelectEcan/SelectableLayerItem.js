@@ -105,6 +105,22 @@ _WidgetsInTemplateMixin, template, ClearSelectionAction) {
       return this.checked;
     },
 
+    // ECAN addition setChecked(checked)
+    setChecked: function (checked) {
+        this.checked = checked;
+
+        if (this.checked) {
+            html.addClass(this.selectableCheckBox, 'checked');
+        } else {
+            html.removeClass(this.selectableCheckBox, 'checked');
+        }
+
+        this.emit('stateChange', {
+            checked: this.checked,
+            layerInfo: this.layerInfo
+        });
+    },
+
     updateLayerVisibility: function() {
       var visible = this.layerInfo.isShowInMap() && this.layerInfo.isInScale();
 

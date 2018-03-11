@@ -13,8 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'dojo/on', 'dojo/Deferred', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/units', "esri/toolbars/edit", 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/featureActions/SaveToMyContent' ///ECAN
-], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, on, Deferred, exportUtils, Graphic, SimpleMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, SaveToMyContent, LayerLoader) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/renderers/SimpleRenderer', 'esri/renderers/UniqueValueRenderer', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup', './search/DrawingDetailsPopup', './search/InfoCard'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, PictureMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, SimpleRenderer, UniqueValueRenderer, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup, DrawingDetailsPopup, InfoCard) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -35,6 +34,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         _labelLayer: null,
 
         exportFileName: null,
+        drawingFolder: null,
+
+        defaultMeasurePointLabel: '{{x}}, {{y}}',
+        defaultMeasurePolygonLabel: '{{area}} {{areaUnit}}; {{length}} {{lengthUnit}}',
+        defaultMeasurePolylineLabel: '{{length}} {{lengthUnit}}',
+
+        //_convertWarningScale: null,
+
 
         //////////////////////////////////////////// GENERAL METHODS //////////////////////////////////////////////////
         /**
@@ -62,8 +69,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                     this.setInfoWindow(false);
                     this.allowPopup(false);
-
                     break;
+
                 case 'add2':
                     this.setMenuState('add', ['add']);
 
@@ -75,8 +82,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
                     this.setInfoWindow(false);
                     this.allowPopup(false);
-
                     break;
+
                 case 'edit':
                     this.setMenuState('edit', ['edit']);
                     if (this._editorConfig["graphicCurrent"]) {
@@ -91,8 +98,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     this.TabViewStack.switchView(this.editorSection);
 
                     this.setInfoWindow(false);
-
                     break;
+
                 case 'list':
                     this.setMenuState('list');
                     this.allowPopup(true);
@@ -108,13 +115,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     this._editorConfig["graphicCurrent"] = false;
 
                     this.TabViewStack.switchView(this.listSection);
-
                     break;
 
                 case 'save':
-
                     this.TabViewStack.switchView(this.saveSection);
+                    break;
 
+                case 'load':
+                    this.TabViewStack.switchView(this.loadSection);
+                    break;
+
+                case 'settings':
+                    this.setMenuState('settings');
+
+                    this.TabViewStack.switchView(this.settingsSection);
                     break;
 
             }
@@ -141,7 +155,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         setMenuState: function setMenuState(active, elements_shown) {
             if (!elements_shown) {
-                elements_shown = ['add', 'list'];
+                elements_shown = ['add', 'list', 'settings'];
             } else if (elements_shown.indexOf(active) < 0) elements_shown.push(active);
 
             for (var button_name in this._menuButtons) {
@@ -180,6 +194,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 dojo.disconnect(this._clickPolylineHandler);
                 dojo.disconnect(this._clickPolygonHandler);
                 dojo.disconnect(this._clickLabelHandler);
+
+                this._clickHandler = false;
+                this._clickPointHandler = false;
+                this._clickPolylineHandler = false;
+                this._clickPolygonHandler = false;
+                this._clickLabelHandler = false;
             } else {
                 this._clickHandler = this._graphicsLayer.on("click", this._onDrawClick);
                 this._clickPointHandler = this._pointLayer.on("click", this._onDrawClick);
@@ -258,6 +278,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             } else {
                 this._removeGraphics(graphics);
             }
+        },
+
+        cut: function cut() {
+            alert('Cut goes here');
+        },
+
+        reshape: function reshape() {
+            alert('Reshape goes here');
         },
 
         _removeClickedGraphic: function _removeClickedGraphic() {
@@ -365,19 +393,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.setMode("list");
         },
 
-        /*        
-        /// SORT THIS - REMOVE THIS FUNCTION AS NO LONGER NEEDED
-        onHideCheckboxClick : function () {
-            var display = (this.hideCheckbox.checked) ? 'none' : 'block';
-              this.drawBox.drawLayer.setVisibility(!this.hideCheckbox.checked);
-            this.menu.style.display = display;
-            this.settingAllContent.style.display = display;
-              if (this.hideCheckbox.checked)
-                this.onClose();
-            else
-                this.onOpen();
+        menuOnClickSettings: function menuOnClickSettings() {
+            this.setMode("settings");
         },
-        */
 
         ///////////////////////// LIST METHODS ///////////////////////////////////////////////////////////
         listGenerateDrawTable: function listGenerateDrawTable() {
@@ -656,6 +674,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorSymbolChooserConfigure(symbol);
 
+            this.editorModifyToolsConfigure(false);
+
             this.nameField.value = this.nls.nameFieldDefaultValue;
             this.descriptionField.value = '';
 
@@ -691,6 +711,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
+            //this.editorModifyToolsConfigure(graphic.geometry);
+
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
             this.editorFooterAdd.style.display = 'none';
@@ -702,6 +724,24 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.editorActivateSnapping(true);
 
             this.editorMeasureConfigure(graphic, false);
+        },
+
+        editorModifyToolsConfigure: function editorModifyToolsConfigure(geometry) {
+            if (geometry) {
+                switch (geometry.type) {
+                    case 'polyline':
+                    case 'polygon':
+                        domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+                        break;
+
+                    default:
+                        // Hide the tools
+                        domStyle.set(this.editorToolsDiv, 'display', 'none');
+                        break;
+                }
+            } else {
+                domStyle.set(this.editorToolsDiv, 'display', 'none');
+            }
         },
 
         editorSymbolChooserConfigure: function editorSymbolChooserConfigure(symbol) {
@@ -758,6 +798,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.map.enableSnapping({
                 "layerInfos": [{
                     "layer": this.drawBox.drawLayer
+                }, {
+                    "layer": this._pointLayer
+                }, {
+                    "layer": this._polylineLayer
+                }, {
+                    "layer": this._polygonLayer
                 }],
                 "tolerance": 20
             });
@@ -836,8 +882,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     return;
                 }
 
-                this.distanceUnitSelect.set('value', this.configDistanceUnits[0]['unit']);
-                this.areaUnitSelect.set('value', this.configAreaUnits[0]['unit']);
+                this.distanceUnitSelect.set('value', this.defaultDistanceUnitSelect.value);
+                this.areaUnitSelect.set('value', this.defaultAreaUnitSelect.value);
+
+                //this.distanceUnitSelect.set('value', this.configDistanceUnits[0]['unit']);
+                //this.areaUnitSelect.set('value', this.configAreaUnits[0]['unit']);
                 this.pointUnitSelect.set('value', 'map');
 
                 this.showMeasure.checked = this.config.measureEnabledByDefault;
@@ -970,7 +1019,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.importMessage.close();
         },
 
-        ///// ECAN
+        //////////////////////// ECAN ////////////////////////////
 
         migrateGISmoDrawings: function migrateGISmoDrawings(json) {
             console.log('migrateGISmoDrawings');
@@ -1135,6 +1184,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         convertGISMoSymbol: function convertGISMoSymbol(json) {
+            if (json === undefined) return null;
+
             var symbol = {};
 
             switch (json.symboltype) {
@@ -1146,15 +1197,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     symbol.angle = 0;
                     symbol.xoffset = 0;
                     symbol.yoffset = 0;
-                    symbol.outline = {};
 
-                    if (json.outline.color) {
-                        symbol.outline.color = this.convertDecimalColor2RGB(json.outline.color, json.outline.alpha);
-                    } else {
-                        symbol.outline.color = [0, 0, 0, 255];
+                    if (json.outline) {
+                        symbol.outline = {};
+                        if (json.outline.color) {
+                            symbol.outline.color = this.convertDecimalColor2RGB(json.outline.color, json.outline.alpha);
+                        } else {
+                            symbol.outline.color = [0, 0, 0, 255];
+                        }
+                        symbol.outline.width = json.outline.width;
+                        symbol.outline.style = this.convertStyleType(json.symboltype, json.outline.symboltype);
                     }
-                    symbol.outline.width = json.outline.width;
-                    symbol.outline.style = this.convertStyleType(json.symboltype, json.outline.symboltype);
 
                     break;
 
@@ -1229,7 +1282,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             return symbol;
         },
 
-        importJsonContent: function importJsonContent(json, nameField, descriptionField) {
+        importJsonContent: function importJsonContent(json, nameField, descriptionField, measureField) {
             try {
                 if (typeof json == 'string') {
                     json = JSON.parse(json);
@@ -1274,6 +1327,18 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         }
                     }
                 }
+                if (!measureField) {
+                    var g = json.features[0];
+                    var fields_possible = ["measure"];
+                    if (g.attributes) {
+                        for (var i = 0, len = fields_possible.length; i < len; i++) {
+                            if (g.attributes[fields_possible[i]] || g.attributes[fields_possible[i]] === "") {
+                                measureField = fields_possible[i];
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 var measure_features_i = [];
                 var graphics = [];
@@ -1289,6 +1354,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     g.attributes["name"] = !nameField || !g.attributes[nameField] ? 'n°' + (i + 1) : g.attributes[nameField];
                     if (g.symbol && g.symbol.type == "textsymbol") g.attributes["name"] = g.symbol.text;
                     g.attributes["description"] = !descriptionField || !g.attributes[descriptionField] ? '' : g.attributes[descriptionField];
+                    g.attributes["measure"] = !measureField || !g.attributes[measureField] ? '' : g.attributes[measureField];
 
                     if (!g.symbol) {
                         var symbol = false;
@@ -1307,7 +1373,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                             g.setSymbol(symbol);
                         }
                     }
-                    g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
+                    //g.attributes["symbol"] = JSON.stringify(g.symbol.toJson());
+                    g.attributes["symbolClass"] = this._getSymbolHash(JSON.stringify(g.symbol.toJson()));
 
                     //If is with measure
                     if (json_feat.measure) {
@@ -1348,9 +1415,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 return false;
             }
 
-            if (this.fileNameField.value === '') this.saveDialogReset();
+            if (this.drawingNameField.value === '') this.saveDialogReset();
 
             this.setMode("save");
+            if (this.portalSaveAllowed) {
+                domStyle.set(this.portalSaveBtn, 'display', 'inline-block');
+            }
         },
 
         saveDialogCancel: function saveDialogCancel() {
@@ -1358,19 +1428,130 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         saveDialogSave: function saveDialogSave() {
-            if (!this.fileNameField.isValid()) {
+            if (!this.drawingNameField.isValid()) {
                 this.showMessage(this.nls.importErrorFileName, 'error');
                 return false;
             }
 
-            this.exportFileName = this.fileNameField.value;
+            this.exportFileName = this.drawingNameField.value;
             this.exportSelectionInFile();
             this.setMode("list");
         },
 
         saveDialogReset: function saveDialogReset() {
             var val = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';
-            this.fileNameField.set('value', val);
+            this.drawingNameField.set('value', val);
+        },
+
+        saveDialogSavePortal: function saveDialogSavePortal() {
+            // Validate drawing name
+            if (!this.drawingNameField.isValid()) {
+                this.showMessage(this.nls.importErrorFileName, 'error');
+                return false;
+            }
+
+            // Prepare daa for saving
+            var only_graphics_checked = true;
+
+            var layers = this._generateLayersArrayForPortal(only_graphics_checked);
+            var snippet = this.drawingSnippetField.value;
+            var description = 'PUT USER DESCRIPTION HERE';
+
+            // Check for existing drawing with that name
+            var existingDrawings = this._findUserDrawing(this.drawingNameField.value, true);
+            if (existingDrawings.length > 0) {
+                var itemid = existingDrawings[0].id;
+
+                // Confirm that user wishes to delete this item
+                this._confirmOverwriteMessage = new Message({
+                    message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.portal.drawingExistsMessage,
+                    buttons: [{
+                        label: this.nls.yes,
+                        onClick: lang.hitch(this, function (evt) {
+                            this._confirmOverwriteMessage.close();
+                            this._confirmOverwriteMessage = false;
+                            this._updatePortalDrawingItem(itemid, this.drawingNameField.value, layers, snippet, description);
+                        })
+                    }, {
+                        label: this.nls.no
+                    }]
+                });
+            } else {
+                // Set whether to only pull in selected graphics - currently defaults to true (future development here)
+                this._addPortalDrawingItem(this.drawingNameField.value, layers, snippet, description);
+            }
+        },
+
+        _generateLayersArrayForPortal: function _generateLayersArrayForPortal(only_graphics_checked) {
+            var layers = [],
+                selectedGraphics = null;
+
+            // Extract the required graphics from the feature layers 
+            if (only_graphics_checked) {
+                selectedGraphics = this.getCheckedGraphics(false);
+            } else {
+                selectedGraphics = this._getAllGraphics();
+            }
+
+            // Build save layers list
+            layers.push(this._generateLayerForPortal(this._polygonLayer, selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._polylineLayer, selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._pointLayer, selectedGraphics));
+            layers.push(this._generateLayerForPortal(this._labelLayer, selectedGraphics));
+            return layers;
+        },
+
+        _generateLayerForPortal: function _generateLayerForPortal(layer, selectedGraphics) {
+            var _this = this;
+
+            // Get the json equivalent of the layer
+            var layerDef = layer.toJson();
+
+            // Ensure only the selected graphics included in the layer
+            var removes = [],
+                found = false,
+                graphic = null,
+                index = null,
+                geometryType = null;;
+            for (var i = 0, il = layerDef.featureSet.features.length; i < il; i++) {
+                graphic = layerDef.featureSet.features[i];
+                found = false;
+                switch (layerDef.featureSet.geometryType) {
+                    case "esriGeometryPolyline":
+                        geometryType = "polyline";
+                        break;
+
+                    case "esriGeometryPolygon":
+                        geometryType = "polygon";
+                        break;
+
+                    case "esriGeometryPoint":
+                        geometryType = "point";
+                        break;
+                }
+
+                for (var j = 0, jl = selectedGraphics.length; j < jl; j++) {
+                    var selected = selectedGraphics[j];
+
+                    if (selected.geometry.type === geometryType && selected.attributes[this._objectIdName] === graphic.attributes["parentId"]) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    removes.push(graphic);
+                }
+            }
+
+            for (var i = 0, il = removes.length; i < il; i++) {
+                index = layerDef.featureSet.features.findIndex(function (x) {
+                    return x.attributes[_this._objectIdName] == removes[i].attributes[_this._objectIdName];
+                });
+                layerDef.featureSet.features.splice(index, 1);
+            }
+
+            return layerDef;
         },
 
         exportInFile: function exportInFile() {
@@ -1379,42 +1560,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         exportSelectionInFile: function exportSelectionInFile(evt) {
             if (evt && evt.preventDefault) evt.preventDefault();
+
             this.launchExport(true);
-        },
-
-        // NEW ECAN 
-        exportSelectionMyContent: function exportSelectionMyContent(evt) {
-            if (evt && evt.preventDefault) evt.preventDefault();
-
-            ///get drawings / layers
-            var only_graphics_checked = true;
-            var drawing_json = this.drawingsGetJson(false, only_graphics_checked);
-
-            // Control if there are drawings
-            if (!drawing_json) {
-                this.showMessage(this.nls.importWarningNoExport0Draw, 'warning');
-                return false;
-            }
-
-            //We could use FeatureSet (which is required) but this workaround keeps symbols !
-            var drawing_seems_featureset = {
-                toJson: function toJson() {
-                    return drawing_json;
-                }
-            };
-
-            //Create datasource and download !
-            var ds = exportUtils.createDataSource({
-                "type": exportUtils.TYPE_FEATURESET,
-                "data": drawing_seems_featureset,
-                "filename": this.exportFileName ? this.exportFileName : 'myDrawings'
-            });
-            ds.setFormat(exportUtils.FORMAT_FEATURESET);
-
-            ///SaveToMyContent.onExecute(ds.data, layer);
-            var savetomycontent = new SaveToMyContent();
-            savetomycontent.onExecute(ds.featureSet, null);
-            //this.launchExport(true);
         },
 
         launchExport: function launchExport(only_graphics_checked) {
@@ -1445,7 +1592,454 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             return false;
         },
 
+        showLoadDialog: function showLoadDialog() {
+            // update the drawings list
+            if (this.portalSaveAllowed) {
+                this._generateDrawingsList();
+            }
+            this.setMode("load");
+        },
+
+        loadDialogCancel: function loadDialogCancel() {
+            this.setMode("list");
+        },
+
+        /////////////// PORTAL DRAWINGS ///////////////////////////////////////////////////////////
+
+        _findUserDrawing: function _findUserDrawing(searchText, nameOnlySearch) {
+            searchText = searchText.toLowerCase().trim();
+            var drawings = [];
+            if (nameOnlySearch) {
+                for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                    var drawing = this.currentDrawings[i];
+                    if (drawing.title.toLowerCase().trim() === searchText) {
+                        drawings.push(drawing);
+                    }
+                }
+            } else {
+                for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                    var drawing = this.currentDrawings[i];
+                    if (drawing.title.toLowerCase().trim().indexOf(searchText) >= 0 || drawing.snippet.toLowerCase().trim().indexOf(searchText) >= 0) {
+                        drawings.push(drawing);
+                    }
+                }
+            }
+            return drawings;
+        },
+
+        _findDrawing: function _findDrawing(itemId) {
+            var drawing = null;
+            for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                drawing = this.currentDrawings[i];
+                if (drawing.id === itemId) {
+                    break;
+                }
+            }
+            return drawing;
+        },
+
+        _refreshDrawingsList: function _refreshDrawingsList() {
+            if (this.drawingFolder !== null) {
+                console.log("_refreshDrawingsList");
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var portal = portalUtils.getPortal(portalUrl);
+
+                this._getDrawingFolderContent(portal).then(lang.hitch(this, function (content) {
+                    //Instantiate the currentDrawings collection
+                    if (this.currentDrawings === undefined) {
+                        this.currentDrawings = [];
+                    } else {
+                        this.currentDrawings.length = 0;
+                    }
+
+                    for (var i = 0, il = content.items.length; i < il; i++) {
+                        this.currentDrawings.push(content.items[i]);
+                    }
+                }));
+            } else {
+                this.showMessage("Error loading drawings saved in portal list", "error");
+            }
+        },
+
+        _generateDrawingsList: function _generateDrawingsList() {
+            this.itemsNode.innerHTML = '';
+            var currentUserName = this.portalUser.username;
+
+            if (this.currentDrawings === undefined || this.currentDrawings.length === 0) {
+                //this.portalDrawingsPane.innerHTML = "<p><em>You currently have no drawings saved in portal</em></p>";
+            } else {
+                for (var i = 0, il = this.currentDrawings.length; i < il; i++) {
+                    var drawing = this.currentDrawings[i];
+                    var canDelete = drawing.owner === currentUserName;
+                    var infoCard = new InfoCard({
+                        item: drawing,
+                        canDelete: canDelete,
+                        resultsPane: this
+                    });
+                    infoCard.placeAt(this.itemsNode);
+                    infoCard.startup();
+                }
+            }
+        },
+
+        addPortalDrawingItem: function addPortalDrawingItem(itemid) {
+            this._getPortalDrawingItem(itemid).then(lang.hitch(this, function (drawingData) {
+                this._loadPortalDrawing(drawingData);
+                this._syncGraphicsToLayers();
+                this.setMode('list');
+            }), lang.hitch(this, function (err) {
+                alert(err);
+            }));
+        },
+
+        _loadPortalDrawing: function _loadPortalDrawing(drawingData) {
+            var layer = null,
+                graphics = [],
+                symbols = null,
+                renderer = null;
+            array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
+                // Check for drawings in layer
+                if (drawingLayer.featureSet.features.length > 0) {
+                    // Prepare the symbols
+                    symbols = {}, renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+
+                    if (renderer.defaultSymbol === null) {
+                        getRendererSymbol = true;
+                        array.forEach(renderer.uniqueValueInfos, lang.hitch(this, function (info) {
+                            symbols[info.value] = info.symbol;
+                        }));
+                    }
+
+                    // Build the graphics
+                    array.forEach(drawingLayer.featureSet.features, lang.hitch(this, function (graphicJson) {
+                        var graphic = new Graphic(graphicJson);
+
+                        // update the symbol based on the renderer
+                        if (getRendererSymbol) {
+                            var symbolJson = symbols[graphic.attributes["symbolClass"]];
+                            switch (symbolJson.type) {
+                                case "esriSFS":
+                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                    break;
+
+                                case "esriSLS":
+                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                    break;
+
+                                case "esriSMS":
+                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                    break;
+
+                                case "esriPMS":
+                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                    break;
+
+                                default:
+                                    //do nothing
+                                    break;
+                            }
+                        }
+
+                        // Reset the attribute fields for the graphic
+                        graphic.setAttributes(this._formatPortalAttributes(graphic.attributes));
+
+                        graphics.push(graphic);
+                    }));
+                }
+            }));
+
+            if (graphics.length > 0) {
+                this._pushAddOperation(graphics, true);
+                var extent = graphicsUtils.graphicsExtent(graphics);
+                this.map.setExtent(extent, true);
+            }
+        },
+
+        deletePortalDrawing: function deletePortalDrawing(itemid) {
+            // Confirm that user wishes to delete this item
+            this._confirmDeleteMessage = new Message({
+                message: '<i class="message-warning-icon"></i>&nbsp;' + this.nls.portal.confirmPortalDrawingDelete,
+                buttons: [{
+                    label: this.nls.yes,
+                    onClick: lang.hitch(this, function (evt) {
+                        this._confirmDeleteMessage.close();
+                        this._confirmDeleteMessage = false;
+                        this._deletePortalDrawingItem(itemid);
+                    })
+                }, {
+                    label: this.nls.no
+                }]
+            });
+        },
+
+        showPortalDrawingDetails: function showPortalDrawingDetails(itemid) {
+            // Get the drawing item
+            var drawingDetails = this._findDrawing(itemid);
+            if (drawingDetails) {
+                var drawingDetailsPopup, param;
+                param = {
+                    map: this.map,
+                    nls: this.nls,
+                    config: this.config,
+                    drawing: drawingDetails,
+                    user: this.portalUser
+                };
+                // initialize drawing details popup widget
+                drawingDetailsPopup = new DrawingDetailsPopup(param);
+                drawingDetailsPopup.startup();
+                //hide popup and start the update process
+                drawingDetailsPopup.onUpdateClick = lang.hitch(this, function () {
+                    var settings = drawingDetailsPopup.getSettings();
+                    this._updatePortalDrawingItem(settings.itemId, settings.title, null, settings.snippet);
+                    drawingDetailsPopup.popup.close();
+                });
+            }
+        },
+
+        ///////////////////////// PORTAL METHODS ///////////////////////////////////////////////////////////
+
+        checkPrivilege: function checkPrivilege() {
+            var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = portalUtils.getPortal(portalUrl);
+
+            if (!portal || !portal.haveSignIn()) {
+                var def = new Deferred();
+                def.resolve(false);
+                return def;
+            } else {
+                return this._hasPrivilege(portal);
+            }
+        },
+
+        _hasPrivilege: function _hasPrivilege(portal) {
+            return portal.loadSelfInfo().then(lang.hitch(this, function (res) {
+                if (res && res.user) {
+                    var userRole = new Role({
+                        id: res.user.roleId ? res.user.roleId : res.user.role,
+                        role: res.user.role
+                    });
+
+                    if (res.user.privileges) {
+                        userRole.setPrivileges(res.user.privileges);
+                    }
+
+                    // Check whether user can create item of type feature collection
+                    return userRole.canCreateItem() && userRole.canPublishFeatures();
+                } else {
+                    return false;
+                }
+            }), function () {
+                return false;
+            });
+        },
+
+        _getDrawingFolder: function _getDrawingFolder(portal) {
+            return portal.getUser().then(lang.hitch(this, function (user) {
+                this.portalUser = user;
+                return user.getContent();
+            })).then(lang.hitch(this, function (res) {
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+                this.drawingFolder = null;
+                for (var i = 0, il = res.folders.length; i < il; i++) {
+                    if (res.folders[i].title === folderTitle) {
+                        this.drawingFolder = res.folders[i];
+                        break;
+                    }
+                }
+                return this.drawingFolder;
+            }));
+        },
+
+        _createDrawingFolder: function _createDrawingFolder(portal) {
+            if (this.drawingFolder === null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username);
+                var createFolderUrl = contentUrl + '/createFolder';
+
+                var folderTitle = this.config.portalDrawingFolderName || "drawings";
+
+                var args = {
+                    url: createFolderUrl,
+                    handleAs: 'json',
+                    content: {
+                        f: 'json',
+                        title: folderTitle
+                    },
+                    callbackParamName: 'callback'
+                };
+
+                var options = {
+                    usePost: true
+                };
+
+                if (portal.isValidCredential) {
+                    args.content.token = portal.credential.token;
+                }
+
+                console.log("_createDrawingFolder Call Server: ", args, options);
+                return esriRequest(args, options);
+            }
+        },
+
+        _getDrawingFolderContent: function _getDrawingFolderContent(portal) {
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username, this.drawingFolder.id);
+
+                var args = {
+                    url: contentUrl,
+                    handleAs: 'json',
+                    content: {
+                        f: 'json'
+                    },
+                    callbackParamName: 'callback'
+                };
+
+                if (portal.isValidCredential) {
+                    args.content.token = portal.credential.token;
+                }
+
+                return esriRequest(args);
+            }
+        },
+
+        _addPortalDrawingItem: function _addPortalDrawingItem(drawingName, layers, snippet, description) {
+            var featureCollection = {
+                layers: layers
+            };
+
+            var itemContent = {
+                name: drawingName,
+                title: drawingName,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: snippet,
+                description: description,
+                text: JSON.stringify(featureCollection)
+            };
+
+            this.portalUser.addItem(itemContent, this.drawingFolder.id).then(lang.hitch(this, function (res) {
+                this.showMessage(this.nls.portal.drawingAddedMessage, 'info');
+                this.setMode('list');
+                this._refreshDrawingsList();
+            }), lang.hitch(this, function (err) {
+                this.showMessage(this.nls.portal.drawingAddErrorMessage, 'error');
+                this.setMode('list');
+            }));
+        },
+
+        _updatePortalDrawingItem: function _updatePortalDrawingItem(itemid, drawingName, layers, snippet, description) {
+            var featureCollection = {
+                layers: layers
+            };
+
+            /*
+            var itemContent = {
+                name: drawingName,
+                title: drawingName,
+                type: 'Feature Collection',
+                typeKeywords: "WAB_created",
+                tags: 'Drawing Graphics',
+                snippet: snippet,
+                description: description,
+                text: JSON.stringify(featureCollection)
+            };
+            */
+
+            var itemContent = {};
+
+            if (drawingName) {
+                itemContent.name = drawingName;
+                itemContent.title = drawingName;
+            }
+
+            if (layers) {
+                itemContent.text = JSON.stringify(featureCollection);
+            }
+
+            if (snippet) {
+                itemContent.snippet = snippet;
+            }
+
+            if (description) {
+                itemContent.description = description;
+            }
+
+            this.portalUser.updateItem(itemid, itemContent).then(lang.hitch(this, function (res) {
+                this.showMessage(this.nls.portal.drawingAddedMessage, 'info');
+                this.setMode('list');
+                this._refreshDrawingsList();
+            }), lang.hitch(this, function (err) {
+                this.showMessage(this.nls.portal.drawingExistsErrorMessage, 'error');
+                this.setMode('list');
+            }));
+        },
+
+        _deletePortalDrawingItem: function _deletePortalDrawingItem(itemid) {
+            // Custom code - portaluser method for deleting items only works on items in the root of my content
+            if (this.drawingFolder !== null && this.portalUser !== undefined) {
+                var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var contentUrl = portalUrlUtils.getUserContentUrl(portalUrl, this.portalUser.username);
+
+                // add drawing folder id to path
+                var deleteUrl = contentUrl + '/' + this.drawingFolder.id + '/items/' + itemid + '/delete';
+                this._deleteItem(deleteUrl).then(lang.hitch(this, function (res) {
+                    this.showMessage(this.nls.portal.drawingDeletedMessage, 'info');
+                    this.setMode('list');
+                    this._refreshDrawingsList();
+                }), lang.hitch(this, function (err) {
+                    this.showMessage(this.nls.portal.drawingDeleteErrorMessage, 'error');
+                    this.setMode('list');
+                }));
+            }
+        },
+
+        _deleteItem: function _deleteItem(deleteUrl) {
+            this.portalUser.updateCredential();
+            var def = new Deferred();
+
+            if (this.portalUser.isValidCredential()) {
+                //resolve {success,itemId}
+                def = esriRequest({
+                    url: deleteUrl,
+                    content: {
+                        token: this.portalUser.credential.token,
+                        f: 'json'
+                    },
+                    handleAs: 'json'
+                }, {
+                    usePost: true
+                });
+            } else {
+                setTimeout(lang.hitch(this, function () {
+                    def.reject('token is null.');
+                }), 0);
+            }
+            return def;
+        },
+
+        _getPortalDrawingItem: function _getPortalDrawingItem(itemid) {
+            var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = portalUtils.getPortal(portalUrl);
+
+            if (!portal || !portal.haveSignIn()) {
+                var def = new Deferred();
+                def.resolve(false);
+                return def;
+            } else {
+                return portal.getItemData(itemid);
+            }
+        },
+
+        ///////////////////////// SETTINGS METHODS ///////////////////////////////////////////////////////////
+
+        settingsDialogCancel: function settingsDialogCancel() {
+            this.setMode('list');
+        },
+
         ///////////////////////// EDIT METHODS ///////////////////////////////////////////////////////////
+
         editorOnClickEditSaveButon: function editorOnClickEditSaveButon() {
             if (this.editorSymbolChooser.type == "text") {
                 this.editorUpdateTextPlus();
@@ -1453,7 +2047,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this._editorConfig["graphicCurrent"].attributes["name"] = this.nameField.value;
             this._editorConfig["graphicCurrent"].attributes["description"] = this.descriptionField.value;
-            this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
+            //this._editorConfig["graphicCurrent"].attributes["symbol"] = JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson());
+            this._editorConfig["graphicCurrent"].attributes["symbolClass"] = this._getSymbolHash(JSON.stringify(this._editorConfig["graphicCurrent"].symbol.toJson()));
+            this._editorConfig["graphicCurrent"].attributes["measure"] = this._getMeasureAttributeText(this._editorConfig["graphicCurrent"].geometry);
 
             if (this.editorSymbolChooser.type != "text") {
                 var geom = this._editorConfig["graphicCurrent"].geometry;
@@ -1516,41 +2112,28 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         ///////////////////////// ADD METHODS ///////////////////////////////////////////////////////////
+
         drawBoxOnTypeSelected: function drawBoxOnTypeSelected(target, geotype, commontype) {
             if (!this._editorConfig["defaultSymbols"]) this._editorConfig["defaultSymbols"] = {};
             this._editorConfig['commontype'] = commontype;
 
             var symbol = this._editorConfig["defaultSymbols"][commontype];
             if (!symbol) {
-                switch (commontype) {
-                    case "point":
-                        var options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol ? this.config.defaultSymbols.SimpleMarkerSymbol : null;
-                        symbol = new SimpleMarkerSymbol(options);
-                        break;
-                    case "polyline":
-                        var options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol ? this.config.defaultSymbols.SimpleLineSymbol : null;
-                        symbol = new SimpleLineSymbol(options);
-                        break;
-                    case "polygon":
-                        var options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol ? this.config.defaultSymbols.SimpleFillSymbol : null;
-                        symbol = new SimpleFillSymbol(options);
-                        break;
-                    case "text":
-                        var options = this.config.defaultSymbols && this.config.defaultSymbols.TextSymbol ? this.config.defaultSymbols.TextSymbol : { "verticalAlignment": "middle", "horizontalAlignment": "center" };
-                        symbol = new TextSymbol(options);
-                        break;
-                }
+                symbol = this._createDefaultSymbol(commontype);
             }
 
             if (symbol) {
                 this._editorConfig["defaultSymbols"][commontype] = symbol;
                 this.setMode('add2');
+                this.drawBoxSetMouseListeners(true);
             }
         },
 
         drawBoxOnDrawEnd: function drawBoxOnDrawEnd(graphic, geotype, commontype) {
             /*jshint unused: false*/
             this.drawBox.clear();
+
+            this._resetMapTip(true);
 
             var geometry = graphic.geometry;
 
@@ -1559,7 +2142,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             graphic.attributes = {
                 "name": this.nameField.value,
                 "description": this.descriptionField.value,
-                "symbol": JSON.stringify(graphic.symbol.toJson())
+                "symbolClass": this._getSymbolHash(JSON.stringify(graphic.symbol.toJson())),
+                "measure": this._getMeasureAttributeText(geometry)
             };
 
             if (geometry.type === 'extent') {
@@ -1581,34 +2165,28 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (commontype === 'point') {
                 if (this.showMeasure.checked) {
                     this._addPointMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'polyline') {
                 if (this.showMeasure.checked) {
                     this._addLineMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'polygon') {
                 if (this.showMeasure.checked) {
                     this._addPolygonMeasure(geometry, graphic);
-                } else {
-                    this._pushAddOperation([graphic]);
                 }
+                this._pushAddOperation([graphic]);
             }
 
             if (commontype === 'text') {
                 if (this.editorSymbolChooser.inputText.value.trim() == "") {
                     //Message
                     this.showMessage(this.nls.textWarningMessage, 'warning');
-
-                    //Remove empty feature (text symbol without text)
-                    // graphic.getLayer().remove(graphic);
                 } else {
                     this._pushAddOperation([graphic]);
                 }
@@ -1617,7 +2195,162 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             //this.saveInLocalStorage();
             this._editorConfig["graphicCurrent"] = graphic;
             this._editorConfig["defaultSymbols"][this._editorConfig['commontype']] = graphic.symbol;
+
+            this.drawBoxSetMouseListeners(false);
+
             this.setMode("list");
+        },
+
+        drawBoxSetMouseListeners: function drawBoxSetMouseListeners(mode) {
+            this.drawing = false;
+            if (mode) {
+                // Check draw tool mode
+                switch (this.drawBox.drawToolBar._geometryType) {
+                    case 'polyline':
+                    case 'polygon':
+                        this.mouseClick = connect.connect(this.map, "onClick", lang.hitch(this, this.mouseClickHandler));
+                        this.mouseMove = connect.connect(this.map, "onMouseMove", lang.hitch(this, this.mouseMoveHandler));
+                        break;
+
+                    case 'line':
+                    case 'freehandpolyline':
+                    case 'freehandpolygon':
+                    case 'extent':
+                    case 'circle':
+                    case 'triangle':
+                    case 'ellipse':
+                        this.mouseDown = connect.connect(this.map, "onMouseDown", lang.hitch(this, this.mouseDownHandler));
+                        this.mouseMove = connect.connect(this.map, "onMouseDrag", lang.hitch(this, this.mouseMoveHandler));
+                        break;
+
+                    default:
+                        break;
+                }
+            } else {
+                connect.disconnect(this.mouseClick);
+                connect.disconnect(this.mouseDown);
+                connect.disconnect(this.mouseMove);
+            }
+        },
+
+        mouseClickHandler: function mouseClickHandler(evt) {
+            this._initialiseMapTip(evt);
+        },
+
+        mouseDownHandler: function mouseDownHandler(evt) {
+            var dragTools = ['line', 'freehandpolyline', 'freehandpolygon', 'extent', 'circle', 'triangle', 'ellipse'];
+            if (!this.drawing && dragTools.indexOf(this.drawBox.drawToolBar._geometryType) >= 0) {
+                this._initialiseMapTip(evt);
+            }
+        },
+
+        mouseMoveHandler: function mouseMoveHandler(evt) {
+            if (this.drawing) {
+                var g = this.drawBox.drawToolBar._graphic;
+                if (g === undefined || g === null) return;
+
+                var graphicJson = null;
+                var clonedGraphic = null;
+                if (g.geometry.type === 'rect') {
+
+                    var a = g.geometry.getExtent();
+                    var polygon = new Polygon(a.spatialReference);
+                    var r = [[a.xmin, a.ymin], [a.xmin, a.ymax], [a.xmax, a.ymax], [a.xmax, a.ymin], [a.xmin, a.ymin]];
+                    polygon.addRing(r);
+                    clonedGraphic = new Graphic(polygon, new SimpleFillSymbol(g.symbol.toJson()));
+                } else {
+                    var graphicJson = g.toJson();
+                    clonedGraphic = new Graphic(graphicJson);
+                }
+
+                var measureGeometry = null;
+                var labelText = null;
+                var length = null;
+                var area = null;
+                var x = null;
+                var y = null;
+
+                var areaUnit = this.defaultAreaUnitSelect.value;
+                var areaUnitGS = areaUnit.toLowerCase().replace("_", "-");
+                var lengthUnit = this.defaultDistanceUnitSelect.value;
+                var lengthUnitGS = lengthUnit.toLowerCase().replace("_", "-");
+
+                // set the label text
+                switch (g.geometry.type) {
+                    case 'polyline':
+                        // Insert the mouse point into the last path of the line
+                        var lastPath = clonedGraphic.geometry.paths[clonedGraphic.geometry.paths.length - 1];
+                        measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.paths.length - 1, lastPath.length, evt.mapPoint);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
+                        break;
+
+                    case 'polygon':
+                        // Insert the mouse point into the last path of the line
+                        var lastRing = clonedGraphic.geometry.rings[clonedGraphic.geometry.rings.length - 1];
+                        measureGeometry = clonedGraphic.geometry.insertPoint(clonedGraphic.geometry.rings.length - 1, lastRing.length, evt.mapPoint);
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnitGS);
+                        break;
+
+                    case 'rect':
+                        measureGeometry = clonedGraphic.geometry;
+                        length = geometryEngine.planarLength(measureGeometry, lengthUnitGS);
+                        area = geometryEngine.planarArea(measureGeometry, areaUnitGS);
+                        break;
+
+                    case 'point':
+                    default:
+                        x = evt.mapPoint.x;
+                        y = evt.mapPoint.y;
+                        break;
+                }
+
+                // Update the label text
+                var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+                var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+                var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
+
+                //Prepare text
+                if (x && y) {
+                    labelText = pointPattern.replace("{{x}}", x).replace("{{y}}", y);
+                } else {
+                    var localeLength = jimuUtils.localizeNumber((length < 0 ? length * -1 : length).toFixed(1));
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+                    if (area) {
+                        var localeAreaUnit = this._getAreaUnitInfo(areaUnit).abbr;
+                        var localeArea = jimuUtils.localizeNumber((area < 0 ? area * -1 : area).toFixed(1));
+                        labelText = polygonPattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", localeArea).replace("{{areaUnit}}", localeAreaUnit);
+                    } else {
+                        labelText = polylinePattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit);
+                    }
+                }
+
+                this.mouseTip.setGeometry(evt.mapPoint);
+                this.mouseTip.symbol.setText(labelText);
+            }
+        },
+
+        _initialiseMapTip: function _initialiseMapTip(evt) {
+            this.drawing = true;
+            if (!this.mouseTip) {
+                this.mouseTip = new Graphic(evt.mapPoint, new TextSymbol());
+                this.mouseTip.symbol.setColor(new Color("white"));
+                this.mouseTip.symbol.setHaloSize(1);
+                this.mouseTip.symbol.setHaloColor(new Color("black"));
+                this.mouseTip.symbol.setAlign(TextSymbol.ALIGN_START);
+                this.map.graphics.add(this.mouseTip);
+            }
+        },
+
+        _resetMapTip: function _resetMapTip(clearMapTip) {
+            if (!this.mouseTip) return;
+
+            this.mouseTip.symbol.setText('');
+
+            if (clearMapTip) {
+                this.map.graphics.remove(this.mouseTip);
+                this.mouseTip = null;
+            }
         },
 
         _syncGraphicsToLayers: function _syncGraphicsToLayers() {
@@ -1626,39 +2359,116 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this._polylineLayer.clear();
             this._polygonLayer.clear();
             this._labelLayer.clear();
+
+            var pointDrawings = [],
+                polylineDrawings = [],
+                polygonDrawings = [],
+                labelDrawings = [];
+
             var graphics = this._getAllGraphics();
             array.forEach(graphics, lang.hitch(this, function (g) {
                 var graphicJson = g.toJson();
                 var clonedGraphic = new Graphic(graphicJson);
+                clonedGraphic.setInfoTemplate(null);
                 var geoType = clonedGraphic.geometry.type;
                 var layer = null;
                 var isNeedRTL = false;
 
                 if (geoType === 'point') {
                     if (clonedGraphic.symbol && clonedGraphic.symbol.type === 'textsymbol') {
-                        layer = this._labelLayer;
-                        isNeedRTL = isRTL;
+                        labelDrawings.push(clonedGraphic);
                     } else {
-                        layer = this._pointLayer;
+                        pointDrawings.push(clonedGraphic);
                     }
                 } else if (geoType === 'polyline') {
-                    layer = this._polylineLayer;
+                    polylineDrawings.push(clonedGraphic);
                 } else if (geoType === 'polygon' || geoType === 'extent') {
-                    layer = this._polygonLayer;
+                    polygonDrawings.push(clonedGraphic);
                 }
+            }));
 
-                if (layer) {
-                    var graphic = layer.add(clonedGraphic);
-                    if (true === isNeedRTL && graphic.getNode) {
-                        var node = graphic.getNode();
-                        if (node) {
-                            //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
-                            //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
-                            domStyle.set(node, "direction", "rtl");
-                        }
+            this._buildLayerRenderer(pointDrawings, this._pointLayer, this._createDefaultSymbol("point"));
+            this._buildLayerRenderer(polylineDrawings, this._polylineLayer, this._createDefaultSymbol("polyline"));
+            this._buildLayerRenderer(polygonDrawings, this._polygonLayer, this._createDefaultSymbol("polygon"));
+            this._populateLabelLayer(labelDrawings, this._labelLayer, this._createDefaultSymbol("text"));
+        },
+
+        _buildLayerRenderer: function _buildLayerRenderer(graphics, layer, defaultSymbol) {
+            var symbolClasses = {};
+
+            array.forEach(graphics, lang.hitch(this, function (g) {
+                var symbolJson = g.symbol.toJson();
+                g.setSymbol(null);
+                var hash = g.attributes.symbolClass;
+                if (!symbolClasses[hash]) {
+                    symbolClasses[hash] = {
+                        "value": hash,
+                        "label": g.attributes.name,
+                        "description": "",
+                        "symbol": symbolJson
+                    };
+                }
+                g.setAttributes(this._stripNonStandardAttributes(g.attributes));
+            }));
+
+            var uvrJson = {
+                "type": "uniqueValue",
+                "field1": "symbolClass",
+                "defaultSymbol": null,
+                "uniqueValueInfos": Object.keys(symbolClasses).map(function (e) {
+                    return symbolClasses[e];
+                })
+            };
+
+            var renderer = new UniqueValueRenderer(uvrJson);
+            layer.setRenderer(renderer);
+            layer.applyEdits(graphics, null, null);
+        },
+
+        _populateLabelLayer: function _populateLabelLayer(graphics, layer, defaultSymbol) {
+            var isNeedRTL = false;
+            array.forEach(graphics, lang.hitch(this, function (g) {
+                g.setAttributes(this._stripNonStandardAttributes(g.attributes));
+                var graphic = layer.add(g);
+                if (true === isNeedRTL && graphic.getNode) {
+                    var node = graphic.getNode();
+                    if (node) {
+                        //SVG <text>node can't set className by domClass.add(node, "jimu-rtl"); so set style
+                        //It's not work that set "direction:rtl" to SVG<text>node in IE11, it is IE's bug
+                        domStyle.set(node, "direction", "rtl");
                     }
                 }
             }));
+        },
+
+        _getSymbolHash: function _getSymbolHash(symbolJson) {
+            var hash = 0;
+            if (symbolJson.length == 0) return hash;
+            for (i = 0; i < symbolJson.length; i++) {
+                char = symbolJson.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash;
+        },
+
+        _stripNonStandardAttributes: function _stripNonStandardAttributes(attributes) {
+            return {
+                "parentId": attributes[this._objectIdName],
+                "nameField": attributes["name"],
+                "descriptionField": attributes["description"],
+                "symbolClass": attributes["symbolClass"],
+                "measureField": attributes["measure"]
+            };
+        },
+
+        _formatPortalAttributes: function _formatPortalAttributes(attributes) {
+            return {
+                "name": attributes["nameField"],
+                "description": attributes["descriptionField"],
+                "symbolClass": attributes["symbolClass"],
+                "measure": attributes["measureField"]
+            };
         },
 
         _hideOperationalGraphic: function _hideOperationalGraphic(graphic) {
@@ -1696,7 +2506,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
-        _pushAddOperation: function _pushAddOperation(graphics) {
+        _pushAddOperation: function _pushAddOperation(graphics, holdSyncGraphics) {
             array.forEach(graphics, lang.hitch(this, function (g) {
                 var attrs = g.attributes || {};
                 attrs[this._objectIdName] = this._objectIdCounter++;
@@ -1712,7 +2522,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
 
             // Sync graphics to layers (temp)
-            this._syncGraphicsToLayers();
+            if (holdSyncGraphics === undefined || holdSyncGraphics === false) this._syncGraphicsToLayers();
         },
 
         _pushDeleteOperation: function _pushDeleteOperation(graphics) {
@@ -1803,10 +2613,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         editorOnClickAddCancelButon: function editorOnClickAddCancelButon() {
+            this.drawBoxSetMouseListeners(false);
             this.setMode("add1");
         },
 
-        ////////////////////////////////////// Measure methods     //////////////////////////////////////////////
+        ////////////////////////////////////// MEASURE METHODS //////////////////////////////////////////////
+
         _getGeometryService: function _getGeometryService() {
             if (!this._gs || this._gs == null) {
                 if (this.config.geometryService) {
@@ -1817,7 +2629,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     this._gs = new GeometryService(this._defaultGsUrl);
                 }
             }
-
             return this._gs;
         },
 
@@ -2052,7 +2863,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _setMeasureVisibility: function _setMeasureVisibility() {
-
             var display_point = 'none';
             var display_line = 'none';
             var display_area = 'none';
@@ -2112,22 +2922,22 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 return false;
             }
 
-            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : "{{x}} {{y}}";
-            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : "{{area}} {{areaUnit}}    {{length}} {{lengthUnit}}";
-            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : "{{length}} {{lengthUnit}}";
+            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
 
             //Prepare text
             if (x && y) {
                 var text = pointPattern.replace("{{x}}", x).replace("{{y}}", y);
                 var pointUnit = this.pointUnitSelect.value;
             } else {
-                var localeLength = jimuUtils.localizeNumber(length.toFixed(1));
+                var localeLength = jimuUtils.localizeNumber((length < 0 ? length * -1 : length).toFixed(1));
                 var lengthUnit = this.distanceUnitSelect.value;
                 var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).label;
                 if (area) {
                     var areaUnit = this.areaUnitSelect.value;
                     var localeAreaUnit = this._getAreaUnitInfo(areaUnit).label;
-                    var localeArea = jimuUtils.localizeNumber(area.toFixed(1));
+                    var localeArea = jimuUtils.localizeNumber((area < 0 ? area * -1 : area).toFixed(1));
                     var text = polygonPattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", localeArea).replace("{{areaUnit}}", localeAreaUnit);
                 } else {
                     var text = polylinePattern.replace("{{length}}", localeLength).replace("{{lengthUnit}}", localeLengthUnit);
@@ -2311,7 +3121,36 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }));
         },
 
-        ////////    INIT METHODS ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        _getMeasureAttributeText: function _getMeasureAttributeText(geometry) {
+            var measure = '';
+
+            var areaUnit = this.defaultAreaUnitSelect.value;
+            var lengthUnit = this.defaultDistanceUnitSelect.value;
+            var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+            var pointPattern = this.config.measurePointLabel ? this.config.measurePointLabel : this.defaultMeasurePointLabel;
+            var polygonPattern = this.config.measurePolygonLabel ? this.config.measurePolygonLabel : this.defaultMeasurePolygonLabel;
+            var polylinePattern = this.config.measurePolylineLabel ? this.config.measurePolylineLabel : this.defaultMeasurePolylineLabel;
+
+            if (geometry.type == 'point') {
+                measure = pointPattern.replace("{{x}}", this._round(geometry.x, 2)).replace("{{y}}", this._round(geometry.y, 2));
+            } else if (geometry.type == 'polyline') {
+                this._getLengthAndArea(geometry, false).then(lang.hitch(this, function (result) {
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+                    measure = polylinePattern.replace("{{length}}", jimuUtils.localizeNumber((result.length < 0 ? result.length * -1 : result.length).toFixed(1))).replace("{{lengthUnit}}", localeLengthUnit);
+                }));
+            } else if (geometry.type == 'polygon') {
+                this._getLengthAndArea(geometry, true).then(lang.hitch(this, function (result) {
+                    var localeLengthUnit = this._getDistanceUnitInfo(lengthUnit).abbr;
+                    var localeAreaUnit = this._getAreaUnitInfo(areaUnit).abbr;
+                    measure = polygonPattern.replace("{{length}}", jimuUtils.localizeNumber((result.length < 0 ? result.length * -1 : result.length).toFixed(1))).replace("{{lengthUnit}}", localeLengthUnit).replace("{{area}}", jimuUtils.localizeNumber((result.area < 0 ? result.area * -1 : result.area).toFixed(1))).replace("{{areaUnit}}", localeAreaUnit);
+                }));
+            }
+
+            return measure;
+        },
+
+        ////////////////////////////////////// INIT METHODS /////////////////////////////////////////////////
+
         _bindEvents: function _bindEvents() {
             //bind DrawBox
             this.own(on(this.drawBox, 'IconSelected', lang.hitch(this, this.drawBoxOnTypeSelected)));
@@ -2395,10 +3234,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 "add": this.menuAddButton,
                 "edit": this.menuEditButton,
                 "list": this.menuListButton,
+                "settings": this.menuSettingsButton,
                 "importExport": this.menuListImportExport
             };
 
-            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection];
+            var views = [this.addSection, this.editorSection, this.listSection, this.saveSection, this.loadSection, this.settingsSection];
 
             this.TabViewStack = new ViewStack({
                 viewType: 'dom',
@@ -2419,29 +3259,86 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             //Closure with timeout to be sure widget is ready
             (function (widget) {
                 setTimeout(function () {
-                    widget.importJsonContent(content, "name", "description");
+                    widget.importJsonContent(content, "name", "description", "measure");
                     widget.showMessage(widget.nls.localLoading);
                 }, 200);
             })(this);
         },
 
+        _initPortal: function _initPortal() {
+            // Check if user logged in / has prvileges save to portal
+            this.checkPrivilege().then(lang.hitch(this, function (res) {
+                console.log("_initPortal Check Privileges: ", res);
+                this.portalSaveAllowed = res;
+                if (this.portalSaveAllowed) {
+                    // get the drawing folder
+                    var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                    var portal = portalUtils.getPortal(portalUrl);
+
+                    // Check the portal credentials userid for inproperly formatted values 
+                    if (portal.credential && portal.credential.userId) {
+                        if (portal.credential.userId.includes("\\")) {
+                            // Reformat
+                            var bits = portal.credential.userId.split("\\");
+                            if (bits.length === 2) {
+                                portal.credential.userId = bits[1] + "@" + bits[0];
+                            }
+                        }
+                    }
+
+                    this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                        console.log("_initPortal Get Drawing Folder: ", res);
+                        this.drawingFolder = res;
+
+                        if (this.drawingFolder === null) {
+                            // Create a new folder
+                            this._createDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                                console.log("_initPortal Create Drawing Folder: ", res);
+                                this._getDrawingFolder(portal).then(lang.hitch(this, function (res) {
+                                    console.log("_initPortal Get Drawing Folder After Create: ", res);
+                                    this._refreshDrawingsList();
+                                    //domStyle.set(this.loadTable,'display','block');
+                                }));
+                            }));
+                        } else {
+                            this._refreshDrawingsList();
+                            //domStyle.set(this.loadTable,'display','block');
+                        }
+                    }));
+                }
+            }));
+        },
+
         _initDrawingPopupAndClick: function _initDrawingPopupAndClick() {
             //Set popup template
-            var infoTemplate = new esri.InfoTemplate("${name}", "${description}");
+            this.infoTemplate = new PopupTemplate({
+                "title": "{name}",
+                "description": "{description}",
+                "fieldInfos": [{ "fieldName": "name", "visible": true, "label": this.nls.nameField }, { "fieldName": "description", "visible": true, "label": this.nls.descriptionField }]
+            });
 
-            this._graphicsLayer.setInfoTemplate(infoTemplate);
-            this._pointLayer.setInfoTemplate(infoTemplate);
-            this._polylineLayer.setInfoTemplate(infoTemplate);
-            this._polygonLayer.setInfoTemplate(infoTemplate);
-            this._labelLayer.setInfoTemplate(infoTemplate);
+            this._graphicsLayer.setInfoTemplate(this.infoTemplate);
 
             //Set draw click
             this._onDrawClick = lang.hitch(this, function (evt) {
                 if (!evt.graphic) return;
 
-                this._editorConfig["graphicCurrent"] = evt.graphic;
-                this.setMode("list");
-                this.setInfoWindow(evt.graphic);
+                // Find the parent graphic if layer is not one of the operational layers
+                var parentId = evt.graphic.attributes.parentId;
+                var graphic = null;
+                for (var i = 0, nb = this._graphicsLayer.graphics.length; i < nb; i++) {
+                    if (this._graphicsLayer.graphics[i].attributes[this._objectIdName] === parentId) {
+                        graphic = this._graphicsLayer.graphics[i];
+                        break;
+                    }
+                }
+
+                if (graphic !== null) {
+                    this._editorConfig["graphicCurrent"] = graphic;
+                    this.setMode("list");
+                } else {
+                    return;
+                }
             });
 
             //Allow click
@@ -2473,6 +3370,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     label: unitInfo.label
                 };
                 this.distanceUnitSelect.addOption(option);
+                this.defaultDistanceUnitSelect.addOption(option);
             }));
 
             array.forEach(this.areaUnits, lang.hitch(this, function (unitInfo) {
@@ -2481,6 +3379,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     label: unitInfo.label
                 };
                 this.areaUnitSelect.addOption(option);
+                this.defaultAreaUnitSelect.addOption(option);
             }));
         },
 
@@ -2549,8 +3448,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }));
         },
 
-        //////////////////////////
-        /// ECAN CODE
+        //////////////////////////// ECAN CODE /////////////////////////////////////////////////////////////
 
         _initLayers: function _initLayers() {
             this._graphicsLayer = new GraphicsLayer();
@@ -2564,67 +3462,123 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         "type": this._objectIdType,
                         "alias": this._objectIdName
                     }, {
-                        "name": "name",
+                        "name": "nameField",
                         "type": "esriFieldTypeString",
                         "alias": this.nls.nameField
                     }, {
-                        "name": "description",
+                        "name": "descriptionField",
                         "type": "esriFieldTypeString",
                         "alias": this.nls.descriptionField
                     }, {
-                        "name": "symbol",
-                        "type": "esriFieldTypeString",
+                        "name": "symbolClass",
+                        "type": "esriFieldTypeInteger",
                         "alias": this.nls.symbolField
+                    }, {
+                        "name": "parentId",
+                        "type": "esriFieldTypeInteger",
+                        "alias": "ParentId"
                     }]
                 };
 
-                var pointDefinition = lang.clone(layerDefinition);
+                var layerDefinitionWithMeasure = lang.clone(layerDefinition);
+                layerDefinitionWithMeasure.fields.push({
+                    "name": "measureField",
+                    "type": "esriFieldTypeString",
+                    "alias": "Measure"
+                });
+
+                var options = {
+                    "infoTemplate": new PopupTemplate({
+                        "title": "{nameField}",
+                        "description": "{descriptionField}",
+                        "fieldInfos": [{ "fieldName": "nameField", "visible": true, "label": this.nls.nameField }, { "fieldName": "descriptionField", "visible": true, "label": this.nls.descriptionField }]
+                    })
+                };
+                var optionsWithMeasure = {
+                    "infoTemplate": new PopupTemplate({
+                        "title": "{nameField}",
+                        "description": '<p>{descriptionField}</p><p>[{measureField}]</p>',
+                        "fieldInfos": [{ "fieldName": "nameField", "visible": true, "label": this.nls.nameField }, { "fieldName": "descriptionField", "visible": true, "label": this.nls.descriptionField }]
+                    })
+                };
+
+                var pointDefinition = lang.clone(layerDefinitionWithMeasure);
                 pointDefinition.name = this.nls.points; //this.label + "_" +
                 pointDefinition.geometryType = "esriGeometryPoint";
                 this._pointLayer = new FeatureLayer({
                     layerDefinition: pointDefinition,
                     featureSet: null
-                });
+                }, lang.clone(optionsWithMeasure));
+                this._pointLayer.arcgisProps = {
+                    title: this.nls.points
+                };
+                this._pointLayer._titleForLegend = this.nls.points;
 
-                var polylineDefinition = lang.clone(layerDefinition);
+                var polylineDefinition = lang.clone(layerDefinitionWithMeasure);
                 polylineDefinition.name = this.nls.lines;
                 polylineDefinition.geometryType = "esriGeometryPolyline";
                 this._polylineLayer = new FeatureLayer({
                     layerDefinition: polylineDefinition,
                     featureSet: null
-                });
+                }, lang.clone(optionsWithMeasure));
+                this._polylineLayer.arcgisProps = {
+                    title: this.nls.lines
+                };
+                this._polylineLayer._titleForLegend = this.nls.lines;
 
-                var polygonDefinition = lang.clone(layerDefinition);
+                var polygonDefinition = lang.clone(layerDefinitionWithMeasure);
                 polygonDefinition.name = this.nls.areas;
                 polygonDefinition.geometryType = "esriGeometryPolygon";
                 this._polygonLayer = new FeatureLayer({
                     layerDefinition: polygonDefinition,
                     featureSet: null
-                });
+                }, lang.clone(optionsWithMeasure));
+                this._polygonLayer.arcgisProps = {
+                    title: this.nls.areas
+                };
+                this._polygonLayer._titleForLegend = this.nls.areas;
 
                 var labelDefinition = lang.clone(layerDefinition);
-                labelDefinition.name = this.nls.text;
+                labelDefinition.name = this.nls.labels;
                 labelDefinition.geometryType = "esriGeometryPoint";
                 this._labelLayer = new FeatureLayer({
                     layerDefinition: labelDefinition,
                     featureSet: null
-                });
+                }, lang.clone(options));
+                var ts = this._createDefaultSymbol('text');
+                ts.setText('Text');
+                this._labelLayer.setRenderer(new SimpleRenderer(ts));
+                this._labelLayer.arcgisProps = {
+                    title: this.nls.labels
+                };
+                this._labelLayer._titleForLegend = this.nls.labels;
 
+                /* BEGIN:CHANGE 27 Sep 2017 - 
+                    Issue with Add Layers widget has newly added layers being added into feature collection group below the groupw title if the 
+                    drawings collection is located at top of stack.  Change to add layers indivudally rather than grouped until this is sorted. 
+                
                 var loading = new LoadingIndicator();
                 loading.placeAt(this.domNode);
-
-                LayerInfos.getInstance(this.map, this.map.itemInfo).then(lang.hitch(this, function (layerInfos) {
-                    if (!this.domNode) {
-                        return;
-                    }
-
-                    loading.destroy();
-                    var layers = [this._polygonLayer, this._polylineLayer, this._pointLayer, this._labelLayer];
-                    layerInfos.addFeatureCollection(layers, this.nls.drawingCollectionName);
-                }), lang.hitch(this, function (err) {
-                    loading.destroy();
+                  LayerInfos
+                    .getInstance(this.map, this.map.itemInfo)
+                    .then(lang.hitch(this, function(layerInfos){
+                        if(!this.domNode){
+                          return;
+                        }
+                          loading.destroy();
+                        var layers = [this._polygonLayer, this._polylineLayer,
+                            this._pointLayer, this._labelLayer];
+                        layerInfos.addFeatureCollection(layers, this.nls.drawingCollectionName);
+                    }), lang.hitch(this, function(err){
+                        loading.destroy();
                     console.error("Can not get LayerInfos instance", err);
-                }));
+                    }));
+                */
+
+                this.map.addLayer(this._polygonLayer);
+                this.map.addLayer(this._polylineLayer);
+                this.map.addLayer(this._pointLayer);
+                this.map.addLayer(this._labelLayer);
             } else {
                 this._pointLayer = new GraphicsLayer();
                 this._polylineLayer = new GraphicsLayer();
@@ -2637,7 +3591,349 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             }
         },
 
-        //////////////////////////// WIDGET CORE METHODS ///////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
+
+        convertToDrawing: function convertToDrawing(featureSet) {
+            //do scale check - no longer required as copy action now queries for ungeneralised versions of graphics if layer has capability
+            /*
+            if(this._convertWarningScale && this.map.getScale() > this._convertWarningScale) {
+                this._confirmConvertMessage  = new Message({
+                    message : '<i class="message-warning-icon"></i>&nbsp;' + this.nls.confirmConvertScaleWarning,
+                    buttons:[
+                        {
+                            label:this.nls.ok,
+                            onClick: lang.hitch(this, function(evt) { 
+                                this._convertFeaturesToDrawings(featureSet);
+                                this._confirmConvertMessage.close();
+                                this._confirmConvertMessage = false;
+                            })
+                        },{
+                            label:this.nls.cancel
+                        }
+                    ]
+                });
+              } else { */
+            this._convertFeaturesToDrawings(featureSet);
+            /*}*/
+        },
+
+        _convertFeaturesToDrawings: function _convertFeaturesToDrawings(featureSet) {
+            var graphicJson = null;
+            var clonedGraphic = null;
+            var graphic = null;
+            var graphics = [];
+            var graphicName = null;
+            var graphicDescription = null;
+            var nameValue = null;
+            var symbol = null;
+            for (var i = 0, il = featureSet.features.length; i < il; i++) {
+                graphic = featureSet.features[i];
+                graphicJson = graphic.toJson();
+                clonedGraphic = new Graphic(graphicJson);
+
+                // Set default symbol
+                symbol = this._createDefaultSymbol(clonedGraphic.geometry.type);
+                clonedGraphic.symbol = symbol;
+
+                // Set default attributes
+                graphicName = graphic.attributes['name'] || '';
+                graphicDescription = graphic.attributes['description'] || '';
+                if (featureSet.displayFieldName) {
+                    nameValue = graphic.attributes[featureSet.displayFieldName];
+                    if (nameValue !== '' && nameValue !== undefined) {
+                        graphicName = nameValue;
+                    }
+                }
+
+                clonedGraphic.attributes = {
+                    "name": graphicName,
+                    "description": graphicDescription,
+                    "symbolClass": this._getSymbolHash(JSON.stringify(symbol.toJson()))
+                };
+
+                graphics.push(clonedGraphic);
+            }
+            this._pushAddOperation(graphics);
+            this.setMode('list');
+        },
+
+        _createDefaultSymbol: function _createDefaultSymbol(commonType) {
+            var symbol = null,
+                options = null;
+            switch (commonType) {
+                case 'text':
+                    options = this.config.defaultSymbols && this.config.defaultSymbols.TextSymbol ? this.config.defaultSymbols.TextSymbol : { "verticalAlignment": "middle", "horizontalAlignment": "center" };
+                    symbol = new TextSymbol(options);
+                    break;
+
+                case 'point':
+                    options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleMarkerSymbol ? this.config.defaultSymbols.SimpleMarkerSymbol : null;
+                    symbol = new SimpleMarkerSymbol(options);
+                    break;
+
+                case 'polyline':
+                    options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleLineSymbol ? this.config.defaultSymbols.SimpleLineSymbol : null;
+                    symbol = new SimpleLineSymbol(options);
+                    break;
+
+                case 'polygon':
+                default:
+                    options = this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol ? this.config.defaultSymbols.SimpleFillSymbol : null;
+                    symbol = new SimpleFillSymbol(options);
+                    break;
+            }
+
+            return symbol;
+        },
+
+        ///////////////////////// ADVANCED GEOMETRY METHODS ///////////////////////////////////////////////////////////
+
+        mergeDrawingsHandler: function mergeDrawingsHandler() {
+            var graphics = this.getCheckedGraphics(false);
+            this._mergeDrawings(graphics);
+        },
+
+        _mergeDrawings: function _mergeDrawings(graphics) {
+            // Check for mixed geometry or points and minimum number of features
+            if (this._geometryPointCheck(graphics)) {
+                this.showMessage(this.nls.mergeErrorPointGeometry, 'error');
+                return false;
+            }
+
+            if (graphics.length < 2) {
+                this.showMessage(this.nls.mergeErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            if (this._geometryMixedTypeCheck(graphics)) {
+                this.showMessage(this.nls.mergeErrorMixedGeometry, 'error');
+                return false;
+            }
+
+            var geometries = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                geometries.push(graphics[i].geometry);
+            }
+
+            var newGeometry = geometryEngine.union(geometries);
+            var newGraphic = new Graphic(graphics[0].toJson());
+            newGraphic.setGeometry(newGeometry);
+
+            this._pushAddOperation([newGraphic]);
+            this._removeGraphics(graphics);
+
+            this.setInfoWindow(newGraphic);
+            var extent = graphicsUtils.graphicsExtent([newGraphic]);
+            this.map.setExtent(extent, true);
+            this.listGenerateDrawTable();
+        },
+
+        explodeDrawingsHandler: function explodeDrawingsHandler() {
+            var graphics = this.getCheckedGraphics(false);
+            this._explodeDrawings(graphics);
+        },
+
+        _explodeDrawings: function _explodeDrawings(graphics) {
+            // Check for points and minimum number of features
+            if (this._geometryPointCheck(graphics)) {
+                this.showMessage(this.nls.explodeErrorPointGeometry, 'error');
+                return false;
+            }
+
+            if (graphics.length === 0) {
+                this.showMessage(this.nls.explodeErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            var graphic = null,
+                process = false,
+                geometry = null,
+                newGraphics = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                graphic = graphics[i];
+                process = '';
+                switch (graphic.geometry.type) {
+                    case 'polyline':
+                        if (graphic.geometry.paths.length > 0) process = 'paths';
+                        break;
+
+                    case 'polygon':
+                        if (graphic.geometry.rings.length > 0) process = 'rings';
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (process !== '') {
+                    geometry = graphic.geometry;
+                    for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+                        var newGraphic = new Graphic(graphic.toJson());
+                        var newGeometry = null;
+
+                        switch (process) {
+                            case 'rings':
+                                newGeometry = new Polygon({
+                                    "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                                    "spatialReference": geometry.spatialReference.toJson()
+                                });
+                                break;
+
+                            case 'paths':
+                                newGeometry = new Polyline({
+                                    "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                                    "spatialReference": geometry.spatialReference.toJson()
+                                });
+                                break;
+                        }
+                        newGraphic.setGeometry(newGeometry);
+                        newGraphics.push(newGraphic);
+                    }
+                } else {
+                    newGraphics.push(graphic);
+                }
+            }
+
+            this._pushAddOperation(newGraphics);
+            this._removeGraphics(graphics);
+
+            var extent = graphicsUtils.graphicsExtent(newGraphics);
+            this.map.setExtent(extent, true);
+            this.listGenerateDrawTable();
+        },
+
+        bufferDrawingsHandler: function bufferDrawingsHandler() {
+            var graphics = this.getCheckedGraphics(false);
+            this._bufferDrawings(graphics);
+        },
+
+        bufferDrawingHandler: function bufferDrawingHandler() {
+            var graphic = this._editorConfig["graphicCurrent"];
+            this._bufferDrawings([graphic]);
+        },
+
+        _bufferDrawings: function _bufferDrawings(graphics) {
+            // Check for drawings with text symbols and minimum number of features
+            if (this._labelPointCheck(graphics)) {
+                this.showMessage(this.nls.bufferErrorTextSymbols, 'error');
+                return false;
+            }
+
+            if (graphics.length === 0) {
+                this.showMessage(this.nls.bufferErrorMinimumNumber, 'error');
+                return false;
+            }
+
+            // Show buffer dialog
+            var bufferFeaturesPopup, param;
+            param = {
+                map: this.map,
+                nls: this.nls,
+                config: this.config
+            };
+            // initialize buffer features popup widget
+            bufferFeaturesPopup = new BufferFeaturesPopup(param);
+            bufferFeaturesPopup.startup();
+            //hide popup and start the buffer process
+            bufferFeaturesPopup.onOkClick = lang.hitch(this, function () {
+                var bufferSettings = bufferFeaturesPopup.bufferSettings;
+                var geometries = [],
+                    distances = [],
+                    names = [],
+                    unitLabel = '',
+                    bufferedGeometries = [];
+
+                var unitInfo = this._getDistanceUnitInfo(bufferSettings.unit);
+                unitLabel = unitInfo.abbr;
+
+                if (!bufferSettings.unionResults) {
+                    for (var i = 0, il = graphics.length; i < il; i++) {
+                        for (var r = 0, rl = bufferSettings.distance.length; r < rl; r++) {
+                            geometries.push(graphics[i].geometry);
+                            distances.push(bufferSettings.distance[r]);
+                            names.push(graphics[i].attributes.name + ' (' + bufferSettings.distance[r] + unitLabel + ' buffer)');
+                        }
+                    }
+
+                    var buffers = geometryEngine.buffer(geometries, distances, bufferSettings.unit.toLowerCase().replace("_", "-"), bufferSettings.unionResults);
+
+                    for (var i = 0, il = buffers.length; i < il; i++) {
+                        bufferedGeometries.push(buffers[i]);
+                    }
+                } else {
+                    // Call service once for each ring
+                    for (var r = 0, rl = bufferSettings.distance.length; r < rl; r++) {
+                        geometries.length = 0;
+                        distances.length = 0;
+                        distances.push(bufferSettings.distance[r]);
+                        for (var i = 0, il = graphics.length; i < il; i++) {
+                            geometries.push(graphics[i].geometry);
+                        }
+                        names.push(bufferSettings.distance[r] + unitLabel + ' buffer)');
+
+                        var buffers = geometryEngine.buffer(geometries, distances, bufferSettings.unit.toLowerCase().replace("_", "-"), bufferSettings.unionResults);
+                        bufferedGeometries.push(buffers[0]);
+                    }
+                }
+
+                var newGraphics = [];
+                for (var i = 0, il = bufferedGeometries.length; i < il; i++) {
+                    var symboloptions = this.config.defaultSymbols && this.config.defaultSymbols.SimpleFillSymbol ? this.config.defaultSymbols.SimpleFillSymbol : null;
+                    var symbol = SimpleFillSymbol(symboloptions);
+                    var graphicName = names[i];
+                    var graphic = new Graphic(bufferedGeometries[i], symbol, {
+                        "name": graphicName,
+                        "description": "",
+                        "symbolClass": this._getSymbolHash(JSON.stringify(symbol.toJson()))
+                    });
+                    newGraphics.push(graphic);
+                }
+
+                this._pushAddOperation(newGraphics);
+                var extent = graphicsUtils.graphicsExtent(newGraphics);
+                this.map.setExtent(extent, true);
+                this.listGenerateDrawTable();
+
+                bufferFeaturesPopup.popup.close();
+            });
+        },
+
+        _geometryMixedTypeCheck: function _geometryMixedTypeCheck(graphics) {
+            var geometryTypes = [];
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                var graphic = graphics[i];
+                var geometryType = graphic.geometry.type;
+
+                if (geometryTypes.indexOf(geometryType) === -1) {
+                    geometryTypes.push(geometryType);
+                }
+            }
+            return geometryTypes.length > 1;
+        },
+
+        _geometryPointCheck: function _geometryPointCheck(graphics) {
+            var result = false;
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                if (graphics[i].geometry.type === 'point') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        },
+
+        _labelPointCheck: function _labelPointCheck(graphics) {
+            var result = false;
+            for (var i = 0, il = graphics.length; i < il; i++) {
+                if (graphics[i].symbol !== undefined && graphics[i].symbol.type === 'textsymbol') {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        },
+
+        //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 
         postMixInProperties: function postMixInProperties() {
             this.inherited(arguments);
@@ -2646,6 +3942,23 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             this.config.isOperationalLayer = !!this.config.isOperationalLayer;
 
             this._resetUnitsArrays();
+
+            // Polyfill for includes method - required for IE support
+            if (!String.prototype.includes) {
+                String.prototype.includes = function (search, start) {
+                    'use strict';
+
+                    if (typeof start !== 'number') {
+                        start = 0;
+                    }
+
+                    if (start + search.length > this.length) {
+                        return false;
+                    } else {
+                        return this.indexOf(search, start) !== -1;
+                    }
+                };
+            }
         },
 
         postCreate: function postCreate() {
@@ -2686,6 +3999,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             //Init list Drag & Drop
             this._initListDragAndDrop();
+
+            //Init the portal functionality
+            if (this.config.allowSaveToPortal) {
+                domStyle.set(this.loadDialogAction, 'display', 'inline-block');
+                this._initPortal();
+            } else {
+                domStyle.set(this.loadFileAction, 'display', 'inline-block');
+            }
+
+            // Convert to drawing warning scale - no longer required as copy function now queries for ungeneralised versions of graphics
+            //this._convertWarningScale = this.config.convertWarningScale || 25000;
 
             // initialise the export file name
             this.exportFileName = this.config.exportFileName ? this.config.exportFileName : 'myDrawings';

@@ -89,6 +89,22 @@ define(['dojo/_base/declare', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/_base/
       return this.checked;
     },
 
+    // ECAN addition setChecked(checked)
+    setChecked: function setChecked(checked) {
+      this.checked = checked;
+
+      if (this.checked) {
+        html.addClass(this.selectableCheckBox, 'checked');
+      } else {
+        html.removeClass(this.selectableCheckBox, 'checked');
+      }
+
+      this.emit('stateChange', {
+        checked: this.checked,
+        layerInfo: this.layerInfo
+      });
+    },
+
     updateLayerVisibility: function updateLayerVisibility() {
       var visible = this.layerInfo.isShowInMap() && this.layerInfo.isInScale();
 

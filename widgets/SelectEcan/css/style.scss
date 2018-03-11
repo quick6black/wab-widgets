@@ -26,11 +26,11 @@ $medium_font: 'Avenir Medium';
       family: $light_font;
       size: 12px;
     }
+
     line-height: 16px;
     color: #000000;
     margin: 20px 0;
   }
-
   // label for layer name and number of selected features
   .normal-label {
     line-height: 36px;
@@ -51,16 +51,45 @@ $medium_font: 'Avenir Medium';
 
   .layer-nodes {
     position: absolute;
-    top: 65px;
+    top: 101px;
     bottom: 0;
     width: 100%;
     overflow: auto;
   }
 
-  .jimu-multiple-layers-featureset-chooser{
+  .layer-nodes-toggleall {
+    @extend .layer-nodes;
+    top: 65px;
+  }
+
+  .jimu-multiple-layers-featureset-chooser {
     .draw-item {
       padding: 0;
-      width: 60%;
+    }
+
+    .btn-select {
+      border: 0;
+      background-color: #B7B7B7;
+
+      &:hover {
+        background-color: #006241;
+      }
+
+      &:hover + .jimu-float-trailing {
+        background-color: #006241;
+      }
+
+      &.selected {
+        background-color: #009966;
+      }
+
+      &.selected + .jimu-float-trailing {
+        background-color: #009966;
+      }
+    }
+
+    .btn-select + .jimu-float-trailing {
+      background-color: #B7B7B7;
     }
 
     .btn-clear {
@@ -73,7 +102,6 @@ $medium_font: 'Avenir Medium';
       }
     }
   }
-
   //Style for selectable layer in the first panel
   .selectable-layer-item {
     width: 100%;
@@ -85,10 +113,13 @@ $medium_font: 'Avenir Medium';
       position: relative;
       cursor: pointer;
 
+      .layer-name-toggleall {
+        font-weight: bold;
+      }
+
       > div {
         display: inline-block;
       }
-
       // CheckBox of the layer
       .selectable-check {
         width: 36px;
@@ -170,6 +201,7 @@ $medium_font: 'Avenir Medium';
 
       .selected-num {
         color: #B7B7B7;
+
         &:hover {
           font-weight: normal;
         }
@@ -226,6 +258,7 @@ $medium_font: 'Avenir Medium';
           family: $medium_font;
           size: 14px;
         }
+
         font-size: 14px;
         color: #000000;
         height: 40px;
