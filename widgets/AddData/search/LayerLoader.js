@@ -506,10 +506,19 @@ define(["dojo/_base/declare",
           if (layerObject.layerDefinition && layerObject.layerDefinition.definitionExpression) {
             layer.setDefinitionExpression(layerObject.layerDefinition.definitionExpression, true);
           }
-          // TODO setInfoTemplate
-          //if (!options.ignorePopups && layerObject.popupInfo) {
-          //  layer.setInfoTemplate(new clazz(layerObject.popupInfo));
-          //}
+
+          /* BEGIN CHANGE: ECAN - Enable popups for Imargey service layers.  Original ESRI code was commented out by them */
+
+          //  setInfoTemplate
+          if (layerObject.popupInfo) {
+            var jsonPopInfo, infoTemplate;
+            jsonPopInfo = djJson.parse(djJson.stringify(layerObject.popupInfo));
+            infoTemplate = new PopupTemplate(jsonPopInfo);
+            layer.setInfoTemplate(infoTemplate);
+          }
+
+          /* END CHANGE */
+
           /*
           rasterUtil.populateLayerWROInfo(layer,true).then(
             function(){dfd.resolve(layer);},

@@ -134,6 +134,21 @@ define(["dojo/_base/declare",
         setOption(options, "Curated5",
             this.Curated5CheckBox, this.Curated5TextBox);
         options.Curated5.filter = getStr(this.Curated5FilterTextBox);
+        setOption(options, "Curated6",
+            this.Curated6CheckBox, this.Curated6TextBox);
+        options.Curated6.filter = getStr(this.Curated6FilterTextBox);
+        setOption(options, "Curated7",
+            this.Curated7CheckBox, this.Curated7TextBox);
+        options.Curated7.filter = getStr(this.Curated7FilterTextBox);
+        setOption(options, "Curated8",
+            this.Curated8CheckBox, this.Curated8TextBox);
+        options.Curated8.filter = getStr(this.Curated8FilterTextBox);
+        setOption(options, "Curated9",
+            this.Curated9CheckBox, this.Curated9TextBox);
+        options.Curated9.filter = getStr(this.Curated9FilterTextBox);
+        setOption(options, "Curated10",
+            this.Curated10CheckBox, this.Curated10TextBox);
+        options.Curated10.filter = getStr(this.Curated10FilterTextBox);
 		//
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);
@@ -239,6 +254,21 @@ define(["dojo/_base/declare",
         setOption(options, "Curated5",
             this.Curated5CheckBox, this.Curated5TextBox, true);
         setStr(options.Curated5.filter, this.Curated5FilterTextBox);
+        setOption(options, "Curated6",
+            this.Curated6CheckBox, this.Curated6TextBox, true);
+        setStr(options.Curated6.filter, this.Curated6FilterTextBox);
+        setOption(options, "Curated7",
+            this.Curated7CheckBox, this.Curated7TextBox, true);
+        setStr(options.Curated7.filter, this.Curated7FilterTextBox);
+        setOption(options, "Curated8",
+            this.Curated8CheckBox, this.Curated8TextBox, true);
+        setStr(options.Curated8.filter, this.Curated8FilterTextBox);
+        setOption(options, "Curated9",
+            this.Curated9CheckBox, this.Curated9TextBox, true);
+        setStr(options.Curated9.filter, this.Curated9FilterTextBox);
+        setOption(options, "Curated10",
+            this.Curated10CheckBox, this.Curated10TextBox, true);
+        setStr(options.Curated10.filter, this.Curated10FilterTextBox);
 		//
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);

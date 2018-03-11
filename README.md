@@ -6,6 +6,34 @@ Source code for each widget is located in the **widgets** folder in the root of 
 Unless otherwise stated in the individual widget's readme file, the widgets have been constructed using the Yeoman ESRI widget generator  [https://github.com/Esri/generator-esri-appbuilder-js](https://github.com/Esri/generator-esri-appbuilder-js").    A "Grunt" script has been included as part of the Yeoman generated scaffolding which if run will compile and distribute the code to an instance of the Web AppBuilder application - take a copy of the *sampe-Gruntfile.js* file, rename it to Gruntfile.js, and alter the **appDir** and **stemappDir** variables in the file to the path of the WAB installation and test app that you want to deploy the widgets to.
 
  
+## AddData Widget
+This is a customised variant of the standard Add Data widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm) developed by ESRI.
+
+#### Changes made include:  
+
+- Additional curated groups added that allow more than one curated to be set up. 
+- Modification made to configure widget in CMaps mode.  If CMapsVersion item on config.json is set to allow:true, the details link on the item card in the layer search will open the configured Open Data endpoint if the layer item is tagged with "Open Data".  If the item does not have the Open Data tag, it will open the item details as per normal functionality.  
+- Bug fix in LayerLoader component to correct issue that loading an image layer from Portal/ArcGIS online that has popups enabled in the web item would not set up that popup in the viewer.  
+
+#### Notes
+The following are changes that are still needed to be implemented:
+
+- The Open Data details option is currently hard coded for "http://opendata.canterburymaps.govt.nz/datasets/" - this should be updated at some point to be made a configurable item.
+- Hard coding in the widget related to the namespace means that this widget must be deployed over the top of the standard AddData widget as opposed to side by side.   
+
+
+
+#### Demo
+To be deployed in the future
+
+### Deployment
+Copy the **AddData** widget folder from the **dist** directory and paste it in the widgets repository. **THIS WILL OVERWRITE THE EXISTING ADD DATA WIDGET.**  By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
+
+Configure as per standard Add Data widget.
+
+### Use Notes
+To be completed...
+
 ## eDrawEcan Widget
 This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
 
@@ -52,7 +80,7 @@ To be completed...
 
 
 ## EditFilter Widget
-This is a customised variant of the standard Group Filter widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-geoprocessing.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-geoprocessing.htm) developed by ESRI.
+This is a customised variant of the standard Group Filter widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-group-filter.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-group-filter.htm) developed by ESRI.
 
 #### Changes made include:  
 
@@ -79,6 +107,71 @@ Copy the **EditFilter** widget folder from the **dist** directory and paste it i
 The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
 
 Configure as per standard Group Filter widget.
+
+### Use Notes
+To be completed...
+
+
+## Smart Editor Widget
+This is a customised variant of the standard Smart Editor widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm) developed by ESRI.
+
+#### Changes made include:  
+
+- Function that allows widget to work with Group Filter extended to also support the same functionality with the custom Edit Filter.
+- Select editable feature option extended to include select by point, select by intersecting line, select by intersecting rectangle and select by intersecting polygon.  Requires user select option from drop down each time to enable the tool.
+- **Cut tool** added for breaking line or polygon features into multiple parts.  Requires a single line or polygon feature be selected to be enabled.
+- **Merge tool** added for combining two or more selected editable line or polygon features from the same editable layer into a single feature.  The attributes of the feature that has focus in the attribute inspector are preserved. If any point features are selected, the tool is disabled.  If features from more than one editable layer are selected, the tool is disabled.
+- **Explode multi-part feature tool** added for breaking multipart features into multiple single part features (lines and polygons only). **NOTE - THIS IS A SIMPLE EXPLODE ONLY AND DOES NOT SUPPORT COMPLEX GEOMETRY SUCH DONUT FEATURES - USING IT IN SUCH SITUATIONS MAY RESULT IN UNEXPECTED OUTCOMES.** 
+
+
+#### Notes
+The following are changes that are still needed to be implemented:
+
+- Requires option for calling on open of widget if it is closed
+- Reset should apply default values from parameters again if they have been changed
+- Developed in conjunction with the Edit Filter widget and should accept filter values from that widget or the standard Group Filter widget. 
+
+#### Demo
+To be deployed in the future
+
+### Deployment
+Copy the **Smart Editor ECan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
+
+The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
+
+Configure in Builder. 
+
+### Use Notes
+To be completed...
+
+
+## eLocate Ecan Widget
+This is a customised variant of the standard eLocate widget developed by R Sheitlin [https://community.esri.com/docs/DOC-7046](https://community.esri.com/docs/DOC-7046).  It has been modified to support coordinate systems utilised in New Zealand, with additional functionality for handling NZ Standard Topo Map Sheet grid references as an input/output.
+
+#### Changes made include:  
+
+- Locate and address (like the search widget, but gives you the ability to limit the address search to the maps current extent).
+- Locate coordinates using user defined spatial reference coordinates (i.e. DMS, State Plane, etc).
+- Reverse Geocode capability called Address Inspection. Address Inspection is clicking on the map and getting the address of the map click point. 
+- NZ Topo 50 Grid reference added as input or and output type
+- NZMS260 Grid reference added as input or and output type
+
+#### Notes
+The following are changes that are still needed to be implemented:
+
+- Requires option for calling on open of widget if it is closed
+- Reset should apply default values from parameters again if they have been changed
+- Developed in conjunction with the Edit Filter widget and should accept filter values from that widget or the standard Group Filter widget. 
+
+#### Demo
+To be deployed in the future
+
+### Deployment
+Copy the **Smart Editor ECan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
+
+The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
+
+Configure in Builder. 
 
 ### Use Notes
 To be completed...
