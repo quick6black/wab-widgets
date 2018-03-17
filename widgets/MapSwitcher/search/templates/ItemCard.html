@@ -1,0 +1,21 @@
+<div class="item-card">
+  <div class="item-card-inner">
+    <div class="thumbnail" data-dojo-attach-point="thumbnailNode"></div>
+    <h3 class="title" data-dojo-attach-point="titleNode"></h3>
+    <div class="info" data-dojo-attach-point="typeByOwnerNode"></div>
+    <div class="info" data-dojo-attach-point="dateNode"></div>
+    <div class="action-bar">
+      <span class="message" data-dojo-attach-point="messageNode"></span>
+      <a href="javascript:void(0)"
+        data-dojo-attach-point="openButton"
+        data-dojo-attach-event="onClick: openClicked"
+        >${i18n.search.item.actions.open}
+      </a>
+      <a href="javascript:void(0)"
+        data-dojo-attach-point="detailsButton"
+        data-dojo-attach-event="onClick: detailsClicked"
+        >${i18n.search.item.actions.details}
+      </a>
+    </div>
+  </div>
+</div>
