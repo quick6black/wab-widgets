@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-class", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/ItemCard.html", "dojo/i18n!../nls/strings", "./util"], function (declare, array, locale, domClass, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, util) {
+define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-class", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/ItemCard.html", "dojo/i18n!../nls/strings", "./util", 'jimu/shareUtils', "jimu/utils", 'esri/urlUtils', 'dojo/_base/lang'], function (declare, array, locale, domClass, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, util, shareUtils, jimuUtils, esriUrlUtils, lang) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -30,6 +30,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
 
       //ECan
       this.config = this.resultsPane.searchPane.wabWidget.config;
+      this.appConfig = this.resultsPane.searchPane.wabWidget.appConfig;
+      this.map = this.resultsPane.getMap();
       //
     },
 
@@ -38,9 +40,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
         return;
       }
       this.inherited(arguments);
-      //ECan
-      //this.config = this.wabWidget.config;
-      //
       this.render();
     },
 
@@ -54,7 +53,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
 
       util.setNodeText(self.messageNode, i18n.search.item.messages.opening);
 
-      alert('Opening map');
+      var url = this._prepareUrl();
+      window.location.href = url;
     },
 
     detailsClicked: function detailsClicked() {
@@ -92,7 +92,7 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
       nd.innerHTML = "";
       thumbnailUrl = util.checkMixedContent(thumbnailUrl);
       var thumbnail = document.createElement("IMG");
-      thumbnail.src = thumbnailUrl || "widgets/AddData/images/placeholder_120x80.png";
+      thumbnail.src = thumbnailUrl || "widgets/MapSwitcher/images/placeholder_120x80.png";
       nd.appendChild(thumbnail);
     },
 
@@ -129,6 +129,35 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
             s = s.replace("{owner}", item.owner);
             util.setNodeText(this.typeByOwnerNode, s);
       */
+    },
+
+    _prepareUrl: function _prepareUrl() {
+      var baseUrl = shareUtils.getBaseHrefUrl(window.portalUrl);
+      var item = this.item;
+
+      var resultUrl = shareUtils.addQueryParamToUrl(baseUrl, "itemid", item.id, true);
+
+      // Check for config parameter in url
+      var urlParams = jimuUtils.urlToObject(window.location.href).query || {};
+      if (urlParams.config) {
+        resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "config", urlParams.config, true);
+      }
+
+      var pt = this.map.extent.getCenter();
+      var ptUrl = pt.x + "," + pt.y + "," + pt.spatialReference.wkid;
+      resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "center", ptUrl, true);
+
+      // Scale used in preference to level in case basemaps use different lods or are dynamic
+      //var level = this.map.getLevel();
+      //if (typeof level === "number" && level !== -1) {
+      //  resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "level", this.map.getLevel(), true);
+      //} else {
+      //use scale if no level
+      resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "scale", this.map.getScale(), true);
+      //}
+
+
+      return resultUrl;
     }
 
   });

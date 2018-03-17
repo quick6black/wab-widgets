@@ -40,7 +40,7 @@ define(['dojo/_base/declare', "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
         });
         self._initListeners();
         self.resize();
-        //console.warn("AddData.startup",this);
+        //console.warn("MapSwitcher.startup",this);
       }).otherwise(function (error) {
         console.warn("MapSwitcher.startup error:", error);
         self.inherited(args);
@@ -132,7 +132,7 @@ define(['dojo/_base/declare', "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
         this.searchPane.searchContext = searchContext;
         this.searchPane.portal = portal;
       }
-      //console.warn("AddData.portal",portal);
+      //console.warn("MapSwitcher.portal",portal);
 
       var msg = this.nls.search.loadError + arcgisOnlineUrl;
       var arcgisOnlineOption = scopeOptions.ArcGISOnline;
