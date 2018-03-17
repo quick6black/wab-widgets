@@ -913,7 +913,6 @@ function(
 
             this.editorMeasureConfigure(graphic, false);
         },
-
         editorModifyToolsConfigure : function (geometry) {
             if (geometry) {
                 switch(geometry.type) {
@@ -937,8 +936,8 @@ function(
                 return;
 
             //Set this symbol in symbol chooser
-            this.editorSymbolChooser.showBySymbol(symbol);
             this.editorSymbolChooser.showByType(this.editorSymbolChooser.type);
+            this.editorSymbolChooser.showBySymbol(symbol);
             this._editorConfig['symboltype'] = this.editorSymbolChooser.type;
 
             var type = symbol.type;

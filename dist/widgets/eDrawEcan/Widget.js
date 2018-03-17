@@ -725,7 +725,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorMeasureConfigure(graphic, false);
         },
-
         editorModifyToolsConfigure: function editorModifyToolsConfigure(geometry) {
             if (geometry) {
                 switch (geometry.type) {
@@ -748,8 +747,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (!symbol) return;
 
             //Set this symbol in symbol chooser
-            this.editorSymbolChooser.showBySymbol(symbol);
             this.editorSymbolChooser.showByType(this.editorSymbolChooser.type);
+            this.editorSymbolChooser.showBySymbol(symbol);
             this._editorConfig['symboltype'] = this.editorSymbolChooser.type;
 
             var type = symbol.type;
