@@ -776,3 +776,59 @@
 input[type=text]::-ms-clear {
     display: none;
 }
+
+.jimu-widget-edraw-ecan .switch-toggle-group {
+  padding: 5px;
+}
+.jimu-widget-edraw-ecan .switch-toggle-group .checkbox-inline {
+  padding-left: 36px;
+  vertical-align: top;
+}
+.jimu-widget-edraw-ecan .switch-toggle-group .switch-toggle.dijitCheckBox {
+  /*margin-left: -36px;*/
+}
+
+.jimu-widget-edraw-ecan .switch-toggle.dijitCheckBox {
+  height: 16px;
+  width: 28px;
+  border: 0 none;
+  background: #e04f1d;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+.jimu-widget-edraw-ecan .switch-toggle.dijitCheckBox:before {
+  content: "";
+  background: #f8f8f8;
+  position: absolute;
+  padding: 0;
+  height: 12px;
+  width: 12px;
+  left: auto;
+  right: 2px;
+  top: 2px;
+  z-index: 1;
+  -webkit-transition: right 0.3s;
+  -moz-transition: right 0.3s;
+  -o-transition: right 0.3s;
+  transition: right 0.3s;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+}
+.jimu-widget-edraw-ecan .switch-toggle.dijitCheckBox input {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  z-index: 2;
+}
+.jimu-widget-edraw-ecan .switch-toggle.dijitCheckBox.dijitCheckBoxChecked {
+  background: #50ad4e;
+}
+.jimu-widget-edraw-ecan .switch-toggle.dijitCheckBox.dijitCheckBoxChecked:before {
+  right: 14px;
+}

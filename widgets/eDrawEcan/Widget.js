@@ -510,7 +510,9 @@ function(
             if (nb_graphics < 1)
                 return (asString) ? '' : false;
 
+            var localStoreOpen = this.localStorageOptionToggle.checked ? "true" : "false";
             var content = {
+                "loadOnOpen" : localStoreOpen,
                 "features" : [],
                 "displayFieldName" : "",
                 "fieldAliases" : {},
@@ -3534,8 +3536,10 @@ function(
         },
 
         _initLocalStorage : function () {
-            if (!this.config.allowLocalStorage)
+            if (!this.config.allowLocalStorage) {
+                domStyle.set(this.localStorageSettingsSection, 'display', 'none');
                 return;
+            }
 
             this._localStorageKey =
                 (this.config.localStorageKey) ? 'WebAppBuilder.2D.eDrawEcan.' + this.config.localStorageKey : 'WebAppBuilder.2D.eDrawEcan';
@@ -3549,8 +3553,12 @@ function(
             (function (widget) {
                 setTimeout(
                     function () {
-                    widget.importJsonContent(content, "name", "description", "measure");
-                    widget.showMessage(widget.nls.localLoading);
+                    if(content.loadOnOpen === "true" || content.loadOnOpen === undefined) {
+                        widget.importJsonContent(content, "name", "description", "measure");
+                        widget.showMessage(widget.nls.localLoading);
+                    }
+            
+                    widget.localStorageOptionToggle.set("checked", content.loadOnOpen === "true");
                 }, 200);
             })(this);
         },
@@ -4270,6 +4278,23 @@ function(
             }
             return result;
         },
+
+        _localStorageOptionChange : function (newState) {
+            this._updateLoadOnOpenSetting(newState);
+        },
+
+        _updateLoadOnOpenSetting : function (openOnLoad) {
+            if (!this.config.allowLocalStorage)
+                return;
+
+            var newValue = openOnLoad ? "true" : "false";
+            var content = localStore.get(this._localStorageKey) || {};
+            if (content.loadOnOpen !== newValue) {
+                content.loadOnOpen = newValue;
+                localStore.set(this._localStorageKey, content);
+            }
+        },
+
 
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 

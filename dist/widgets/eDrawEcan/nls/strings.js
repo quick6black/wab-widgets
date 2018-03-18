@@ -204,6 +204,11 @@ define({
 		    }
 	    },
 
+	    localStorage : {
+	    	loadOnOpenLabel: "Load last drawings when first opened?",
+	    	loadOnOpenTitle: "Click to toggle loading the last drawings you created when this tool is opened in a new session."
+	    },
+
 	    _featureAction_ConvertToDrawing: "Convert to Drawing"				
 	}),
 	"ar" : 1,
