@@ -61,6 +61,7 @@ define([
         'dijit/form/TextBox', 
         'dijit/form/ValidationTextBox',
         'dijit/form/Button',
+        'dijit/form/CheckBox', 
         'jimu/dijit/ViewStack',
         'jimu/dijit/SymbolChooser',
         'jimu/dijit/DrawBox',
@@ -131,6 +132,7 @@ function(
     TextBox,
     ValidationTextBox,
     Button,
+    CheckBox,
     ViewStack, 
     SymbolChooser, 
     DrawBox, 
@@ -510,7 +512,9 @@ function(
             if (nb_graphics < 1)
                 return (asString) ? '' : false;
 
+            var localStoreOpen = this.localStorageOptionToggle.checked ? "true" : "false";
             var content = {
+                "loadOnOpen" : localStoreOpen,
                 "features" : [],
                 "displayFieldName" : "",
                 "fieldAliases" : {},
@@ -913,7 +917,6 @@ function(
 
             this.editorMeasureConfigure(graphic, false);
         },
-
         editorModifyToolsConfigure : function (geometry) {
             if (geometry) {
                 switch(geometry.type) {
@@ -937,8 +940,8 @@ function(
                 return;
 
             //Set this symbol in symbol chooser
-            this.editorSymbolChooser.showBySymbol(symbol);
             this.editorSymbolChooser.showByType(this.editorSymbolChooser.type);
+            this.editorSymbolChooser.showBySymbol(symbol);
             this._editorConfig['symboltype'] = this.editorSymbolChooser.type;
 
             var type = symbol.type;
@@ -3535,8 +3538,10 @@ function(
         },
 
         _initLocalStorage : function () {
-            if (!this.config.allowLocalStorage)
+            if (!this.config.allowLocalStorage) {
+                domStyle.set(this.localStorageSettingsSection, 'display', 'none');
                 return;
+            }
 
             this._localStorageKey =
                 (this.config.localStorageKey) ? 'WebAppBuilder.2D.eDrawEcan.' + this.config.localStorageKey : 'WebAppBuilder.2D.eDrawEcan';
@@ -3550,8 +3555,12 @@ function(
             (function (widget) {
                 setTimeout(
                     function () {
-                    widget.importJsonContent(content, "name", "description", "measure");
-                    widget.showMessage(widget.nls.localLoading);
+                    if(content.loadOnOpen === "true" || content.loadOnOpen === undefined) {
+                        widget.importJsonContent(content, "name", "description", "measure");
+                        widget.showMessage(widget.nls.localLoading);
+                    }
+            
+                    widget.localStorageOptionToggle.set("checked", content.loadOnOpen === "true");
                 }, 200);
             })(this);
         },
@@ -4271,6 +4280,23 @@ function(
             }
             return result;
         },
+
+        _localStorageOptionChange : function (newState) {
+            this._updateLoadOnOpenSetting(newState);
+        },
+
+        _updateLoadOnOpenSetting : function (openOnLoad) {
+            if (!this.config.allowLocalStorage)
+                return;
+
+            var newValue = openOnLoad ? "true" : "false";
+            var content = localStore.get(this._localStorageKey) || {};
+            if (content.loadOnOpen !== newValue) {
+                content.loadOnOpen = newValue;
+                localStore.set(this._localStorageKey, content);
+            }
+        },
+
 
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 

@@ -1,5 +1,5 @@
-# esri-webappbuilder-widget-eDraw-Ecan
-Enhanced draw widget for WebApp Builder for ArcGIS.
+# eDraw Widget (Ecan Variant)
+Enhanced draw widget for Web AppBuilder for ArcGIS.
 
 This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
 
@@ -13,7 +13,9 @@ This is a customised variant of the eDraw widget [https://github.com/magis-nc/es
 - UI added to display a list of all saved drawings in portal/ArcGIS online.  Users can manage saved drawings from UI including deleting them.  A placeholder option for and action that can show details and allow user to rename a drawing is in place, thought this functionality is not developed yet.     
 - Advanced geometry options for union of polyline or polygon drawings added, as is a function to explode multipart geometry drawings into individual drawings.  Functionality for creating buffer graphics added.
 - Custom feature action in widget now allows features in popups or other widgets to be sent to the eDraw widget and converted to drawing objects.
-- 
+- Users can now change whether they want to load drawings saved in local storage if the widget has been configured to allow it.  This is controlled by a toggle option displayed on the settings tab of the widget in runtime mode.  If the allow local storage mode is disabled in the widget settings, this toggle is hidden. 
+
+
 ## configuration :
 - export file name.
 - Confirm on delete. A confirm dialog when user delete drawing(s) ?
@@ -22,7 +24,7 @@ This is a customised variant of the eDraw widget [https://github.com/magis-nc/es
     - Local storage key : let empty or set a name :
         - if empty, all apps with eDraw widgets share the same local storage (apps on the same server)
         - if not empty, all apps with the same key share the same local storage (apps on the same server)
-- Choose availables font families in text plus
+- Choose available font families in text plus
 - (without UI) set default symbols
 - use geometryEngine for measure ?
 - specify geometryServer for measure (not used if geometryEngine is activated)
@@ -30,9 +32,10 @@ This is a customised variant of the eDraw widget [https://github.com/magis-nc/es
 - measure's labels patterns
         
 ## Installation :
-Add eDrawEcan folder in your webApp Builder client\stemapp\widgets folder.
-Download Release here : 
-https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest
+Add eDrawEcan folder in your Web AppBuilder client\stemapp\widgets folder.
+
+Download Release here:  
+[https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest](https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest)
 
 ## Demo :
 To be created
@@ -40,10 +43,14 @@ To be created
 
 ### Changes
 
-**27 September 2017**     
-
-
+**27 September 2017**  
+   
 - Alteration to following functions to **Widget.js** in section marked *BEGIN:CHANGE 27 Sep 2017*:  
-    -  **\_initLayers** function altered to bypass creating a feature collection and adding it to the map in favour of adding the point, line, area and label features layers to the map ungrouped.  Change made to correct issue found when code ported to WAB 2.5 where it was discovered the when used in conjunction with AddLayers widget and Layers Widget, newly added layers from AddLayers are appearing in the feature collection group in the layers list if the drawing layers are located at the top of the layer stack.   Label for layer that holds text label drawings changed to use new proeprty in nls strings file called "labels" nls"
+    -  **\_initLayers** function altered to bypass creating a feature collection and adding it to the map in favour of adding the point, line, area and label features layers to the map un-grouped.  Change made to correct issue found when code ported to WAB 2.5 where it was discovered the when used in conjunction with AddLayers widget and Layers Widget, newly added layers from AddLayers are appearing in the feature collection group in the layers list if the drawing layers are located at the top of the layer stack.   Label for layer that holds text label drawings changed to use new property in nls strings file called "labels" nls"
 
--- New parameter added to nls strings.js file for text labels to bbe used in preference to "text" value used for title of the layer which holds the text label graphics 
+- New parameter added to nls strings.js file for text labels to be used in preference to "text" value used for title of the layer which holds the text label graphics 
+
+**18 March 2018**
+
+- Bugfix for issue when point graphics using picture marker symbols opened selected and displayed in symbol editor, the symbol settings were not being applied in the symbol editor.  Alteration made in **Widget.js** file in the **editorSymbolChooserConfigure** method to switch the order that the **showByType** and **showBySymbol** methods are called on the editorSymbolChooser instance.  
+- User client side settings added for choosing whether to load any drawings stored in the local storage from the previous session.  New toggle button added to the **Settings** tab on the widget.  Requires that the widget have allow local storage setting in the config set to true, otherwise client toggle option is hidden. 
