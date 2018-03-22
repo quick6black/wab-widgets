@@ -231,6 +231,8 @@
     float: left;
     height: 36px;
     width: 36px; }
+  .jimu-widget-edraw-ecan .jimu-input {
+    color: #898989; }
   .jimu-widget-edraw-ecan #nameField {
     width: 100%; }
   .jimu-widget-edraw-ecan #descriptionField {
