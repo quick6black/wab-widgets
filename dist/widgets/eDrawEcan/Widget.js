@@ -323,6 +323,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _removeGraphic: function _removeGraphic(graphic, holdSyncGraphics) {
+            this.setInfoWindow(false);
+
             if (graphic.measure && graphic.measure.graphic) {
                 this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
@@ -789,25 +791,30 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         editorActivateSnapping: function editorActivateSnapping(bool) {
+            /*
             //If disable
             if (!bool) {
                 this.map.disableSnapping();
                 return;
             }
-
-            //If enable
+              //If enable
             this.map.enableSnapping({
-                "layerInfos": [{
-                    "layer": this.drawBox.drawLayer
-                }, {
-                    "layer": this._pointLayer
-                }, {
-                    "layer": this._polylineLayer
-                }, {
-                    "layer": this._polygonLayer
-                }],
-                "tolerance": 20
+                "layerInfos" : [{
+                        "layer" : this.drawBox.drawLayer
+                    },
+                    {
+                        "layer" : this._pointLayer
+                    },
+                    {
+                        "layer" : this._polylineLayer
+                    },
+                    {
+                        "layer" : this._polygonLayer
+                    }
+                ],
+                "tolerance" : 20
             });
+            */
         },
 
         editorUpdateTextPlus: function editorUpdateTextPlus() {
@@ -3596,6 +3603,35 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this.map.addLayer(this._polylineLayer);
                 this.map.addLayer(this._pointLayer);
                 this.map.addLayer(this._labelLayer);
+            }
+
+            /* BEGIN: ECAN CHANGE - Add layers to snapping manager - lables not included for snapping */
+            this._updateSnapping(this._polygonLayer);
+            this._updateSnapping(this._polylineLayer);
+            this._updateSnapping(this._pointLayer);
+
+            /* END: ECAN CHANGES */
+        },
+
+        _updateSnapping: function _updateSnapping(graphicsLyr) {
+            if (this.map.snappingManager && graphicsLyr) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === graphicsLyr.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = [];
+                    array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+
+                    layerInfos.push({
+                        layer: graphicsLyr
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
             }
         },
 

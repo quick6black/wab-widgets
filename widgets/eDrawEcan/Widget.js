@@ -493,6 +493,8 @@ function(
         },
 
         _removeGraphic : function (graphic, holdSyncGraphics) {
+            this.setInfoWindow(false);
+
             if (graphic.measure && graphic.measure.graphic) {
                 this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
@@ -985,6 +987,7 @@ function(
         },
 
         editorActivateSnapping : function (bool) {
+            /*
             //If disable
             if (!bool) {
                 this.map.disableSnapping();
@@ -1008,6 +1011,7 @@ function(
                 ],
                 "tolerance" : 20
             });
+            */
         },
 
         editorUpdateTextPlus : function () {
@@ -3912,7 +3916,37 @@ function(
                 this.map.addLayer(this._pointLayer);
                 this.map.addLayer(this._labelLayer);
             }
+
+            /* BEGIN: ECAN CHANGE - Add layers to snapping manager - lables not included for snapping */
+            this._updateSnapping(this._polygonLayer);
+            this._updateSnapping(this._polylineLayer);
+            this._updateSnapping(this._pointLayer);
+
+            /* END: ECAN CHANGES */
         },
+
+        _updateSnapping: function (graphicsLyr) {
+            if (this.map.snappingManager && graphicsLyr) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+                    return layerInfo.layer.id === graphicsLyr.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = []; 
+                    array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+            
+                    layerInfos.push({
+                        layer: graphicsLyr
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
 
         ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
 
