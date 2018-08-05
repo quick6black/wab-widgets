@@ -28,12 +28,15 @@ define([
   "jimu/dijit/ColorPickerButton"
 ], function(declare, lang, Color, on, array, query, html, _WidgetsInTemplateMixin, BaseWidgetSetting, CheckBox) {
   var PARTIAL_WITHIN = 'partial', WHOLLY_WITHIN = 'wholly';
+  var ALL_LAYERS = 'all', VISIBLE_LAYERS = 'visible', LAYERS_OFF = null;
   return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
     baseClass: 'jimu-widget-select-setting',
 
     selectionColor: '',
     selectionMode: '',
+    selectOnActivate: true,
     allowExport: false,
+    selectedLayersMode: null,
 
     postMixInProperties:function(){
       this.inherited(arguments);
@@ -48,6 +51,12 @@ define([
         checked: this.config && this.config.allowExport,
         onChange: lang.hitch(this, this._onAllowExportChange)
       }, this.exportCheckBoxDiv);
+
+      this.selectOnActivateCheckBox = new CheckBox({
+        label: this.nls.selectOnActivate,
+        checked: this.config && this.config.selectOnActivate,
+        onChange: lang.hitch(this, this._onSelectOnActivateChange)
+      }, this.selectOnActivateCheckBoxDiv);
 
       if(this.config) {
         this._init();
@@ -73,6 +82,24 @@ define([
       this.allowExport = checked;
     },
 
+    _onSelectOnActivateChange: function(checked) {
+      this.selectOnActivate = checked;
+    },
+
+
+    _onSelectAllMode: function() {
+      this.selectedLayersMode = ALL_LAYERS;
+    },
+
+    _onSelectVisibleMode: function() {
+      this.selectedLayersMode = VISIBLE_LAYERS;
+    },
+
+    _onSelectNoneMode: function() {
+      this.selectedLayersMode = LAYERS_OFF;
+    },
+
+
     _init: function() {
       this.selectionColor = this.config.selectionColor;
       if(this.config.selectionColor) {
@@ -88,8 +115,24 @@ define([
         this._onSelectWhollyMode();
       }
 
+      this.selectedLayersMode = this.config.selectedLayersMode;
+      if(this.config.selectedLayersMode === ALL_LAYERS) {
+        this.allLayersMode.checked = true;
+        this._onSelectAllMode();
+      }else if(this.config.selectedLayersMode === VISIBLE_LAYERS || this.config.selectedLayersMode === undefined) {
+        this.visibleLayersMode.checked = true;
+        this._onSelectVisibleMode();
+      }else if(this.config.selectedLayersMode === LAYERS_OFF) {
+        this.layersOffMode.checked = true;
+        this._onSelectNoneMode();
+      }
+
       this.allowExport = this.config.allowExport;
       this.allowExportCheckBox.setValue(this.allowExport);
+
+      this.selectOnActivate = this.config.selectOnActivate;
+      this.selectOnActivateCheckBox.setValue(this.selectOnActivate);
+
 
       this._selectDrawingTools(this.config.geometryTypes || ['EXTENT']);
     },
@@ -103,7 +146,9 @@ define([
       return {
         selectionColor: this.selectionColor,
         selectionMode: this.selectionMode,
+        selectedLayersMode: this.selectedLayersMode,
         allowExport: this.allowExport,
+        selectOnActivate: this.selectOnActivate,
         geometryTypes: this._getSelectedDrawingTools()
       };
     },

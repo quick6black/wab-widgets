@@ -32,6 +32,7 @@ define(['dojo/_base/declare',
   'jimu/dijit/FeatureSetChooserForMultipleLayers',
   'jimu/LayerInfos/LayerInfos',
   'jimu/SelectionManager',
+  'jimu/dijit/FeatureActionPopupMenu',
   './layerUtil',
   './SelectableLayerItem',
   './FeatureItem',
@@ -42,7 +43,7 @@ define(['dojo/_base/declare',
 ],
 function(declare, lang, html, array, on, all, _WidgetsInTemplateMixin, SimpleMarkerSymbol,
 SimpleLineSymbol, SimpleFillSymbol, SymbolJsonUtils, Color, BaseWidget, WidgetManager, ViewStack,
-FeatureSetChooserForMultipleLayers, LayerInfos, SelectionManager, layerUtil,
+FeatureSetChooserForMultipleLayers, LayerInfos, SelectionManager, PopupMenu, layerUtil,
 SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     baseClass: 'jimu-widget-select-ecan',
@@ -62,6 +63,7 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
       this.defaultFillSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
           this.defaultLineSymbol,
           new Color([selectionColor.r, selectionColor.g, selectionColor.b, 0.3]));
+      this.popupMenu = PopupMenu.getInstance();
       /**
        * Helper object to keep which layer is selectable.
        */
@@ -123,20 +125,34 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
         lang.hitch(this, this._layerVisibilityChanged)));
 
       this.own(on(this.map, 'zoom-end', lang.hitch(this, this._layerVisibilityChanged)));
+      this.own(on(this.settingNode, 'click', lang.hitch(this, function(event) {
+        event.stopPropagation();
+        var position = html.position(event.target);
+        this.showPopup(position);
+      })));
+    },
 
-      ///////////////////////////// ECAN CHANGES /////////////////////////////
-
-      this.toggleAllChecked = false;
-
-      if (this.toggleAllChecked) {
-          html.addClass(this.toggleAllCheckBox, 'checked');
-      } else {
-          html.removeClass(this.toggleAllCheckBox, 'checked');
-      }
-
-      this.own(on(this.toggleAllCheckBox, 'click', lang.hitch(this, this._toggleAllChecked)));
-        
-      ///////////////////////// END OF ECAN CHANGES //////////////////////////
+    showPopup: function(position) {
+      var actions = [{
+        iconClass: 'no-icon',
+        label: this.nls.turnonAll,
+        data: {},
+        onExecute: lang.hitch(this, this._turnOnAllLayers)
+      },
+      {
+        iconClass: 'no-icon',
+        label: this.nls.turnoffAll,
+        data: {},
+        onExecute: lang.hitch(this, this._turnOffAllLayers)
+      },
+      {
+        iconClass: 'no-icon',
+        label: this.nls.toggleSelect,
+        data: {},
+        onExecute: lang.hitch(this, this._toggleAllLayers)
+      }];
+      this.popupMenu.setActions(actions);
+      this.popupMenu.show(position);
     },
 
     onDeActive: function(){
@@ -148,7 +164,11 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
 
     onActive: function(){
       this._setSelectionSymbol();
-      if (!this.selectDijit.isActive()) {
+      
+      // ECAN CHANGE - Specifiy whether select dijit should be activuated when widget activates
+      var setActive = this.config.selectOnActivate !== undefined ? this.config.selectOnActivate : true;
+
+      if (setActive && !this.selectDijit.isActive()) {
         this.selectDijit.activate();
       }
     },
@@ -162,6 +182,26 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
         this.selectDijit.deactivate();
       }
       this._clearAllSelections();
+    },
+
+    _filterLayerInfo: function(layerInfoArray) {
+      if (!this.config.layerState) {
+        return layerInfoArray;
+      }
+      var layerInfosObject = LayerInfos.getInstanceSync();
+      var webmapLayerInfos = layerInfosObject.getLayerInfoArrayOfWebmap();
+      return array.filter(layerInfoArray, lang.hitch(this, function(layerInfo) {
+        var inWhiteList = this.config.layerState[layerInfo.id] &&
+            this.config.layerState[layerInfo.id].selected;
+        if (inWhiteList) {
+          return true;
+        } else if(this.config.includeRuntimeLayers !== false) {
+          return array.every(webmapLayerInfos, function(webmapLayerInfo) {
+            return layerInfo.getRootLayerInfo().id !== webmapLayerInfo.id;
+          });
+        }
+        return false;
+      }));
     },
 
     _initLayers: function(layerInfoArray) {
@@ -179,9 +219,16 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
             var layerInfo = layerInfoArray[index];
             var visible = layerInfo.isShowInMap() && layerInfo.isInScale();
 
+            // ECAN CHANGE - Configure initial state of selected check box to override visible state
+
+            var checked = visible;
+            if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
+              checked = this.config.selectedLayersMode === 'none' ? false : true;
+            }
+
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
-              checked: false,//visible, -- ECAN default to not-selected initially
+              checked: checked,//visible, -- ECAN default to not-selected initially
               layerVisible: visible,
               folderUrl: this.folderUrl,
               allowExport: this.config ? this.config.allowExport : false,
@@ -213,6 +260,33 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
         this._setSelectionSymbol();
         this.shelter.hide();
       }));
+    },
+
+    _turnOffAllLayers: function() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function(layerItem) {
+        layerItem.turnOff();
+      }));
+      this.selectDijit.setFeatureLayers([]);
+      this.shelter.hide();
+    },
+
+    _turnOnAllLayers: function() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function(layerItem) {
+        layerItem.turnOn();
+      }));
+      this.selectDijit.setFeatureLayers(this._getSelectableLayers());
+      this.shelter.hide();
+    },
+
+    _toggleAllLayers: function() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function(layerItem) {
+        layerItem.toggleChecked();
+      }));
+      this.selectDijit.setFeatureLayers(this._getSelectableLayers());
+      this.shelter.hide();
     },
 
     _setSelectionSymbol: function(){
@@ -303,20 +377,7 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
       this.viewStack.switchView(0);
     },
 
-	///////////////////////////// ECAN CHANGES /////////////////////////////
-
-    toggleAllChecked: false,
-    
-    _toggleAllChecked: function (event) {
-        //Event.stop(event);
-
-        html.toggleClass(this.toggleAllCheckBox, 'checked');
-        this.toggleAllChecked = html.hasClass(this.toggleAllCheckBox, 'checked');
-
-        array.forEach(this.layerItems, function (layerItem) {
-            layerItem.setChecked(this.toggleAllChecked);
-        }, this);
-    },
+   	///////////////////////////// ECAN CHANGES /////////////////////////////
 
     /// Custome function added to handle a passed featureset to generate a shape to select features by
     selectByFeature : function (featureSet) {

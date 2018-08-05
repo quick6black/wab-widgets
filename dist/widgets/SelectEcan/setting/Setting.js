@@ -17,12 +17,17 @@
 define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/Color', "dojo/on", 'dojo/_base/array', 'dojo/query', 'dojo/_base/html', "dijit/_WidgetsInTemplateMixin", "jimu/BaseWidgetSetting", "jimu/dijit/CheckBox", "jimu/dijit/ColorPickerButton"], function (declare, lang, Color, on, array, query, html, _WidgetsInTemplateMixin, BaseWidgetSetting, CheckBox) {
   var PARTIAL_WITHIN = 'partial',
       WHOLLY_WITHIN = 'wholly';
+  var ALL_LAYERS = 'all',
+      VISIBLE_LAYERS = 'visible',
+      LAYERS_OFF = null;
   return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
     baseClass: 'jimu-widget-select-setting',
 
     selectionColor: '',
     selectionMode: '',
+    selectOnActivate: true,
     allowExport: false,
+    selectedLayersMode: null,
 
     postMixInProperties: function postMixInProperties() {
       this.inherited(arguments);
@@ -37,6 +42,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/Color', "dojo/on", 
         checked: this.config && this.config.allowExport,
         onChange: lang.hitch(this, this._onAllowExportChange)
       }, this.exportCheckBoxDiv);
+
+      this.selectOnActivateCheckBox = new CheckBox({
+        label: this.nls.selectOnActivate,
+        checked: this.config && this.config.selectOnActivate,
+        onChange: lang.hitch(this, this._onSelectOnActivateChange)
+      }, this.selectOnActivateCheckBoxDiv);
 
       if (this.config) {
         this._init();
@@ -61,6 +72,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/Color', "dojo/on", 
       this.allowExport = checked;
     },
 
+    _onSelectOnActivateChange: function _onSelectOnActivateChange(checked) {
+      this.selectOnActivate = checked;
+    },
+
+    _onSelectAllMode: function _onSelectAllMode() {
+      this.selectedLayersMode = ALL_LAYERS;
+    },
+
+    _onSelectVisibleMode: function _onSelectVisibleMode() {
+      this.selectedLayersMode = VISIBLE_LAYERS;
+    },
+
+    _onSelectNoneMode: function _onSelectNoneMode() {
+      this.selectedLayersMode = LAYERS_OFF;
+    },
+
     _init: function _init() {
       this.selectionColor = this.config.selectionColor;
       if (this.config.selectionColor) {
@@ -76,8 +103,23 @@ define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/Color', "dojo/on", 
         this._onSelectWhollyMode();
       }
 
+      this.selectedLayersMode = this.config.selectedLayersMode;
+      if (this.config.selectedLayersMode === ALL_LAYERS) {
+        this.allLayersMode.checked = true;
+        this._onSelectAllMode();
+      } else if (this.config.selectedLayersMode === VISIBLE_LAYERS || this.config.selectedLayersMode === undefined) {
+        this.visibleLayersMode.checked = true;
+        this._onSelectVisibleMode();
+      } else if (this.config.selectedLayersMode === LAYERS_OFF) {
+        this.layersOffMode.checked = true;
+        this._onSelectNoneMode();
+      }
+
       this.allowExport = this.config.allowExport;
       this.allowExportCheckBox.setValue(this.allowExport);
+
+      this.selectOnActivate = this.config.selectOnActivate;
+      this.selectOnActivateCheckBox.setValue(this.selectOnActivate);
 
       this._selectDrawingTools(this.config.geometryTypes || ['EXTENT']);
     },
@@ -91,7 +133,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/Color', "dojo/on", 
       return {
         selectionColor: this.selectionColor,
         selectionMode: this.selectionMode,
+        selectedLayersMode: this.selectedLayersMode,
         allowExport: this.allowExport,
+        selectOnActivate: this.selectOnActivate,
         geometryTypes: this._getSelectedDrawingTools()
       };
     },

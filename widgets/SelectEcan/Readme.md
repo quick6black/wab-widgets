@@ -1,10 +1,20 @@
 #Changes from Existing Select Widget
 
-*Based off ESRI Select Widget from WAB Developer Edition v2.4*  
+*Based off ESRI Select Widget from WAB Developer Edition v2.9*  
 
 
 
 ### Changes
+
+**5 Aug 2018** 
+
+
+- Ported to WAB 2.9 framework
+- Removal of custom layer selection state toggle code which is replaced with functions now standard in ESRI version of widget.
+- Default selection state checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
+- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
+- Settings page updated to include options for the new config settings.     
+
 
 **23 May 2017**     
 
