@@ -153,30 +153,27 @@ define(["dojo/_base/declare",
         var baseUrl = shareUtils.getBaseHrefUrl(window.portalUrl);
         var item = this.item;
 
-        var resultUrl = shareUtils.addQueryParamToUrl(baseUrl, "itemid", item.id, true);
+        if (item.type == 'Web Mapping Application') {
+          return item.url;
+        } else {
+          var resultUrl = shareUtils.addQueryParamToUrl(baseUrl, "itemid", item.id, true);
 
-        // Check for config parameter in url
-        var urlParams = jimuUtils.urlToObject(window.location.href).query || {};
-        if (urlParams.config) {
-          resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "config", urlParams.config, true);
-        }
+          // Check for config parameter in url
+          var urlParams = jimuUtils.urlToObject(window.location.href).query || {};
+          if (urlParams.config) {
+            resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "config", urlParams.config, true);
+          }
 
-        var pt = this.map.extent.getCenter();
-        var ptUrl = pt.x + "," + pt.y + "," + pt.spatialReference.wkid;
-        resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "center", ptUrl, true);
+          // Apply centerpoint location to url
+          var pt = this.map.extent.getCenter();
+          var ptUrl = pt.x + "," + pt.y + "," + pt.spatialReference.wkid;
+          resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "center", ptUrl, true);
 
-
-        // Scale used in preference to level in case basemaps use different lods or are dynamic
-        //var level = this.map.getLevel();
-        //if (typeof level === "number" && level !== -1) {
-        //  resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "level", this.map.getLevel(), true);
-        //} else {
-          //use scale if no level
+          // Apply use map scale
           resultUrl = shareUtils.addQueryParamToUrl(resultUrl, "scale", this.map.getScale(), true);
-        //}
 
-
-        return resultUrl;          
+          return resultUrl;          
+        }
       }
 
     });
