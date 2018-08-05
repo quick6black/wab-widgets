@@ -130,7 +130,7 @@
     width: 30px; }
   .jimu-widget-edraw-ecan .edit-draw-actions span.text,
   .jimu-widget-edraw-ecan .list-draw-actions span.text {
-    background: none repeat scroll 0 0 transparent;
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
     color: black;
     font-size: 1em;
     position: relative;
