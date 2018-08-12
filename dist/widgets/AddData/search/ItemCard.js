@@ -39,9 +39,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
         return;
       }
       this.inherited(arguments);
-      //ECan
-      //this.config = this.wabWidget.config;
-      //
       this.render();
     },
 
@@ -99,14 +96,13 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
       var baseUrl = util.checkMixedContent(item.portalUrl);
       var url = baseUrl + "/home/item.html?id=" + encodeURIComponent(item.id);
 
+      //ECAN CHANGE
       if (this.config.CMapsVersion.allow) {
-        //ECAN CHANGE
         if (item.tags.indexOf("Open Data") > -1) {
           url = this.openDataUrl(item);
         }
       }
       //ECAN CHANGE
-
       window.open(url);
     },
 
@@ -191,7 +187,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/date/locale", "dojo/dom-
       }
 
       util.setNodeText(this.typeByOwnerNode, s);
-
       util.setNodeTitleText(this.typeByOwnerNode, s);
 
       /* ORIGNAL CODE BLOCK

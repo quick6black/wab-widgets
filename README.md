@@ -48,6 +48,9 @@ This is a customised variant of the standard Select widget [http://doc.arcgis.co
 #### Changes made include:  
 
 - Custom feature action **SelectByGeometryFeatureAction** added to widget that adds functionality to pass the geometry of a feature/featureSet to the Select widget to perform a search as though the user had drawn the shape.  A **Select By Geometry** option is added to the popup action menu for any valid featureSet option in the WAB framework e.g. on popup windows for feature layers, in the options off the select and query widgets, etc.  
+- Default selected layer checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
+- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
+
 
 #### Demo
 To be deployed in the future
