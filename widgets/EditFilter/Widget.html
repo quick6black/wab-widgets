@@ -47,7 +47,7 @@
 				</tr>
 			</table>
 			<br>
-			<table id="tblSave" class="tableFormat" border=0 cellspacing="0" cellpadding="0">
+			<table id="tblFIlterOptions" class="tableFormat" border=0 cellspacing="0" cellpadding="0">
 				<tr class="rowHeader">
 					<td class="tdLabel">${nls.labels.layerOptionHeading}</td>
 				</tr>
@@ -61,6 +61,12 @@
 				</tr>
 				<tr>
 					<td class="tdData"><input type="checkbox" data-dojo-type="dijit/form/CheckBox"  data-dojo-attach-point="chkPersistDef" data-dojo-props="value:true,checked:false"/> ${nls.labels.PersistDefHeading}</td>
+				</tr>
+				<tr class="rowHeader">
+					<td class="tdLabel">${nls.labels.RefreshHeading}</td>
+				</tr>
+				<tr>
+					<td class="tdData"><div data-dojo-attach-event="click:refreshData"><a class="refresh-icon" id="refreshDiv"></a> ${nls.labels.RefreshValueList}</div></td>
 				</tr>
 			</table>
 		</div>

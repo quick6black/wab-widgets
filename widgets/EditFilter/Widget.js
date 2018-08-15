@@ -64,6 +64,9 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
     chkAppendToDef: null,
     persistOnClose: true,
     filterExt: null,
+    isHosted: null,
+    firstOpen: true,
+    bypassActive: false,
     dayInMS: (24 * 60 * 60 * 1000) - 1000, // 1 sec less than 1 day
 
     postCreate: function() {
@@ -106,9 +109,13 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
 
       this.createMapLayerList();
 
+      //BEGIN: Ecan Changes
+
       if(this.config.showEditButton) {
         domClass.remove(this.btnLaunchEditor, "hide-items");
       }
+
+      //END: Ecan Changes
     },
 
     /*
@@ -138,8 +145,12 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
             this._pullMapServiceFields(operLayerInfos._layerInfos);
 
             array.forEach(this.layerList, lang.hitch(this, function(layer) {
-              if(layer.originOperLayer.layerType !== "ArcGISTiledMapServiceLayer" &&
+              if((layer.originOperLayer.layerType !== "ArcGISTiledMapServiceLayer" &&
+                layer.originOperLayer.layerType !== "VectorTileLayer"
+              ) &&
                 typeof(layer.originOperLayer.featureCollection) === 'undefined') {
+
+                //this.own(on(layer, "update-end", this.onLayerUpdate()));
 
                 if(typeof(layer.layerObject._defnExpr) !== 'undefined') {
                   this.defaultDef.push({
@@ -259,6 +270,22 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       }));
     },
 
+    checkCaseSearch: function(pParam) {
+      this.useCaseSearch = null;
+      array.forEach(this.config.groups, lang.hitch(this, function(group) {
+        if(group.name === pParam.group) {
+          this.useCaseSearch = group.caseSearch;
+        }
+      }));
+    },
+
+    checkIsHosted: function(pParam) {
+      this.isHosted = false;
+      if(utils.isHostedService(pParam.url)) {
+        this.isHosted = true;
+      }
+    },
+
     createGroupSelection: function() {
       var ObjList = [];
       var descLabel = '';
@@ -279,6 +306,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         showGroups = showGroups || group.displayPreset;
       }));
 
+      domConstruct.empty("groupPicker");
+      this.removeAllRows();
       this.grpSelect = new Select({
         options: ObjList
       }).placeAt(this.groupPicker);
@@ -289,6 +318,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         this.removeAllRows();
         this.checkDomainUse({group: val});
         this.checkDateUse({group: val});
+        this.checkCaseSearch({group: val});
         this.reconstructRows(val);
         this.updateGroupDesc(val);
         this.groupCurrVal = val;
@@ -317,6 +347,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       })));
       this.checkDomainUse({group: this.grpSelect.value});
       this.checkDateUse({group: this.grpSelect.value});
+      this.checkCaseSearch({group: this.grpSelect.value});
       this.groupCurrVal = this.grpSelect.value;
 
       if(typeof(this.config.groups[0]) !== 'undefined') {
@@ -606,11 +637,27 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       pFilter.logicalOperator = "OR";
       pFilter.expr = "";
       pFilter.parts = pParts;
-      pDijit.build(pUrl, pLayerObject, pFilter).then(lang.hitch(this, function() {
-        //pDijit.partsObj.parts[0].valueObj.value = pValue.value;
-        //pDijit.set("value",pValue.value);
-        //pDijit.set("displayedValue","Yes");
-      }));
+      if(this.config.webmapAppendMode) {
+        if(typeof(pLayerObject.id) !== null) {
+          if(pLayerObject.id !== null) {
+            pDijit.build(pUrl, pLayerObject, pFilter, pLayerObject.id);
+          } else {
+            var mapLayerId = pGroupLayer.layer.replace(/.([^.]*)$/,'_$1');
+            pDijit.build(pUrl, pLayerObject, pFilter, mapLayerId);
+          }
+        }
+      } else {
+        if(typeof(pLayerObject.id) !== null) {
+          if(pLayerObject.id !== null) {
+            pDijit.build(pUrl, pLayerObject, pFilter, pLayerObject.id);
+          } else {
+            var mapLayerId = pGroupLayer.layer.replace(/.([^.]*)$/,'_$1');
+            pDijit.build(pUrl, pLayerObject, pFilter, mapLayerId);
+          }
+        } else {
+          pDijit.build(pUrl, pLayerObject, pFilter);
+        }
+      }
 
       var nodes = query(".jimu-single-filter-parameter");
       array.forEach(nodes, function(node) {
@@ -786,6 +833,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         timePattern: "HH:mm:ss"
       });
       return s1 + " " + s2;
+
       /* contains comma '2013-03-01, 00:00:00' for locale 'en'
       return dojo.date.locale.format(value, {
         datePattern: "yyyy-MM-dd",
@@ -794,15 +842,28 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       */
     },
 
+    addSecond: function(date) {
+      var dt = new Date(date);
+      return new Date(dt.setSeconds(59));
+    },
+
+    substractSecond: function(date) {
+      var dt = new Date(date);
+      dt.setSeconds(dt.getSeconds() - 1);
+      return dt;
+    },
+
     addDay: function(date){
+      date = new Date(date);
       return new Date(date.getTime() + this.dayInMS);
     },
 
     subtractDay: function(date){
+      date = new Date(date);
       return new Date(date.getTime() - this.dayInMS);
     },
 
-    createQuery: function(isNum, field, op, value, junc, dataType) {
+    createQuery: function(isNum, field, op, value, junc, dataType, layer) {
       // escape all single quotes
       // decode sanitized input
       if(isNaN(value)) {
@@ -826,29 +887,49 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       }
       if (op === 'LIKE' || op === 'NOT LIKE') {
         if (isNum === false) {
-          value = "UPPER('%" + value + "%')";
-          field = "UPPER(" + field + ")";
+          if(this.useCaseSearch){
+            value = "'%" + value + "%'";
+            field = field;
+          } else {
+            value = "UPPER('%" + value + "%')";
+            field = "UPPER(" + field + ")";
+          }
         } else {
           value = "'%" + value + "%'";
         }
       } else if (op === 'START') {
         op = 'LIKE';
         if (isNum === false) {
-          value = "UPPER('" + value + "%')";
-          field = "UPPER(" + field + ")";
+          if(this.useCaseSearch){
+            value = "'" + value + "%'";
+            field = field;
+          } else {
+            value = "UPPER('" + value + "%')";
+            field = "UPPER(" + field + ")";
+          }
         } else {
           value = value + "%";
         }
       } else if (op === 'END') {
         op = 'LIKE';
         if (isNum === false) {
-          value = "UPPER('%" + value + "')";
-          field = "UPPER(" + field + ")";
+          if(this.useCaseSearch){
+            value = "'%" + value + "'";
+            field = field;
+          } else {
+            value = "UPPER('%" + value + "')";
+            field = "UPPER(" + field + ")";
+          }
         } else {
           value = "%" + value;
         }
       } else if (isNum === false) { // wrap string fields if not already
         if(dataType.indexOf("Date") > -1) {
+          if(typeof(layer.layerObject) !== 'undefined') {
+            this.checkIsHosted(layer.layerObject);
+          } else {
+            this.checkIsHosted(layer);
+          }
           // The date entry dijit only permits whole dates, so our value is at the beginning (00:00:00) of the
           // entered day. We'll make ranges as needed to cover times during the day.
           if(op === "=" || op === "<>") {
@@ -858,10 +939,18 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
               op = "NOT BETWEEN";
             }
             // Make a range from the beginning of the day to the last second of the day
-            value = "'" + this.formatDate(value) + "' AND '" + this.formatDate(this.addDay(value)) + "'";
+            if(this.isHosted) {
+              value = "'" + this.formatDate(value) + "' AND '" + this.formatDate(this.addDay(value)) + "'";
+            } else {
+              value = "timestamp '" + this.formatDate(this.substractSecond(value)) + "' AND timestamp '" + this.formatDate(this.addDay(value)) + "'";
+            }
           } else if(op === ">") {
             // Move comparison to the last second of the day
-            value = "'" + this.formatDate(this.addDay(value)) + "'";
+            if(this.isHosted) {
+              value = "'" + this.formatDate(this.addDay(value)) + "'";
+            } else {
+              value = "timestamp '" + this.formatDate(this.addDay(value)) + "'";
+            }
           } else {
             // Trim flag from aliases of less than or equal and greater than or equal
             if (op === 'd<=' || op === 'd>=') {
@@ -873,11 +962,20 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
               value = this.addDay(value);
             }
 
-            value = "'" + this.formatDate(value) + "'";
+            if(this.isHosted) {
+              value = "'" + this.formatDate(value) + "'";
+            } else {
+              value = "timestamp '" + this.formatDate(value) + "'";
+            }
           }
         } else {
-          value = "UPPER('" + value + "')";
-          field = "UPPER(" + field + ")";
+          if(this.useCaseSearch){
+            value = "'" + value + "'";
+            field = field;
+          } else {
+            value = "UPPER('" + value + "')";
+            field = "UPPER(" + field + ")";
+          }
         }
       } else {
 
@@ -951,7 +1049,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                             p.operator,
                             userVal,
                             p.conjunc,
-                            field.type
+                            field.type,
+                            layer
                           );
                         } else {
                           console.log("Not a Number");
@@ -974,7 +1073,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                             //locale.format(newDate, { selector: 'date', fullYear: true }),
                             //locale.format(newDate, {datePattern: "MMMM d, yyyy", selector: "date"}),
                             p.conjunc,
-                            field.type
+                            field.type,
+                            layer
                           );
                         }
                         else {
@@ -983,7 +1083,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                             grpLayer.field, p.operator,
                             utils.sanitizeHTML(p.userValue),
                             p.conjunc,
-                            field.type
+                            field.type,
+                            layer
                           );
                         }
                       }
@@ -994,7 +1095,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                           p.operator,
                           utils.sanitizeHTML(p.userValue),
                           p.conjunc,
-                          field.type
+                          field.type,
+                            layer
                         );
                       }
                       group.def.push({
@@ -1026,7 +1128,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                         p.operator,
                         utils.sanitizeHTML(p.userValue),
                         p.conjunc,
-                        grpLayer.dataType
+                        grpLayer.dataType,
+                        layer
                       );
                     }
                     else if ((grpLayer.dataType).indexOf("Date") > -1) {
@@ -1046,7 +1149,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                           //locale.format(newDate, { selector: 'date', fullYear: true }),
                           //locale.format(newDate, {datePattern: "MMMM d, yyyy", selector: "date"}),
                           p.conjunc,
-                          grpLayer.dataType
+                          grpLayer.dataType,
+                          layer
                         );
                       } else {
                         expr = expr + this.createQuery(
@@ -1055,7 +1159,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                           p.operator,
                           utils.sanitizeHTML(p.userValue),
                           p.conjunc,
-                          grpLayer.dataType
+                          grpLayer.dataType,
+                          layer
                         );
                       }
                     }
@@ -1066,7 +1171,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                         p.operator,
                         utils.sanitizeHTML(p.userValue),
                         p.conjunc,
-                        grpLayer.dataType
+                        grpLayer.dataType,
+                        layer
                       );
                     }
                     group.def.push({
@@ -1087,7 +1193,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
                       p.operator,
                       utils.sanitizeHTML(p.userValue),
                       p.conjunc,
-                      grpLayer.dataType
+                      grpLayer.dataType,
+                      layer
                     );
                     group.def.push({
                       field: grpLayer.field,
@@ -1148,34 +1255,35 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
           // layer.layerObject.setDefinitionExpression(expr.trim());
           this._applyFilter(layer.layerObject, expr.trim(), false);
           //}
-          layer.layerObject.setVisibility(true);
+          //layer.layerObject.setVisibility(true);
         }
       } else if(filterType === "MapService") {
-        //console.log(msExpr);
         if(msExpr.length > 0) {
-
           if(this.chkAppendToDef.checked) {
             array.forEach(this.defaultDef, lang.hitch(this, function(def) {
               if(def.layer === layer.id ) {
-                array.forEach(msExpr, lang.hitch(this, function(expr, i) {
+                for(slot in msExpr) {
                   for(var key in def.definition) {
-                    if(def.definition[key] !== 'undefined') {
-                      if(msExpr[i.toString()]) {
-                        msExpr[i.toString()] = "(" + def.definition[key] + ") "  +
-                        this.slAppendChoice.value +  " " + expr;
+                    if(slot === key) {
+                      msExpr[slot] = "(" + def.definition[key] + ") "  +
+                      this.slAppendChoice.value +  " " + expr;
+                    } else {
+                      if(msExpr[slot] === "") {
+                        msExpr[slot] = expr;
                       }
                     }
                   }
-                }));
+                }
                 layer.layerObject.setLayerDefinitions(msExpr);
                 this._zoomOnFilter(layer.layerObject);
               }
             }));
           } else {
+            var temp = layer;
             layer.layerObject.setLayerDefinitions(msExpr);
             this._zoomOnFilter(layer.layerObject);
           }
-          layer.layerObject.setVisibility(true);
+          //layer.layerObject.setVisibility(true);
         }
       } else {
         //do nothing, not a valid service
@@ -1571,10 +1679,34 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
 
     // END: ECAN CUSTOM CODE
 
+    refreshData: function() {
+      this.onLayerUpdate();
+      domClass.replace("refreshDiv", "refresh-done-icon", "refresh-icon");
+    },
 
+    onLayerUpdate: function() {
+      if(this.grpSelect) {
+        this.removeAllRows();
+        this.reconstructRows(this.grpSelect.value);
+      }
+    },
 
     onOpen: function(){
-      console.log('onOpen');
+      if(!this.firstOpen) {
+        this.bypassActive = true;
+        this.onLayerUpdate();
+      }
+    },
+    onActive: function(){
+      if(!this.firstOpen) {
+        if(!this.bypassActive) {
+          this.onLayerUpdate();
+        }
+      }
+    },
+
+    onDeActive: function() {
+      this.bypassActive = false;
     },
 
     onClose: function(){
@@ -1583,6 +1715,8 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
         this.removeAllRows();
         this.reconstructRows(this.grpSelect.value);
       }
+      this.firstOpen = false;
+      this.bypassActive = false;
     },
 
     onMinimize: function(){

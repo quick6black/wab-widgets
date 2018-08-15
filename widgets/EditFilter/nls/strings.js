@@ -9,7 +9,9 @@ define({
       saveHeading: "Save Current Settings",
       layerOptionHeading: "Filter Options",
       AppendDefHeading: "Append to Existing Definitions Using",
-      PersistDefHeading: "Persist After Widget is Closed"
+      PersistDefHeading: "Persist After Widget is Closed",
+      RefreshValueList: "Refresh the values in drop down list",
+      RefreshHeading: "Refresh Data"
     },
     buttons: {
       save: "Save",

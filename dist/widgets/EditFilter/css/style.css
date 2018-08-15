@@ -210,6 +210,18 @@
     padding-top: 5px; }
   .jimu-widget-map-filter .hide-items {
     display: none; }
+  .jimu-widget-map-filter .refresh-icon:after {
+    content: url("../images/refresh.png");
+    width: 16px;
+    height: 16px;
+    cursor: hand;
+    cursor: pointer; }
+  .jimu-widget-map-filter .refresh-done-icon:after {
+    content: url("../images/check.png");
+    width: 16px;
+    height: 16px;
+    cursor: hand;
+    cursor: pointer; }
   .jimu-widget-map-filter .launch-editor-button {
     text-align: left;
     padding-right: 5px; }

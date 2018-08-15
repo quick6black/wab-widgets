@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplateMixin', 'jimu/dijit/SimpleTable', 'dojo/dom', 'dojo/dom-construct', 'dojo/on', 'dojo/query', 'dojo/dom-attr', 'dojo/_base/lang', 'dojo/_base/array', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'jimu/utils', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', 'jimu/dijit/Popup', 'dojox/html/entities', '../LayersHandler', './presetValuePicker', 'dijit/form/CheckBox'], function (declare, BaseWidgetSetting, _WidgetsInTemplateMixin, SimpleTable, dom, domConstruct, on, query, domAttr, lang, array, Select, TextBox, ValidationTextBox, utils, LayerInfos, Message, Popup, entities, LayersHandler, presetValuePicker, CheckBox) {
+define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplateMixin', 'jimu/dijit/SimpleTable', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/query', 'dojo/dom-attr', 'dojo/_base/lang', 'dojo/_base/array', 'dijit/form/Select', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/CheckBox', 'jimu/utils', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', 'jimu/dijit/Popup', 'dojox/html/entities', '../LayersHandler', './presetValuePicker'], function (declare, BaseWidgetSetting, _WidgetsInTemplateMixin, SimpleTable, dom, domConstruct, domClass, on, query, domAttr, lang, array, Select, TextBox, ValidationTextBox, CheckBox, utils, LayerInfos, Message, Popup, entities, LayersHandler, presetValuePicker) {
   return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
 
     //these two properties is defined in the BaseWidget
@@ -28,6 +28,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
     groupLayerDefault: [],
     //groupAppendSame: [],
     groupAppendSameConjunc: [],
+    groupCaseSearch: [],
     layerCounter: 0,
     layerList: null,
 
@@ -61,6 +62,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
 
       //this.groupAppendSame = [];
       this.groupAppendSameConjunc = [];
+      this.groupCaseSearch = [];
       this.chkSimpleMode.set('checked', this.config.simpleMode);
       this.chkOptionsMode.set('checked', this.config.optionsMode);
       this.chkWebmapAppendMode.set('checked', this.config.webmapAppendMode);
@@ -68,7 +70,11 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       this.chkZoomMode.set('checked', this.config.zoomMode);
       this.chkPersistOnClose.set('checked', this.config.persistOnClose);
 
+      /* BEGIN: CHANGE ECAN - Display settings array */
+
       this.chkShowEditButton.set('checked', this.config.showEditButton);
+
+      /* END: CHANGE ECAN */
 
       this.createMapLayerList();
     },
@@ -93,7 +99,9 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
           this.config.zoomMode = this.chkZoomMode.checked;
           this.config.persistOnClose = this.chkPersistOnClose.checked;
 
+          /* BEGIN: CHANGE ECAN */
           this.config.showEditButton = this.chkShowEditButton.checked;
+          /* END: CHANGE ECAN */
 
           this.config.groups = [];
           array.forEach(this.groupLayerName, lang.hitch(this, function (groupName, i) {
@@ -106,8 +114,12 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
                 groupObj.defaultVal = utils.sanitizeHTML(this.groupLayerDefault[i].value);
                 groupObj.appendSameLayer = true;
                 groupObj.appendSameLayerConjunc = this.groupAppendSameConjunc[i].value;
+                groupObj.caseSearch = this.groupCaseSearch[i].get('checked');
                 groupObj.layers = [];
+
+                /* BEGIN: CHANGE ECAN */
                 groupObj.displayPreset = this.groupDisplayPresets[i].checked;
+                /* END: CHANGE ECAN */
 
                 array.forEach(this.groupLayerContainer[i].getRows(), lang.hitch(this, function (row) {
                   var layerStruct = {};
@@ -148,9 +160,6 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
     createMapLayerList: function createMapLayerList() {
       LayerInfos.getInstance(this.map, this.map.itemInfo).then(lang.hitch(this, function (operLayerInfos) {
         if (operLayerInfos._layerInfos && operLayerInfos._layerInfos.length > 0) {
-          //this.layerList = operLayerInfos._layerInfos;
-          console.log(operLayerInfos._layerInfos);
-
           var layerHandle = new LayersHandler({
             "layers": operLayerInfos._layerInfos
           });
@@ -207,13 +216,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       var rowAppend = groupSettingTable.insertRow(-1);
       var cellSameLayerAppend = rowAppend.insertCell(0);
       domAttr.set(cellSameLayerAppend, "colspan", "3");
-      //var cellAppendInput = rowAppend.insertCell(1);
-      //var cellAppendUsing = rowAppend.insertCell(2);
       var cellAppendConjun = rowAppend.insertCell(1);
       rowAppend.insertCell(2);
-
       domAttr.set(rowAppend, 'id', 'appendLayers_' + this.groupCounter);
-      //domStyle.set(rowAppend, 'display', 'none');
+
+      var rowCaseSearch = groupSettingTable.insertRow(-1);
+      var cellCaseSearchLabel = rowCaseSearch.insertCell(0);
+      domAttr.set(cellCaseSearchLabel, "colspan", "3");
+      var cellCaseSearchRadio = rowCaseSearch.insertCell(1);
+      rowCaseSearch.insertCell(2);
+      domAttr.set(rowCaseSearch, 'id', 'caseSearch_' + this.groupCounter);
 
       /* BEGIN: CHANGE ECAN - Optional hide group settings */
 
@@ -230,6 +242,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       cellOperatorLabel.innerHTML = this.nls.labels.groupOperator;
       cellDefaultLabel.innerHTML = this.nls.labels.groupDefault;
       cellSameLayerAppend.innerHTML = this.nls.labels.sameLayerAppend;
+      cellCaseSearchLabel.innerHTML = this.nls.labels.caseSearch;
       //cellAppendUsing.innerHTML = this.nls.labels.sameLayerConjunc;
 
       var groupName = '';
@@ -238,6 +251,7 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       var groupDef = '';
       var groupAppend = false;
       var groupAppendConjunc = '';
+      var groupCaseSearch = false;
       if (typeof pParam.group !== 'undefined' && pParam.group !== null) {
         groupName = pParam.group.name;
         groupDesc = pParam.group.desc;
@@ -326,6 +340,8 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
 
       this.createAppendConjunc({ cell: cellAppendConjun, value: groupAppendConjunc });
 
+      this.createCaseSearch({ cell: cellCaseSearchRadio, value: groupCaseSearch });
+
       this.createTableObject(pParam);
 
       var addLayerNode = domConstruct.create("div", {
@@ -360,6 +376,16 @@ define(['dojo/_base/declare', 'jimu/BaseWidgetSetting', 'dijit/_WidgetsInTemplat
       opSelect.startup();
       opSelect.set('value', entities.decode(params.value));
       this.groupAppendSameConjunc.push(opSelect);
+    },
+
+    createCaseSearch: function createCaseSearch(params) {
+      var opCkbx = new CheckBox({
+        "class": "operator-append-select"
+      }).placeAt(params.cell);
+      opCkbx.startup();
+
+      opCkbx.set('checked', params.value);
+      this.groupCaseSearch.push(opCkbx);
     },
 
     createTableObject: function createTableObject(pParam) {

@@ -55,7 +55,7 @@ define(['dojo/Evented', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/arr
             }
           } else if (layer.newSubLayers.length > 0) {
             this.childList = [];
-            if (typeof layer.originOperLayer.layerType !== 'undefined' && layer.originOperLayer.layerType === "ArcGISTiledMapServiceLayer") {
+            if (typeof layer.originOperLayer.layerType !== 'undefined' && (layer.originOperLayer.layerType === "ArcGISTiledMapServiceLayer" || layer.originOperLayer.layerType === "VectorTileLayer")) {
               // Do nothing, no looking up against tiles.
             } else {
               array.forEach(layer.layerObject.layerInfos, lang.hitch(this, function (subLyr) {
@@ -83,6 +83,8 @@ define(['dojo/Evented', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/arr
               };
               this.layerStore.push(dataItem);
             }
+          } else if (typeof layer.originOperLayer.layerType !== 'undefined' && (layer.originOperLayer.layerType === "ArcGISTiledMapServiceLayer" || layer.originOperLayer.layerType === "VectorTileLayer")) {
+            // Do nothing, no looking up against tiles.
           } else if (layer.originOperLayer.layerType === 'ArcGISMapServiceLayer') {
             this.childList = [];
             array.forEach(layer.layerObject.layerInfos, lang.hitch(this, function (subLyr) {
