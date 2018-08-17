@@ -1104,19 +1104,19 @@ define([
         var maxYPref = mapSheet.ymax.toString().substring(0, 2);
         var maxXPref = mapSheet.xmax.toString().substring(0, 2);
 
-        var minY = parseInt(mapSheet.ymin.toString().substring(2, 5));
-        var minX = parseInt(mapSheet.xmin.toString().substring(2, 5));
-        var maxY = parseInt(mapSheet.ymax.toString().substring(2, 5));
-        var maxX = parseInt(mapSheet.xmax.toString().substring(2, 5));
+        var minY = parseInt(mapSheet.ymin.toString().substring(2, 7));
+        var minX = parseInt(mapSheet.xmin.toString().substring(2, 7));
+        var maxY = parseInt(mapSheet.ymax.toString().substring(2, 7));
+        var maxX = parseInt(mapSheet.xmax.toString().substring(2, 7));
 
         if(minY > maxY || minX > maxX) {
-          if (minY <= parseInt(yVal) && parseInt(yVal) < 10000) {
+          if (minY <= parseInt(yVal) && parseInt(yVal) < 100000) {
             y = parseFloat(parseInt(minYPref + yVal));
           } else {
             y = parseFloat(parseInt(maxYPref + yVal));
           }
 
-          if (minX <= parseInt(xVal) && parseInt(xVal) < 10000) {
+          if (minX <= parseInt(xVal) && parseInt(xVal) < 100000) {
             x = parseFloat(parseInt(minXPref + xVal));
           } else {
             x = parseFloat(parseInt(maxXPref + xVal));
