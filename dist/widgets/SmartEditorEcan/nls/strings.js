@@ -1,6 +1,6 @@
 define({
   root: ({
-    _widgetLabel: "Smart Editor",
+    _widgetLabel: "Smart Editor Enhanced",
     _featureAction_SmartEditor: "Smart Editor",
     noEditPrivileges: "Your account does not have permission to create or modify data.",
     widgetActive:"Active",
@@ -21,12 +21,35 @@ define({
     attachmentLoadingError: "Error uploading attachments",
     attachmentSaveDeleteWarning: "Warning: Changes to attachments are saved automatically",
     autoSaveEdits: "Saves the edit automatically",
+    addNewFeature: "Create new feature",
+    featureCreationFailedMsg: "Cannot create a new record/feature",
+    relatedItemTitle: "Related Table/Layer",
+    invalidRelationShipMsg: "Please make sure the primary key field: \'${parentKeyField}\' has a valid value",
+    pendingFeatureSaveMsg: "Please save the feature edits before creating a related feature.",
+    attachmentsRequiredMsg: "(*) Attachments are required.",
+    coordinatePopupTitle : "Move feature to XY location",
+    coordinatesSelectTitle : "Coordinate System:",
+    mapSpecialReferenceDropdownOption : "Map Spatial Reference",
+    latLongDropdownOption : "Latitude/Longitude",
+    xAttributeTextBoxLabel :"X-coordinate:",
+    yAttributeTextBoxLabel :"Y-coordinate:",
+    latitudeTextBoxLabel : "Latitude:",
+    longitudeTextBoxLabel : "Longitude:",
     filterEditor:{
       all: "All",
       noAvailableTempaltes: "No available templates",
       searchTemplates: "Search Templates"
     },
     invalidConfiguration: "Widget is either not configured or the layers in the configuration are no longer in the map.  Please open the app in the builder mode and reconfigure the widget.",
+    invalidConfiguration: "Widget is either not configured or the layers in the configuration are no longer in the map.  Please open the app in the builder mode and reconfigure the widget.",
+    geometryServiceURLNotFoundMSG: "Unable to get Geometry Service URL",
+    clearSelection: "Clear",
+    refreshAttributes: "Update feature attributes", // displayed as a tooltip on refresh attribute button
+    automaticAttributeUpdatesOn: "Auto update feature attributes: ON", // displayed as a tooltip on automatic attribute update on button
+    automaticAttributeUpdatesOff: "Auto update feature attributes: OFF", // displayed as a tooltip on automatic attribute update off button
+    moveSelectedFeatureToGPS: "Move selected feature to current GPS location", // displayed as a tooltip on current locate button
+    moveSelectedFeatureToXY: "Move selected feature to XY location", // displayed as a tooltip on xy coordinate button
+    mapNavigationLocked: "Map Navigation: Locked", // displayed as a tooltip on map navigation locked button
 
     copyFeaturesPopup: {
       ok: "OK",

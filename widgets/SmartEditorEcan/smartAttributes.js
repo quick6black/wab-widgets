@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2017 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,6 +53,15 @@ define([
     constructor: function () {
       this.inherited(arguments);
       lang.mixin(this, arguments[0]);
+    //polyfill for older browser
+      if (!String.prototype.endsWith) {
+        String.prototype.endsWith = function(search, this_len) {
+          if (this_len === undefined || this_len > this.length) {
+            this_len = this.length;
+          }
+          return this.substring(this_len - search.length, this_len) === search;
+        };
+      }
       this.useFieldName = false;
       this._mapLayer = this._feature.getLayer();
       this._attTable = query("td.atiLabel", this._attrInspector.domNode);
@@ -109,7 +118,11 @@ define([
         }
       }, this);
     },
-    toggleFields: function () {
+    toggleFields: function (changeDefaultState) {
+      //optional param to determine if no rule is found, should it reset the state.  
+      //Required for when a form is disabled and a rule to hide a field is required
+      changeDefaultState = typeof changeDefaultState !== 'undefined' && changeDefaultState !== null ? changeDefaultState : true;
+    
       if (this._attTable === undefined || this._attTable === null) {
         return;
       }
@@ -259,6 +272,10 @@ define([
                                part.caseSensitive));
               break;
             case 'field':
+              //Translate the field to a value
+              if (this._feature.attributes.hasOwnProperty(value1)) {
+                value1 = this._feature.attributes[value1];
+              }
               partResults.push(this.validatePart(part.operator,
                                                  this._feature.attributes[part.fieldObj.name],
                                                  value1,
@@ -837,7 +854,10 @@ define([
       this._removeDisableRule(fieldName, valueCell);
       this._removeHideRule(parent);
     },
-    toggleFieldOnAttributeInspector: function (fieldName, actionType, fieldHasValidValue) {
+    toggleFieldOnAttributeInspector: function (fieldName, actionType, fieldHasValidValue,changeDefaultState) {
+      //optional param to determine if no rule is found, should it reset the state.  
+      //Required for when a form is disabled and a rule to hide a field is required
+      changeDefaultState = typeof changeDefaultState !== 'undefined' && changeDefaultState !== null ? changeDefaultState : true;
       if (this._gdbRequiredFields === undefined || this._gdbRequiredFields === null) {
         this._gdbRequiredFields = [];
       }
@@ -956,7 +976,10 @@ define([
                 case 'Value':
                   break;
                 default:
-                  this._remove(row, fieldName, valueCell, parent, widget);
+                  if (changeDefaultState)
+                  {
+                    this._remove(row, fieldName, valueCell, parent, widget);
+                  }
               }
             }
           }

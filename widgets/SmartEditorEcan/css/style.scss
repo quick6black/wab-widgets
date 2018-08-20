@@ -16,6 +16,10 @@
     .panel {
         display: block;
     }
+
+    .busy {
+        display: block;        
+    }
 }
 
 .jimu-widget-smartEditor-ecan {
@@ -59,7 +63,7 @@
     }
     /********about attributeInspector*********/
     .esriAttributeInspector {
-        height: 100%;
+        height: 20px;
         width: 100%;
 
         td {
@@ -89,6 +93,10 @@
                 float: left;
                 display: inline;
             }
+
+            &.hide {
+                display: none;
+            }
         }
 
         .deleteButton {
@@ -100,6 +108,16 @@
                 display: inline;
             }
         }
+
+
+        .cancelButton {
+            float: left;
+        
+            .jimu-rtl {
+                float: right;
+            }
+        }
+
 
         .atiField {
             width: 100%;
@@ -118,8 +136,44 @@
             line-height: 20px !important;
             font-size: 14px;
         }
+
+        .atiLayerName {
+            display:none;
+        }
+
     }
     /*********about preset values table*********/
+
+    .buttonHeader {
+        float: right;
+        
+        .saveButton {
+            float: right;
+            margin-left: 5px;       
+
+            .jimu-rtl {
+                float: left;
+                margin-left: 0px;
+                margin-right: 5px;
+            }        
+
+        }
+
+        .deleteButton {
+            float: left;            
+        }
+
+
+        .cancelButton {
+            float: left;            
+        }
+
+        .jimu-rtl {
+            float: left;            
+        }        
+    }
+
+
     .ee-presetValueTableDiv {
         height: 100%;
         width: 100%;
@@ -333,6 +387,279 @@
             padding: 0px 5px 5px 5px;
         }
     }
+
+
+/* Newly Added Classes*/
+
+    .buttonWrapper {
+        text-align: center;
+        margin-bottom: 5px;
+        width: 100%;
+        display: inline-block;
+    }
+
+    .footerButton {
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .editDescription {
+        padding : 5px 0 5px 0;
+    }
+
+    .esriCTItemListContainer {
+        float: left;
+        width: 100%;
+        height: calc(100% - 30px);
+        overflow-y: auto;
+    }
+
+    .esriCTItemTitleContainer {
+        background-color: #f5f5f5;
+        color: #444;
+        cursor: pointer;
+        border: 1px solid #d9d9d9;
+        width: 100%;
+        display: inline-block;
+        float: left;
+    }
+
+    .esriCTItemTitle {
+        padding: 15px 5px 15px 5px;
+        text-align: left;
+        border: none;
+        outline: none;
+        width: calc(100% - 35px);
+        float: left;
+        white-space: pre-wrap; /*Text will wrap when necessary, and on line breaks*/
+    
+        .jimu-rtl {
+            float: right;
+            text-align: right;
+        }
+    }
+
+    .esriCTItemHighlighter {
+        .jimu-rtl   {
+            float: right;
+        }
+    }
+
+    .esriCTEllipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .esriCTItemContent {
+        height: 0px;
+        padding: 0 5px;
+        overflow: hidden;
+        border-right: 1px solid #d9d9d9;
+        border-left: 1px solid #d9d9d9;
+    }
+
+    .esriCTRelatedItemContent {
+        border-bottom: 1px solid #d9d9d9;
+    }
+
+    .esriCTItemContentActive {
+        height: auto;
+    }
+
+    .esriCTItemListImageLogo {
+        height: 24px;
+        width: 24px;
+        margin-top: 10px;
+        float: left;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 24px;
+        margin-left: 5px;
+    }
+
+    .esriCTItemListImageLogo {
+        float: right;
+        margin-left: auto;
+        margin-right: 5px;
+    }
+
+    .esriCTBorder {
+        border: 1px solid grey;
+    }
+
+    .buttonContainer {
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .attributeInspectorMainDiv {
+        height: 100%;
+    }
+
+    .detailsContainer {
+        height:100%;
+    }
+
+    .itemTitleArrowIcon {
+        margin-left: 5px;
+    }
+    
+    .itemTitleUpArrow {
+        background-image: url(../images/upArrow.png);
+    }
+
+    .itemTitleDownArrow {
+        background-image: url(../images/downArrow.png);
+    }
+
+    .esriCTDisableToggling {
+        .esriCTItemTitleContainer {
+            cursor: default;
+        }
+    }
+
+    .esriCTDisableToggling {
+        .itemTitleUpArrow {
+            background-image: none;
+        }
+    }
+
+    /* Tabels widget*/
+    .relatedTablesContainer {
+        float: left;
+        margin: 3px;
+        width: 100%;
+    }
+
+    .relatedTablesContainer {
+        .jimu-rtl {
+            float: right;
+        }
+    }
+
+    .relatedTableTitleContainer {
+        padding: 7px 0px 7px 0px;
+        width: 100%;
+        float: left;
+        border-bottom: 1px solid #d9d9d9;
+        cursor: pointer;
+        line-height: 20px;
+    }
+
+    .esriCTRelatedTableTitleDefaultCursor {
+        cursor: default;
+    }
+
+    .relatedTableTitle {
+        float: left;
+    }
+
+    .relatedTableTitle {
+        .jimu-rtl  {
+            float: right;
+        }
+    }
+
+    .relatedTableIcons {
+        height: 20px;
+        width: 20px;
+        background-size: 20px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        margin-left: 10px;
+    }
+
+    .esriCTRelatedTableRecordsCount {
+        float: left;
+    }
+
+    .refreshAttributes {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/refresh.png);
+        cursor: pointer;
+    }
+
+    .esriCTAutoUpdateOnMode {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/auto-update-on-mode.png);
+        cursor: pointer;
+    }
+
+    .esriCTAutoUpdateOffMode {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/auto-update-off-mode.png);
+        cursor: pointer;
+    }
+
+    .esriCTMapNavigationLocked {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/map-navigation-locked.png);
+        cursor: pointer;
+    }
+
+    .esriCTMapNavigationUnLocked {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/map-navigation-unlocked.png);
+        cursor: pointer;
+    }
+
+    .esriCTLocateButtonContainer {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/locate.png);
+        cursor: pointer;
+    }
+
+    .esriCTXYCoordinates {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/xy-coordinates.png);
+        cursor: pointer;
+    }
+
+    .esriCTGeometryEditor {
+        margin-right: 5px;
+    }
+
+}
+
+.autoSaveOptionDiv {
+    display:none;
 }
 
 .widgetIndicator {

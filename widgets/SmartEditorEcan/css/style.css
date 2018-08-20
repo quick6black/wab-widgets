@@ -168,12 +168,16 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
   background-repeat: no-repeat; }
   .processing-indicator-panel .panel {
     display: block; }
+  .processing-indicator-panel .busy {
+    display: block; }
 
 .jimu-widget-smartEditor-ecan {
   position: relative;
   /***********about templatePicker**************/
   /********about attributeInspector*********/
-  /*********about preset values table*********/ }
+  /*********about preset values table*********/
+  /* Newly Added Classes*/
+  /* Tabels widget*/ }
   .jimu-widget-smartEditor-ecan .hideField {
     display: none; }
   .jimu-widget-smartEditor-ecan .templatePicker {
@@ -194,7 +198,7 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
   .jimu-widget-smartEditor-ecan .dojoxGridView {
     width: 100% !important; }
   .jimu-widget-smartEditor-ecan .esriAttributeInspector {
-    height: 100%;
+    height: 20px;
     width: 100%; }
     .jimu-widget-smartEditor-ecan .esriAttributeInspector td {
       display: block;
@@ -215,12 +219,18 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
       .jimu-widget-smartEditor-ecan .esriAttributeInspector .saveButton .jimu-rtl {
         float: left;
         display: inline; }
+      .jimu-widget-smartEditor-ecan .esriAttributeInspector .saveButton.hide {
+        display: none; }
     .jimu-widget-smartEditor-ecan .esriAttributeInspector .deleteButton {
       float: right;
       margin-right: 20px; }
       .jimu-widget-smartEditor-ecan .esriAttributeInspector .deleteButton .jimu-rtl {
         float: left;
         display: inline; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .cancelButton {
+      float: left; }
+      .jimu-widget-smartEditor-ecan .esriAttributeInspector .cancelButton .jimu-rtl {
+        float: right; }
     .jimu-widget-smartEditor-ecan .esriAttributeInspector .atiField {
       width: 100%; }
     .jimu-widget-smartEditor-ecan .esriAttributeInspector .dijitTextBox {
@@ -233,6 +243,23 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
       font-family: inherit;
       line-height: 20px !important;
       font-size: 14px; }
+    .jimu-widget-smartEditor-ecan .esriAttributeInspector .atiLayerName {
+      display: none; }
+  .jimu-widget-smartEditor-ecan .buttonHeader {
+    float: right; }
+    .jimu-widget-smartEditor-ecan .buttonHeader .saveButton {
+      float: right;
+      margin-left: 5px; }
+      .jimu-widget-smartEditor-ecan .buttonHeader .saveButton .jimu-rtl {
+        float: left;
+        margin-left: 0px;
+        margin-right: 5px; }
+    .jimu-widget-smartEditor-ecan .buttonHeader .deleteButton {
+      float: left; }
+    .jimu-widget-smartEditor-ecan .buttonHeader .cancelButton {
+      float: left; }
+    .jimu-widget-smartEditor-ecan .buttonHeader .jimu-rtl {
+      float: left; }
   .jimu-widget-smartEditor-ecan .ee-presetValueTableDiv {
     height: 100%;
     width: 100%; }
@@ -373,6 +400,186 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
       text-decoration: none;
       line-height: 20px;
       padding: 0px 5px 5px 5px; }
+  .jimu-widget-smartEditor-ecan .buttonWrapper {
+    text-align: center;
+    margin-bottom: 5px;
+    width: 100%;
+    display: inline-block; }
+  .jimu-widget-smartEditor-ecan .footerButton {
+    text-align: center;
+    margin-top: 5px; }
+  .jimu-widget-smartEditor-ecan .editDescription {
+    padding: 5px 0 5px 0; }
+  .jimu-widget-smartEditor-ecan .esriCTItemListContainer {
+    float: left;
+    width: 100%;
+    height: calc(100% - 30px);
+    overflow-y: auto; }
+  .jimu-widget-smartEditor-ecan .esriCTItemTitleContainer {
+    background-color: #f5f5f5;
+    color: #444;
+    cursor: pointer;
+    border: 1px solid #d9d9d9;
+    width: 100%;
+    display: inline-block;
+    float: left; }
+  .jimu-widget-smartEditor-ecan .esriCTItemTitle {
+    padding: 15px 5px 15px 5px;
+    text-align: left;
+    border: none;
+    outline: none;
+    width: calc(100% - 35px);
+    float: left;
+    white-space: pre-wrap;
+    /*Text will wrap when necessary, and on line breaks*/ }
+    .jimu-widget-smartEditor-ecan .esriCTItemTitle .jimu-rtl {
+      float: right;
+      text-align: right; }
+  .jimu-widget-smartEditor-ecan .esriCTItemHighlighter .jimu-rtl {
+    float: right; }
+  .jimu-widget-smartEditor-ecan .esriCTEllipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .jimu-widget-smartEditor-ecan .esriCTItemContent {
+    height: 0px;
+    padding: 0 5px;
+    overflow: hidden;
+    border-right: 1px solid #d9d9d9;
+    border-left: 1px solid #d9d9d9; }
+  .jimu-widget-smartEditor-ecan .esriCTRelatedItemContent {
+    border-bottom: 1px solid #d9d9d9; }
+  .jimu-widget-smartEditor-ecan .esriCTItemContentActive {
+    height: auto; }
+  .jimu-widget-smartEditor-ecan .esriCTItemListImageLogo {
+    height: 24px;
+    width: 24px;
+    margin-top: 10px;
+    float: left;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 24px;
+    margin-left: 5px; }
+  .jimu-widget-smartEditor-ecan .esriCTItemListImageLogo {
+    float: right;
+    margin-left: auto;
+    margin-right: 5px; }
+  .jimu-widget-smartEditor-ecan .esriCTBorder {
+    border: 1px solid grey; }
+  .jimu-widget-smartEditor-ecan .buttonContainer {
+    text-align: center;
+    margin-top: 5px; }
+  .jimu-widget-smartEditor-ecan .attributeInspectorMainDiv {
+    height: 100%; }
+  .jimu-widget-smartEditor-ecan .detailsContainer {
+    height: 100%; }
+  .jimu-widget-smartEditor-ecan .itemTitleArrowIcon {
+    margin-left: 5px; }
+  .jimu-widget-smartEditor-ecan .itemTitleUpArrow {
+    background-image: url(../images/upArrow.png); }
+  .jimu-widget-smartEditor-ecan .itemTitleDownArrow {
+    background-image: url(../images/downArrow.png); }
+  .jimu-widget-smartEditor-ecan .esriCTDisableToggling .esriCTItemTitleContainer {
+    cursor: default; }
+  .jimu-widget-smartEditor-ecan .esriCTDisableToggling .itemTitleUpArrow {
+    background-image: none; }
+  .jimu-widget-smartEditor-ecan .relatedTablesContainer {
+    float: left;
+    margin: 3px;
+    width: 100%; }
+  .jimu-widget-smartEditor-ecan .relatedTablesContainer .jimu-rtl {
+    float: right; }
+  .jimu-widget-smartEditor-ecan .relatedTableTitleContainer {
+    padding: 7px 0px 7px 0px;
+    width: 100%;
+    float: left;
+    border-bottom: 1px solid #d9d9d9;
+    cursor: pointer;
+    line-height: 20px; }
+  .jimu-widget-smartEditor-ecan .esriCTRelatedTableTitleDefaultCursor {
+    cursor: default; }
+  .jimu-widget-smartEditor-ecan .relatedTableTitle {
+    float: left; }
+  .jimu-widget-smartEditor-ecan .relatedTableTitle .jimu-rtl {
+    float: right; }
+  .jimu-widget-smartEditor-ecan .relatedTableIcons {
+    height: 20px;
+    width: 20px;
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    margin-left: 10px; }
+  .jimu-widget-smartEditor-ecan .esriCTRelatedTableRecordsCount {
+    float: left; }
+  .jimu-widget-smartEditor-ecan .refreshAttributes {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/refresh.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTAutoUpdateOnMode {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/auto-update-on-mode.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTAutoUpdateOffMode {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/auto-update-off-mode.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTMapNavigationLocked {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/map-navigation-locked.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTMapNavigationUnLocked {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/map-navigation-unlocked.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTLocateButtonContainer {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/locate.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTXYCoordinates {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/xy-coordinates.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTGeometryEditor {
+    margin-right: 5px; }
+
+.autoSaveOptionDiv {
+  display: none; }
 
 .widgetIndicator {
   height: 4px;
