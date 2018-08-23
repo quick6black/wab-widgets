@@ -510,9 +510,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (this.state !== 'active') {
         this.widgetManager.activateWidget(this);
       }
-
-      /* BEGIN CHANGE - Handle multiple selected features 
-       // ORIGINAL CODE
       var firstFeature = features[0];
       if (this._validateFeatureChanged() && this.currentFeature) {
         // do not show templatePicker after saving
@@ -524,23 +521,8 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       } else {
         this.load_from_featureaction(featureLayer, firstFeature);
       }
-      */
-      if (this._validateFeatureChanged() && this.currentFeature) {
-        // do not show templatePicker after saving
-        if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
-          this._promptToResolvePendingEdit(false, { featureLayer: featureLayer, feature: features }, false, true);
-        } else {
-          this.load_from_featureaction(featureLayer, features);
-        }
-      } else {
-        this.load_from_featureaction(featureLayer, features);
-      }
     },
     load_from_featureaction: function load_from_featureaction(featureLayer, firstFeature) {
-
-      // NOTE  - START CHANGES HERE ------>>>>
-
-
       //CT- Commented as now we need to clear multiple layer from multiple AI
       /* if (this.updateFeatures) {
          var layersRefresh = [];
@@ -705,9 +687,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         } else {
           return;
         }
+        /* ------------------------------------------------------------- 
+          CHANGE ECAN 2017-05-29 - addition of EditFilter to Listener 
         if (name !== 'GroupFilter') {
           return;
         }
+        */
+
+        if (name !== 'GroupFilter' && name !== 'EditFilter') {
+          return;
+        }
+
+        /* ----------- END OF CHANGE 2017-05-29 ---------------------- */
 
         if (data.message.hasOwnProperty("fields") && data.message.hasOwnProperty("values")) {
           array.forEach(data.message.fields, function (field) {
@@ -804,6 +795,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.drawingTool = null;
       }
       this._enableFeatureReduction();
+
+      /* BEGIN: Ecan Changes */
+
+      this._mapAddRemoveLayerHandler(false);
+
+      /* END: Ecan Changes */
+
       this.inherited(arguments);
     },
     onActive: function onActive() {
@@ -1935,6 +1933,25 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
         this.own(on(this._editGeomSwitch, 'Change', lang.hitch(this, this.editGeoCheckChange())));
 
+        /* BEGIN: ECan Change - Add custom edit options */
+
+        this.featureMergeBtnNode = domConstruct.create("div", {
+          "class": "esriCTMergeTool esriCTGeometryEditor",
+          "title": this.nls.tools.mergeFeatures
+        }, this.attrInspector.deleteBtn.domNode, "after");
+
+        this.featureExplodeBtnNode = domConstruct.create("div", {
+          "class": "esriCTExplodeTool esriCTGeometryEditor",
+          "title": this.nls.tools.explodeMultipartFeatures
+        }, this.attrInspector.deleteBtn.domNode, "after");
+
+        this.featureCutBtnNode = domConstruct.create("div", {
+          "class": "esriCTCutTool esriCTGeometryEditor",
+          "title": this.nls.tools.cutFeatures
+        }, this.attrInspector.deleteBtn.domNode, "after");
+
+        /* END: ECan Change */
+
         // to create container for custom coordinates
         this._xyCoordinates = domConstruct.create("div", {
           "class": "esriCTXYCoordinates esriCTGeometryEditor hidden",
@@ -2356,6 +2373,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _drawingToolClick: function _drawingToolClick(shapeType, options) {
       return function () {
         if (shapeType !== "select") {
+          /* BEGIN: Ecan Change - Check for a select method so we can disable the map info popup */
+          if (options.label.indexOf(window.apiNls.widgets.editor.tools.NLS_selectionNewLbl) >= 0) {
+            this._mapClickHandler(false);
+            this.map.setInfoWindowOnClick(false);
+          }
+          /* END: ECan Change  */
+
           this.drawingTool.set('label', options.label);
           this.drawingTool.set('iconClass', options.iconClass);
           this.drawToolbar.activate(options._drawType);
@@ -2497,6 +2521,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         //this.templatePicker.domNode.appendChild(this.widgetActiveIndicator);
         //this.templatePickerNode.appendChild(this.templatePicker.domNode);
         this._addFilterEditor(layers);
+
+        /* BEGIN: ECAN CHANGE - Look for and apply url parameter template filters */
+        this._applyURLTemplateFilter();
+        /* END: ECAN CHANGE */
+
         // wire up events
 
         if (selectedTemplate !== null && this.templatePicker) {
@@ -2593,6 +2622,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         //change the value of the variable. This will make sure table is created only once
         this._isPresetTableCreated = true;
         this._createPresetTable(this.config.editor.configInfos);
+
+        /* BEGIN: ECAN CHANGE - Init URL Preset Values */
+        this._initURLPresetValues();
+        /* END: ECAN CHANGE */
       }
     },
     isGuid: function isGuid(value) {
@@ -3086,6 +3119,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           addedAnyField = true;
         }
       }
+
+      // BEGIN: ECAN CHANGE - Refresh UI Links to account for preset value parameters
+      this._updateLinksUI();
+      // END: ECAN CHANGE
+
       return addedAnyField;
     },
 
@@ -3730,7 +3768,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         // set selection symbol
         layer.setSelectionSymbol(this._getSelectionSymbol(layer.geometryType, false));
         var selectQuery = new Query();
-        selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+
+        /* BEGIN: Ecan Change - Altered to support polyline and polygon inputs rather than assuming just the map point */
+        // ORIGINAL CODE
+        // selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+
+        if (evt.mapPoint) {
+          selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+        } else {
+          selectQuery.geometry = evt.geometry;
+        }
+        /* END: Ecan Change */
+
         var deferred = layer.selectFeatures(selectQuery, FeatureLayer.SELECTION_NEW, lang.hitch(this, function (features) {
           var OIDsToRemove = [];
           var validFeatures = [];
@@ -4241,6 +4290,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             this.attrInspector.first();
           }
           this.attrInspector.refresh();
+
+          /* BEGIN CHANGE - Configure feature editing tools */
+          this._createFeatureEditTools();
+          /* END CHANGE */
+
           this._createSmartAttributes();
           this._createAttributeInspectorTools();
           this._attributeInspectorTools.triggerFormValidation();
@@ -4277,6 +4331,103 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       };
       this._attributeInspectorTools = new attributeInspectorTools(attributeInspectorToolsParams);
     },
+
+    /* BEGIN: ECan Changes - additional geometry tools */
+
+    _createFeatureEditTools: function _createFeatureEditTools() {
+      if (this.currentFeature === undefined || this.currentFeature === null) {
+        return;
+      }
+
+      // Prepare merge tool
+      this._createMergeTool();
+
+      // Prepare explode tool
+      this._createExplodeTool();
+
+      // Prepare cut tool
+      this._createCutTool();
+    },
+
+    _createMergeTool: function _createMergeTool() {
+      // Merge Button - verify multple features selected from a single dataset
+      var selLayers = [];
+      array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
+        var layer = feature.getLayer();
+        if (selLayers && selLayers.indexOf(layer.id) === -1) {
+          selLayers.push(layer.id);
+        }
+      }));
+
+      if (selLayers.length !== 1) {
+        // Disable the merge tool and show multi layer error message value
+        this._setMergeHandler(false, "multiple layers");
+        return;
+      }
+
+      // Check geometry is line or polygon
+      if (this.currentFeature.geometry.type === 'point') {
+        // Disable the merge tool and show unsupported geometry error message value
+        this._setMergeHandler(false, "unsupported geometry");
+        return;
+      }
+
+      // Ensure multiple features
+      if (this.updateFeatures.length === 1) {
+        // Disable the merge tool and show requires two or more error message value
+        this._setMergeHandler(false, "number of features");
+      } else {
+        this._setMergeHandler(true);
+      }
+    },
+
+    _createExplodeTool: function _createExplodeTool() {
+      // Check geometry is line or polygon
+      if (this.currentFeature.geometry.type === 'point') {
+        // Disable the explode tool and show unsupported geometry error message value
+        this._setExplodeHandler(false, "unsupported geometry");
+        return;
+      }
+
+      // Check for multipart geometry
+      var feature = null,
+          process = '',
+          geometry = null,
+          newFeatures = [];
+      feature = this.currentFeature;
+      switch (feature.geometry.type) {
+        case 'polyline':
+          if (feature.geometry.paths.length > 0) process = 'paths';
+          break;
+
+        case 'polygon':
+          if (feature.geometry.rings.length > 0) process = 'rings';
+          break;
+
+        default:
+          break;
+      }
+
+      if (feature.geometry[process].length === 1) {
+        // Disable the explode tool and show not multipart error message value
+        this._setExplodeHandler(false, "not multipart");
+      } else {
+        this._setExplodeHandler(true);
+      }
+    },
+
+    _createCutTool: function _createCutTool() {
+      // Check geometry is line or polygon
+      if (this.currentFeature.geometry.type === 'point') {
+        // Disable the explode tool and show unsupported geometry error message value
+        this._setCutHandler(false, "unsupported geometry");
+      } else {
+        this._setCutHandler(true);
+      }
+    },
+
+    /* END: ECan Changes */
+
     _createSmartAttributes: function _createSmartAttributes() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
         return;
@@ -5226,6 +5377,861 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this.map.snappingManager.setLayerInfos(layerInfos);
         }
       }
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Copy Features */
+
+    copyFeatureSet: function copyFeatureSet(featureSet) {
+      // Get geometry type and ensure editable layer of this geometry type is available
+      var geometryType = featureSet.geometryType;
+      if (!geometryType) {
+        geometryType = featureSet.features[0].geometry.type;
+      }
+      geometryType = this._getEsriGeometryType(geometryType);
+
+      var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+      layers = layers.filter(function (layer) {
+        return layer.geometryType && layer.geometryType === geometryType;
+      });
+
+      var copyPopup, param;
+      param = {
+        map: this.map,
+        nls: this.nls,
+        config: this.config,
+        featureSet: featureSet,
+        layers: layers
+      };
+
+      copyPopup = new CopyFeaturesPopup(param);
+      copyPopup.startup();
+
+      copyPopup.onOkClick = lang.hitch(this, function () {
+        var template = copyPopup.getSelectedTemplate();
+        if (template) {
+          if (copyPopup.featureSet.features.length === 1) {
+            this._addFeature(copyPopup.featureSet.features[0], template);
+          } else {
+            this._bulkAddFeatures(copyPopup.featureSet.features, template);
+          }
+        }
+        copyPopup.popup.close();
+      });
+    },
+
+    _getEsriGeometryType: function _getEsriGeometryType(geometryType) {
+      var esriGeometryType = '';
+      switch (geometryType) {
+        case 'polygon':
+          esriGeometryType = 'esriGeometryPolygon';
+          break;
+
+        case 'polyline':
+          esriGeometryType = 'esriGeometryPolyline';
+          break;
+
+        case 'point':
+          esriGeometryType = 'esriGeometryPoint';
+          break;
+
+        default:
+          esriGeometryType = geometryType;
+          break;
+      }
+      return esriGeometryType;
+    },
+
+    _addFeature: function _addFeature(feature, template) {
+      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+      var newTempLayerInfos;
+      var localLayerInfo = null;
+
+      if (this.attrInspector) {
+        this.attrInspector.destroy();
+        this.attrInspector = null;
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+      this._removeLocalLayers();
+      // preparation for a new attributeInspector for the local layer
+      this.cacheLayer = this._cloneLayer(template.featureLayer);
+      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+
+      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
+
+      this._createAttributeInspector([localLayerInfo]);
+
+      if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
+        setTimeout(lang.hitch(this, function () {
+          this._editGeomSwitch.set('checked', true);
+        }), 100);
+      }
+
+      var newAttributes = lang.clone(template.template.prototype.attributes);
+      if (this._copyExistingValues) {
+        this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+      }
+
+      if (this._usePresetValues) {
+        this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+      }
+
+      var newGraphic = new Graphic(feature.geometry, null, newAttributes);
+
+      // store original attrs for later use
+      newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+      this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
+        var queryTask = new Query();
+        queryTask.objectIds = [e[0].objectId];
+        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+
+        this.currentFeature = this.updateFeatures[0] = newGraphic;
+        this.getConfigDefaults();
+        this.geometryChanged = false;
+        if (this._attributeInspectorTools) {
+          this._attributeInspectorTools.triggerFormValidation();
+        }
+        this._attachLayerHandler();
+        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+        this.currentLayerInfo.isCache = true;
+        this._toggleDeleteButton(false);
+        //this._toggleEditGeoSwitch(false);
+
+        //this._createSmartAttributes();
+        //
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
+      }));
+
+      this._showTemplate(false, false);
+
+      if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+        setTimeout(lang.hitch(this, function () {
+          var saveBtn = query(".saveButton")[0];
+          if (!saveBtn) {
+            //do nothing
+          } else {
+            on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
+          }
+        }), 100);
+      }
+    },
+
+    _bulkAddFeatures: function _bulkAddFeatures(featureSet, template) {
+      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+      var newTempLayerInfos;
+      var localLayerInfo = null;
+
+      if (this.attrInspector) {
+        this.attrInspector.destroy();
+        this.attrInspector = null;
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
+      }
+
+      this._removeLocalLayers();
+      // preparation for a new attributeInspector for the local layer
+      this.cacheLayer = this._cloneLayer(template.featureLayer);
+      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+
+      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
+
+      this._createAttributeInspector([localLayerInfo]);
+
+      if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
+        setTimeout(lang.hitch(this, function () {
+          this._editGeomSwitch.set('checked', true);
+        }), 100);
+      }
+
+      var updateFeatures = [];
+      array.forEach(featureSet, lang.hitch(this, function (feature) {
+        var newAttributes = lang.clone(template.template.prototype.attributes);
+        if (this._copyExistingValues) {
+          this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+        }
+
+        if (this._usePresetValues) {
+          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+        }
+
+        var newGraphic = new Graphic(feature.geometry, null, newAttributes);
+
+        // store original attrs for later use
+        newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+        updateFeatures.push(newGraphic);
+      }));
+
+      this.cacheLayer.applyEdits(updateFeatures, null, null, lang.hitch(this, function (e) {
+        var queryTask = new Query();
+        var objectIds = e.map(function (feature) {
+          return feature.objectId;
+        });
+        queryTask.objectIds = objectIds;
+        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+
+        /*
+         this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
+        this.getConfigDefaults();
+        this.geometryChanged = false;
+        if (this._attributeInspectorTools) {
+          this._attributeInspectorTools.triggerFormValidation();
+        }
+        this._attachLayerHandler();
+        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+        this.currentLayerInfo.isCache = true;
+        this._toggleDeleteButton(false);
+        //this._toggleEditGeoSwitch(false);
+         //this._createSmartAttributes();
+        //
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
+        */
+        array.forEach(updateFeatures, lang.hitch(this, function (feature) {
+          this._postChanges(feature).then(lang.hitch(this, function (e) {
+            if (e === "failed") {} else {}
+          }));
+        }));
+
+        this._showTemplate(false, false);
+
+        if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+          setTimeout(lang.hitch(this, function () {
+            var saveBtn = query(".saveButton")[0];
+            if (!saveBtn) {
+              //do nothing
+            } else {
+              on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
+            }
+          }), 100);
+        }
+      }));
+    },
+
+    _modifyAttributesWithCopyValues: function _modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, attributes) {
+      for (var key in newAttributes) {
+        // Check if attribute exists in new feature
+        if (attributes[key]) {
+          // Validate the attribute value is valid for data type
+          if (this._validateCopyAttribute(attributes[key], key, newTempLayerInfos[0].fieldInfos)) {
+            newAttributes[key] = attributes[key];
+          }
+        }
+      }
+    },
+
+    _validateCopyAttribute: function _validateCopyAttribute(fieldValue, fieldName, fieldInfos) {
+      var isValid = false;
+      var field = fieldInfos.filter(function (fieldInfo) {
+        return fieldInfo.name === fieldName;
+      })[0];
+
+      // Validate data type
+      switch (field.type) {
+        case 'esriFieldTypeGUID':
+          var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
+          if (pattern.test(fieldValue) === true) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeInteger":
+          var regInt = parseInt(fieldValue);
+          if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSmallInteger":
+          var shtInt = parseInt(fieldValue);
+          if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSingle":
+        case "esriFieldTypeDouble":
+          if (Number.isNumeric(fieldValue)) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeDate":
+          var newDate = new Date(fieldValue);
+          isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
+          break;
+
+        case 'esriFieldTypeString':
+        default:
+          isValid = field["length"] >= fieldValue.length;
+          break;
+      }
+
+      // Check Domain values
+      if (field.domain && isValid) {
+        switch (field.domain.type) {
+          case "codedValue":
+            // Validate value is with domain list
+            isValid = field.domain.codedValues.filter(function (value) {
+              return value.code === fieldValue;
+            }).length > 0;
+            break;
+
+          case "range":
+            var numValue = Number(fieldValue);
+            isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      // Check editable
+      if (!field.ediatble && isValid) {
+        isValid = false;
+      }
+
+      return isValid;
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Merge Features */
+
+    _setMergeHandler: function _setMergeHandler(create, error) {
+      if (create) {
+        // Remove disable button style
+        if (domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+          domClass.remove(this.featureMergeBtnNode, "jimu-state-disabled");
+        }
+
+        domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeToolTitle);
+
+        // Apply the click event
+        if (!this._mergeClick) {
+          this._mergeClick = on(this.featureMergeBtnNode, "click", lang.hitch(this, this._startMerge));
+        }
+      } else {
+        // Apply disable button style
+        if (!domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+          domClass.add(this.featureMergeBtnNode, "jimu-state-disabled");
+        }
+
+        // Deactiviate the click event
+        if (this._mergeClick) {
+          this._mergeClick.remove();
+          this._mergeClick = null;
+        }
+
+        switch (error) {
+          case "multiple layers":
+            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.multipleLayersError);
+            break;
+
+          case "unsupported geometry":
+            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.unsupportedGeometryError);
+            break;
+
+          case "number of features":
+            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.numberOfFeaturesError);
+            break;
+
+          default:
+            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.generalError);
+            break;
+        }
+      }
+    },
+
+    _startMerge: function _startMerge() {
+      var mergePopup, param;
+      param = {
+        map: this.map,
+        nls: this.nls,
+        config: this.config,
+        features: this.updateFeatures,
+        currentFeature: this.currentFeature
+      };
+
+      mergePopup = new MergeFeaturesPopup(param);
+      mergePopup.startup();
+
+      mergePopup.onOkClick = lang.hitch(this, function () {
+        this._mergeFeatures();
+        mergePopup.popup.close();
+      });
+    },
+
+    _mergeFeatures: function _mergeFeatures() {
+      var geometries = [];
+      var removeFeatures = [];
+      for (var i = 0, il = this.updateFeatures.length; i < il; i++) {
+        var feature = this.updateFeatures[i];
+        geometries.push(feature.geometry);
+
+        if (feature !== this.currentFeature) removeFeatures.push(feature);
+      }
+
+      var newGeometry = geometryEngine.union(geometries);
+      var newFeature = new Graphic(this.currentFeature.toJson());
+      newFeature.setGeometry(newGeometry);
+
+      // Apply the changes
+      var layer = this.currentFeature.getLayer();
+      layer.applyEdits(null, [newFeature], removeFeatures, lang.hitch(this, function (adds, updates, deletes) {
+        if (updates && updates.length > 0 && updates[0].hasOwnProperty("error")) {
+          Message({
+            message: updates[0].error.toString()
+          });
+        }
+        if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+          Message({
+            message: deletes[0].error.toString()
+          });
+        }
+
+        this.load_from_featureaction(layer, newFeature);
+      }), lang.hitch(this, function (err) {
+        Message({
+          message: err.message.toString() + "\n" + err.details
+        });
+      }));
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Explode Features */
+
+    _setExplodeHandler: function _setExplodeHandler(create, error) {
+      if (create) {
+        // Remove disable button style
+        if (domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+          domClass.remove(this.featureExplodeBtnNode, "jimu-state-disabled");
+        }
+
+        domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeToolTitle);
+
+        // Apply the click event
+        if (!this._explodeClick) {
+          this._explodeClick = on(this.featureExplodeBtnNode, "click", lang.hitch(this, this._startExplode));
+        }
+      } else {
+        // Apply disable button style
+        if (!domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+          domClass.add(this.featureExplodeBtnNode, "jimu-state-disabled");
+        }
+
+        // Deactiviate the click event
+        if (this._explodeClick) {
+          this._explodeClick.remove();
+          this._explodeClick = null;
+        }
+
+        switch (error) {
+          case "unsupported geometry":
+            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
+            break;
+
+          case "not multipart":
+            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.notMultipartError);
+            break;
+
+          default:
+            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.generalError);
+            break;
+        }
+      }
+    },
+
+    _startExplode: function _startExplode() {
+      var explodePopup, param;
+      param = {
+        map: this.map,
+        nls: this.nls,
+        config: this.config,
+        features: this.updateFeatures,
+        currentFeature: this.currentFeature
+      };
+
+      explodePopup = new ExplodeFeaturesPopup(param);
+      explodePopup.startup();
+
+      explodePopup.onOkClick = lang.hitch(this, function () {
+        this._explodeFeatures();
+        explodePopup.popup.close();
+      });
+    },
+
+    _explodeFeatures: function _explodeFeatures() {
+      // Check for multipart geometry
+      var feature = null,
+          process = '',
+          geometry = null,
+          newFeatures = [];
+      feature = this.currentFeature;
+      switch (feature.geometry.type) {
+        case 'polyline':
+          if (feature.geometry.paths.length > 0) process = 'paths';
+          break;
+
+        case 'polygon':
+          if (feature.geometry.rings.length > 0) process = 'rings';
+          break;
+
+        default:
+          break;
+      }
+
+      if (process !== '') {
+        geometry = feature.geometry;
+        for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+          var newFeature = new Graphic(feature.toJson());
+          var newGeometry = null;
+
+          switch (process) {
+            case 'rings':
+              newGeometry = new Polygon({
+                "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                "spatialReference": geometry.spatialReference.toJson()
+              });
+              break;
+
+            case 'paths':
+              newGeometry = new Polyline({
+                "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
+                "spatialReference": geometry.spatialReference.toJson()
+              });
+              break;
+          }
+          newFeature.setGeometry(newGeometry);
+          newFeatures.push(newFeature);
+        }
+      } else {
+        newFeatures.push(feature);
+      }
+
+      // Apply the changes
+      var layer = this.currentFeature.getLayer();
+      layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
+        if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+          Message({
+            message: adds[0].error.toString()
+          });
+        }
+        if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+          Message({
+            message: deletes[0].error.toString()
+          });
+        }
+
+        // Return to templates 
+        this._showTemplate(true);
+      }), lang.hitch(this, function (err) {
+        Message({
+          message: err.message.toString() + "\n" + err.details
+        });
+      }));
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Edit DrawTools */
+
+    _applyEditToolButtonStyle: function _applyEditToolButtonStyle(tool, active) {
+      // Update cut tool state
+      if (tool !== 'CUT' || tool === 'CUT' && !active) {
+        if (domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+          domClass.remove(this.featureCutBtnNode, "btn-toggle");
+        }
+      } else {
+        if (!domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+          domClass.add(this.featureCutBtnNode, "btn-toggle");
+        }
+      }
+    },
+
+    _actionEditTool: function _actionEditTool(evt) {
+      switch (this._drawToolEditType) {
+        case 'CUT':
+          this._cutFeatures(evt);
+          break;
+        default:
+          alert('_actionEditTool: Not finished');
+          break;
+      }
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Cut Tool */
+
+    _setCutHandler: function _setCutHandler(create, error) {
+      if (create) {
+        // Remove disable button style
+        if (domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+          domClass.remove(this.featureCutBtnNode, "jimu-state-disabled");
+        }
+
+        domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutToolTitle);
+
+        // Apply the click event
+        if (!this._cutClick) {
+          this._cutClick = on(this.featureCutBtnNode, "click", lang.hitch(this, this._setCutMode));
+        }
+      } else {
+        // Apply disable button style
+        if (!domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+          domClass.add(this.featureCutBtnNode, "jimu-state-disabled");
+        }
+
+        // Deactiviate the click event
+        if (this._cutClick) {
+          this._cutClick.remove();
+          this._cutClick = null;
+        }
+
+        switch (error) {
+          case "unsupported geometry":
+            domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.unsupportedGeometryError);
+            break;
+
+          default:
+            domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.generalError);
+            break;
+        }
+      }
+    },
+
+    _setCutMode: function _setCutMode(reset) {
+      if (reset === true || this._drawToolEditMode && this._drawToolEditType && this._drawToolEditType === 'CUT') {
+        // Deactivate the cut tool
+        this._drawToolEditMode = false;
+        this._drawToolEditType = null;
+        this.drawToolbar.deactivate();
+
+        this.map.setInfoWindowOnClick(true);
+
+        // Remove active style on button
+        this._applyEditToolButtonStyle('CUT', false);
+      } else {
+
+        // Check if another edit tool is active
+        if (this._drawToolEditType !== 'CUT') {}
+        // disable this tool
+
+
+        // Activate the draw tool to define the cut line
+        this._drawToolEditType = 'CUT';
+        this._drawToolEditMode = true;
+        this.drawToolbar.activate(Draw.POLYLINE, null);
+
+        this.map.setInfoWindowOnClick(false);
+
+        // Remove active style on button
+        this._applyEditToolButtonStyle('CUT', true);
+      }
+    },
+
+    _cutFeatures: function _cutFeatures(evt) {
+      // Check for line feature
+      if (this.currentFeature && evt && evt.geometry) {
+        var cutLine = evt.geometry;
+
+        // Reset the cut tool
+        this._setCutMode(true);
+
+        if (cutLine.type !== 'polyline') {
+          Message({
+            message: this.nls.tools.cutErrors.invalidCutGeometryError
+          });
+
+          // stop here and reset tool
+          return;
+        }
+
+        var feature = this.currentFeature;
+        var newShapes = geometryEngine.cut(feature.geometry, cutLine);
+
+        if (newShapes.length === 0) {
+          Message({
+            message: this.nls.tools.cutErrors.noFeaturesCutError
+          });
+        } else {
+          // Create new records based on the original and remove the original record
+          var newFeatures = [],
+              newGeometry = null;
+          for (var p = 0, pl = newShapes.length; p < pl; p++) {
+            var newFeature = new Graphic(feature.toJson());
+            newGeometry = newShapes[p];
+            newFeature.setGeometry(newGeometry);
+            newFeatures.push(newFeature);
+          }
+
+          var layer = feature.getLayer();
+          layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
+            if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+              Message({
+                message: adds[0].error.toString()
+              });
+            }
+            if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+              Message({
+                message: deletes[0].error.toString()
+              });
+            }
+
+            // Return to templates 
+            this._showTemplate(true);
+          }), lang.hitch(this, function (err) {
+            Message({
+              message: err.message.toString() + "\n" + err.details
+            });
+          }));
+        }
+      }
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - URL Parameter Preset Fields */
+
+    _initURLPresetValues: function _initURLPresetValues() {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var valuesQuery = urlObject.query["preset"];
+        if (valuesQuery) {
+          var values = this._getPresetParams(valuesQuery);
+          array.forEach(values, function (field) {
+            this._setPresetValueValue(field.name, field.value);
+          }, this);
+        }
+      }
+    },
+
+    _getPresetParams: function _getPresetParams(query) {
+      var presetValues = [];
+      if (query) {
+        var items = query.split(',');
+        array.forEach(items, lang.hitch(this, function (item) {
+          var itemparts = item.split(':');
+          if (itemparts.length === 2) {
+            presetValues.push({
+              name: itemparts[0],
+              value: itemparts[1]
+            });
+          }
+        }));
+      }
+      return presetValues;
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - URL Parameter Template Filter */
+
+    _applyURLTemplateFilter: function _applyURLTemplateFilter() {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var templatesQuery = urlObject.query["templates"];
+        if (templatesQuery) {
+          var templateIDs = this._getTemplateParams(templatesQuery);
+          this._filterEditor.filterTextBox.value = templateIDs;
+          this._filterEditor._onTemplateFilterChanged();
+        }
+      }
+    },
+
+    _getTemplateParams: function _getTemplateParams(query) {
+      var templatesString = '';
+
+      var filterParams = query.split(',');
+
+      if (filterParams.length > 0) {
+        // Check layer templates for domain codes that match template urls
+        var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+        var tmps = [],
+            tmpIds = [];
+        array.forEach(layers, lang.hitch(this, function (layer) {
+          var dmVals = layer.types.map(function (item) {
+            return {
+              "id": item["id"],
+              "label": item.templates[0]["name"]
+            };
+          });
+
+          for (var i = 0, l = dmVals.length; i < l; i++) {
+            if (tmpIds.indexOf(dmVals[i].label) === -1) {
+              tmps.push(dmVals[i]);
+              tmpIds.push(dmVals[i].label);
+            } else if (tmpIds.indexOf(dmVals[i].id) === -1) {
+              tmps.push(dmVals[i]);
+              tmpIds.push(dmVals[i].id);
+            }
+          }
+        }));
+
+        var templates = [];
+        array.forEach(filterParams, function (param) {
+          var paramlc = param.toLowerCase();
+          var options = tmps.filter(function (item, index) {
+            return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+          });
+
+          array.forEach(options, function (item) {
+            if (templates.indexOf(item.label) === -1) {
+              templates.push(item.label);
+            }
+          });
+        });
+        templatesString = templates.join(',');
+      }
+
+      return templatesString;
+    },
+
+    /* END: Ecan Changes */
+
+    /* BEGIN: Ecan Changes - Hide Attribute display on preset fields */
+
+    _getRowInfo: function _getRowInfo(row) {
+      var valueCell = row.parentNode.childNodes[1].childNodes[0];
+      var valueCell2 = null;
+      if (row.parentNode.childNodes[1].childNodes.length > 1) {
+        valueCell2 = row.parentNode.childNodes[1].childNodes[1];
+      }
+      var label;
+      if (this.useFieldName === true) {
+        if (row.hasAttribute("data-fieldname")) {
+          label = row.getAttribute("data-fieldname");
+        } else {
+          label = row.childNodes[0].data;
+        }
+      } else {
+        label = row.childNodes[0].data;
+      }
+
+      var parent = row.parentNode;
+      var widget = registry.getEnclosingWidget(valueCell);
+
+      return [valueCell, parent, widget, label, valueCell2];
     }
 
     /* END: Ecan Changes */

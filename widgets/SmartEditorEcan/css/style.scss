@@ -652,6 +652,39 @@
         cursor: pointer;
     }
 
+    .esriCTCutTool {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/xy-coordinates.png);
+        cursor: pointer;
+    }
+
+    .esriCTExplodeTool {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/xy-coordinates.png);
+        cursor: pointer;
+    }    
+
+    .esriCTMergeTool {
+        height: 35px;
+        width: 35px;
+        background-size: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        float: left;
+        background-image: url(../images/xy-coordinates.png);
+        cursor: pointer;
+    }
+
     .esriCTGeometryEditor {
         margin-right: 5px;
     }

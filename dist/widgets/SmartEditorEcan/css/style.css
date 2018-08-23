@@ -575,6 +575,33 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     float: left;
     background-image: url(../images/xy-coordinates.png);
     cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTCutTool {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/xy-coordinates.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTExplodeTool {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/xy-coordinates.png);
+    cursor: pointer; }
+  .jimu-widget-smartEditor-ecan .esriCTMergeTool {
+    height: 35px;
+    width: 35px;
+    background-size: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    background-image: url(../images/xy-coordinates.png);
+    cursor: pointer; }
   .jimu-widget-smartEditor-ecan .esriCTGeometryEditor {
     margin-right: 5px; }
 
