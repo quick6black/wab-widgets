@@ -582,8 +582,12 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    background-image: url(../images/xy-coordinates.png);
+    background-image: url(../images/cut-inactive.png);
     cursor: pointer; }
+    .jimu-widget-smartEditor-ecan .esriCTCutTool.btn-toggle {
+      background-color: transparent !important;
+      background-image: url(../images/cut-active.png);
+      border: none; }
   .jimu-widget-smartEditor-ecan .esriCTExplodeTool {
     height: 35px;
     width: 35px;
@@ -591,7 +595,7 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    background-image: url(../images/xy-coordinates.png);
+    background-image: url(../images/explode.png);
     cursor: pointer; }
   .jimu-widget-smartEditor-ecan .esriCTMergeTool {
     height: 35px;
@@ -600,7 +604,7 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     background-repeat: no-repeat;
     background-position: center;
     float: left;
-    background-image: url(../images/xy-coordinates.png);
+    background-image: url(../images/merge.png);
     cursor: pointer; }
   .jimu-widget-smartEditor-ecan .esriCTGeometryEditor {
     margin-right: 5px; }

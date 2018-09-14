@@ -2364,7 +2364,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         if (this.attrInspector) {
           if (this.attrInspector._numFeatures === 0) {
             this._showTemplate(true);
-           }
+            }
         }
       }
     },
@@ -5583,7 +5583,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
 
         /*
-         this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
+          this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
         this.getConfigDefaults();
         this.geometryChanged = false;
         if (this._attributeInspectorTools) {
@@ -5594,7 +5594,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.currentLayerInfo.isCache = true;
         this._toggleDeleteButton(false);
         //this._toggleEditGeoSwitch(false);
-         //this._createSmartAttributes();
+          //this._createSmartAttributes();
         //
         this._enableAttrInspectorSaveButton(this._validateAttributes());
         */
