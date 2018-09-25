@@ -13,12 +13,12 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            myWidget.copyFeatureSet(results);
+            myWidget.requestStatement(results);
           }, function (error) {
             alert(error);
           });
         } else {
-          myWidget.copyFeatureSet(featureSet);
+          myWidget.requestStatement(featureSet);
         }
       }));
     },

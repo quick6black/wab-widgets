@@ -22,9 +22,29 @@ define([
   var clazz = declare(BaseFeatureAction, {
     iconFormat: 'png',
 
+    _widgetConfig: null,
+
+
     isFeatureSupported: function (featureSet) {
-      return featureSet.features.length > 0 && 
-        featureSet.features[0].geometry.type === 'polygon';
+		if (featureSet.features.length = 1 && 
+        	featureSet.features[0].geometry.type === 'polygon' &&
+        	this._checkForFeatureLayers(featureSet)) {
+			var cfg = this._getThisConfig();
+			var layer = featureSet.features[0].getLayer();
+
+			var isLayer = false;
+			arrayUtils.forEach(cfg.recordTemplates, lang.hitch(this, 
+				function (recordTemplate) {
+					if (layer.url === recordTemplate.lookupUrl) {
+						isLayer = true;
+					}
+				})
+			);
+
+			return isLayer;
+		} else {
+			return false;
+		}    	
     },
 
     onExecute: function (featureSet) {
@@ -37,14 +57,14 @@ define([
                 this._queryForFeatures(featureSet)
                   .then(
                     function(results) {
-                      myWidget.copyFeatureSet(results);
+                      myWidget.editRecord(results);
                     }, 
                     function (error) {
                       alert(error);
                     }
                   );
             } else {
-              myWidget.copyFeatureSet(featureSet);
+              myWidget.editRecord(featureSet);
             }       
           })
         );
@@ -76,7 +96,29 @@ define([
       query.outFields = fields;
 
       return layer.queryFeatures(query);
+    },
+
+    _getThisConfig: function () {
+    	if (this._widgetConfig === null) {
+    		var widgetsLst = this.appConfig.widgetPool.widgets;
+    		var cfg = null;
+    		arrayUtils.forEach(widgetsLst, lang.hitch(this, 
+    			function(item) {
+    				if (item.id === this.widgetId) {
+					cfg = item.config;   				
+    				}
+    			})
+    		);
+
+    		if (cfg !== null) {
+    			this._widgetConfig = cfg;
+    		}
+    	}
+
+    	return this._widgetConfig;
     }
+
+
 
   });
   return clazz;

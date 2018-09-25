@@ -2,8 +2,24 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
   var clazz = declare(BaseFeatureAction, {
     iconFormat: 'png',
 
+    _widgetConfig: null,
+
     isFeatureSupported: function isFeatureSupported(featureSet) {
-      return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
+      if (featureSet.features.length = 1 && featureSet.features[0].geometry.type === 'polygon' && this._checkForFeatureLayers(featureSet)) {
+        var cfg = this._getThisConfig();
+        var layer = featureSet.features[0].getLayer();
+
+        var isLayer = false;
+        arrayUtils.forEach(cfg.recordTemplates, lang.hitch(this, function (recordTemplate) {
+          if (layer.url === recordTemplate.lookupUrl) {
+            isLayer = true;
+          }
+        }));
+
+        return isLayer;
+      } else {
+        return false;
+      }
     },
 
     onExecute: function onExecute(featureSet) {
@@ -13,12 +29,12 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            myWidget.copyFeatureSet(results);
+            myWidget.editRecord(results);
           }, function (error) {
             alert(error);
           });
         } else {
-          myWidget.copyFeatureSet(featureSet);
+          myWidget.editRecord(featureSet);
         }
       }));
     },
@@ -49,6 +65,24 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       query.outFields = fields;
 
       return layer.queryFeatures(query);
+    },
+
+    _getThisConfig: function _getThisConfig() {
+      if (this._widgetConfig === null) {
+        var widgetsLst = this.appConfig.widgetPool.widgets;
+        var cfg = null;
+        arrayUtils.forEach(widgetsLst, lang.hitch(this, function (item) {
+          if (item.id === this.widgetId) {
+            cfg = item.config;
+          }
+        }));
+
+        if (cfg !== null) {
+          this._widgetConfig = cfg;
+        }
+      }
+
+      return this._widgetConfig;
     }
 
   });

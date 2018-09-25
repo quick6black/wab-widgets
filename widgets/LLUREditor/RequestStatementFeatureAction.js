@@ -37,14 +37,14 @@ define([
                 this._queryForFeatures(featureSet)
                   .then(
                     function(results) {
-                      myWidget.copyFeatureSet(results);
+                      myWidget.requestStatement(results);
                     }, 
                     function (error) {
                       alert(error);
                     }
                   );
             } else {
-              myWidget.copyFeatureSet(featureSet);
+              myWidget.requestStatement(featureSet);
             }       
           })
         );

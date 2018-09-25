@@ -25,5 +25,13 @@
   "featureActions": [{
     "name": "CreateRecord",
     "uri": "CreateRecordFeatureAction"
+  },
+  {
+    "name": "EditRecord",
+    "uri": "EditRecordFeatureAction"
+  },
+  {
+    "name": "RequestStatement",
+    "uri": "RequestStatementFeatureAction"
   }]
 }
