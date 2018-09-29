@@ -170,6 +170,8 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
 
       if (setActive && !this.selectDijit.isActive()) {
         this.selectDijit.activate();
+      } else if (!setActive && this.selectDijit.isActive()){
+        this.selectDijit.deactivate();
       }
     },
 

@@ -132,6 +132,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
       if (setActive && !this.selectDijit.isActive()) {
         this.selectDijit.activate();
+      } else if (!setActive && this.selectDijit.isActive()) {
+        this.selectDijit.deactivate();
       }
     },
 
