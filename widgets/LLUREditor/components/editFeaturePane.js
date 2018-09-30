@@ -254,7 +254,7 @@ function (
                 this.submitButton.startup();
                 this.submitButton.on("click", lang.hitch(this, 
                     function (evt) {
-                        var c = confirm("Are you sure you want to save changes?");
+                        var c = confirm(this.i18n.edit.cancelConfirm);
                         if (c) {
                             this.wabWidget.saveChanges();
                         }
@@ -271,7 +271,7 @@ function (
                 this.cancelButton.startup();
                 this.cancelButton.on("click", lang.hitch(this, 
                     function (evt) {
-                        var c = confirm("Are you sure you want to cancel?");
+                        var c = confirm(this.i18n.edit.cancelConfirm);
                         if (c) {
                             this.wabWidget.cancelChanges();
                         }

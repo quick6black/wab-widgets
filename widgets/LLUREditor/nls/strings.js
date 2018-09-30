@@ -16,7 +16,10 @@ define({
     editorCache: " - Edit Feature",
 
     create: {
-      instruction: "Click one of the following options to create a record of that type."
+      instruction: "Click one of the following options to create a record of that type.",
+      layerButton: {
+        layerButtonTooltip:"Click to create a record to this type."
+      }
     },
 
     edit: {
@@ -24,8 +27,10 @@ define({
       instructionUpdate: "<p>Click <b>Edit Geometry</b> or use the gemeotry tools to alter the shape of the record, and then click <b>Submit</b> to save the changes to the record, or <b>Cancel</b> to abandon the changes.</p>",
       submitLabel: "Submit",
       submitTooltip: "Click to save the changes to the LLUR Database.",
+      submitConfirm: "Are you sure you want to save changes?",
       cancelLabel: "Cancel",
       cancelTooltip: "Click to cancel the edit and return to the map.",
+      cancelConfirm: "Are you sure you want to cancel?",
       editGeometryLabel: "Edit Shape",
       editGeometryTooltip: "Click to toggle the edit tools for this feature on or off",
       requestStatementLabel: "Request Statement",
@@ -39,7 +44,8 @@ define({
     createCreateLLURFeaturePopup: {
       ok: "Ok",
       cancel: "Cancel",
-      titleLabel: "Create a LLUR Record"
+      titleLabel: "Create a LLUR Record",
+      instruction: "Select a Record Type"
     }
 
   })

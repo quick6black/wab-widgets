@@ -17,6 +17,9 @@
   .llur-editor .secondary-pane > * {
     width: 100%; }
 
+.llur-editor .instructions {
+  padding: 5px; }
+
 .llur-editor .templatePicker {
   position: relative;
   height: 296px !important; }

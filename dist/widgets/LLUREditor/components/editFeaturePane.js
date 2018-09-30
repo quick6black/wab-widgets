@@ -187,7 +187,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 this.attributeInspector.editButtons.appendChild(this.submitButton.domNode);
                 this.submitButton.startup();
                 this.submitButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm("Are you sure you want to save changes?");
+                    var c = confirm(this.i18n.edit.cancelConfirm);
                     if (c) {
                         this.wabWidget.saveChanges();
                     }
@@ -202,7 +202,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 this.attributeInspector.editButtons.appendChild(this.cancelButton.domNode);
                 this.cancelButton.startup();
                 this.cancelButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm("Are you sure you want to cancel?");
+                    var c = confirm(this.i18n.edit.cancelConfirm);
                     if (c) {
                         this.wabWidget.cancelChanges();
                     }
