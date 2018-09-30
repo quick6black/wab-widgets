@@ -178,6 +178,21 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                     this._startEditTool();
                 }));
 
+                //add in request statement 
+                this.requestButton = new Button({
+                    label: this.i18n.edit.requestStatementLabel,
+                    title: this.i18n.edit.requestStatementTooltip,
+                    class: "atiButton atiRequestButton"
+                });
+                this.attributeInspector.editButtons.appendChild(this.requestButton.domNode);
+                this.requestButton.startup();
+                this.requestButton.on("click", lang.hitch(this, function (evt) {
+                    var c = confirm(this.i18n.edit.requestStatementConfirm);
+                    if (c) {
+                        this.wabWidget.requestStatement();
+                    }
+                }));
+
                 //add in submit 
                 this.submitButton = new Button({
                     label: this.i18n.edit.submitLabel,

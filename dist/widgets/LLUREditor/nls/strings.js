@@ -34,7 +34,8 @@ define({
       editGeometryLabel: "Edit Shape",
       editGeometryTooltip: "Click to toggle the edit tools for this feature on or off",
       requestStatementLabel: "Request Statement",
-      requestStatementTooltip: "Click to generate a LLUR statement for this selected area."    
+      requestStatementTooltip: "Click to generate a LLUR statement for this selected area.",
+      requestStatementConfirm: "Do you want a statement for this area?"    
     },
 
     search: {

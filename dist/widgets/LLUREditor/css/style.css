@@ -119,6 +119,7 @@
 .esriAttributeInspector .atiDeleteButton {
   float: left; }
 
+.esriAttributeInspector .atiRequestButton,
 .esriAttributeInspector .atiCancelButton,
 .esriAttributeInspector .atiSubmitButton {
   float: right; }
