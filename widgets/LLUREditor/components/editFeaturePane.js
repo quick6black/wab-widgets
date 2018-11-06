@@ -20,7 +20,9 @@ define([
     "dijit/form/Button",
 
     "esri/toolbars/edit",    
-    "esri/dijit/AttributeInspector"     
+    "esri/dijit/AttributeInspector",
+
+    './../libs/automapper'       
 ],
 function (
 	declare, 
@@ -44,7 +46,9 @@ function (
     Button,
 
     Edit,
-    AttributeInspector
+    AttributeInspector,
+
+    automapperUtil
 ) {
 	return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 	   	
@@ -150,9 +154,11 @@ function (
                             arrayUtils.forEach(infos, lang.hitch(this, 
                                 function (info) {
                                     if (info.fieldName === fieldName && !info.visible) {
+                                        //get row
+                                        var row = info.dijit.domNode.parentNode.parentNode;
+                                        
                                         //hide row
-                                        var i = 0;
-                                        //domStyle.atiNode.parent
+                                        domStyle.set(row, "display", "none");
                                     }
                                 })
                             );
@@ -199,7 +205,8 @@ function (
                 this.currentTargetTemplate = recordTemplate;
 
                 //prepare attribute inspector
-                var fieldInfos = lang.clone(recordTemplate.fieldInfos);
+                //var fieldInfos = lang.clone(recordTemplate.fieldInfos);
+                var fieldInfos = this._mapFields(recordTemplate.fieldInfos, this.editMode === "update");
                 var layerInfos = [
                     {
                         'featureLayer': recordTemplate.displayLayer,
@@ -210,14 +217,14 @@ function (
                     }
                 ];
 
-                if (this.editMode === "update") {
-                    arrayUtils.forEach(layerInfos[0]["fieldInfos"], lang.hitch(this, 
-                        function (fieldInfo) {
-                            fieldInfo.visible = fieldInfo.editModeVisible;
-                            fieldInfo.isEditable = fieldInfo.editModeIsEditable;
-                        })
-                    );
-                }
+                // if (this.editMode === "update") {
+                //     arrayUtils.forEach(layerInfos[0]["fieldInfos"], lang.hitch(this, 
+                //         function (fieldInfo) {
+                //             fieldInfo.visible = fieldInfo.editModeVisible;
+                //             fieldInfo.isEditable = fieldInfo.editModeIsEditable;
+                //         })
+                //     );
+                // }
 
                 //create a new attribute inspector
                 this.attributeInspectorDiv = domConstruct.create("div");
@@ -225,6 +232,13 @@ function (
                 this.attributeInspector = new AttributeInspector({
                     layerInfos: layerInfos
                 }, this.attributeInspectorDiv );
+                //add handler to update the feature attributes when the ui is updated.
+                this.attributeInspector.on("attribute-change", lang.hitch( this, function (evt) {
+                    var feature = evt.feature;
+                    feature.attributes[evt.fieldName] = evt.fieldValue;
+                    feature.getLayer().applyEdits(null, [feature], null);                    
+                }));
+
                 // this.atttributeInspectorDelete = this.attributeInspector.on("delete", lang.hitch(this, function (evt) {
                 //     alert(this.currentTargetTemplate.title + ' - Delete Clicked');
                 // }));
@@ -274,9 +288,12 @@ function (
                 this.submitButton.startup();
                 this.submitButton.on("click", lang.hitch(this, 
                     function (evt) {
-                        var c = confirm(this.i18n.edit.cancelConfirm);
+                        var c = confirm(this.i18n.edit.submitConfirm);
                         if (c) {
-                            this.wabWidget.saveChanges();
+                            var rec = this.attributeInspector._selection[0];
+                            var saveRec = automapperUtil.map('graphic','ACT', rec);
+
+                            this.wabWidget.saveChanges(rec, saveRec);
                         }
                     })
                 );
@@ -410,6 +427,21 @@ function (
 
         /*---------------------------------------------------------
           UTIL FUNCTIONS */
+        _mapFields: function (originalFieldInfos, editmode) {
+            var fieldInfos = [];
+            var mapType = 'field';
+            if (editmode) {
+                mapType = 'fieldEditMode';
+            }
+
+            arrayUtils.forEach(originalFieldInfos, lang.hitch(this, 
+                function (fld) {
+                    fieldInfos.push(automapperUtil.map('fieldConfig', mapType, fld));
+                })
+            );
+
+            return fieldInfos;
+        },
 
 
         _setNodeText: function(nd, text) {

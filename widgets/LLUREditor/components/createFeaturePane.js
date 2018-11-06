@@ -376,6 +376,7 @@ function (
             }
 
             this.drawToolbar.activate(draw_type);
+            this.wabWidget._mapClickHandler(true);
             this._setDrawingToolbar(shape_type, draw_type);
 	    },
 

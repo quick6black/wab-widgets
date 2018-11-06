@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", "dojo/Deferred", 'dojo/query', "dojo/dom-class", "dojo/dom-construct", 'dojo/dom-style', "dijit/Viewport", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/EditFeaturePane.html", "dojo/i18n!../nls/strings", "dijit/form/Button", "esri/toolbars/edit", "esri/dijit/AttributeInspector"], function (declare, lang, arrayUtils, on, Deferred, dojoQuery, domClass, domConstruct, domStyle, Viewport, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, Button, Edit, AttributeInspector) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", "dojo/Deferred", 'dojo/query', "dojo/dom-class", "dojo/dom-construct", 'dojo/dom-style', "dijit/Viewport", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/EditFeaturePane.html", "dojo/i18n!../nls/strings", "dijit/form/Button", "esri/toolbars/edit", "esri/dijit/AttributeInspector", './../libs/automapper'], function (declare, lang, arrayUtils, on, Deferred, dojoQuery, domClass, domConstruct, domStyle, Viewport, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, Button, Edit, AttributeInspector, automapperUtil) {
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
         i18n: i18n,
@@ -97,9 +97,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
                         arrayUtils.forEach(infos, lang.hitch(this, function (info) {
                             if (info.fieldName === fieldName && !info.visible) {
+                                //get row
+                                var row = info.dijit.domNode.parentNode.parentNode;
+
                                 //hide row
-                                var i = 0;
-                                //domStyle.atiNode.parent
+                                domStyle.set(row, "display", "none");
                             }
                         }));
                     }
@@ -140,7 +142,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 this.currentTargetTemplate = recordTemplate;
 
                 //prepare attribute inspector
-                var fieldInfos = lang.clone(recordTemplate.fieldInfos);
+                //var fieldInfos = lang.clone(recordTemplate.fieldInfos);
+                var fieldInfos = this._mapFields(recordTemplate.fieldInfos, this.editMode === "update");
                 var layerInfos = [{
                     'featureLayer': recordTemplate.displayLayer,
                     'showAttachments': false,
@@ -149,12 +152,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                     'fieldInfos': fieldInfos
                 }];
 
-                if (this.editMode === "update") {
-                    arrayUtils.forEach(layerInfos[0]["fieldInfos"], lang.hitch(this, function (fieldInfo) {
-                        fieldInfo.visible = fieldInfo.editModeVisible;
-                        fieldInfo.isEditable = fieldInfo.editModeIsEditable;
-                    }));
-                }
+                // if (this.editMode === "update") {
+                //     arrayUtils.forEach(layerInfos[0]["fieldInfos"], lang.hitch(this, 
+                //         function (fieldInfo) {
+                //             fieldInfo.visible = fieldInfo.editModeVisible;
+                //             fieldInfo.isEditable = fieldInfo.editModeIsEditable;
+                //         })
+                //     );
+                // }
 
                 //create a new attribute inspector
                 this.attributeInspectorDiv = domConstruct.create("div");
@@ -162,6 +167,13 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 this.attributeInspector = new AttributeInspector({
                     layerInfos: layerInfos
                 }, this.attributeInspectorDiv);
+                //add handler to update the feature attributes when the ui is updated.
+                this.attributeInspector.on("attribute-change", lang.hitch(this, function (evt) {
+                    var feature = evt.feature;
+                    feature.attributes[evt.fieldName] = evt.fieldValue;
+                    feature.getLayer().applyEdits(null, [feature], null);
+                }));
+
                 // this.atttributeInspectorDelete = this.attributeInspector.on("delete", lang.hitch(this, function (evt) {
                 //     alert(this.currentTargetTemplate.title + ' - Delete Clicked');
                 // }));
@@ -202,9 +214,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 this.attributeInspector.editButtons.appendChild(this.submitButton.domNode);
                 this.submitButton.startup();
                 this.submitButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm(this.i18n.edit.cancelConfirm);
+                    var c = confirm(this.i18n.edit.submitConfirm);
                     if (c) {
-                        this.wabWidget.saveChanges();
+                        var rec = this.attributeInspector._selection[0];
+                        var saveRec = automapperUtil.map('graphic', 'ACT', rec);
+
+                        this.wabWidget.saveChanges(rec, saveRec);
                     }
                 }));
 
@@ -326,6 +341,19 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
         /*---------------------------------------------------------
           UTIL FUNCTIONS */
+        _mapFields: function _mapFields(originalFieldInfos, editmode) {
+            var fieldInfos = [];
+            var mapType = 'field';
+            if (editmode) {
+                mapType = 'fieldEditMode';
+            }
+
+            arrayUtils.forEach(originalFieldInfos, lang.hitch(this, function (fld) {
+                fieldInfos.push(automapperUtil.map('fieldConfig', mapType, fld));
+            }));
+
+            return fieldInfos;
+        },
 
         _setNodeText: function _setNodeText(nd, text) {
             nd.innerHTML = "";

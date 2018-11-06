@@ -16,6 +16,7 @@ define([
     'jimu/WidgetManager',
     'jimu/dijit/TabContainer3',
 
+    "esri/geometry/geometryEngine",
     "esri/graphic",
     "esri/layers/GraphicsLayer",
     "esri/layers/FeatureLayer",
@@ -26,6 +27,7 @@ define([
     "esri/toolbars/draw",
     "esri/toolbars/edit",    
     'esri/urlUtils',
+    'esri/graphicsUtils',
     "esri/symbols/SimpleMarkerSymbol",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
@@ -34,7 +36,11 @@ define([
     './components/createFeaturePane',
     './components/editFeaturePane',
     './components/searchFeaturePane',
-    './components/createLLURFeaturePopup'
+    './components/createLLURFeaturePopup',
+
+    './libs/automapper',
+
+    './libs/terraformer'
 ],
 function(
     declare, lang, html, arrayUtils, on, aspect, all, 
@@ -48,6 +54,7 @@ function(
     WidgetManager,
     TabContainer3,
 
+    geometryEngine,
     Graphic,
     GraphicsLayer,
     FeatureLayer,
@@ -58,6 +65,7 @@ function(
     Draw,
     Edit,
     esriUrlUtils,
+    graphicsUtils,
     SimpleMarkerSymbol,
     SimpleLineSymbol,
     SimpleFillSymbol,
@@ -66,7 +74,10 @@ function(
     CreateFeaturePane,
     EditFeaturePane,
     SearchFeaturePane,
-    CreateLLURFeaturePopup
+    CreateLLURFeaturePopup,
+
+    automapperUtil,
+    Terraformer
 ) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -93,7 +104,6 @@ function(
     currentFeature: null,
 
 
-
     //methods to communication with app container:
     postMixInProperties: function() {
         this.inherited(arguments);
@@ -102,6 +112,20 @@ function(
 
     postCreate: function() {
         this.inherited(arguments);
+
+        if (!window.Terraformer.ArcGIS) {
+            //load the arcgis and wkt plugins for terraformer - wait until terraformer has loaded before trying this
+            var arcgisPath = './' + this.amdFolder + 'libs/terraformer-arcgis-parser.js';
+            var wktPath = './' + this.amdFolder + 'libs/terraformer-wkt-parser.js';
+            require([arcgisPath,wktPath], 
+                function () {
+                    // terraformer plugins loaded
+                }
+            );
+        }
+
+        //ready automapper for class conversion
+        this._prepareAutomapper();
     },
 
     startup: function() {
@@ -164,26 +188,32 @@ function(
     _checkURLParameters: function () {
         var loc = window.location;
         var urlObject = esriUrlUtils.urlToObject(loc.href);
+        var value = null; 
 
         // Check for filter
         if (urlObject.query !== null) {
             //check for single id parameter
             var valuesQuery = urlObject.query["llur"];
             if (valuesQuery) {
-                var value = this._getURLParams(valuesQuery);
+                value = this._getURLParams(valuesQuery);
                 if (value !== null) {
                     //Check for an existing feature with this id
                     this._checkExistingFeature(value);
+                    return;
                 }
             }
 
             //check for location id and entity id parameters
             var idQuery = urlObject.query["locationId"];
             var typeQuery = urlObject.query["locationType"];
-
-
-
-
+            if (idQuery && typeQuery) {
+                value = this._getURLParams(typeQuery,idQuery);
+                if (value !== null) {
+                    //Check for an existing feature with this id
+                    this._checkExistingFeature(value);
+                    return;
+                }
+            }
         }
     },
 
@@ -196,11 +226,18 @@ function(
                     for(var i=0,ii=recordTemplate.lookupPatterns.length;i<ii;i++) {
                         var exp = new RegExp(recordTemplate.lookupPatterns[i].pattern);
                         if (exp.test(entitytype)) {
-                            var exp2 = new RegExp(recordTemplate.lookupPatterns[i].format);
-                            lookupValue = {
-                                "lookupValue": entitytype.replace(exp2,''),
-                                "template": recordTemplate
-                            };
+                            if (recordTemplate.lookupPatterns[i].format) {
+                                var exp2 = new RegExp(recordTemplate.lookupPatterns[i].format);
+                                lookupValue = {
+                                    "lookupValue": entitytype.replace(exp2,''),
+                                    "template": recordTemplate
+                                };
+                            } else {
+                                lookupValue = {
+                                    "lookupValue": locationid,
+                                    "template": recordTemplate
+                                };
+                            }
                             break;
                         }
                     }
@@ -213,6 +250,15 @@ function(
     //make a call to gis service to retrieve an existing feature
     _checkExistingFeature: function (queryItem) {
         if (queryItem && queryItem.lookupValue && queryItem.template) {
+            //check if featurelayer loaded
+            var layer = queryItem.template.layer;           
+            if (!layer.loaded) {
+                layer.on('load', lang.hitch(this, function(event) {
+                    this._checkExistingFeature(queryItem);
+                }));
+                return;
+            }
+
             if (!queryItem.queryTask) {
                 queryItem.queryTask = new QueryTask(queryItem.template.lookupUrl);
             }
@@ -222,26 +268,41 @@ function(
             q.returnGeometry = true;
             q.outFields = ["*"];
             queryItem.queryTask.execute(q, 
-                lang.hitch(this, this._checkExistingFeatureResult), 
+                lang.hitch(this, function(result) {
+                    if (result && result.features.length > 0) {
+                        //get the first shape
+                        var record = result.features[0];
+
+                        //check if type of record specified
+                        var template = null;
+                        var attributes = null
+                        if (queryItem.template.lookupTypeField) {
+                            //find the template type associated with this value
+                            var typeId = record.attributes[queryItem.template.lookupTypeField];
+
+                            arrayUtils.forEach(layer.types, lang.hitch(this, 
+                                function (layerType) {
+                                    if (layerType.id === typeId) {
+                                        template = layerType.templates[0];
+                                        attributes = lang.clone(template.prototype.attributes);
+                                    }                            
+                                })
+                            );
+                        } else {
+                            //select first template
+                        }
+
+                        //set default attributes
+                        attributes["ID"] = queryItem.lookupValue;
+
+                        // Zoom to shape extent
+                        this._prepareRecord(record.geometry, attributes, queryItem.template);
+                    } else {
+                        alert('No Record found');
+                    }                    
+                }), 
                 lang.hitch(this, this._requestError)
             );
-        }
-    },
-
-    //handles result received from existing feature check
-    _checkExistingFeatureResult: function (result) {
-        if (result && result.features.length > 0) {
-            // Get the first shape
-            var record = result.features[0];
-
-            //get the record sub type
-
-
-
-            // Zoom to shape extent
-            this._prepareRecord()
-        } else {
-            alert('No Record found');
         }
     },
 
@@ -253,9 +314,10 @@ function(
     /*---------------------------------------------------------
       RECORD FUNCTIONS */
 
-    _prepareRecord: function (shape, attributes, template) {
+    _prepareRecord: function (shape, attributes, template, featureTemplate) {
         if (shape) {
             var recordTemplate = null;
+            var editMode = attributes === null ? "create" : "update";
 
             //prepare template if not specified - use template picker current selection
             if (!template) {
@@ -283,7 +345,7 @@ function(
 
                         recordTemplate.displayLayer.setSelectionSymbol(this._getSelectionSymbol(recordTemplate.displayLayer.geometryType, true));
 
-                        this._prepareRecord(shape,attributes,template);
+                        this._prepareRecord(shape,attributes,template, featureTemplate);
                     })
                 );
                 return;
@@ -297,7 +359,7 @@ function(
                 this.displayLayer.show();
 
                 //update the current record template
-                this.editFeaturePane.setEditFeature(recordTemplate);                
+                this.editFeaturePane.setEditFeature(recordTemplate, editMode);                
             }
 
             if (!template.template) {
@@ -305,7 +367,7 @@ function(
             }
 
 
-            var newAttributes = lang.clone(template.template.prototype.attributes);
+            var newAttributes = attributes === null ? lang.clone(template.template.prototype.attributes) : attributes;
             var newGraphic = new Graphic(shape, null, newAttributes);
 
             this.displayLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
@@ -364,14 +426,19 @@ function(
         copyPopup.onOkClick = lang.hitch(this, function() {
         var recordTemplate = copyPopup.getSelectedRecordType();
         if (recordTemplate) {
-            if (copyPopup.featureSet.features.length === 1) {
-                var shape = copyPopup.featureSet.features[0].geometry;
-                this._prepareRecord(shape,null,recordTemplate);
-            } else {
-
-
-
+            if (copyPopup.featureSet.features.length === 0) {
+                alert('No shapes to copy');
+                return;
             }
+
+            var shape = null;
+            if (copyPopup.featureSet.features.length === 1) {
+                shape = copyPopup.featureSet.features[0].geometry;
+            } else {
+                var shapes = graphicsUtils.getGeometries(copyPopup.featureSet.features);
+                shape = geometryEngine.union(shapes);
+            }
+            this._prepareRecord(shape,null,recordTemplate);
         }
         copyPopup.popup.close();
         copyPopup.destroy();
@@ -388,8 +455,11 @@ function(
         this.updateFeatures = [];
     },
 
-    saveChanges: function () {
-
+    saveChanges: function (editRecord, apiRecord) {
+        //Check is this update or new record
+        if (editRecord && editRecord.attributes["ID"] !== null) {
+            alert("Start Save Process");
+        }
     },
 
     cancelChanges: function () {
@@ -636,6 +706,53 @@ function(
     /*---------------------------------------------------------
       CONFIGURATION */
 
+    _prepareAutomapper: function () {
+        //fieldconfig map to field
+        automapperUtil.createMap('fieldConfig','field')
+            .forMember('fieldName', function (opts) { opts.mapFrom('fieldName'); })
+            .forMember('label', function (opts) { opts.mapFrom('label'); })
+            .forMember('isEditable', function (opts) { opts.mapFrom('isEditable'); })
+            .forMember('tooltip', function (opts) { opts.mapFrom('tooltip'); })
+            .forMember('visible', function (opts) { opts.mapFrom('visible'); })
+            .forMember('stringFieldOption', function (opts) { opts.mapFrom('stringFieldOption'); })
+            .forMember('format', function (opts) { opts.mapFrom('format'); })
+            .forMember('editModeVisible', function (opts) { opts.ignore(); })
+            .forMember('editModeIsEditable', function (opts) { opts.ignore(); });
+
+        //fieldconfig map to field
+        automapperUtil.createMap('fieldConfig','fieldEditMode')
+            .forMember('fieldName', function (opts) { opts.mapFrom('fieldName'); })
+            .forMember('label', function (opts) { opts.mapFrom('label'); })
+            .forMember('isEditable', function (opts) { opts.mapFrom('editModeIsEditable'); })
+            .forMember('tooltip', function (opts) { opts.mapFrom('tooltip'); })
+            .forMember('visible', function (opts) { opts.mapFrom('editModeVisible'); })
+            .forMember('stringFieldOption', function (opts) { opts.mapFrom('stringFieldOption'); })
+            .forMember('format', function (opts) { opts.mapFrom('format'); });
+            //.forMember('editModeVisible', function (opts) { opts.ignore(); })
+            //.forMember('editModeIsEditable', function (opts) { opts.ignore(); })
+    
+
+        //fieldconfig map to field
+        automapperUtil.createMap('graphic','ACT')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { return 'ACT'; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
+            .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
+            .forMember('periodFrom', function (opts) { return opts.sourceObject.attributes["PeriodFrom"]; })
+            .forMember('periodTo', function (opts) { return opts.sourceObject.attributes["PeriodTo"]; })
+            .forMember('activityTypeId', function (opts) { return opts.sourceObject.attributes["ActivityType"]; })
+            .forMember('active', function (opts) { return null; })
+            .ignoreAllNonExisting();
+
+    },
+
+
     //setup the list of layers that the widget has been configured for
     _getConfigTemplates: function () {
         if (this.recordTemplateLayers !== null) return;
@@ -665,6 +782,21 @@ function(
     _getRecordTemplate: function (layerUrl) {
         var recordTemplates = arrayUtils.filter(this.recordTemplateLayers, function (item) { return item.layerUrl === layerUrl; });
         return recordTemplates[0];
+    },
+
+    /*---------------------------------------------------------
+      UTIL FUNCTIONS */
+
+    _getWKT: function (geometry) {
+        if (geometry) {
+            var arcgisJson = geometry.toJson();
+
+            var tPrim = window.Terraformer.ArcGIS.parse(geometry.toJson());
+            var wkt = window.Terraformer.WKT.convert(tPrim);
+            return wkt;
+        } else {
+            return null;
+        }
     }
 
   });
