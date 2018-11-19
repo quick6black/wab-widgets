@@ -217,8 +217,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                     var c = confirm(this.i18n.edit.submitConfirm);
                     if (c) {
                         var rec = this.attributeInspector._selection[0];
-                        var saveRec = automapperUtil.map('graphic', 'ACT', rec);
 
+                        //determine record type
+                        var recordType = this.currentTargetTemplate.apiSettings.mappingClass;
+                        var saveRec = automapperUtil.map('graphic', recordType, rec);
+
+                        //calll the widget
                         this.wabWidget.saveChanges(rec, saveRec);
                     }
                 }));

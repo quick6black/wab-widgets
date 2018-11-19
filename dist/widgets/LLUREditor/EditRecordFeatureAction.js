@@ -3,19 +3,38 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     iconFormat: 'png',
 
     _widgetConfig: null,
+    _recordTemplate: null,
 
     isFeatureSupported: function isFeatureSupported(featureSet) {
+      this._recordTemplate = null;
       if (featureSet.features.length = 1 && featureSet.features[0].geometry.type === 'polygon' && this._checkForFeatureLayers(featureSet)) {
         var cfg = this._getThisConfig();
+
+        //check if edit is enabled
+        if (!cfg.allowEditExisting) {
+          return false;
+        }
+
         var layer = featureSet.features[0].getLayer();
 
         var isLayer = false;
+
+        //handle use of dynamic layers
+        var serviceUrl = layer.url.substring(0, layer.url.lastIndexOf("Server/") + 6);
+
+        //itereate to find a template asscoated with this type of record
         arrayUtils.forEach(cfg.recordTemplates, lang.hitch(this, function (recordTemplate) {
           if (layer.url === recordTemplate.lookupUrl) {
             isLayer = true;
+            this._recordTemplate = recordTemplate;
+          } else if (recordTemplate.lookupUrl.indexOf(serviceUrl) >= 0) {
+            //check if features include the entity fields
+            if (typeof featureSet.features[0].attributes[recordTemplate.lookupKeyField] !== 'undefined') {
+              isLayer = true;
+              this._recordTemplate = recordTemplate;
+            }
           }
         }));
-
         return isLayer;
       } else {
         return false;
@@ -26,16 +45,24 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
         wm.activateWidget(myWidget);
+        myWidget.editRecord(this._recordTemplate.apiSettings.mappingClass, featureset.features[0].attributes[this._recordTemplate.lookupKeyField]);
+
+        /*
         if (this._checkForFeatureLayers(featureSet)) {
-          // Query the source layer to get the ungeneralised version of the feature
-          this._queryForFeatures(featureSet).then(function (results) {
-            myWidget.editRecord(results);
-          }, function (error) {
-            alert(error);
-          });
+            // Query the source layer to get the ungeneralised version of the feature
+            this._queryForFeatures(featureSet)
+              .then( lang.hitch(this, 
+                function(results) {
+                  myWidget.editRecord(results, this._recordTemplate.title);
+                }), 
+                function (error) {
+                  alert(error);
+                }
+              );
         } else {
           myWidget.editRecord(featureSet);
         }
+        */
       }));
     },
 
@@ -48,26 +75,24 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       return false;
     },
 
-    _queryForFeatures: function _queryForFeatures(featureSet) {
+    /*    _queryForFeatures: function (featureSet) {
       var layer = featureSet.features[0].getLayer();
       var objectIdField = layer.objectIdField;
       var objectIds = featureSet.features.map(function (feature) {
-        return feature.attributes[objectIdField];
+         return feature.attributes[objectIdField];
       });
-
-      var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
+        var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
         return field.name;
       })) : ['*'];
-
-      var query = new Query();
+        var query = new Query();
       query.maxAllowableOffset = 0;
       query.objectIds = objectIds;
       query.outFields = fields;
       query.returnGeometry = true;
-
-      var queryTask = new QueryTask(layer.url);
+        var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);
       return queryTask.execute(query);
-    },
+    },*/
 
     _getThisConfig: function _getThisConfig() {
       if (this._widgetConfig === null) {
@@ -86,7 +111,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
 
       return this._widgetConfig;
     }
-
   });
   return clazz;
 });

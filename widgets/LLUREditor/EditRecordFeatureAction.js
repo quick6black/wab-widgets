@@ -23,28 +23,46 @@ define([
     iconFormat: 'png',
 
     _widgetConfig: null,
-
+    _recordTemplate: null,
 
     isFeatureSupported: function (featureSet) {
-		if (featureSet.features.length = 1 && 
-        	featureSet.features[0].geometry.type === 'polygon' &&
-        	this._checkForFeatureLayers(featureSet)) {
-			var cfg = this._getThisConfig();
-			var layer = featureSet.features[0].getLayer();
+      this._recordTemplate = null;
+      if (featureSet.features.length = 1 && 
+          	featureSet.features[0].geometry.type === 'polygon' &&
+          	this._checkForFeatureLayers(featureSet)) {
+  			var cfg = this._getThisConfig();
 
-			var isLayer = false;
-			arrayUtils.forEach(cfg.recordTemplates, lang.hitch(this, 
-				function (recordTemplate) {
-					if (layer.url === recordTemplate.lookupUrl) {
-						isLayer = true;
-					}
-				})
-			);
+        //check if edit is enabled
+        if (!cfg.allowEditExisting) {
+          return false;
+        }
 
-			return isLayer;
-		} else {
-			return false;
-		}    	
+  			var layer = featureSet.features[0].getLayer();
+
+  			var isLayer = false;
+
+        //handle use of dynamic layers
+        var serviceUrl = layer.url.substring(0,layer.url.lastIndexOf("Server/") + 6);
+
+        //itereate to find a template asscoated with this type of record
+  			arrayUtils.forEach(cfg.recordTemplates, lang.hitch(this, 
+  				function (recordTemplate) {
+  					if (layer.url === recordTemplate.lookupUrl) {
+  						isLayer = true;
+              this._recordTemplate = recordTemplate;
+  					} else if (recordTemplate.lookupUrl.indexOf(serviceUrl) >= 0) {
+              //check if features include the entity fields
+              if (typeof featureSet.features[0].attributes[recordTemplate.lookupKeyField] !== 'undefined') {
+                isLayer = true;
+                this._recordTemplate = recordTemplate;
+              }
+            }
+  				})
+  			);
+  			return isLayer;
+  		} else {
+  			return false;
+  		}    	
     },
 
     onExecute: function (featureSet) {
@@ -52,20 +70,27 @@ define([
       wm.triggerWidgetOpen(this.widgetId)
         .then(lang.hitch(this, function (myWidget) {
           wm.activateWidget(myWidget);
+            myWidget.editRecord(
+              this._recordTemplate.apiSettings.mappingClass, 
+              featureset.features[0].attributes[this._recordTemplate.lookupKeyField]
+            );
+
+            /*
             if (this._checkForFeatureLayers(featureSet)) {
                 // Query the source layer to get the ungeneralised version of the feature
                 this._queryForFeatures(featureSet)
-                  .then(
+                  .then( lang.hitch(this, 
                     function(results) {
-                      myWidget.editRecord(results);
-                    }, 
+                      myWidget.editRecord(results, this._recordTemplate.title);
+                    }), 
                     function (error) {
                       alert(error);
                     }
                   );
             } else {
               myWidget.editRecord(featureSet);
-            }       
+            }
+            */     
           })
         );
     },
@@ -79,7 +104,7 @@ define([
       return false;
     },
 
-    _queryForFeatures: function (featureSet) {
+    /*    _queryForFeatures: function (featureSet) {
       var layer = featureSet.features[0].getLayer();
       var objectIdField = layer.objectIdField;
       var objectIds = featureSet.features.map(function (feature) {
@@ -96,9 +121,10 @@ define([
       query.outFields = fields;
       query.returnGeometry = true;
 
-      var queryTask = new QueryTask(layer.url);
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);
       return queryTask.execute(query);
-    },
+    },*/
 
     _getThisConfig: function () {
     	if (this._widgetConfig === null) {
@@ -119,9 +145,6 @@ define([
 
     	return this._widgetConfig;
     }
-
-
-
   });
   return clazz;
 });

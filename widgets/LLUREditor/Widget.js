@@ -8,6 +8,10 @@ define([
     'dojo/promise/all',
     'dijit/_WidgetsInTemplateMixin',
     "dojo/i18n",
+    'dojo/topic',
+    'dojo/request',
+    'dojo/Deferred',
+    'dojo/json',
 
     "dojo/dom-construct",
     'dojo/dom-style',
@@ -15,6 +19,7 @@ define([
     'jimu/BaseWidget',
     'jimu/WidgetManager',
     'jimu/dijit/TabContainer3',
+    'jimu/dijit/AGOLLoading',
 
     "esri/geometry/geometryEngine",
     "esri/graphic",
@@ -32,6 +37,7 @@ define([
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
     "esri/Color",
+    "esri/request",
 
     './components/createFeaturePane',
     './components/editFeaturePane',
@@ -45,7 +51,8 @@ define([
 function(
     declare, lang, html, arrayUtils, on, aspect, all, 
     _WidgetsInTemplateMixin, 
-    i18n,
+    i18n, topic,
+    request, Deferred, JSON,
 
     domConstruct,
     domStyle,
@@ -53,6 +60,7 @@ function(
     BaseWidget,
     WidgetManager,
     TabContainer3,
+    AGOLLoading,
 
     geometryEngine,
     Graphic,
@@ -70,6 +78,7 @@ function(
     SimpleLineSymbol,
     SimpleFillSymbol,
     Color,
+    esriRequest,
 
     CreateFeaturePane,
     EditFeaturePane,
@@ -88,6 +97,7 @@ function(
     // add additional properties here
 
     tabContainer: null,
+    loadingDijit: null,
     createFeaturePane: null,
     editFeaturePane: null,
     searchFeaturePane: null,
@@ -136,6 +146,9 @@ function(
         this.createFeaturePane.startup();
         this.editFeaturePane.startup();
         //this.searchFeaturePane.startup();
+
+        //Load up editor layer for submitting
+        this._prepEditorService();
 
         //check for any url query parameters
         this._checkURLParameters();
@@ -248,7 +261,7 @@ function(
     },
 
     //make a call to gis service to retrieve an existing feature
-    _checkExistingFeature: function (queryItem) {
+    _checkExistingFeature: function (queryItem, forceEdit) {
         if (queryItem && queryItem.lookupValue && queryItem.template) {
             //check if featurelayer loaded
             var layer = queryItem.template.layer;           
@@ -270,6 +283,7 @@ function(
             queryItem.queryTask.execute(q, 
                 lang.hitch(this, function(result) {
                     if (result && result.features.length > 0) {
+
                         //get the first shape
                         var record = result.features[0];
 
@@ -295,8 +309,18 @@ function(
                         //set default attributes
                         attributes["ID"] = queryItem.lookupValue;
 
-                        // Zoom to shape extent
-                        this._prepareRecord(record.geometry, attributes, queryItem.template);
+                        //check if edit or view
+                        var loc = window.location;
+                        var urlObject = esriUrlUtils.urlToObject(loc.href);                       
+                        if (urlObject.query["editMode"] || forceEdit === true) {
+                            //zoom to shape extent
+                            this._prepareRecord(record.geometry, attributes, queryItem.template, true);
+                        } else {
+                            //call the search widget find method
+                            topic.publish('publishData', 'framework', 'framework', {
+                              searchString: queryItem.lookupValue
+                            }, true);
+                        }
                     } else {
                         alert('No Record found');
                     }                    
@@ -313,6 +337,38 @@ function(
 
     /*---------------------------------------------------------
       RECORD FUNCTIONS */
+
+    //ready the layer to update the primary GIS features 
+    _prepEditorService: function () {
+        if (!this._geometryLayer) {
+            //create the layer reference
+            this._geometryLayer = new FeatureLayer(this.config.llurGeometryURL, {
+                mode: FeatureLayer.MODE_ONDEMAND,
+                outFields: ["*"]                
+            });
+
+            var geoLoaded = this._geometryLayer.on("load", 
+                lang.hitch(this, 
+                    function (event) {
+                        geoLoaded.remove();
+
+                        //check functionality includes insert/update
+                        var caps = this._geometryLayer.getEditCapabilities();
+                        if (!caps.canCreate || !caps.canUpdate) {
+                            //disable edit tools
+
+
+                            //alert user
+                            alert("LLUR Edit Widget: Edit capability disabled. Some functionality will not work as expected.");
+                        }
+                    }), 
+                lang.hitch(this, 
+                    function (error) {
+                        console.log('LLUREditor::_prepEditorService::Geometry layer load failed');
+                    })
+            );
+        }
+    },
 
     _prepareRecord: function (shape, attributes, template, featureTemplate) {
         if (shape) {
@@ -406,8 +462,14 @@ function(
         }
     },
 
-    editRecord: function (featureSet) {
-        alert('Put edit stuff here !!!');
+    //trigger an edit action based on a supplied dataset
+    editRecord: function (typeQuery, idQuery) {
+        var value = this._getURLParams(typeQuery,idQuery);
+        if (value !== null) {
+            //Check for an existing feature with this id
+            this._checkExistingFeature(value, true);
+            return;
+        }
     },
 
     showCreatePopup: function (featureSet) {
@@ -456,9 +518,52 @@ function(
     },
 
     saveChanges: function (editRecord, apiRecord) {
+        
+        
+        //temp -for testing api
+        //editRecord.attributes["ID"] = 166593;
+        //apiRecord.id = 166593;
+
+        //this.token = 'Bearer bZy3awf0Ox_JN5zUgNNPbCQHu-dJG2SjHWKKMoSS-HFBxK_YEnweeC9WcJxkaelnF8nIojDM2oErvF-F9QJRARfyLEpABAErMEHEMwAsakicSRKeQLRhqHz_7mhj7D13mAF_Pm87fBm86jeGf2c6zpVW5L2nHhPpkqM83z20cSAzba_1yIENmplaBTbB7fCn6XmXjsR56XfLXNT2CdhCTSqE7792Kppv7ORCSXvOCA60-eWGguWFSfzi7Yqh4TSiRjwcDCgTfDwxP6jYn2_wBB9j3OW2RkhHFYpcDLmkC0Upwk7dNpRjWY8sVoPvv0_JFAT51sY4tWvEpI72Gn7K9xfToRYmGFciO_c9PTHpGnA';
+        this.token = this.tokenText.value;
+
         //Check is this update or new record
         if (editRecord && editRecord.attributes["ID"] !== null) {
-            alert("Start Save Process");
+            this._changeEditToolState(false, "Starting Update Process");
+
+            //confirm the current record exists and get the current model
+            this._requestLLUREntity(apiRecord);
+
+            //
+
+            //submit update request
+
+            //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
+            this._postGeometryChanges(editRecord);
+        } else {
+            this._changeEditToolState(false, "Starting Save New Record Process");
+
+            //get the template for the rec type - match against configured layer settings
+            var template = null;
+            arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+                function (recordTemplate) {
+                    if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
+                        template = recordTemplate;
+                    }
+                })
+            );
+
+            //post entity to api and await response
+            this._postNewAPIEntity(apiRecord, template.apiSettings.controller, this.token)
+                .then(
+                    lang.hitch(this, function (result) {
+                        this._postGeometryChanges(editRecord);
+                    }),
+                    lang.hitch(this, function (error) {
+                        alert(error.message);
+                        this._changeEditToolState(true);
+                    })
+                );
         }
     },
 
@@ -472,6 +577,173 @@ function(
             this.createFeaturePane.templatePicker.clearSelection();
         }
         this.tabContainer.selectTab(this.nls.tabs.create);
+    },
+
+    //post the data to tye LLUR Geometry layer
+    _postGeometryChanges: function (rec) {
+        if (this._geometryLayer) {
+            var feature = new Graphic(rec.toJson()), 
+                newAttributes = automapperUtil.map('graphic','llurGeoFeature', rec);
+
+            //update feature roperties
+            feature.setAttributes(newAttributes);
+            feature.setSymbol(null);
+            this._updateGeometryProperties(feature);
+
+            var inserts = null, updates = null, deletes = null;
+
+            if (feature.attributes["ID"] === null) {
+                //insert as new feature
+                inserts = [rec];
+            } else {
+                //update existing feature
+                updates = [rec];
+            }
+
+            this._geometryLayer.applyEdits(inserts, updates, deletes, 
+                lang.hitch(this, 
+                    function (results) {
+                        this.tabContainer.selectTab(this.nls.tabs.create);                        
+                        this._changeEditToolState(true);
+                    }),
+                lang.hitch(this, 
+                    function (error) {
+                        alert(error.message);
+                        this._changeEditToolState(true);
+                    })
+                );
+        }
+    },
+
+    //update geometry properties
+    _updateGeometryProperties: function (rec) {
+        if (rec) {
+            var area = geometryEngine.planarArea(rec.geometry, 'square-meters');
+            var perimeter = geometryEngine.planarLength(rec.geometry, 'meters');
+
+            rec.attributes["AREA_M2"] = area;
+            rec.attributes["AREA_HA"] = area/10000;
+            rec.attributes["PERIMETER_M"] = perimeter;
+        }
+    },
+
+
+    /*---------------------------------------------------------
+      LLUR API FUNCTIONS */
+
+    _requestLLUREntity: function (rec) {
+        //get the template for the rec type - match against configured layer settings
+        var template = null;
+        arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+            function (recordTemplate) {
+                if (recordTemplate.apiSettings.mappingClass === rec.entTypeId) {
+                    template = recordTemplate;
+                }
+            })
+        );
+ 
+        //if valid template found
+        if (template) {
+            this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token)
+                .then(
+                    lang.hitch(this, function (response) {
+                        //if valid record found - request the shape record 
+                        if (response.data !== null) {
+                            /*this._requestAPIEntityGet(rec, 'ECanMaps', this.token)
+                                .then(
+                                    lang.hitch(this, function (response) {
+                                        var shapeRecord = response.data;                                        
+                                        //call shape update function
+
+
+                                    }),
+                                    lang.hitch(this, function (error) {
+                                        console.error(error);
+                                    })
+
+                                );*/
+                        }
+                    }),
+                    lang.hitch(this, function (error) {
+                        console.error(error);
+                    })
+
+                );
+        }
+    },
+
+    _requestAPIEntityGet: function (rec, entType, token) {
+        var deferred = new Deferred();
+
+        var url = this.config.llurAPI.apiBaseURL + '/' + entType + '/?entityId=' + rec.id;
+
+        //append proxy - requires call be made via proxy
+        url = this.appConfig.httpProxy.url + '?' + url; 
+
+        //construct request
+        var entityRequest = request(url, {
+            method: 'GET',
+            handleAs: 'json',
+            callbackParameter: 'callback',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        //make request
+        entityRequest.response.then(
+            function (response) {
+                deferred.resolve(response);
+            },
+            function (response) {
+                deferred.reject(response);
+            }
+        );
+
+        return deferred.promise;
+    },
+
+    _postNewAPIEntity: function (rec, entType, token) {
+        var deferred = new Deferred();
+
+        var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + 's';
+
+        //append proxy - requires call be made via proxy
+        url = this.appConfig.httpProxy.url + '?' + url; 
+
+        //construct request
+        /*
+        var entityRequest = request(url, {
+            method: 'POST',
+            handleAs: 'json',
+            callbackParameter: 'callback',
+            headers: {
+                'Authorization': token
+            },
+            data: rec,
+            preventCache: true
+        });
+        */
+        var entityRequest = request(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': token
+            },
+            data: JSON.stringify(rec)
+        });
+
+
+        //make request
+        entityRequest.response.then(
+            function (response) {
+                deferred.resolve(response);
+            },
+            function (response) {
+                deferred.reject(response);
+            }
+        );
+
+        return deferred.promise;
     },
 
 
@@ -537,6 +809,25 @@ function(
         } 
     },    
 
+    //change display status of edit tools
+    _changeEditToolState: function (show, message) {
+        if (this.tabContainer) {
+
+            if (!this.loadingDijit) {
+                this.loadingDijit = new AGOLLoading({hidden: true});
+                this.loadingDijit.placeAt(this.workingNode);            
+            }
+
+            if (show) {
+                this.loadingDijit.hide();
+                domStyle.set(this.tabContainer.domNode, "display", "block");
+            } else {
+                this.loadingDijit.show(message);
+                domStyle.set(this.tabContainer.domNode, "display", "none");
+            } 
+        }
+    },
+
     //update the display graphics layer visibility status
     _changeDisplayLayerVisibility: function (showLayer) {
         if (this.displayLayer) {
@@ -556,7 +847,13 @@ function(
       STATEMENT FUNCTIONS */
 
     requestStatement: function (featureset) {
-        alert('Put request statement stuff here !!!');
+        this._changeEditToolState(false, "Requesting Statement");
+
+        //submit request
+        setTimeout(lang.hitch(this, function () {
+            this._changeEditToolState(true);
+            alert("You will get the statement here");
+        }), 1000);
     },
 
 
@@ -706,6 +1003,7 @@ function(
     /*---------------------------------------------------------
       CONFIGURATION */
 
+    //prep the automapper settings used in the widget
     _prepareAutomapper: function () {
         //fieldconfig map to field
         automapperUtil.createMap('fieldConfig','field')
@@ -719,7 +1017,7 @@ function(
             .forMember('editModeVisible', function (opts) { opts.ignore(); })
             .forMember('editModeIsEditable', function (opts) { opts.ignore(); });
 
-        //fieldconfig map to field
+        //fieldconfig map to fieldwith EditMode settings
         automapperUtil.createMap('fieldConfig','fieldEditMode')
             .forMember('fieldName', function (opts) { opts.mapFrom('fieldName'); })
             .forMember('label', function (opts) { opts.mapFrom('label'); })
@@ -732,7 +1030,26 @@ function(
             //.forMember('editModeIsEditable', function (opts) { opts.ignore(); })
     
 
-        //fieldconfig map to field
+        //feature to ECanMapsLocationShape entitydto
+        automapperUtil.createMap('graphic','ECanMaps')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { return 'ACT'; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
+            .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
+            .forMember('periodFrom', function (opts) { return opts.sourceObject.attributes["PeriodFrom"]; })
+            .forMember('periodTo', function (opts) { return opts.sourceObject.attributes["PeriodTo"]; })
+            .forMember('activityTypeId', function (opts) { return opts.sourceObject.attributes["ActivityType"]; })
+            .forMember('active', function (opts) { return null; })
+            .ignoreAllNonExisting();
+
+
+        //activity feature to ACT entitydto
         automapperUtil.createMap('graphic','ACT')
             .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
             .forMember('entTypeId', function (opts) { return 'ACT'; })
@@ -750,6 +1067,46 @@ function(
             .forMember('active', function (opts) { return null; })
             .ignoreAllNonExisting();
 
+        //site feature to SIT entitydto
+        automapperUtil.createMap('graphic','SIT')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { return 'SIT'; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
+            .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
+            .forMember('riskId', function (opts) { null; })
+            .forMember('fileNo', function (opts) { return null; })
+            .forMember('categoryId', function (opts) { return opts.sourceObject.attributes["CategoryType"]; })
+            .forMember('active', function (opts) { return null; })
+            .forMember('previousId', function (opts) { return null; })
+            .ignoreAllNonExisting();
+
+        //edit feature to geometry feature attributes
+        automapperUtil.createMap('graphic','llurGeoFeature')
+            .forMember('ID', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('EntType_ID', function (opts) { 
+                var entType = null;
+                if (typeof opts.sourceObject.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                if (typeof opts.sourceObject.attributes["Category"] !== 'undefined') entType = 'SIT';
+                if (typeof opts.sourceObject.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                if (typeof opts.sourceObject.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                if (typeof opts.sourceObject.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
+                return entType; })
+            .forMember('PERIMETER_M', function (opts) { return null; })
+            .forMember('AREA_M2', function (opts) { return null; })
+            .forMember('AREA_HA', function (opts) { return null; })
+            .forMember('SOURCECODE', function (opts) { return 'MANCAP'; })
+            .forMember('QARCODE', function (opts) { return 6; })
+            .forMember('CREATEDBY', function (opts) { return null; })
+            .forMember('CREATEDDATE', function (opts) { return null; })
+            .forMember('MODIFIEDBY', function (opts) { return null; })
+            .forMember('MODIFIEDDATE', function (opts) { return null; })
+            .ignoreAllNonExisting();
     },
 
 
@@ -793,7 +1150,15 @@ function(
 
             var tPrim = window.Terraformer.ArcGIS.parse(geometry.toJson());
             var wkt = window.Terraformer.WKT.convert(tPrim);
-            return wkt;
+
+            var wktObject = {
+                geometry: {
+                    wellKnownText: wkt,
+                    coordinateSystemId: geometry.spatialReference.wkid
+                }
+            };
+
+            return wktObject;
         } else {
             return null;
         }
