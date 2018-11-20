@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(["dojo/_base/declare", "dojo/_base/lang", 'dojo/_base/array', "dojo/on", "dojo/aspect", "dojo/Deferred", "dojo/dom-class", "jimu/portalUrlUtils", "jimu/portalUtils", "jimu/tokenUtils", "jimu/BaseWidget", "jimu/dijit/TabContainer3", "dijit/_WidgetsInTemplateMixin", "./search/SearchContext", "./search/util", "./search/SearchPane", "./search/AddFromUrlPane", "./search/AddFromFilePane", "./search/LayerListPane"], function (declare, lang, array, on, aspect, Deferred, domClass, portalUrlUtils, portalUtils, tokenUtils, BaseWidget, TabContainer3, _WidgetsInTemplateMixin, SearchContext, util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo/Deferred", "dojo/dom-class", "jimu/portalUrlUtils", "jimu/portalUtils", "jimu/tokenUtils", "jimu/BaseWidget", "jimu/dijit/TabContainer3", "dijit/_WidgetsInTemplateMixin", "./search/SearchContext", "./search/util", "./search/SearchPane", "./search/AddFromUrlPane", "./search/AddFromFilePane", "./search/LayerListPane", "dojo/_base/array"], function (declare, lang, on, aspect, Deferred, domClass, portalUrlUtils, portalUtils, tokenUtils, BaseWidget, TabContainer3, _WidgetsInTemplateMixin, SearchContext, util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane, array) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
     name: "AddData",

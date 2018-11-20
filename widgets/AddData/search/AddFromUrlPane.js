@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -197,7 +197,7 @@ define(["dojo/_base/declare",
           if (lc.indexOf("/featureserver") > 0 || lc.indexOf("/mapserver") > 0) {
             loader._readRestInfo(url).then(function(info) {
               //console.warn("restInfo",info);
-              if (info && typeof info.type === "string" && 
+              if (info && typeof info.type === "string" &&
                  (info.type === "Feature Layer" || info.type === "Table")) {
                 layer = new FeatureLayer(url, {
                   id: id,

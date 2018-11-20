@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/promise/all", "dojo/Deferred", "dojo/json", "dojo/i18n!../nls/strings", "./util", "esri/lang", "esri/request", "esri/arcgis/utils", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/ArcGISImageServiceLayer", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/DynamicLayerInfo", "esri/layers/FeatureLayer", "esri/layers/ImageParameters", "esri/layers/ImageServiceParameters", "esri/layers/KMLLayer", "esri/layers/LayerDrawingOptions", "esri/layers/MosaicRule", "esri/layers/RasterFunction", "esri/layers/VectorTileLayer", 'esri/layers/WMSLayer', "esri/layers/WMSLayerInfo", "esri/dijit/PopupTemplate", "esri/InfoTemplate", "esri/renderers/jsonUtils", "esri/geometry/Extent", "esri/SpatialReference", "jimu/utils"], function (declare, lang, array, all, Deferred, djJson, i18n, util, esriLang, esriRequest, agsUtils, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, DynamicLayerInfo, FeatureLayer, ImageParameters, ImageServiceParameters, KMLLayer, LayerDrawingOptions, MosaicRule, RasterFunction, VectorTileLayer, WMSLayer, WMSLayerInfo, PopupTemplate, InfoTemplate, jsonRendererUtils, Extent, SpatialReference, jimuUtils) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/promise/all", "dojo/Deferred", "dojo/json", "dojo/i18n!../nls/strings", "./util", "esri/lang", "esri/request", "esri/arcgis/utils", "esri/layers/ArcGISDynamicMapServiceLayer", "esri/layers/ArcGISImageServiceLayer", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/DynamicLayerInfo", "esri/layers/FeatureLayer", "esri/layers/ImageParameters", "esri/layers/ImageServiceParameters", "esri/layers/KMLLayer", "esri/layers/LayerDrawingOptions", "esri/layers/MosaicRule", "esri/layers/RasterFunction", "esri/layers/VectorTileLayer", "esri/layers/WMSLayer", "esri/layers/WMSLayerInfo", "esri/dijit/PopupTemplate", "esri/InfoTemplate", "esri/renderers/jsonUtils", "esri/geometry/Extent", "esri/SpatialReference", "jimu/utils"], function (declare, lang, array, all, Deferred, djJson, i18n, util, esriLang, esriRequest, agsUtils, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, DynamicLayerInfo, FeatureLayer, ImageParameters, ImageServiceParameters, KMLLayer, LayerDrawingOptions, MosaicRule, RasterFunction, VectorTileLayer, WMSLayer, WMSLayerInfo, PopupTemplate, InfoTemplate, jsonRendererUtils, Extent, SpatialReference, jimuUtils) {
 
   return declare(null, {
 
@@ -92,7 +92,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/promi
           var list = [];
           if (result && result.layers && result.layers.length > 0) {
             array.forEach(result.layers, function (lyr) {
-              list.push(lry);
+              list.push(lyr);
             });
           }
           if (result && result.tables && result.tables.length > 0) {
