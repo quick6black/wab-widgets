@@ -193,9 +193,9 @@ SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
       var layerInfosObject = LayerInfos.getInstanceSync();
       var webmapLayerInfos = layerInfosObject.getLayerInfoArrayOfWebmap();
       return array.filter(layerInfoArray, lang.hitch(this, function(layerInfo) {
-        var inWhiteList = this.config.layerState[layerInfo.id] &&
-            this.config.layerState[layerInfo.id].selected;
-        if (inWhiteList) {
+        var inBlackList = this.config.layerState[layerInfo.id] &&
+          this.config.layerState[layerInfo.id].selected === false;
+        if (!inBlackList) {
           return true;
         } else if(this.config.includeRuntimeLayers !== false) {
           return array.every(webmapLayerInfos, function(webmapLayerInfo) {

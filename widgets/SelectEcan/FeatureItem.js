@@ -53,10 +53,16 @@ template, jimuUtils, symbolUtils, PopupMenu, PanToAction, ShowPopupAction) {
       }
 
       this.popupMenu = PopupMenu.getInstance();
-      this.nameNode.innerHTML = this.graphic.attributes[this.displayField] ||
+      var title;
+      if (this.featureLayer && this.featureLayer.infoTemplate &&
+        typeof this.featureLayer.infoTemplate.title === 'function') {
+        title = this.featureLayer.infoTemplate.title(this.graphic);
+      } else {
+        title = this.graphic.attributes[this.displayField] ||
           this.graphic.attributes[this.objectIdField];
-      this.nameNode.title = this.graphic.attributes[this.displayField] ||
-          this.graphic.attributes[this.objectIdField];
+      }
+      this.nameNode.innerHTML = title;
+      this.nameNode.title = title;
 
       this.own(on(this.actionBtn, 'click', lang.hitch(this, this._showActions)));
 
