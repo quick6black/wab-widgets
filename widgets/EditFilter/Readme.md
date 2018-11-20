@@ -38,3 +38,7 @@
 -  **Upgrade to WAB 2.9 Code to include changes that are part of v2.9 Group Filter widget.**	
 	-  Changes to settings component: Setting.html, Setting.js, strings.js
 	-  Changes to config.json, Widget.js, widget.html, LayersHandler.js,manifest.json,strings.js,style.css
+
+**20 November 2018**
+
+-  **Upgrade to WAB 2.10 check.** No real changes introduced between v2.9 & v2.10 Group Filter widget, so left as-is from v2.9 update.
