@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,29 +16,22 @@
 
 // jscs:disable validateIndentation
 
-define(["dojo/Evented", "dojo", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", 'dojo/dom-construct', 'dojo/dom-style', "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dojo/text!./AttachmentUploader.html", 'dojo/i18n!esri/nls/jsapi'], function (Evented, dojo, declare, lang, on, domConstruct, domStyle, _WidgetBase, _TemplatedMixin, widgetTemplate, esriBundle) {
+define(["dojo", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", 'dojo/dom-construct', "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dojo/text!./AttachmentUploader.html", 'dojo/i18n!esri/nls/jsapi'], function (dojo, declare, lang, on, domConstruct, _WidgetBase, _TemplatedMixin, widgetTemplate, esriBundle) {
   return declare([_WidgetBase, _TemplatedMixin], {
     declaredClass: "jimu-widget-smartEditor-attachmentuploader",
     templateString: widgetTemplate,
     widgetsInTemplate: true,
     _inputCount: 0,
     _inputIndex: 1,
-    currentAction: null,
     constructor: function constructor() {
       this.nls = lang.mixin(this.nls, esriBundle.widgets.attachmentEditor);
     },
     _fileSelected: function _fileSelected(source) {
 
-      var target = source.target || source.srcElement;
-      if (target.value.length > 0) {
-        dojo.style(target.parentNode.childNodes[0], "display", "inline-block");
+      if (source.srcElement.value.length > 0) {
+        dojo.style(source.srcElement.parentNode.childNodes[0], "display", "inline-block");
 
         this._addInput();
-        //Remove required message if one or more attachments are added
-        if (domStyle.get(this.attachmentsRequiredMsg, "display") === "block") {
-          domStyle.set(this.attachmentsRequiredMsg, "display", "none");
-          this.emit("attachmentAdded");
-        }
       }
     },
     clear: function clear() {
@@ -50,15 +43,7 @@ define(["dojo/Evented", "dojo", "dojo/_base/declare", "dojo/_base/lang", "dojo/o
       }
     },
     _deleteAttachment: function _deleteAttachment(source) {
-      var target = source.target || source.srcElement;
-      target.parentNode.parentNode.removeChild(target.parentNode);
-      if (!this._hasAddedAnyAttachments() && this.currentAction === "Required") {
-        //Remove required message if one or more attachments are added
-        if (domStyle.get(this.attachmentsRequiredMsg, "display") === "none") {
-          domStyle.set(this.attachmentsRequiredMsg, "display", "block");
-          this.emit("attachmentDeleted");
-        }
-      }
+      source.srcElement.parentNode.parentNode.removeChild(source.srcElement.parentNode);
     },
     _reflect: function _reflect(promise) {
       return promise.then(function (v) {
@@ -138,19 +123,7 @@ define(["dojo/Evented", "dojo", "dojo/_base/declare", "dojo/_base/lang", "dojo/o
         return null;
       }
       return defs.map(this._reflect);
-    },
-
-    _hasAddedAnyAttachments: function _hasAddedAnyAttachments() {
-      var hasAttachments = false;
-      for (var i = 0; i < this._attachmentList.childNodes.length; i++) {
-        if (this._attachmentList.childNodes[i].childNodes[this._inputIndex].value) {
-          if (this._attachmentList.childNodes[i].childNodes[this._inputIndex].value.length > 0) {
-            hasAttachments = true;
-            break;
-          }
-        }
-      }
-      return hasAttachments;
     }
+
   });
 });
