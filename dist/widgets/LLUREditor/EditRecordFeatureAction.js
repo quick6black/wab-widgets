@@ -45,7 +45,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
         wm.activateWidget(myWidget);
-        myWidget.editRecord(this._recordTemplate.apiSettings.mappingClass, featureset.features[0].attributes[this._recordTemplate.lookupKeyField]);
+        myWidget.editRecord(this._recordTemplate.apiSettings.mappingClass, featureSet.features[0].attributes[this._recordTemplate.lookupKeyField]);
 
         /*
         if (this._checkForFeatureLayers(featureSet)) {

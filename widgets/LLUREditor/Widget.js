@@ -10,6 +10,7 @@ define([
     "dojo/i18n",
     'dojo/topic',
     'dojo/request',
+    'dojo/request/xhr',
     'dojo/Deferred',
     'dojo/json',
 
@@ -20,6 +21,7 @@ define([
     'jimu/WidgetManager',
     'jimu/dijit/TabContainer3',
     'jimu/dijit/AGOLLoading',
+    'jimu/portalUtils',
 
     "esri/geometry/geometryEngine",
     "esri/graphic",
@@ -52,7 +54,7 @@ function(
     declare, lang, html, arrayUtils, on, aspect, all, 
     _WidgetsInTemplateMixin, 
     i18n, topic,
-    request, Deferred, JSON,
+    request, xhr, Deferred, JSON,
 
     domConstruct,
     domStyle,
@@ -61,6 +63,7 @@ function(
     WidgetManager,
     TabContainer3,
     AGOLLoading,
+    jimuPortalUtils,
 
     geometryEngine,
     Graphic,
@@ -312,7 +315,7 @@ function(
                         //check if edit or view
                         var loc = window.location;
                         var urlObject = esriUrlUtils.urlToObject(loc.href);                       
-                        if (urlObject.query["editMode"] || forceEdit === true) {
+                        if ((urlObject.query && urlObject.query["editMode"]) || forceEdit === true) {
                             //zoom to shape extent
                             this._prepareRecord(record.geometry, attributes, queryItem.template, true);
                         } else {
@@ -532,14 +535,46 @@ function(
             this._changeEditToolState(false, "Starting Update Process");
 
             //confirm the current record exists and get the current model
-            this._requestLLUREntity(apiRecord);
+            this._requestLLUREntity(apiRecord).then(
+                    lang.hitch(this, function (response) {
+                        //if valid record found
+                        if (response.data !== null) {
+                            //generate a shape dto to send through as an update
+                            var shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
 
-            //
+                            //update user details
+                            shapeDto.createdBy = response.data.createdBy;
+                            shapeDto.createdDate = response.data.createdDate;
 
-            //submit update request
+                            var user = jimuPortalUtils.portals[0].getUser()
+                                .then(lang.hitch(this, 
+                                    function (user) {
+                                        var now = new Date();
+                                        shapeDto.modifiedBy = user.credential.userId;
+                                        shapeDto.modifiedDate = now.toISOString();
 
-            //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
-            this._postGeometryChanges(editRecord);
+                                        this._putExistingAPIEntity(shapeDto, this.token)
+                                            .then(
+                                                lang.hitch(this, 
+                                                    function (result) { 
+                                                        var r = 0;
+                                                        //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
+                                                        this._postGeometryChanges(editRecord);
+                                                    }),
+                                                lang.hitch(this, 
+                                                    function (error) {
+                                                        var e = 0;
+                                                    })
+                                            );
+                                    })
+                                );
+                        }
+                    }),
+                    lang.hitch(this, function (error) {
+                        console.error(error);
+                        this._changeEditToolState(true);
+                    })
+                );
         } else {
             this._changeEditToolState(false, "Starting Save New Record Process");
 
@@ -644,31 +679,10 @@ function(
  
         //if valid template found
         if (template) {
-            this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token)
-                .then(
-                    lang.hitch(this, function (response) {
-                        //if valid record found - request the shape record 
-                        if (response.data !== null) {
-                            /*this._requestAPIEntityGet(rec, 'ECanMaps', this.token)
-                                .then(
-                                    lang.hitch(this, function (response) {
-                                        var shapeRecord = response.data;                                        
-                                        //call shape update function
-
-
-                                    }),
-                                    lang.hitch(this, function (error) {
-                                        console.error(error);
-                                    })
-
-                                );*/
-                        }
-                    }),
-                    lang.hitch(this, function (error) {
-                        console.error(error);
-                    })
-
-                );
+            return this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token);
+        } else {
+            alert('Invalid record requested');
+            return null;
         }
     },
 
@@ -732,6 +746,61 @@ function(
             data: JSON.stringify(rec)
         });
 
+
+        //make request
+        entityRequest.response.then(
+            function (response) {
+                deferred.resolve(response);
+            },
+            function (response) {
+                deferred.reject(response);
+            }
+        );
+
+        return deferred.promise;
+    },
+
+    _putExistingAPIEntity: function (rec, token) {
+        var deferred = new Deferred();
+
+        var entType = null;
+        if (rec.entTypeId === 'ACT') entType = 'Activities';
+        if (rec.entTypeId === 'SIT') entType = 'Sites';
+        if (rec.entTypeId === 'INV') entType = 'Investigations';
+        if (rec.entTypeId === 'ENQ') entType = 'Enquiries';
+        if (rec.entTypeId === 'COM') entType = 'Communications';
+
+        var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + '/' + rec.id;
+
+        //append proxy - requires call be made via proxy
+        url = this.appConfig.httpProxy.url + '?' + url; 
+
+        //construct request
+        var data = {
+            locationId: rec.id,
+            eCanMapsLocationShapeDto: rec
+        };
+
+        /*
+
+        var entityRequest =  request(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': token
+            },
+            data: JSON.stringify(data)
+        });
+
+        **/
+
+        var entityRequest = xhr.put(url, {
+            headers: {
+                'Authorization': token,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(rec),
+            handleAs: 'json'
+        });
 
         //make request
         entityRequest.response.then(
@@ -1106,6 +1175,30 @@ function(
             .forMember('CREATEDDATE', function (opts) { return null; })
             .forMember('MODIFIEDBY', function (opts) { return null; })
             .forMember('MODIFIEDDATE', function (opts) { return null; })
+            .ignoreAllNonExisting();
+
+
+        //site feature to SIT entitydto
+        automapperUtil.createMap('graphic','shapeDto')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { 
+                var entType = null;
+                if (typeof opts.sourceObject.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                if (typeof opts.sourceObject.attributes["Category"] !== 'undefined') entType = 'SIT';
+                if (typeof opts.sourceObject.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                if (typeof opts.sourceObject.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                if (typeof opts.sourceObject.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
+                return entType; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdDate', function (opts) { return null; })
+            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedDate', function (opts) { return null; })            
             .ignoreAllNonExisting();
     },
 

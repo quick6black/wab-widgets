@@ -72,7 +72,7 @@ define([
           wm.activateWidget(myWidget);
             myWidget.editRecord(
               this._recordTemplate.apiSettings.mappingClass, 
-              featureset.features[0].attributes[this._recordTemplate.lookupKeyField]
+              featureSet.features[0].attributes[this._recordTemplate.lookupKeyField]
             );
 
             /*
