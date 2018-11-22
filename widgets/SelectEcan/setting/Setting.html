@@ -2,22 +2,22 @@
   <div class="config-section">
     <div class="label">${nls.chooseSelectingTools}</div>
     <div data-dojo-attach-point="drawingToolsContainer" class="drawing-tools-container jimu-draw-box" data-dojo-attach-event="onclick:_onDrawingToolsContainerClicked">
-      <div class="draw-item point-icon" data-geotype="POINT">
+      <div class="draw-item point-icon" title="${nls.selectByPoint}" data-geotype="POINT">
         <div class="draw-item-icon"></div>
       </div>
-      <div class="draw-item polyline-icon" data-geotype="POLYLINE">
+      <div class="draw-item polyline-icon" title="${nls.selectByLine}" data-geotype="POLYLINE">
         <div class="draw-item-icon"></div>
       </div>
-      <div class="draw-item extent-icon" data-geotype="EXTENT">
+      <div class="draw-item extent-icon" title="${nls.selectByRectangle}" data-geotype="EXTENT">
         <div class="draw-item-icon"></div>
       </div>
-      <div class="draw-item circle-icon" data-geotype="CIRCLE">
+      <div class="draw-item circle-icon" title="${nls.selectByCircle}" data-geotype="CIRCLE">
         <div class="draw-item-icon"></div>
       </div>
-      <div class="draw-item polygon-icon" data-geotype="POLYGON">
+      <div class="draw-item polygon-icon" title="${nls.selectByPolygon}" data-geotype="POLYGON">
         <div class="draw-item-icon"></div>
       </div>
-      <div class="draw-item freehand-polygon-icon" data-geotype="FREEHAND_POLYGON">
+      <div class="draw-item freehand-polygon-icon" title="${nls.selectByFreehandPolygon}" data-geotype="FREEHAND_POLYGON">
         <div class="draw-item-icon"></div>
       </div>
     </div>

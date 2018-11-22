@@ -36,7 +36,7 @@ define(["dojo/_base/declare",
     "esri/layers/MosaicRule",
     "esri/layers/RasterFunction",
     "esri/layers/VectorTileLayer",
-    'esri/layers/WMSLayer',
+    "esri/layers/WMSLayer",
     "esri/layers/WMSLayerInfo",
     "esri/dijit/PopupTemplate",
     "esri/InfoTemplate",
@@ -118,7 +118,7 @@ define(["dojo/_base/declare",
 
         }).then(function(result) {
           //console.warn("_addFeatureService.serviceInfo",result);
-          if (result && typeof result.type === "string" && 
+          if (result && typeof result.type === "string" &&
              (result.type === "Feature Layer" || result.type === "Table")) {
             // a single layer registered from a service /FeatureServer/1 or /MapServer/2
             var layer = new FeatureLayer(serviceUrl, {
@@ -130,8 +130,8 @@ define(["dojo/_base/declare",
           } else {
             var list = [];
             if (result && result.layers && result.layers.length > 0) {
-              array.forEach(result.layers, function(lyr) {
-                list.push(lry);
+              array.forEach(result.layers,function(lyr){
+                list.push(lyr);
               });
             }
             if (result && result.tables && result.tables.length > 0) {

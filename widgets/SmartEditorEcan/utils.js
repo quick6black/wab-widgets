@@ -1,5 +1,5 @@
 /*
-// Copyright © 2014 - 2018 Esri. All rights reserved.
+// Copyright © 2014 - 2017 Esri. All rights reserved.
 
 TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
 Unpublished material - all rights reserved under the
@@ -45,10 +45,10 @@ define([
     var pixelWidth = map.extent.getWidth() / map.width;
     var toleranceInMapCoords = toleranceInPixel * pixelWidth;
     return new Extent(point.x - toleranceInMapCoords,
-      point.y - toleranceInMapCoords,
-      point.x + toleranceInMapCoords,
-      point.y + toleranceInMapCoords,
-      map.spatialReference);
+                      point.y - toleranceInMapCoords,
+                      point.x + toleranceInMapCoords,
+                      point.y + toleranceInMapCoords,
+                      map.spatialReference);
   };
 
   mo.filterOnlyUpdatedAttributes = function (attributes, origAttributes, featureLayer) {
@@ -236,29 +236,19 @@ define([
     return fieldInfos;
   };
   //Methods to get the Layer info from the map, service and configuration
-  mo.getConfigInfos = function (jimuLayerInfos, configurationLayerInfos, editableOnly, configuredOnly, considerTables) {
+  mo.getConfigInfos = function (jimuLayerInfos, configurationLayerInfos, editableOnly, configuredOnly) {
     // summary:
     //   get all editable layers from map.
     // description:
     //   layerInfo will honor configuration if that layer has configured.
     var configInfos = [];
-    var allLayerAndTables = jimuLayerInfos.getLayerInfoArrayOfWebmap();
-    var tablesFromWebmap = [];
-    //considerTables only when asked,
-    //In case of all layers only show layers and for related ones show layers & tables
-    if (considerTables) {
-      tablesFromWebmap = jimuLayerInfos.getTableInfoArrayOfWebmap();
-      allLayerAndTables = allLayerAndTables.concat(tablesFromWebmap);
-    }
-    array.forEach(allLayerAndTables, function (layerInfo) {
+    array.forEach(jimuLayerInfos.getLayerInfoArrayOfWebmap(), function (layerInfo) {
       var addLayer = false;
-      //Consider layerInfos of type 'Table' Or a 'Feature Layer' and has valid url
-      if ((layerInfo.layerObject.type === "Table" ||
-        layerInfo.layerObject.type === "Feature Layer") && layerInfo.layerObject.url) {
+      if (layerInfo.layerObject.type === "Feature Layer" && layerInfo.layerObject.url) {
         if (layerInfo.layerObject.isEditable && layerInfo.layerObject.isEditable() && editableOnly) {
           addLayer = true;
         }
-        else if (editableOnly !== undefined && editableOnly === false) {
+        else if (editableOnly && editableOnly === false) {
           addLayer = true;
         }
       }
@@ -295,6 +285,8 @@ define([
         configInfo = lang.clone(configurationLayerInfo);
         configInfo.fieldInfos = this.mergeFieldInfosWithConfiguration(layerInfo, configInfo);
         configInfo = this.mergeDefaultWithConfig(configInfo, defConfigInfo);
+        // set _editFlag to true
+        configInfo._editFlag = true;
         return true;
       }
       return false;
@@ -361,26 +353,8 @@ define([
         }
       }
     }
-    //set the allow geometry update flag if available in layer object
     if (layerInfo.layerObject.hasOwnProperty('allowGeometryUpdates')) {
       allowGeometryUpdates = layerInfo.layerObject.allowGeometryUpdates;
-    }
-    //update capabilities from webmap if object is of type Table
-    if (layerInfo.layerObject.type === "Table" && layerInfo.layerObject.url &&
-      layerInfo.getCapabilitiesOfWebMap()) {
-      var capabilitiesOfWebMap = layerInfo.getCapabilitiesOfWebMap();
-      //if table is editable then set the allowsUpdate flag to true else disable all
-      if (layerInfo.layerObject.isEditable &&// todo...********
-        layerInfo.layerObject.isEditable() &&
-        capabilitiesOfWebMap && capabilitiesOfWebMap.toLowerCase().indexOf('editing') > -1) {
-        allowsUpdate = true;
-      } else {
-        allowsCreate = false;
-        allowsUpdate = false;
-        allowsDelete = false;
-      }
-      //in case of table geometry updates will always be false
-      allowGeometryUpdates = false;
     }
     var configInfo = {
       'featureLayer': {
@@ -394,7 +368,7 @@ define([
       'allowUpdateOnly': !allowsCreate,
       'allowDelete': false,
       'fieldInfos': this.mergeFieldInfosWithConfiguration(layerInfo, null),
-      '_editFlag': allowsCreate || allowsUpdate ? true : false //if canCreate or canUpdate means layer is editable
+      '_editFlag': false
     };
     return configInfo;
   };

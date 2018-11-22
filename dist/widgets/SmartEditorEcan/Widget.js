@@ -1,5 +1,7 @@
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © 2014 - 2017 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +17,14 @@
 ///////////////////////////////////////////////////////////////////////////
 
 // jscs:disable validateIndentation
-/* jshint proto: true */
 
-define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference',
+define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "dijit/registry", "./utils", "./smartAttributes", "./attributeInspectorTools", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil',
 
 /* ECAN ADDITION REQUIRES */
-"esri/geometry/Polygon", 'esri/urlUtils', 'esri/geometry/geometryEngine', './components/operationLink', './components/copyFeaturesPopup', './components/mergeFeaturesPopup', './components/explodeFeaturesPopup'], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, Polygon, esriUrlUtils, geometryEngine, OperationLink, CopyFeaturesPopup, MergeFeaturesPopup, ExplodeFeaturesPopup) {
-  return declare([BaseWidget, _WidgetsInTemplateMixin], {
+'esri/urlUtils', 'esri/geometry/geometryEngine', 'dojo/dom-attr', './components/operationLink', './components/copyFeaturesPopup', './components/mergeFeaturesPopup', './components/explodeFeaturesPopup', 'jimu/dijit/LoadingShelter'], function (Stateful, dojo, dijit, declare, lang, array, html, query, esriBundle, dom, domConstruct, domClass, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, registry, editUtils, smartAttributes, attributeInspectorTools, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, esriUrlUtils, geometryEngine, domAttr, OperationLink, CopyFeaturesPopup, MergeFeaturesPopup, ExplodeFeaturesPopup) {
+  var _declare;
+
+  return declare([BaseWidget, _WidgetsInTemplateMixin], (_declare = {
     name: 'SmartEditorEcan',
     baseClass: 'jimu-widget-smartEditor-ecan',
     _defaultStartStr: "",
@@ -47,26 +50,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _eventHandler: null,
     _createOverDef: null,
     featureReductionEnabledLayers: [],
-    rendererDifferentLayers: [],
     clusterState: true,
-    _relatedTablesInfo: {},
-    _traversal: [],
-    _nodesCollection: [],
-    _paginationNodeCollection: [],
-    _buttonsWrapper: [],
-    _attributeInspectorCollection: [],
-    contentWrapper: null,
-    viewedFeatureDetails: [],
-    viewedLayerDetails: [],
-    currentAction: null,
-    _isPresetTableCreated: false,
-    _layerClearSelectionHandles: [],
-    _layerChangedOutside: false,
-    _refreshButton: null, // to store the object of refresh button
-    _mapNavigation: null, // to store the object of map navigation button
-    _locateButtonDiv: null, // to store the object of locate button
-    _xyCoordinates: null, // to store the object of custom coordinates button
-    _coordinates: null, //to store instance of XYCoordinates
     //widget_loaded: declare([Stateful], {
     //  loaded: null,
     //  _loadedGetter: function () {
@@ -78,44 +62,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     //}),
     _copyExistingValues: false,
     _drawToolEditMode: false,
-    postMixInProperties: function postMixInProperties() {
-      this.nls = lang.mixin(this.nls, window.jimuNls.common);
-    },
-
     postCreate: function postCreate() {
       this.inherited(arguments);
-      this._relatedTablesInfo = {};
-      this._traversal = [];
-      this._nodesCollection = [];
-      this._paginationNodeCollection = [];
-      this._buttonsWrapper = [];
-      this._attributeInspectorCollection = [];
-      this.viewedFeatureDetails = [];
-      this.viewedLayerDetails = [];
-      this._isPresetTableCreated = false;
-      this._layerClearSelectionHandles = [];
-      this._layerChangedOutside = false;
-      //wire up the button events
-      this.own(on(this.cancelButton, "click", lang.hitch(this, function () {
-        //check if needs to display prompt fro unsaved edits
-        if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
-          var isFirstPage = this._traversal.length > 1 ? false : true;
-          this._promptToResolvePendingEdit(isFirstPage, null, true).then(lang.hitch(this, function (clickedButton) {
-            //if adding new related record the task of back button(_onCancelButtonClicked)
-            //should be processed after adding related record and showing list related records
-            //So process _onCancelButtonClicked only when action is 'no' & not adding related record
-            //if adding related record and clicked button is 'yes' then raise the flag of back button
-            //so that once related record is added after that _onCancelButtonClicked will be called
-            if (!this._addingNewRelatedRecord || clickedButton === "no") {
-              this._onCancelButtonClicked();
-            } else {
-              this._processBackButtonInNewRelatedRecord = true;
-            }
-          }), function () {});
-        } else {
-          this._onCancelButtonClicked();
-        }
-      })));
+      console.log('SmartEditorEcan::postCreate');
 
       /* BEGIN: Ecan Changes */
 
@@ -125,212 +74,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       /* END: Ecan Changes */
     },
 
-    _setCancelButtonText: function _setCancelButtonText() {
-      if (this._traversal && this._traversal.length > 1) {
-        domAttr.set(this.cancelButton, "innerHTML", this.nls.back);
-      } else {
-        domAttr.set(this.cancelButton, "innerHTML", this.nls.clearSelection);
-      }
-    },
-
-    _onCancelButtonClicked: function _onCancelButtonClicked() {
-      //clear previous selections of layer
-      if (this.attrInspector) {
-        //as now prev attribute inspector could have multiple features of multiple layer
-        //clear selections of all layers in layer infos
-        if (this.attrInspector.layerInfos) {
-          array.forEach(this.attrInspector.layerInfos, function (layerInfo) {
-            var layer = layerInfo.featureLayer;
-            layer.clearSelection();
-            layer.refresh();
-          });
-        }
-        this.attrInspector.destroy();
-      }
-      domConstruct.destroy(this.contentWrapper);
-      domConstruct.destroy(this.buttonHeader);
-      if (this.navButtonsDiv) {
-        domConstruct.destroy(this.navButtonsDiv);
-      }
-      //get prev Attribute inspector if going back from related layer/tables
-      if (this._attributeInspectorCollection && this._attributeInspectorCollection.length > 0) {
-        var prevAttrInspector = this._attributeInspectorCollection.pop();
-        if (prevAttrInspector) {
-          this.attrInspector = prevAttrInspector;
-        }
-      }
-      if (this._traversal && this._traversal.length > 0) {
-        this._traversal.pop();
-      }
-      if (this._buttonsWrapper.length > 0) {
-        this.buttonHeader = this._buttonsWrapper.pop();
-      }
-      this._setCancelButtonText();
-      this._unLockMapNavigation();
-      //get prev ContentWrapper if going back from related layer/tables
-      if (this._nodesCollection && this._nodesCollection.length > 0) {
-        var prevContentWrapper = this._nodesCollection.pop();
-        var prevPaginationWrapper = this._paginationNodeCollection.pop();
-        if (prevContentWrapper) {
-          domClass.remove(prevContentWrapper, "hidden");
-          domClass.remove(this.buttonHeader, "hidden");
-          //when AI's dom is set to hidden all its node get hidden so show then
-          domStyle.set(this.attrInspector.attributeTable, "display", "block");
-          domStyle.set(this.attrInspector.editButtons, "display", "block");
-          if (this.attrInspector._attachmentEditor !== undefined && this.attrInspector._attachmentEditor !== null) {
-            domStyle.set(this.attrInspector._attachmentEditor.domNode, "display", "block");
-          }
-          //Hide Attribute inspector's delete button text shown when we block editButtons
-          domStyle.set(this.attrInspector.deleteBtn.domNode, "display", "none");
-          //set the prev selected feature index which is stored before navigating to shoe related records
-          this.attrInspector._featureIdx = this.attrInspector.ctStoredFeatureIndex;
-          //refresh the AI this will update the UI also
-          this.attrInspector.refresh();
-          //after time out
-          // 1. Show/hide navButtons as per number of features selected
-          // 2. Show number of features in nav buttons control
-          setTimeout(lang.hitch(this, function () {
-            //Show/hide navButtons as per number of features selected
-            domStyle.set(this.attrInspector.navButtons, "display", !this.attrInspector._hideNavButtons && this.attrInspector._numFeatures > 1 ? "" : "none");
-            //Show number of features in nav buttons control
-            this.attrInspector.navMessage.innerHTML = esriLang.substitute({
-              idx: this.attrInspector._featureIdx + 1,
-              of: this.attrInspector.NLS_of,
-              numFeatures: this.attrInspector._numFeatures
-            }, this.attrInspector._navMessage);
-            this._toggleAttrInspectorNavButtons();
-            //also update the current feature
-            this.currentFeature = this.attrInspector._numFeatures ? this.attrInspector._selection[this.attrInspector._featureIdx] : null;
-            this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-            this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
-            // Update related records count
-            if (this._relatedTablesInfo && this._relatedTablesInfo[this.currentFeature._layer.id]) {
-              this._relatedTablesInfo[this.currentFeature._layer.id].updateRelatedRecordsCount();
-            }
-            this._toggleEditGeoSwitch(this.currentLayerInfo.disableGeometryUpdate || !this.currentLayerInfo.configFeatureLayer.layerAllowsUpdate);
-            //Show hide delete button based on configuration
-            //TODO : Revisit
-            if (this.currentFeature.hasOwnProperty("allowDelete")) {
-              this._toggleDeleteButton(this.currentFeature.allowDelete && this.currentLayerInfo.allowDelete);
-            } else {
-              this._toggleDeleteButton(this.currentLayerInfo.allowDelete);
-            }
-            if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
-              //perform any edit geom switch functionality
-              //only when working with main layers feature and not on related features
-              if (this._traversal.length < 2 && this._editGeomSwitch.domNode) {
-                this._editGeomSwitch.set('checked', true);
-              }
-            }
-            //Disable attachments editor for the layers which are not editable
-            //add timeout as it is taking some time to load editor
-            this.loading.show();
-            setTimeout(lang.hitch(this, function () {
-              if (this.attrInspector._attachmentEditor && (!this.currentLayerInfo.isEditable || !this.currentLayerInfo._editFlag)) {
-                this._disableAttachments(this.attrInspector._attachmentEditor, true, false);
-              }
-              this.loading.hide();
-            }), 1000);
-          }), 200);
-          this.contentWrapper = prevContentWrapper;
-          this.navButtonsDiv = prevPaginationWrapper;
-          return;
-        }
-      }
-      if (this._attrInspIsCurrentlyDisplayed && this._attrInspIsCurrentlyDisplayed === true) {
-        if (this.attrInspector) {
-          if (this.attrInspector._numFeatures === 0) {
-            this._showTemplate(true);
-          }
-        }
-      }
-      if (this.map.infoWindow.isShowing) {
-        this.map.infoWindow.hide();
-      }
-      this._removeLayerVisibleHandler();
-    },
-
-    //create instance of XYCoordinates
-    _createCoordinatesPopup: function _createCoordinatesPopup() {
-      this._coordinates = new XYCoordinates({
-        map: this.map,
-        nls: this.nls,
-        geometryService: this.geometryService
-      });
-      //Listen for event and get the updated location
-      on(this._coordinates, "gotoSelectedLocation", lang.hitch(this, function (coordsData) {
-        this._getUpdatedLocation(coordsData).then(lang.hitch(this, function (updatedLocation) {
-          //Move graphics to updated location
-          this.currentFeature.setGeometry(updatedLocation);
-          this.map.centerAt(updatedLocation);
-          this.geometryEdited();
-        }), function () {
-          //TODO : error handler
-        });
-      }));
-    },
-
-    _getUpdatedLocation: function _getUpdatedLocation(coordsData) {
-      var newPoint, firstPoint, secondPoint, locationDef;
-      locationDef = new Deferred();
-      firstPoint = parseFloat(coordsData.firstPoint);
-      secondPoint = parseFloat(coordsData.secondPoint);
-      //Convert the coordinates as per coordinates system
-      if (coordsData.coordinateSystem === "Map Spatial Reference") {
-        newPoint = new Point(firstPoint, secondPoint, this.map.spatialReference);
-        locationDef.resolve(newPoint);
-      } else {
-        newPoint = new Point(secondPoint, firstPoint, new SpatialReference(4326));
-        coordinateUtils.getProjectedGeometry(newPoint, this.map.spatialReference, this.geometryService).then(lang.hitch(this, function (coordinatesInfo) {
-          locationDef.resolve(coordinatesInfo);
-        }), function () {
-          //TODO : error handler
-        });
-      }
-      return locationDef.promise;
-    },
-
-    _toggleAttrInspectorNavButtons: function _toggleAttrInspectorNavButtons() {
-      var currentNavigationNode;
-      if (query(".esriAttrPaginationDiv") && this._traversal) {
-        currentNavigationNode = query(".esriAttrPaginationDiv")[this._traversal.length - 1];
-      }
-      //Do the action only of pagination node is found
-      //No navigation node means the current panel is showing temp feature
-      if (currentNavigationNode) {
-        if (this.attrInspector && this.attrInspector._selection.length > 1) {
-          domStyle.set(currentNavigationNode, "display", "block");
-          if (currentNavigationNode.nextElementSibling) {
-            domStyle.set(currentNavigationNode.nextElementSibling, "max-height", "calc(100% - 65px)");
-            domStyle.set(currentNavigationNode.nextElementSibling, "margin-top", "5px");
-          }
-        } else {
-          domStyle.set(currentNavigationNode, "display", "none");
-          if (currentNavigationNode.nextElementSibling) {
-            domStyle.set(currentNavigationNode.nextElementSibling, "max-height", "calc(100% - 40px)");
-            domStyle.set(currentNavigationNode.nextElementSibling, "margin-top", "0px");
-          }
-        }
-      }
-    },
     startup: function startup() {
       this.inherited(arguments);
-      //create instance of geometryService
-      if (this.appConfig.geometryService) {
-        this.geometryService = new GeometryService(this.appConfig.geometryService);
-      } else {
-        Message({
-          message: this.nls.geometryServiceURLNotFoundMSG
-        });
-        return;
-      }
-      if (this.appConfig.theme.name === "TabTheme") {
-        //override the panel styles
-        domClass.add(this.domNode.parentElement, "esriCTOverridePanelStyle");
-      }
       this._createOverDef = new Deferred();
-      //get selected theme color
-      this._getSelectedThemeColor();
       //this.loaded_state = new this.widget_loaded({
       //  loaded: false
       //});
@@ -346,24 +92,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       this.widgetActiveIndicator = domConstruct.create("div", { "class": "widgetActive widgetIndicator" });
       parentDom.insertBefore(this.widgetActiveIndicator, parentDom.firstChild);
+
       if (this.config.editor.editDescription === undefined || this.config.editor.editDescription === null) {
         this.config.editor.editDescription = '';
         this.templateTitle.innerHTML = this.config.editor.editDescription;
       } else {
         this.templateTitle.innerHTML = entities.decode(this.config.editor.editDescription);
       }
-
       this._orignls = esriBundle.widgets.attachmentEditor.NLS_attachments;
       //this.nls = lang.mixin(this.nls, window.jimuNls.common);
-      this.loading = new LoadingIndicator({
-        hidden: true
-      });
-      this.loading.placeAt(this.domNode);
-
-      this.attachmentloading = new LoadingIndicator({
-        hidden: true
-      });
-      this.loading.placeAt(this.domNode);
+      //this.loading = new LoadingShelter({
+      //  hidden: true
+      //});
+      //this.loading.placeAt(this.domNode);
 
       this.editToolbar = new Edit(this.map);
       this.drawToolbar = new Draw(this.map);
@@ -378,11 +119,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       /* END: Ecan Changes */
 
       // edit events
-      this.own(on(this.editToolbar, "graphic-move-stop, rotate-stop, scale-stop, vertex-move-stop, vertex-click", lang.hitch(this, this.geometryEdited)));
+      this.own(on(this.editToolbar, "graphic-move-stop, rotate-stop, scale-stop, vertex-move-stop, vertex-click", lang.hitch(this, function () {
+        this.geometryChanged = true;
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
+      })));
 
       // draw event
-      //updated to draw-complete as draw-end is depricated
-      this.own(on(this.drawToolbar, "draw-complete", lang.hitch(this, function (evt) {
+      this.own(on(this.drawToolbar, "draw-end", lang.hitch(this, function (evt) {
         this.drawToolbar.deactivate();
 
         /* BEGIN: Ecan Changes - Handle edit tools using the draw tool i.e. cut, reshape */
@@ -394,7 +137,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             // In select mode - use as select geometry
             this._processOnMapClick(evt);
           } else {
-            // In create feature mode - process to layers
+            // In create featuyre mode - process to layers
             this._addGraphicToLocalLayer(evt);
           }
         }
@@ -453,26 +196,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }));
     },
 
-    /**
-     * This function is used to perform further execution once editing of geometry like
-     * moving geometry is completed
-     */
-    geometryEdited: function geometryEdited() {
-      //this._updateRefreshButtonState();
-      if (this._refreshButton && this.config.editor.enableAttributeUpdates) {
-        //if automatic update is configured to true show refresh button
-        if (this.config.editor.enableAutomaticAttributeUpdates) {
-          domClass.remove(this._refreshButton, "hidden");
-          //if automatic update is 'ON' in the widget then call refresh attribute function
-          if (domClass.contains(this._refreshButton, "esriCTAutoUpdateOnMode")) {
-            this._refreshAttributes();
-          }
-        }
-      }
-      this.geometryChanged = true;
-      this._enableAttrInspectorSaveButton(this._validateAttributes());
-    },
-
     _noPrivilegeHandler: function _noPrivilegeHandler(message) {
       this.templateTitle.innerHTML = message;
       if (this.templatePicker) {
@@ -510,148 +233,63 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (this.state !== 'active') {
         this.widgetManager.activateWidget(this);
       }
-      var firstFeature = features[0];
+
+      /* BEGIN CHANGE - Handle multiple selected features 
+        // ORIGINAL CODE
+        var firstFeature = features[0];
       if (this._validateFeatureChanged() && this.currentFeature) {
         // do not show templatePicker after saving
         if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
           this._promptToResolvePendingEdit(false, { featureLayer: featureLayer, feature: firstFeature }, false, true);
-        } else {
-          this.load_from_featureaction(featureLayer, firstFeature);
         }
       } else {
         this.load_from_featureaction(featureLayer, firstFeature);
       }
-    },
-    load_from_featureaction: function load_from_featureaction(featureLayer, firstFeature) {
-      //CT- Commented as now we need to clear multiple layer from multiple AI
-      /* if (this.updateFeatures) {
-         var layersRefresh = [];
-         array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
-           var layer = feature.getLayer();
-           if (layersRefresh && layersRefresh.indexOf(layer.id) === -1) {
-             layersRefresh.push(layer.id);
-             layer.clearSelection();
-             layer.refresh();
-           }
-         }));
-       }*/
-      this._clearLayerSelection();
-      if (this.contentWrapper && this.contentWrapper.parentNode && !domClass.contains(this.contentWrapper, "hidden")) {
-        this.contentWrapper.parentNode.removeChild(this.contentWrapper);
-        //Remove all the previously created pagination dom's before creating new AI
-        query(".esriAttrPaginationDiv", this.domNode).forEach(lang.hitch(this, function (paginationDom) {
-          domConstruct.destroy(paginationDom);
-        }));
-      }
-      //reset array
-      this._traversal = [];
-      this._nodesCollection = [];
-      this._paginationNodeCollection = [];
-      this._buttonsWrapper = [];
-      this._attributeInspectorCollection = [];
-      this._relatedTablesInfo = {};
-      this.currentFeature = null;
-      this.geometryChanged = false;
-      this.currentLayerInfo = null;
+        */
 
-      this.map.infoWindow.hide();
-      if (this.viewedLayerDetails.length > 0) {
-        this.loading.show();
-        featureLayer = this._getLayerInfoByID(this.viewedLayerDetails.shift());
-        firstFeature = this.viewedFeatureDetails.shift();
-        this._traverseToSelectedFeature(featureLayer, firstFeature);
+      if (this._validateFeatureChanged() && this.currentFeature) {
+        // do not show templatePicker after saving
+        if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
+          this._promptToResolvePendingEdit(false, { featureLayer: featureLayer, feature: features }, false, true);
+        }
+      } else {
+        this.load_from_featureaction(featureLayer, features);
       }
     },
-
-    _clearLayerSelection: function _clearLayerSelection() {
-      if (this._attributeInspectorCollection && this._attributeInspectorCollection.length > 0) {
-        array.forEach(this._attributeInspectorCollection, function (attrInspector) {
-          //clear previous selections of layer
-          if (attrInspector) {
-            //as now prev attribute inspector could have multiple features of multiple layer
-            //clear selections of all layers in layer infos
-            if (attrInspector.layerInfos) {
-              array.forEach(attrInspector.layerInfos, function (layerInfo) {
-                var layer = layerInfo.featureLayer;
-                layer.clearSelection();
-                layer.refresh();
-              });
-            }
-            attrInspector.destroy();
-          }
-        });
-      }
-      //clear previous selections of layer
-      if (this.attrInspector) {
-        //as now prev attribute inspector could have multiple features of multiple layer
-        //clear selections of all layers in layer infos
-        if (this.attrInspector.layerInfos) {
-          array.forEach(this.attrInspector.layerInfos, function (layerInfo) {
-            var layer = layerInfo.featureLayer;
+    load_from_featureaction: function load_from_featureaction(featureLayer, feature) {
+      if (this.updateFeatures) {
+        var layersRefresh = [];
+        array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
+          var layer = feature.getLayer();
+          if (layersRefresh && layersRefresh.indexOf(layer.id) === -1) {
+            layersRefresh.push(layer.id);
             layer.clearSelection();
             layer.refresh();
-          });
-        }
-        this.attrInspector.destroy();
+          }
+        }));
       }
-    },
-    _traverseToSelectedFeature: function _traverseToSelectedFeature(featureLayer, feature) {
-      var def = new Deferred();
-      var tempFeature;
-      if (this.viewedFeatureDetails.length > 0) {
-        tempFeature = this.viewedFeatureDetails[0];
-        if (this.viewedLayerDetails[0] === this.viewedLayerDetails[1]) {
-          tempFeature = this.viewedFeatureDetails[1];
-        }
-      }
-
-      this._createAttributeInspector([featureLayer], false, null, def, tempFeature);
+      this.map.infoWindow.hide();
+      // recreate the attr inspector if needed
+      this._createAttributeInspector(this.config.editor.configInfos);
       if (feature) {
-        SelectionManager.getInstance().setSelection(featureLayer.featureLayer, feature).then(lang.hitch(this, function () {
-          var selectedFeatures = featureLayer.featureLayer.getSelectedFeatures();
+
+        /* BEGIN CHANGE - Handle multiple selected features */
+
+        var selFeatures = lang.isArray(feature) ? feature : [feature];
+
+        SelectionManager.getInstance().setSelection(featureLayer, selFeatures).then(lang.hitch(this, function () {
+          var selectedFeatures = featureLayer.getSelectedFeatures();
           this.updateFeatures = selectedFeatures;
           if (this.updateFeatures.length > 0) {
             this._showTemplate(false);
           }
         }));
-      }
-      def.then(lang.hitch(this, function () {
-        if (this.viewedLayerDetails.length > 0) {
-          var relatedFeatureLayerId = this.viewedLayerDetails.shift();
-          this.viewedFeatureDetails.shift();
-          if (this.viewedLayerDetails.length > 0 && this.viewedLayerDetails[0] === relatedFeatureLayerId) {
-            this.viewedLayerDetails.shift();
-            this.viewedFeatureDetails.shift();
-          }
-          var tableTitle = query("[layerid='" + relatedFeatureLayerId + "']", this.contentWrapper)[0];
-          tableTitle.click();
-        }
-        if (this.viewedLayerDetails.length === 0) {
-          this.loading.hide();
-        }
-      }));
-    },
 
-    _getFeatureIndexToSelect: function _getFeatureIndexToSelect(relatedFeature) {
-      var featureOID,
-          featureIndex = -1;
-      featureOID = relatedFeature.attributes[relatedFeature._layer.objectIdField];
-      array.some(this.attrInspector._selection, lang.hitch(this, function (feature, index) {
-        if (feature.attributes[feature._layer.objectIdField] === featureOID) {
-          featureIndex = index;
-          return true;
-        }
-      }));
-      return featureIndex;
+        /* END CHANGE */
+      }
     },
     //Function from the feature action
-    beginEditingByFeatures: function beginEditingByFeatures(features, featureLayer, viewedLayerDetails, viewedFeatureDetails) {
-      //clear the temporary graphics if present
-      if (this.cacheLayer) {
-        this.cacheLayer.clear();
-      }
-      this.viewedLayerDetails = viewedLayerDetails;
-      this.viewedFeatureDetails = viewedFeatureDetails;
+    beginEditingByFeatures: function beginEditingByFeatures(features, featureLayer) {
       if (!featureLayer) {
         return;
       }
@@ -687,6 +325,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         } else {
           return;
         }
+
         /* ------------------------------------------------------------- 
           CHANGE ECAN 2017-05-29 - addition of EditFilter to Listener 
         if (name !== 'GroupFilter') {
@@ -725,14 +364,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         utils.loadStyleLink('launchpadOverrideCSS', this.folderUrl + "/css/launchpadTheme.css", null);
       } else {
         styleLink = document.getElementById("launchpadOverrideCSS");
-        if (styleLink) {
-          styleLink.disabled = true;
-        }
-      }
-      if (this.appConfig.theme.name === "DashboardTheme") {
-        utils.loadStyleLink('dashboardOverrideCSS', this.folderUrl + "/css/dashboardTheme.css", null);
-      } else {
-        styleLink = document.getElementById("dashboardOverrideCSS");
         if (styleLink) {
           styleLink.disabled = true;
         }
@@ -812,14 +443,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         domClass.add(this.widgetActiveIndicator, "widgetActive");
         if (this.map) {
           this._disableFeatureReduction();
-          if (this.templatePicker) {
-            this.templatePicker.update();
-          }
           this._mapClickHandler(true);
-          //Remove selection clear handlers for all the layers so that,
-          //it will work only for layer selection clear from outside the widget
-          this._disconnectLayerSelectionClearedOutside();
-
           if (this._attrInspIsCurrentlyDisplayed === false) {
             var override = null;
             if (this.drawingTool && this.currentDrawType) {
@@ -833,15 +457,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _enableFeatureReduction: function _enableFeatureReduction() {
       if (this.clusterState === false) {
         array.forEach(this.featureReductionEnabledLayers, function (layer) {
-          if (!layer.isFeatureReductionEnabled()) {
-            layer.enableFeatureReduction();
-          }
-        });
-        array.forEach(this.rendererDifferentLayers, function (layer) {
           if (layer._layerRenderer) {
             layer.setRenderer(layer._layerRenderer);
-            layer.redraw();
           }
+          layer.enableFeatureReduction();
+          //layer.redraw();
         });
         this.clusterState = true;
       }
@@ -849,92 +469,34 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _disableFeatureReduction: function _disableFeatureReduction() {
       if (this.clusterState === true) {
         array.forEach(this.featureReductionEnabledLayers, function (layer) {
-          if (layer.isFeatureReductionEnabled()) {
-            layer.disableFeatureReduction();
-          }
-        });
-        array.forEach(this.rendererDifferentLayers, function (layer) {
           if (layer._serviceRendererJson) {
             layer.setRenderer(rendererJsonUtils.fromJson(layer._serviceRendererJson));
-            layer.redraw();
           }
+          layer.disableFeatureReduction();
+          //layer.redraw();
         });
         this.clusterState = false;
       }
     },
-
-    _handleLayerSelectionClear: function _handleLayerSelectionClear(attrInspector) {
-      if (attrInspector && attrInspector.layerInfos) {
-        array.forEach(attrInspector.layerInfos, lang.hitch(this, function (layerInfo) {
-          if (layerInfo.featureLayer) {
-            var layerHandle = on(layerInfo.featureLayer, 'selection-clear', lang.hitch(this, this._onLayerSelectionCleared));
-            this.own(layerHandle);
-            this._layerClearSelectionHandles.push(layerHandle);
-          }
-        }));
-      }
-    },
-
-    //Added this function  mulitple layers cleard from out side the widget
-    //should not fire the _layerChangeOutside multiple times
-    _onLayerSelectionCleared: function _onLayerSelectionCleared() {
-      if (this._LayerSelectionClearedTimer) {
-        clearTimeout(this._LayerSelectionClearedTimer);
-      }
-      this._LayerSelectionClearedTimer = setTimeout(lang.hitch(this, function () {
-        if (!this._layerChangedOutside) {
-          this._layerChangedOutside = true;
-          //show template picker and clear current AI
-          this._navigateToMain();
-        }
-      }), 100);
-    },
-
-    _navigateToMain: function _navigateToMain() {
-      this._attrInspIsCurrentlyDisplayed = false;
-      //this._mapClickHandler(true);
-      this._showTemplatePicker();
-      //reset array
-      this._traversal = [];
-      this._nodesCollection = [];
-      this._paginationNodeCollection = [];
-      this._buttonsWrapper = [];
-      this._attributeInspectorCollection = [];
-      this._relatedTablesInfo = {};
-      this.currentFeature = null;
-      this.geometryChanged = false;
-      this.currentLayerInfo = null;
-    },
-
-    _connectLayerSelectionClearedOutside: function _connectLayerSelectionClearedOutside() {
-      this._layerChangedOutside = false;
-      this._disconnectLayerSelectionClearedOutside();
-      if (this._attrInspIsCurrentlyDisplayed) {
-        //handle layer selection clear for all the layers of all the atribute inspector else
-        //only for the current attribute inspector
-        if (this._attributeInspectorCollection && this._attributeInspectorCollection.length > 0) {
-          array.forEach(this._attributeInspectorCollection, lang.hitch(this, function (attrInspector) {
-            if (attrInspector) {
-              this._handleLayerSelectionClear(attrInspector);
-            }
-          }));
-        }
-        if (this.attrInspector) {
-          this._handleLayerSelectionClear(this.attrInspector);
-        }
-      }
-    },
-
-    _disconnectLayerSelectionClearedOutside: function _disconnectLayerSelectionClearedOutside() {
-      if (this._layerClearSelectionHandles && this._layerClearSelectionHandles.length > 0) {
-        array.forEach(this._layerClearSelectionHandles, lang.hitch(this, function (layerHandle) {
-          layerHandle.remove();
-        }));
-      }
-      this._layerClearSelectionHandles = [];
-    },
-
     onDeActive: function onDeActive() {
+      /* BEGIN: ECAN CHANGE - handle bug when widget is made inactive while edit tools are in process */
+
+      if (this._attrInspIsCurrentlyDisplayed) {
+        if (this.map.infoWindow.isShowing) {
+          this.map.infoWindow.hide();
+        }
+
+        if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
+          this._promptToResolvePendingEdit(true, null, true);
+        } else {
+          this._cancelEditingFeature(true);
+        }
+
+        this._removeLayerVisibleHandler();
+      }
+
+      /* END: ECAN CHANGE */
+
       if (domClass.contains(this.widgetActiveIndicator, "widgetActive")) {
         domClass.remove(this.widgetActiveIndicator, "widgetActive");
       }
@@ -943,11 +505,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._mapClickHandler(false);
       }
       this._enableFeatureReduction();
-      //Connect layers selection clear event for all the layer of all attributeInspectors
-      this._connectLayerSelectionClearedOutside();
     },
 
     onOpen: function onOpen() {
+      console.log('SmartEditorEcan::onOpen');
       if (this._userHasPrivilege === true) {
         //this.fetchDataByName('GroupFilter');
         this._workBeforeCreate();
@@ -958,34 +519,14 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
     },
 
-    _getTableInfos: function _getTableInfos() {
-      var defs = [];
-      var tableInfoArray = this._jimuLayerInfos.getTableInfoArray();
-      array.forEach(tableInfoArray, function (jimuTableInfo) {
-        defs.push(jimuTableInfo.getLayerObject());
-      }, this);
-      return all(defs);
-    },
-
     _initControl: function _initControl(operLayerInfos) {
       this._userHasPrivilege = true;
       this._jimuLayerInfos = operLayerInfos;
-      //Get table infos so that all the tables layer objects are loaded
-      //This will help in getting the capabilities and other layer infos
-      this._getTableInfos();
-      //create address utils and intersectionUtils object to copy values
-      this.addressUtils = new AddressUtils({
-        "config": this.config
-      });
-      this._intersectionUtils = new Intersection({
-        _jimuLayerInfos: this._jimuLayerInfos,
-        map: this.map
-      });
       var onlyConfiged = false;
       if (this.config.editor && this.config.editor.layerInfos) {
         onlyConfiged = this.config.editor.layerInfos.length > 0;
       }
-      this.config.editor.configInfos = editUtils.getConfigInfos(this._jimuLayerInfos, this.config.editor.layerInfos, false, onlyConfiged);
+      this.config.editor.configInfos = editUtils.getConfigInfos(this._jimuLayerInfos, this.config.editor.layerInfos, true, onlyConfiged);
       if (onlyConfiged === false) {
         array.forEach(this.config.editor.configInfos, function (configInfo) {
           configInfo._editFlag = true;
@@ -1000,16 +541,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       array.forEach(this.config.editor.configInfos, function (configInfo) {
         configInfo.featureLayer.name = configInfo.layerInfo.title;
         var layer = configInfo.featureLayer;
-        var layerRenderer = layer.renderer;
-        var layerRendererJson = layerRenderer.toJson();
-        var serviceDefJson = JSON.parse(layer._json);
-        var serviceRendererJson = serviceDefJson.drawingInfo.renderer;
-        layer._layerRenderer = layerRenderer;
-        layer._serviceRendererJson = serviceRendererJson;
-        if (layer.hasFeatureReduction && layer.hasFeatureReduction()) {
+
+        //disable clustering
+        if (layer.isFeatureReductionEnabled()) {
+          var layerRenderer = layer.renderer;
+          var layerRendererJson = layerRenderer.toJson();
+          var serviceDefJson = JSON.parse(layer._json);
+          var serviceRendererJson = serviceDefJson.drawingInfo.renderer;
+          if (!utils.isEqual(layerRendererJson, serviceRendererJson)) {
+            layer._layerRenderer = layerRenderer;
+            layer._serviceRendererJson = serviceRendererJson;
+          }
           this.featureReductionEnabledLayers.push(layer);
-        } else if (layerRendererJson.hasOwnProperty('type') && layerRendererJson.type == "heatmap") {
-          this.rendererDifferentLayers.push(layer);
         }
       }, this);
       this._disableFeatureReduction();
@@ -1030,6 +573,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //});
       this._createEditor();
       this.fetchDataByName('GroupFilter');
+
+      /* BEGIN: CHANGE ECAN - Call to EditFilter widget */
+      this.fetchDataByName('EditFilter');
+      /* END: CHANGE ECAN */
+
       this.widgetManager.activateWidget(this);
       this._createOverDef.resolve();
       //this.loaded_state.set("loaded", true);
@@ -1079,88 +627,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       polyline.spatialReference = polygon.spatialReference;
       return polyline;
     },
-    _addRelatedFeatureToLocalLayer: function _addRelatedFeatureToLocalLayer(graphic, fKeyField) {
-      var newTempLayerInfos;
-      var localLayerInfo = null;
-      if (this.attrInspector && this.attrInspector._attachmentUploader && this.attrInspector._attachmentUploader !== null) {
-        this.attrInspector._attachmentUploader.clear();
-      }
-      this._removeLocalLayers();
-      this.cacheLayer = this._cloneLayer(graphic.featureLayer.layerObject);
-      var cacheLayerHandler = on(this.cacheLayer, "load", lang.hitch(this, function () {
-        cacheLayerHandler.remove();
-        /* TODO: CT - Not required as we will not be allowing to add geometry for related features
-        if (this.cacheLayer.geometryType) {
-          this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
-        }
-        */
-        localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
-        newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
-        this._createAttributeInspector([localLayerInfo], true, graphic.featureLayer.layerObject, null, null, fKeyField);
-        var newAttributes = lang.clone(graphic.attributes);
-        if (this._usePresetValues) {
-          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
-        }
-        var newGraphic = new Graphic(null, null, newAttributes);
-        newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
-        this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
-          var queryTask = new Query();
-          queryTask.objectIds = [e[0].objectId];
-          this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW, lang.hitch(this, function () {
-            this.currentFeature = this.updateFeatures[0] = newGraphic;
-            this.getConfigDefaults();
-            this.geometryChanged = false;
-            if (this._attributeInspectorTools) {
-              this._attributeInspectorTools.triggerFormValidation();
-            }
-            var graphicOrigLyr = this.currentFeature.getLayer();
-            this.currentLayerInfo = this._getLayerInfoByID(graphicOrigLyr.id);
-            this.currentLayerInfo.isCache = true;
-            this._toggleDeleteButton(false);
-            this._enableAttrInspectorSaveButton(this._validateAttributes(), true);
-            this._toggleAttrInspectorNavButtons();
-          }));
-        }));
-        this._showTemplate(false, false);
-        if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
-          setTimeout(lang.hitch(this, function () {
-            var saveBtn = query(".saveButton", this.buttonHeader)[0];
-            if (!saveBtn) {} else {
-              on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
-            }
-          }), 100);
-        }
-      }));
-    },
-
-    _getCopyAttributes: function _getCopyAttributes(layerInfo, geometry) {
-      var defList = [],
-          copyAttributesInfo = {},
-          coordinatesDef,
-          resultDef;
-      resultDef = new Deferred();
-      coordinatesDef = new Deferred();
-      //Get data required for intersection
-      defList.push(this._intersectionUtils.getDistinctLayers(layerInfo, geometry));
-      //Get coordinates info and on completing coordinates info get address info
-      defList.push(coordinatesDef);
-      coordinateUtils.getCoordinatesData(geometry, this.geometryService).then(lang.hitch(this, function (coordinatesInfo) {
-        copyAttributesInfo.Coordinates = coordinatesInfo;
-        this.addressUtils.locateAddress(coordinatesInfo.MapSpatialReference).then(function (addressInfo) {
-          //once both coordinate and address infos are available resolve coordinatesDef
-          copyAttributesInfo.Address = addressInfo;
-          coordinatesDef.resolve(copyAttributesInfo);
-        });
-      }));
-      //Once all info for Intersection, Coordinates and Address are available
-      //resolve main result def with copyAttributesInfo object
-      all(defList).then(lang.hitch(this, function (allResult) {
-        copyAttributesInfo.Intersection = allResult[0];
-        resultDef.resolve(copyAttributesInfo);
-      }));
-      return resultDef.promise;
-    },
-
     // this function also create a new attribute inspector for the local layer
     _addGraphicToLocalLayer: function _addGraphicToLocalLayer(evt) {
       if (this.templatePicker === undefined || this.templatePicker === null) {
@@ -1174,95 +640,77 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var localLayerInfo = null;
 
       if (this.attrInspector) {
-        if (this.attrInspector._attachmentUploader && this.attrInspector._attachmentUploader !== null) {
-          this.attrInspector._attachmentUploader.clear();
-        }
         this.attrInspector.destroy();
         this.attrInspector = null;
+      }
+
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.clear();
       }
 
       this._removeLocalLayers();
       // preparation for a new attributeInspector for the local layer
 
       this.cacheLayer = this._cloneLayer(this.templatePicker.getSelected().featureLayer);
-      var cacheLayerHandler = on(this.cacheLayer, "load", lang.hitch(this, function () {
-        cacheLayerHandler.remove();
+      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
 
-        this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
 
-        localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
-        newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
+      this._createAttributeInspector([localLayerInfo]);
 
-        this._createAttributeInspector([localLayerInfo], true, this.templatePicker.getSelected().featureLayer);
+      if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
+        setTimeout(lang.hitch(this, function () {
+          this._editGeomSwitch.set('checked', true);
+        }), 100);
+      }
 
-        if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
-          //perform any edit geom switch functionality
-          //only when working with main layers feature and not on related features
-          setTimeout(lang.hitch(this, function () {
-            if (this._traversal.length < 2) {
-              this._editGeomSwitch.set('checked', true);
-            }
-          }), 100);
+      var newAttributes = lang.clone(selectedTemp.template.prototype.attributes);
+      if (this._usePresetValues) {
+        this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+      }
+
+      if (this.cacheLayer.geometryType === "esriGeometryPolyline" && evt.geometry.type === 'polygon') {
+        evt.geometry = this._polygonToPolyline(evt.geometry);
+      }
+      var newGraphic = new Graphic(evt.geometry, null, newAttributes);
+      // store original attrs for later use
+      newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+      this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
+        var queryTask = new Query();
+        queryTask.objectIds = [e[0].objectId];
+        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+
+        this.currentFeature = this.updateFeatures[0] = newGraphic;
+        this.getConfigDefaults();
+        this.geometryChanged = false;
+        //this._editGeomSwitch.set('checked', true);
+        if (this._attributeInspectorTools) {
+          this._attributeInspectorTools.triggerFormValidation();
         }
+        this._attachLayerHandler();
+        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+        this.currentLayerInfo.isCache = true;
+        this._toggleDeleteButton(false);
+        //this._toggleEditGeoSwitch(false);
 
-        var newAttributes = lang.clone(selectedTemp.template.prototype.attributes);
-
-        if (this.cacheLayer.geometryType === "esriGeometryPolyline" && evt.geometry.type === 'polygon') {
-          evt.geometry = this._polygonToPolyline(evt.geometry);
-        }
-        this.loading.show();
-        //load all the info required to copy attributes
-        this._getCopyAttributes(localLayerInfo, evt.geometry).then(lang.hitch(this, function (copyAttributesInfo) {
-          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0], copyAttributesInfo);
-          this.loading.hide();
-          //perform feature creation
-          var newGraphic = new Graphic(evt.geometry, null, newAttributes);
-          // store original attrs for later use
-          newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
-          this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
-            var queryTask = new Query();
-            queryTask.objectIds = [e[0].objectId];
-            this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW, lang.hitch(this, function () {
-              this.currentFeature = this.updateFeatures[0] = newGraphic;
-              this.getConfigDefaults();
-              this.geometryChanged = false;
-              //this._editGeomSwitch.set('checked', true);
-              if (this._attributeInspectorTools) {
-                this._attributeInspectorTools.triggerFormValidation();
-              }
-              //this._attachLayerHandler();
-              var graphicOrigLyr = this.currentFeature.getLayer();
-              this.currentLayerInfo = this._getLayerInfoByID(graphicOrigLyr.id);
-              this.currentLayerInfo.isCache = true;
-              //this._attachLayerHandler();
-              this._toggleDeleteButton(false);
-              //this._toggleEditGeoSwitch(false);
-
-              //this._createSmartAttributes();
-              //
-              this._enableAttrInspectorSaveButton(this._validateAttributes());
-              var paginationNode = query(".esriAttrPaginationDiv", this.domNode);
-              //Hide attribute inspector's navigation button
-              if (paginationNode && paginationNode[0]) {
-                domStyle.set(paginationNode[0], "display", "none");
-              }
-            }));
-          }));
-
-          this._showTemplate(false, false);
-
-          if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
-            setTimeout(lang.hitch(this, function () {
-              var saveBtn = query(".saveButton", this.buttonHeader)[0];
-              if (!saveBtn) {
-                //do nothing
-              } else {
-                on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
-              }
-            }), 100);
-          }
-        }));
+        //this._createSmartAttributes();
+        //
+        this._enableAttrInspectorSaveButton(this._validateAttributes());
       }));
+
+      this._showTemplate(false, false);
+
+      if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+        setTimeout(lang.hitch(this, function () {
+          var saveBtn = query(".saveButton")[0];
+          if (!saveBtn) {
+            //do nothing
+          } else {
+            on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
+          }
+        }), 100);
+      }
     },
 
     // cancel editing of the current feature
@@ -1385,7 +833,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //}
 
       this._eventHandler = this.own(on(layer, "visibility-change", lang.hitch(this, function () {
-        /*
         setTimeout(lang.hitch(this, function () {
           var cancelBtn = query(".cancelButton")[0];
           if (!cancelBtn) {
@@ -1394,7 +841,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             on.emit(cancelBtn, 'click', { cancelable: true, bubbles: true });
           }
         }), 100);
-        */
       })));
 
       cloneFeaturelayer = new FeatureLayer(featureCollection, {
@@ -1414,12 +860,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _validateEventHandler: function _validateEventHandler() {
       this._enableAttrInspectorSaveButton(this._validateAttributes());
     },
-    _validateAttributes: function _validateAttributes(changeDefaultState) {
-      //optional param to determine if no rule is found, should it reset the state.
-      //Required for when a form is disabled and a rule to hide a field is required
-      changeDefaultState = typeof changeDefaultState !== 'undefined' && changeDefaultState !== null ? changeDefaultState : true;
-      var attachmentValidationResult = [];
-      var attachmentResult = true;
+    _validateAttributes: function _validateAttributes() {
       var rowsWithGDBRequiredFieldErrors = this._validateRequiredFields();
       var featureHasEdits = this._validateFeatureChanged();
 
@@ -1427,7 +868,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var formValid = true;
       if (this._smartAttributes !== undefined) {
         if (this._smartAttributes !== null) {
-          rowsWithSmartErrors = this._smartAttributes.toggleFields(changeDefaultState);
+          rowsWithSmartErrors = this._smartAttributes.toggleFields();
         }
       }
       if (this._attributeInspectorTools !== undefined) {
@@ -1435,143 +876,34 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           formValid = this._attributeInspectorTools.formValid();
         }
       }
-      if (featureHasEdits && this.currentLayerInfo && this.currentLayerInfo.attachmentValidations) {
-        array.forEach(this.currentLayerInfo.attachmentValidations.Actions, lang.hitch(this, function (action) {
-          var attachmentObj = {};
-          if (action.filter && this._smartAttributes) {
-            attachmentObj.actionType = action.actionName;
-            attachmentObj.result = this._smartAttributes.processFilter(action.filter);
-            attachmentValidationResult.push(attachmentObj);
-          }
-        }));
-        //Perform action based on feature is being created or updated
-        if (this.attrInspector._attachmentUploader) {
-          attachmentResult = this.performAction(this.attrInspector._attachmentUploader, attachmentValidationResult, true);
-        } else if (this.attrInspector._attachmentEditor) {
-          attachmentResult = this.performAction(this.attrInspector._attachmentEditor, attachmentValidationResult, false);
-        }
-      }
-      return editUtils.isObjectEmpty(rowsWithGDBRequiredFieldErrors) && rowsWithSmartErrors.length === 0 && formValid && featureHasEdits && attachmentResult;
+      return editUtils.isObjectEmpty(rowsWithGDBRequiredFieldErrors) && rowsWithSmartErrors.length === 0 && formValid && featureHasEdits;
     },
-
-    performAction: function performAction(node, actions, isUploader) {
-      var enableSaveButton = true;
-      //Remove message which could be a result of previous required action
-      domStyle.set(this.attrInspector.attachmentsRequiredMsg, "display", "none");
-      array.some(actions, lang.hitch(this, function (action) {
-        switch (action.actionType) {
-          case 'Hide':
-            if (action.result) {
-              //Current Action
-              this.currentAction = action.actionType;
-              node.currentAction = action.actionType;
-              domStyle.set(node.domNode, "display", "none");
-              return true;
-            }
-            domStyle.set(node.domNode, "display", "block");
-            break;
-          case 'Disabled':
-            if (action.result) {
-              //Current Action
-              this.currentAction = action.actionType;
-              node.currentAction = action.actionType;
-              if (!isUploader) {
-                this._disableAttachments(node, true, isUploader);
-              } else {
-                domStyle.set(node.domNode, "display", "none");
-              }
-              return true;
-            }
-            this._disableAttachments(node, false, isUploader);
-            domStyle.set(node.domNode, "display", "block");
-            break;
-          case 'Required':
-            if (action.result) {
-              //Current Action
-              this.currentAction = action.actionType;
-              node.currentAction = action.actionType;
-              domStyle.set(node.domNode, "display", "block");
-              if (!this._hasAddedAnyAttachments(node, isUploader)) {
-                enableSaveButton = false;
-                domStyle.set(this.attrInspector.attachmentsRequiredMsg, "display", "block");
-              } else {
-                enableSaveButton = true;
-                domStyle.set(this.attrInspector.attachmentsRequiredMsg, "display", "none");
-              }
-              return true;
-            } else {
-              //Clear the current action variable for further processing
-              this.currentAction = null;
-              node.currentAction = null;
-            }
-            break;
-        }
-      }));
-      return enableSaveButton;
-    },
-
-    _disableAttachments: function _disableAttachments(node, isDisable, isUploader) {
-      var display, warningNode;
-      //set the sate of div
-      display = isDisable ? "none" : "block";
-      if (!isUploader) {
-        //get warning node
-        warningNode = this.attrInspector._attachmentEditor.domNode;
-        if (query(".attwarning", warningNode)[0]) {
-          domStyle.set(query(".attwarning", warningNode)[0], "display", display);
-        }
-        //set the display style
-        domStyle.set(node._uploadForm, "display", display);
-        //Loop through all the delete button nodes and set the display property as per the state
-        array.forEach(node._attachmentList.childNodes, lang.hitch(this, function (childNode) {
-          if (childNode.nodeName !== "#text") {
-            var deleteButton = query(".deleteAttachment", childNode)[0];
-            if (deleteButton) {
-              domStyle.set(deleteButton, "display", display);
-            }
-          }
-        }));
-      }
-    },
-
-    _hasAddedAnyAttachments: function _hasAddedAnyAttachments(node, isUploader) {
-      var hasAttachments = false;
-      //Check for attachments length and return the flag value
-      if (!isUploader) {
-        if (node._attachmentList.childNodes.length > 0 && node._attachmentList.childNodes[0].nodeName !== "#text") {
-          return true;
-        }
-        return false;
-      }
-      for (var i = 0; i < node._attachmentList.childNodes.length; i++) {
-        if (node._attachmentList.childNodes[i].childNodes && node._attachmentList.childNodes[i].childNodes.length > 0 && node._attachmentList.childNodes[i].childNodes[1].value) {
-          if (node._attachmentList.childNodes[i].childNodes[1].value.length > 0) {
-            hasAttachments = true;
-            break;
-          }
-        }
-      }
-      return hasAttachments;
-    },
-
     _toggleEditGeoSwitch: function _toggleEditGeoSwitch(disable) {
-      //return if _editGeomSwitch is not available or
-      //traversal length is greater than one i.e. showing attribute inspector of related records
-      if (this._editGeomSwitch === undefined || this._editGeomSwitch === null || this._traversal.length > 1) {
+      if (this._editGeomSwitch === undefined || this._editGeomSwitch === null) {
         return;
       }
       if (disable === false) {
-        if (this.currentLayerInfo && this.currentLayerInfo._editFlag) {
-          dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "block");
-        } else {
-          dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "none");
-        }
+        dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "block");
+        this._turnEditGeometryToggleOff();
       } else {
         dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "none");
+        this._turnEditGeometryToggleOff();
       }
-      this._turnEditGeometryToggleOff();
     },
     _recordLoadeAttInspector: function _recordLoadeAttInspector() {
+      if (this.editDescription.style.display === "block") {
+        if (this.updateFeatures.length > 1) {
+          dojo.style(this.editDescription, "padding-top", "20px");
+        } else {
+          dojo.style(this.editDescription, "padding-top", "0");
+        }
+      } else {
+        if (this.updateFeatures.length > 1) {
+          dojo.style(query(".attributeInspectorDiv")[0], "padding-top", "20px");
+        } else {
+          dojo.style(query(".attributeInspectorDiv")[0], "padding-top", "8px");
+        }
+      }
       this.getConfigDefaults();
     },
     editGeoCheckChange: function editGeoCheckChange() {
@@ -1582,19 +914,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     _attributeInspectorChangeRecord: function _attributeInspectorChangeRecord(evt) {
       //this._turnEditGeometryToggleOff();
-      //CT - commented the code in if block as we are displaying Prompt On Save on next button click
+
       if (this._validateFeatureChanged() && this.currentFeature) {
         // do not show templatePicker after saving
-        //   if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
-        //     this._promptToResolvePendingEdit(false, evt, false, true);
-        //   }
+        if (this.config.editor.displayPromptOnSave && this.config.editor.displayPromptOnSave === true) {
+          this._promptToResolvePendingEdit(false, evt, false, true);
+        }
       } else {
         this._postFeatureSave(evt);
       }
       this._recordLoadeAttInspector();
     },
     _addWarning: function _addWarning() {
-      if (query(".attwarning", this.attrInspector.domNode).length === 0) {
+      if (query(".attwarning").length === 0) {
         var txt = domConstruct.create("div", { 'class': 'attwarning' });
         txt.innerHTML = this.nls.attachmentSaveDeleteWarning;
         if (this.attrInspector._attachmentEditor !== undefined && this.attrInspector._attachmentEditor !== null) {
@@ -1602,306 +934,23 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+    _createAttributeInspector: function _createAttributeInspector(layerInfos) {
 
-    _hasAnyEditableLayerInRelation: function _hasAnyEditableLayerInRelation(layerInfos) {
-      var showLayer = false;
-      array.forEach(layerInfos, lang.hitch(this, function (layer) {
-        if (showLayer) {
-          return true;
-        }
-        if (layer._editFlag === true) {
-          showLayer = true;
-        } else if (layer.relationshipInfos && layer.relationshipInfos.length > 0) {
-          showLayer = this._hasAnyEditableLayerInRelation(layer.relationshipInfos);
-        }
-      }));
-      return showLayer;
-    },
-
-    _processRelationAndShowAttrInspector: function _processRelationAndShowAttrInspector(processRelations, evt, layer, def, relatedFeat, isTempFeature) {
-      var layerNode;
-      if (this.contentWrapper && this.contentWrapper.parentNode && !domClass.contains(this.contentWrapper, "hidden")) {
-        this.contentWrapper.parentNode.removeChild(this.contentWrapper);
-        if (this.navButtonsDiv && this.navButtonsDiv.parentNode) {
-          this.navButtonsDiv.parentNode.removeChild(this.navButtonsDiv);
-        }
-      }
-      //dom for item list and navigation content
-      this.contentWrapper = domConstruct.create("div", {
-        "class": "detailsContainer"
-      }, this.mainContainer);
-      //Create pagination controls only for saved feature
-      if (!isTempFeature) {
-        // dom for navigation buttons
-        this.navButtonsDiv = domConstruct.create("div", {
-          "class": "esriAttributeInspector esriAttrPaginationDiv"
-        });
-        domConstruct.place(this.attrInspector.navButtons, this.navButtonsDiv, "first");
-        //place the navigation button before main container
-        //to make sure only the content have scrollbar
-        domConstruct.place(this.navButtonsDiv, this.mainContainer, "before");
-      }
-      // dom for item list
-      var itemListContainer = domConstruct.create("div", {
-        "class": "esriCTItemListContainer"
-      }, this.contentWrapper);
-      if (evt && evt.feature) {
-        layer = evt.feature._layer;
-        //update symbol of prev selected feature
-        if (this.currentFeature && layer.id === this.currentFeature._layer.id) {
-          this.currentFeature.setSymbol(this._getSelectionSymbol(this.currentFeature.getLayer().geometryType, false));
-        }
-        //update currentFeature
-        this.currentFeature = evt.feature;
-        this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-        this.currentLayerInfo = this._getLayerInfoByID(layer.id);
-        //Set highlight symbol to current selected feature
-        this.currentFeature.setSymbol(this._getSelectionSymbol(this.currentFeature.getLayer().geometryType, true));
-        //toggle delete button as per current feature
-        this._toggleDeleteButton(this.attrInspector._currentLInfo.allowDelete);
-        //Disable attachments editor for the layers which are not editable
-        //add timeout as it is taking some time to load editor
-        this.loading.show();
-        setTimeout(lang.hitch(this, function () {
-          if (this.attrInspector._attachmentEditor && (!this.currentLayerInfo.isEditable || !this.currentLayerInfo._editFlag)) {
-            this._disableAttachments(this.attrInspector._attachmentEditor, true, false);
-          }
-          this.loading.hide();
-        }), 2000);
-      }
-      if (layer) {
-        layerNode = this.addItem(layer.name, true, itemListContainer, layer.id, isTempFeature);
-      }
-      if (processRelations && evt.feature) {
-        if (this._traversal.length > 0) {
-          this._traversal[this._traversal.length - 1] = evt.feature._layer.id;
-        } else {
-          this._traversal.push(evt.feature._layer.id);
-        }
-        //check for the relationship of selected features layer
-        var relatedTableInfos = this._getRelationshipInfo(evt.feature);
-        var feature = {
-          "attributes": lang.clone(evt.feature.attributes),
-          "_layer": evt.feature._layer
-        };
-        var relatedOBJID;
-        if (relatedFeat) {
-          relatedOBJID = [];
-          array.forEach(relatedFeat, function (feat) {
-            relatedOBJID.push(feat.attributes[feat._layer.objectIdField]);
-          });
-        }
-        if (relatedTableInfos && relatedTableInfos.length > 0) {
-          var filterdRelatedInfos = [];
-          array.forEach(relatedTableInfos, lang.hitch(this, function (relationship) {
-            var showRelatedLayer = relationship._editFlag;
-            if (!relationship._editFlag && relationship.relationshipInfos && relationship.relationshipInfos.length > 0) {
-              showRelatedLayer = this._hasAnyEditableLayerInRelation(relationship.relationshipInfos);
-            }
-            if (showRelatedLayer && relationship.featureLayer && relationship.hasOwnProperty('relationshipId')) {
-              filterdRelatedInfos.push(relationship);
-            }
-          }));
-          if (filterdRelatedInfos.length > 0) {
-            var contentPanel = query(".esriCTItemContent", itemListContainer);
-            if (contentPanel && contentPanel[0]) {
-              domClass.remove(contentPanel[0], "esriCTRelatedItemContent");
-            }
-            this._relatedTablesInfo[evt.feature._layer.id] = {};
-            this._relatedTablesInfo[evt.feature._layer.id] = new relatedTables({
-              relationshipInfo: filterdRelatedInfos,
-              layerInfosObj: this._jimuLayerInfos,
-              parentFeature: feature,
-              parentFeatureIndexInAI: this.attrInspector._featureIdx,
-              parentFieldInfos: this.currentLayerInfo.fieldInfos,
-              config: this.config,
-              nls: this.nls,
-              mapSpatialReference: this.map.spatialReference
-            }, domConstruct.create('div'));
-            this.own(on(this._relatedTablesInfo[evt.feature._layer.id], "addRelatedRecord", lang.hitch(this, function (relatedNewFeature, relatedDomNode, layerId, parentFeatureIndexInAI, fKeyField) {
-              //hide parent features content
-              domClass.add(this.contentWrapper, "hidden");
-              domClass.add(this.buttonHeader, "hidden");
-              domStyle.set(this.navButtonsDiv, "display", "none");
-              //Store the parent features index in AI object
-              this.attrInspector.ctStoredFeatureIndex = parentFeatureIndexInAI;
-              //push the AI, ContentWrapper and Parent layerID in an array
-              this._attributeInspectorCollection.push(this.attrInspector);
-              this._nodesCollection.push(this.contentWrapper);
-              this._buttonsWrapper.push(this.buttonHeader);
-              this._paginationNodeCollection.push(this.navButtonsDiv);
-              this._traversal.push(layerId);
-              //store related layer/tables dom which will be used to click once feature is saved
-              this.currentRelatedDom = relatedDomNode;
-              //finally add the feature to local layer
-              this._addRelatedFeatureToLocalLayer(relatedNewFeature, fKeyField);
-              this._addingNewRelatedRecord = true;
-            })));
-            this.own(on(this._relatedTablesInfo[evt.feature._layer.id], "titleClicked", lang.hitch(this, function (layerId, relationshipId, isNewFeature, parentFeatureIndexInAI, parentOID, fKeyField) {
-              if (this.addNewRelatedRecord) {
-                isNewFeature = true;
-                this.addNewRelatedRecord = false;
-              }
-              this._editGeomSwitch.set("checked", false);
-              if (!isNewFeature && this.currentFeature && this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
-                this._promptToResolvePendingEdit(false, null, true).then(lang.hitch(this, function () {
-                  this._fetchRelatedRecords(isNewFeature, evt.feature._layer, relationshipId, layerId, parentOID, parentFeatureIndexInAI, relatedOBJID, fKeyField);
-                  //reset the relatedOBJID variable once used as it fetches the wrong results next time
-                  relatedOBJID = null;
-                }), function () {});
-              } else {
-                this._fetchRelatedRecords(isNewFeature, evt.feature._layer, relationshipId, layerId, parentOID, parentFeatureIndexInAI, relatedOBJID, fKeyField);
-                //reset the relatedOBJID variable once used as it fetches the wrong results next time
-                relatedOBJID = null;
-              }
-            })));
-            this.addItem(this.nls.relatedItemTitle, false, itemListContainer, null, false);
-          } else {
-            this._disableToggling(layerNode);
-          }
-        } else {
-          this._disableToggling(layerNode);
-        }
-        if (def) {
-          def.resolve();
-        }
-      } else {
-        if (def) {
-          def.resolve();
-        }
-      }
-    },
-
-    _fetchRelatedRecords: function _fetchRelatedRecords(isNewFeature, layer, relationshipId, layerId, parentOID, parentFeatureIndexInAI, relatedOBJID, fKeyField) {
-      //get related records for the selected layer/table
-      this._getRelatedRecordsByRelatedQuery(layer, relationshipId, layerId, parentOID).then(lang.hitch(this, function (oIds) {
-        if (oIds && oIds.length === 0) {
-          if (isNewFeature) {
-            domClass.remove(this.contentWrapper, "hidden");
-            this.attrInspector.refresh();
-            setTimeout(lang.hitch(this, function () {
-              domStyle.set(this.attrInspector.navButtons, "display", !this.attrInspector._hideNavButtons && this.attrInspector._numFeatures > 1 ? "" : "none");
-              this.attrInspector.navMessage.innerHTML = esriLang.substitute({
-                idx: this.attrInspector._featureIdx + 1,
-                of: this.attrInspector.NLS_of,
-                numFeatures: this.attrInspector._numFeatures
-              }, this.attrInspector._navMessage);
-              this.currentFeature = this.attrInspector._numFeatures ? this.attrInspector._selection[this.attrInspector._featureIdx] : null;
-              this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-            }), 200);
-          }
-          return;
-        }
-        domClass.add(this.contentWrapper, "hidden");
-        domStyle.set(this.navButtonsDiv, "display", "none");
-        //store AI's _featureIdx which will be used when coming back to parent feature
-        this.attrInspector.ctStoredFeatureIndex = parentFeatureIndexInAI;
-        this._attributeInspectorCollection.push(this.attrInspector);
-        this._nodesCollection.push(this.contentWrapper);
-        this._buttonsWrapper.push(this.buttonHeader);
-        this._paginationNodeCollection.push(this.navButtonsDiv);
-        //push selected layer's id
-        this._traversal.push(layerId);
-        if (relatedOBJID) {
-          oIds = [];
-          oIds = relatedOBJID;
-          relatedOBJID = null;
-        }
-        if (oIds && oIds.length > 0) {
-          var newDef,
-              queryObj = new Query();
-          queryObj.objectIds = oIds;
-          if (this.viewedLayerDetails.length > 0) {
-            newDef = new Deferred();
-            var tempFeature = this.viewedFeatureDetails[0];
-            if (this.viewedLayerDetails[0] === this.viewedLayerDetails[1]) {
-              tempFeature = this.viewedFeatureDetails[1];
-            }
-            this._createAttributeInspector([this._getLayerInfoByID(layerId)], false, null, newDef, tempFeature, fKeyField);
-          } else {
-            this._createAttributeInspector([this._getLayerInfoByID(layerId)], false, null, null, null, fKeyField);
-          }
-          var relatedLayer = this._jimuLayerInfos.getLayerOrTableInfoById(layerId).layerObject;
-          this.loading.show();
-          relatedLayer.selectFeatures(queryObj, FeatureLayer.SELECTION_NEW, lang.hitch(this, function (selectedFeatures) {
-            //if adding new related record or while adding new related record back button is clicked
-            //then empty the current feature as it will enter in next callback of ATI when we the last record is selected
-            if (this._addingNewRelatedRecord && this._processBackButtonInNewRelatedRecord || isNewFeature) {
-              this.currentFeature = null;
-            }
-            //update the features
-            this.updateFeatures = selectedFeatures;
-            //If new feature is created go to the last feature of attribute inspector
-            if (isNewFeature) {
-              this.attrInspector.last();
-            } else {
-              this.attrInspector.first();
-            }
-            //update current feature
-            this.currentFeature = this.attrInspector._numFeatures ? this.attrInspector._selection[this.attrInspector._featureIdx] : null;
-            this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-            if (this.updateFeatures.length > 0) {
-              this._showTemplate(false);
-            }
-            if (this._addingNewRelatedRecord && this._processBackButtonInNewRelatedRecord) {
-              this._addingNewRelatedRecord = false;
-              this._processBackButtonInNewRelatedRecord = false;
-              this._onCancelButtonClicked();
-            }
-            this.loading.hide();
-          }), lang.hitch(this, function () {
-            this.loading.hide();
-          }));
-          if (newDef) {
-            newDef.then(lang.hitch(this, function () {
-              if (this.viewedLayerDetails.length > 0) {
-                var relatedFeatureLayerId = this.viewedLayerDetails.shift();
-                var relatedFeatures = this.viewedFeatureDetails.shift();
-                if (this.viewedLayerDetails.length > 0 && this.viewedLayerDetails[0] === relatedFeatureLayerId) {
-                  this.viewedLayerDetails.shift();
-                  relatedFeatures = this.viewedFeatureDetails.shift();
-                }
-                var tableTitle = query("[layerid='" + relatedFeatureLayerId + "']", this.contentWrapper)[0];
-                tableTitle.click();
-              }
-              if (this.viewedLayerDetails.length === 0) {
-                this.loading.hide();
-              }
-            }));
-          }
-        }
-      }));
-    },
-
-    _createAttributeInspector: function _createAttributeInspector(layerInfos, featureCreated, layer, def, feature, fKeyField) {
-      var attachmentRefNode, refreshButtonClass, refreshButtonTitle, canShowLocateButton;
-      //perform any edit geom switch functionality
-      //only when working with main layers feature and not on related features
       //destroy the edit geom switch
-      if (this._traversal.length < 2) {
-        if (this._editGeomSwitch) {
-          this._editGeomSwitch.destroy();
-          this._editGeomSwitch = null;
-        }
+      if (this._editGeomSwitch) {
+        this._editGeomSwitch.destroy();
+        this._editGeomSwitch = null;
+      }
 
-        if (this.editSwitchDiv) {
-          while (this.editSwitchDiv.firstChild) {
-            this.editSwitchDiv.removeChild(this.editSwitchDiv.firstChild);
-          }
+      if (this.editSwitchDiv) {
+        while (this.editSwitchDiv.firstChild) {
+          this.editSwitchDiv.removeChild(this.editSwitchDiv.firstChild);
         }
       }
-      this._setCancelButtonText();
-      if (this.attrInspector) {}
-      //  this.attrInspector.destroy();
-      //  this.attrInspector = null;
 
-      //if related feature is selected, disable the foreign key field in attribute inspector
-      if (fKeyField) {
-        array.forEach(layerInfos[0].fieldInfos, lang.hitch(this, function (field) {
-          if (field.name === fKeyField) {
-            field.isEditable = false;
-          }
-        }));
+      if (this.attrInspector) {
+        this.attrInspector.destroy();
+        this.attrInspector = null;
       }
       this.attrInspector = editUtils.ATI({ //new AttributeInspector({
         layerInfos: layerInfos
@@ -1911,163 +960,51 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           height: "100%"
         }
       }));
+      this.attrInspector.placeAt(this.attributeInspectorNode);
       this.attrInspector.startup();
       domConstruct.place(this.attrInspector.navMessage, this.attrInspector.nextFeatureButton.domNode, "before");
-      //perform any edit geom switch functionality
-      //only when working with main layers feature and not on related features
-      if (this._traversal.length < 2) {
-        this.editSwitchDiv = domConstruct.create("div");
-        this.editSwitchDiv.appendChild(domConstruct.create("div", { "class": "spacer" }));
-        // edit geometry toggle button
-        this._editGeomSwitch = new CheckBox({
-          id: "editGeometrySwitch_" + this.attrInspector.id,
-          checked: false,
-          value: this.nls.editGeometry
-        }, null);
 
-        this.editSwitchDiv.appendChild(this._editGeomSwitch.domNode);
+      this.editSwitchDiv = domConstruct.create("div");
+      this.editSwitchDiv.appendChild(domConstruct.create("div", { "class": "spacer" }));
+      // edit geometry toggle button
+      this._editGeomSwitch = new CheckBox({
+        id: "editGeometrySwitch",
+        checked: false,
+        value: this.nls.editGeometry
+      }, null);
 
-        domConstruct.place(lang.replace("<label for='editGeometrySwitch_'" + this.attrInspector.id + ">{replace}</label></br></br>", { replace: this.nls.editGeometry }), this._editGeomSwitch.domNode, "after");
+      this.editSwitchDiv.appendChild(this._editGeomSwitch.domNode);
 
-        domConstruct.place(this.editSwitchDiv, this.attrInspector.deleteBtn.domNode, "before");
+      domConstruct.place(lang.replace("<label for='editGeometrySwitch'>{replace}</label></br></br>", { replace: this.nls.editGeometry }), this._editGeomSwitch.domNode, "after");
 
-        this.own(on(this._editGeomSwitch, 'Change', lang.hitch(this, this.editGeoCheckChange())));
+      domConstruct.place(this.editSwitchDiv, this.attrInspector.deleteBtn.domNode, "before");
 
-        /* BEGIN: ECan Change - Add custom edit options */
+      this.own(on(this._editGeomSwitch, 'Change', lang.hitch(this, this.editGeoCheckChange())));
 
-        this.featureMergeBtnNode = domConstruct.create("div", {
-          "class": "esriCTMergeTool esriCTGeometryEditor",
-          "title": this.nls.tools.mergeFeatures
-        }, this.attrInspector.deleteBtn.domNode, "after");
-
-        this.featureExplodeBtnNode = domConstruct.create("div", {
-          "class": "esriCTExplodeTool esriCTGeometryEditor",
-          "title": this.nls.tools.explodeMultipartFeatures
-        }, this.attrInspector.deleteBtn.domNode, "after");
-
-        this.featureCutBtnNode = domConstruct.create("div", {
-          "class": "esriCTCutTool esriCTGeometryEditor",
-          "title": this.nls.tools.cutFeatures
-        }, this.attrInspector.deleteBtn.domNode, "after");
-
-        /* END: ECan Change */
-
-        // to create container for custom coordinates
-        this._xyCoordinates = domConstruct.create("div", {
-          "class": "esriCTXYCoordinates esriCTGeometryEditor hidden",
-          "title": this.nls.moveSelectedFeatureToXY
-        }, this.attrInspector.deleteBtn.domNode, "after");
-
-        this.own(on(this._xyCoordinates, 'click', lang.hitch(this, function () {
-          this._createCoordinatesPopup();
-        })));
-
-        // to create container for locate button
-        // esriCTGeometryEditor is a common css class, that deals with margin values
-        this._locateButtonDiv = domConstruct.create("div", {
-          "class": "esriCTLocateButtonContainer esriCTGeometryEditor hidden",
-          "title": this.nls.moveSelectedFeatureToGPS
-        }, this.attrInspector.deleteBtn.domNode, "after");
-        // current location button object
-        this._locateButton = new LocateButton({
-          map: this.map,
-          highlightLocation: false,
-          setScale: false,
-          centerAt: true
-        }, domConstruct.create("div"));
-        this._locateButton.startup();
-        canShowLocateButton = this._locateButton.domNode.style.display;
-        if (canShowLocateButton === "none") {
-          domStyle.set(this._locateButtonDiv, 'display', canShowLocateButton);
-        }
-        // to get the current location when clicked on locate button
-        this.own(on(this._locateButton, 'locate', lang.hitch(this, function (currentLocation) {
-          // display error if fetching current location fails
-          // current location functionality only works with https i.e; secured services
-          // application should be executed in https mode
-          if (currentLocation.error && currentLocation.error.message) {
-            Message({
-              message: currentLocation.error.message
-            });
-          } else {
-            if (currentLocation && currentLocation.graphic && currentLocation.graphic.geometry) {
-              // In case of point geometry, set current selected feature geometry as current location geometry
-              this.currentFeature.setGeometry(currentLocation.graphic.geometry);
-              // once current feature is moved to current location, execute this function for further process
-              this.geometryEdited();
-            }
-          }
-        })));
-
-        // on click of locate button container, execute locate function
-        this.own(on(this._locateButtonDiv, 'click', lang.hitch(this, function () {
-          // locate current position on click of its container
-          this._locateButton.locate();
-        })));
-
-        // to create container for map navigation icon
-        this._mapNavigation = domConstruct.create("div", {
-          "class": "esriCTMapNavigationLocked esriCTGeometryEditor hidden",
-          "title": this.nls.mapNavigationLocked
-        }, this.attrInspector.deleteBtn.domNode, "after");
-        this.own(on(this._mapNavigation, 'click', lang.hitch(this, this._toggleMapNavigationButtonState)));
-
-        // Button to refresh attributes on geometry change
-        if (this.config.editor.enableAttributeUpdates) {
-          refreshButtonClass = "refreshAttributes";
-          refreshButtonTitle = this.nls.refreshAttributes;
-        }
-        if (this.config.editor.enableAutomaticAttributeUpdates) {
-          refreshButtonClass = "esriCTAutoUpdateOnMode";
-          refreshButtonTitle = this.nls.automaticAttributeUpdatesOn;
-        }
-        this._refreshButton = domConstruct.create("div", {
-          "class": refreshButtonClass + " " + "esriCTGeometryEditor hidden",
-          "title": refreshButtonTitle
-        }, this.attrInspector.deleteBtn.domNode, "after");
-        this.own(on(this._refreshButton, 'click', lang.hitch(this, function () {
-          if (this.config.editor.enableAutomaticAttributeUpdates) {
-            this._toggleAttributeButtonState();
-          } else {
-            this._refreshAttributes();
-          }
-        })));
-      }
-      // save button
-      domConstruct.create("div", {
-        innerHTML: this.nls.save,
-        "class": "saveButton jimu-btn jimu-state-disabled",
-        "style": "visibility: hidden"
+      //add close/cancel/switch to template button
+      var cancelButton = domConstruct.create("div", {
+        innerHTML: this.nls.back,
+        "class": "cancelButton jimu-btn"
       }, this.attrInspector.deleteBtn.domNode, "after");
-
-      if (this.buttonHeader) {
-        domClass.add(this.buttonHeader, "hidden");
-      }
-      this.buttonHeader = domConstruct.create("div", {
-        "class": "buttonHeader"
-      }, this.buttonWrapper);
 
       // save button
       var saveButton = domConstruct.create("div", {
         innerHTML: this.nls.save,
         "class": "saveButton jimu-btn jimu-state-disabled"
-      }, this.buttonHeader, "last");
-
-      //Hide Attribute inspector's delete button
-      domStyle.set(this.attrInspector.deleteBtn.domNode, "display", "none");
+      }, cancelButton, "after");
 
       //add another process indicator
       //domConstruct.create("div", {
       //  "class": "processing-indicator"
       //}, saveButton, "before");
-      if (query(".deleteButton", this.buttonHeader).length < 1) {
-        var deleteButton = domConstruct.create("div", {
+      if (query(".jimu-widget-smartEditor-ecan .deleteButton").length < 1) {
+        this._deleteButton = domConstruct.create("div", {
           innerHTML: this.nls.deleteText,
           "class": "deleteButton jimu-btn jimu-btn-vacation"
-        }, saveButton, "before");
+        }, saveButton, "after");
         // query(".jimu-widget-smartEditor-ecan .topButtonsRowDiv")[0], "first");
 
-        on(deleteButton, "click", lang.hitch(this, function () {
+        on(this._deleteButton, "click", lang.hitch(this, function () {
           //if (this.currentFeature) {
           if (this.map.infoWindow.isShowing) {
             this.map.infoWindow.hide();
@@ -2082,14 +1019,21 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }));
       }
 
-      //Change the position of action buttons(save/delete) based on configuration
-      if (this.config.editor.showActionButtonsAbove) {
-        domStyle.set(this.mainContainer, "margin-top", "5px");
-      } else {
-        domConstruct.place(this.buttonWrapper, this.mainContainer, "after");
-        domStyle.set(this.mainContainer, "margin-bottom", "5px");
-        domStyle.set(this.mainContainer, "margin-top", "0px");
-      }
+      //wire up the button events
+      this.own(on(cancelButton, "click", lang.hitch(this, function () {
+        if (this.map.infoWindow.isShowing) {
+          this.map.infoWindow.hide();
+        }
+
+        if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
+          this._promptToResolvePendingEdit(true, null, true);
+        } else {
+          this._cancelEditingFeature(true);
+          //this._activateTemplateToolbar();
+        }
+
+        this._removeLayerVisibleHandler();
+      })));
 
       this.own(on(saveButton, "click", lang.hitch(this, function () {
         if (!this._validateFeatureChanged()) {
@@ -2102,69 +1046,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
         this._saveEdit(this.currentFeature);
       })));
-      //Code to support selection updated from select widget
-      //Listen for onLayerSelectionChange
-      aspect.after(this.attrInspector, "onLayerSelectionChange", lang.hitch(this, function () {
-        if (this.state !== 'active') {
-          if (this._LayerSelectionChangedTimer) {
-            clearTimeout(this._LayerSelectionChangedTimer);
-          }
-          this._LayerSelectionChangedTimer = setTimeout(lang.hitch(this, function () {
-            if (this.attrInspector) {
-              this.attrInspector.first();
-            }
-          }), 500);
-        }
-      }));
-      //Listen for all the necessary events
-      if (this.attrInspector._attachmentEditor) {
-        //Listen for delete attachments event
-        aspect.after(this.attrInspector._attachmentEditor, "_onDeleteAttachmentComplete", lang.hitch(this, function () {
-          //If "Required" action is performed and at no attachment is present
-          //show the required message
-          if (!this._hasAddedAnyAttachments(this.attrInspector._attachmentEditor, false) && this.currentAction === "Required") {
-            domStyle.set(this.attrInspector.attachmentsRequiredMsg, "display", "block");
-          }
-          this._enableAttrInspectorSaveButton(this._validateAttributes());
-        }));
-        //Listen for attachments complete event
-        aspect.after(this.attrInspector._attachmentEditor, "_onAddAttachmentComplete", lang.hitch(this, function () {
-          if (domStyle.get(this.attrInspector.attachmentsRequiredMsg, "display") === "block") {
-            domStyle.set(this.attrInspector.attachmentsRequiredMsg, "display", "none");
-          }
-          this._enableAttrInspectorSaveButton(this._validateAttributes());
-        }));
-        //Listen for all the attachments complete event
-        aspect.after(this.attrInspector._attachmentEditor, "_getAttachments", lang.hitch(this, function () {
-          this.attachmentloading.show();
-          setTimeout(lang.hitch(this, function () {
-            if (this.currentLayerInfo && this.currentLayerInfo.attachmentValidations) {
-              if (this.currentLayerInfo.attachmentValidations) {
-                var attachmentValidationResult = [];
-                array.forEach(this.currentLayerInfo.attachmentValidations.Actions, lang.hitch(this, function (action) {
-                  var attachmentObj = {};
-                  if (action.filter && this._smartAttributes) {
-                    attachmentObj.actionType = action.actionName;
-                    attachmentObj.result = this._smartAttributes.processFilter(action.filter);
-                    attachmentValidationResult.push(attachmentObj);
-                  }
-                }));
-                if (this.attrInspector._attachmentUploader) {
-                  this.performAction(this.attrInspector._attachmentUploader, attachmentValidationResult, true);
-                } else {
-                  this.performAction(this.attrInspector._attachmentEditor, attachmentValidationResult, false);
-                }
-              }
-              //Disable attachments editor for the layers which are not editable
-              //add timeout as it is taking some time to load editor
-              if (this.attrInspector._attachmentEditor && (!this.currentLayerInfo.isEditable || !this.currentLayerInfo._editFlag)) {
-                this._disableAttachments(this.attrInspector._attachmentEditor, true, false);
-              }
-            }
-            this.attachmentloading.hide();
-          }), 1500);
-        }));
-      }
+
       // edit geometry checkbox event
 
       // attribute inspector events
@@ -2174,79 +1056,42 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this._enableAttrInspectorSaveButton(this._validateAttributes());
         }
       })));
-
       this.own(on(this.attrInspector, "next", lang.hitch(this, function (evt) {
-        if (this.currentFeature && this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
-          this._promptToResolvePendingEdit(false, null, false).then(lang.hitch(this, function () {
-            this._processNextButtonClicked(true, evt, null, def, feature);
-          }), function () {});
-        } else {
-          this._processNextButtonClicked(true, evt, null, def, feature);
-        }
-      })));
 
-      this.attrInspector.attachmentsRequiredMsg = domConstruct.create("div", {
-        "innerHTML": this.nls.attachmentsRequiredMsg,
-        "style": "display:none;color:red;margin-top:5px"
-      });
+        this._attributeInspectorChangeRecord(evt);
+        this._addWarning();
+      })));
+      if (this._attachmentUploader && this._attachmentUploader !== null) {
+        this._attachmentUploader.destroy();
+        this._attachmentUploader = null;
+      }
       if (layerInfos.length === 1) {
         if (layerInfos[0].featureLayer.hasOwnProperty('originalLayerId')) {
           var result = this._getLayerInfoByID(layerInfos[0].featureLayer.originalLayerId);
           if (result.featureLayer.hasAttachments === true) {
-            var attachNode = domConstruct.create("div");
-            domConstruct.place(attachNode, this.attrInspector.attributeTable, "after");
-            this.attrInspector._attachmentUploader = new AttachmentUploader({
-              'class': 'atiAttachmentEditor',
-              attachmentsRequiredMsg: this.attrInspector.attachmentsRequiredMsg,
-              currentAction: this.currentAction
-            }, attachNode);
-            this.attrInspector._attachmentUploader.startup();
-            on(this.attrInspector._attachmentUploader, "attachmentAdded", lang.hitch(this, function () {
-              this._enableAttrInspectorSaveButton(this._validateAttributes());
-            }));
-            on(this.attrInspector._attachmentUploader, "attachmentDeleted", lang.hitch(this, function () {
-              this._enableAttrInspectorSaveButton(this._validateAttributes());
-            }));
+            this.attachNode = domConstruct.create("div");
+            domConstruct.place(this.attachNode, this.attrInspector.attributeTable, "after");
+            this._attachmentUploader = new AttachmentUploader({ 'class': 'atiAttachmentEditor' }, this.attachNode);
+            this._attachmentUploader.startup();
           }
         }
       }
-
-      //Place the attachments warning as per create/edit mode
-      if (this.attrInspector._attachmentUploader) {
-        attachmentRefNode = this.attrInspector._attachmentUploader.domNode;
-      } else if (this.attrInspector._attachmentEditor) {
-        attachmentRefNode = this.attrInspector._attachmentEditor.domNode;
-      }
-      //If node exist, create message and add it to node
-      if (attachmentRefNode) {
-        domConstruct.place(this.attrInspector.attachmentsRequiredMsg, attachmentRefNode, "before");
-      }
-      if (featureCreated) {
-        this._processRelationAndShowAttrInspector(false, null, layer, null, null, true);
-      }
     },
-
-    _processNextButtonClicked: function _processNextButtonClicked(processRelations, evt, layer, def, feature) {
-      this._processRelationAndShowAttrInspector(processRelations, evt, layer, def, feature, false);
-      this._attributeInspectorChangeRecord(evt);
-      this._addWarning();
-      this._toggleAttrInspectorNavButtons();
-    },
-
     _toggleDeleteButton: function _toggleDeleteButton(show) {
-      var deleteButton;
-      deleteButton = query(".deleteButton", this.buttonHeader);
-      if (deleteButton.length > 0) {
-        deleteButton = deleteButton[0];
-        if (show === true) {
-          deleteButton.style.display = "block";
-        } else {
-          deleteButton.style.display = "none";
-        }
+      if (show === true) {
+        this._deleteButton.style.display = "block";
+      } else {
+        this._deleteButton.style.display = "none";
       }
     },
 
     _activateTemplateToolbar: function _activateTemplateToolbar(override) {
+
+      /* BEGIN: Ecan Changes - Handling draw tool use by edit tools for cut, reshape */
+
+      this._drawToolEditMode = false;
+
+      /* END: Ecan Changes */
 
       var draw_type = override || null;
       var shape_type = null;
@@ -2357,19 +1202,15 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //}, this);
       //return recreate;
     },
-
-    /* CT - Commented the code as it was clearing parent features selection when moving to related feature
-    _layerChangeOutside: function () {
+    _layerChangeOutside: function _layerChangeOutside() {
       if (this._attrInspIsCurrentlyDisplayed && this._attrInspIsCurrentlyDisplayed === true) {
         if (this.attrInspector) {
           if (this.attrInspector._numFeatures === 0) {
             this._showTemplate(true);
-            }
+          }
         }
       }
     },
-    */
-
     _drawingToolClick: function _drawingToolClick(shapeType, options) {
       return function () {
         if (shapeType !== "select") {
@@ -2465,8 +1306,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         return;
       }
       var layers = this._getEditableLayers(this.config.editor.configInfos, false);
-      //CT: Commented the code as it was clearing parent features selection when moving to related feature
-      //this._layerChangeOutside();
+      this._layerChangeOutside();
       if (layers.length < 1) {
         this._creationDisabledOnAll = true;
       } else if (this._templatePickerNeedsToBeCreated()) {
@@ -2495,6 +1335,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           }
         } else {
           this._createAutoSaveSwitch(this.config.editor.autoSaveEdits);
+          this._createPresetTable(layers, this.config.editor.configInfos);
+
+          /* BEGIN: ECAN CHANGE - Init URL Preset Values */
+
+          this._initURLPresetValues();
+
+          /* END: ECAN CHANGE */
         }
         //create template picker
         this.templatePickerNode = domConstruct.create("div", { 'class': "eeTemplatePicker" });
@@ -2523,7 +1370,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._addFilterEditor(layers);
 
         /* BEGIN: ECAN CHANGE - Look for and apply url parameter template filters */
+
         this._applyURLTemplateFilter();
+
         /* END: ECAN CHANGE */
 
         // wire up events
@@ -2617,16 +1466,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           dojo.style(this._filterEditor.domNode, "display", "block");
         }
       }
-      //if valid config infos create preset table
-      if (this.config.editor.configInfos && !this._isPresetTableCreated) {
-        //change the value of the variable. This will make sure table is created only once
-        this._isPresetTableCreated = true;
-        this._createPresetTable(this.config.editor.configInfos);
-
-        /* BEGIN: ECAN CHANGE - Init URL Preset Values */
-        this._initURLPresetValues();
-        /* END: ECAN CHANGE */
-      }
     },
     isGuid: function isGuid(value) {
       if (value[0] === "{") {
@@ -2645,58 +1484,185 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       constraints = constraints;
       return this.isGuid(value);
     },
-    _createPresetTable: function _createPresetTable(layerInfos) {
-      var isAnyFieldShownInPresetTable = false;
-      //to support backward compatibility
-      //if canPresetValue flag is present and it is set to true update the layer infos accordingly
-      this._processConfigForBackwardPresetInfos(layerInfos);
+    _createPresetTable: function _createPresetTable(layers, layerInfos) {
       // set preset values table
-      if (this.config.editor.hasOwnProperty("presetInfos") && Object.keys(this.config.editor.presetInfos).length > 0) {
+      var editLayerInfos = layerInfos; //this._getEditableLayersInfos(layerInfos)
+      if (layers.length > 0 && this._hasPresetValueFields(editLayerInfos)) {
         this._initPresetFieldsTable();
-        isAnyFieldShownInPresetTable = this._fillPresetValueTable(layerInfos);
-        if (isAnyFieldShownInPresetTable) {
-          query(".presetFieldsTableDiv")[0].style.display = "block";
-        } else {
-          query(".presetFieldsTableDiv")[0].style.display = "none";
-        }
+        this._fillPresetValueTable(editLayerInfos);
+
+        /* BEGIN: CHANGE ECAN - Hide presets but include in dom for system use */
+        //query(".presetFieldsTableDiv")[0].style.display = "block";
+
+        // TO - TIE TO HIDE CONFIG SETTING
+        query(".presetFieldsTableDiv")[0].style.display = "none";
+        /* EDN: CHANGE ECAN */
       } else {
         query(".presetFieldsTableDiv")[0].style.display = "none";
       }
     },
+    _createPresetFieldContentNode: function _createPresetFieldContentNode(fieldInfo) {
+      var nodes = [];
+      var node;
 
-    _processConfigForBackwardPresetInfos: function _processConfigForBackwardPresetInfos(layerInfos) {
-      var configuredPresetInfos = [];
-      //if preset infos is not available in config means use the preset info for canPresetValue
-      //flag stored in filed infos
-      if (!this.config.editor.hasOwnProperty("presetInfos") && layerInfos) {
-        array.forEach(layerInfos, lang.hitch(this, function (configInfo) {
-          configInfo.fieldValues = {};
-          array.forEach(configInfo.fieldInfos, lang.hitch(this, function (fieldInfo) {
-            var actionObj;
-            //Check for "canPresetValue" key and handle it for backward compatibility
-            if (fieldInfo.hasOwnProperty("canPresetValue") && fieldInfo.canPresetValue) {
-              actionObj = [{
-                "actionName": "Intersection",
-                "enabled": false
-              }, {
-                "actionName": "Address",
-                "enabled": false
-              }, {
-                "actionName": "Coordinates",
-                "enabled": false
-              }, {
-                "actionName": "Preset",
-                "enabled": true
-              }];
-              configInfo.fieldValues[fieldInfo.fieldName] = lang.clone(actionObj);
-              configuredPresetInfos[fieldInfo.fieldName] = [];
+      if (fieldInfo.domain) {
+        // domain.type = codedValue
+        if (fieldInfo.domain.type === "codedValue") {
+          var domainValues = fieldInfo.domain.codedValues;
+
+          var options = [];
+          array.forEach(domainValues, function (dv) {
+            options.push({ name: dv.name, id: dv.code });
+          });
+
+          node = new FilteringSelect({
+            "class": "ee-inputField",
+            name: fieldInfo.fieldName,
+            store: new Memory({ data: options }),
+            searchAttr: "name"
+          }, domConstruct.create("div"));
+        } else {
+          //domain.type = range
+          var cons = null;
+          switch (fieldInfo.type) {
+            case "esriFieldTypeSmallInteger":
+            case "esriFieldTypeInteger":
+              cons = {
+                min: fieldInfo.domain.minValue,
+                max: fieldInfo.domain.maxValue,
+                places: 0
+              };
+              break;
+
+            case "esriFieldTypeSingle":
+            case "esriFieldTypeDouble":
+              cons = {
+                min: fieldInfo.domain.minValue,
+                max: fieldInfo.domain.maxValue
+              };
+              break;
+
+          }
+          node = new NumberSpinner({
+            "class": "ee-inputField",
+            name: fieldInfo.fieldName,
+            smallDelta: 1,
+            constraints: cons
+          }, domConstruct.create("div"));
+        }
+
+        nodes.push(node);
+      } else {
+        switch (fieldInfo.type) {
+          case "esriFieldTypeGUID":
+            node = new ValidationTextBox({
+              "class": "ee-inputField",
+              name: fieldInfo.fieldName
+            }, domConstruct.create("div"));
+            node.validator = lang.hitch(this, this.validateGUID);
+            nodes.push(node);
+            break;
+          case "esriFieldTypeDate":
+            node = new DateTextBox({
+              "class": "ee-inputField",
+
+              name: fieldInfo.fieldName
+            }, domConstruct.create("div"));
+            //value: new Date(),
+            nodes.push(node);
+
+            if (fieldInfo.format) {
+              if (fieldInfo.format.time && fieldInfo.format.time === true) {
+                var timeNode = new TimeTextBox({
+                  "class": "ee-inputField",
+                  "style": "margin-top:2px;"
+
+                }, domConstruct.create("div"));
+                nodes.push(timeNode);
+                //value: new Date()
+              }
             }
-          }));
-        }));
-        this.config.editor.presetInfos = configuredPresetInfos;
-      }
-    },
 
+            break;
+          case "esriFieldTypeString":
+            var maxlength = null;
+            if (fieldInfo.length && Number(fieldInfo.length) && Number(fieldInfo.length) > 0) {
+              maxlength = fieldInfo.length;
+            }
+            if (fieldInfo.hasOwnProperty("stringFieldOption")) {
+              if (fieldInfo.stringFieldOption === "richtext") {
+                var params = {
+                  'class': 'ee-inputField ee-inputFieldRichText',
+                  trim: true,
+                  maxLength: maxlength
+                };
+                params['class'] += ' atiRichTextField';
+                params.height = '100%';
+                params.width = '100%';
+                params.name = fieldInfo.fieldName;
+                params.plugins = ['bold', 'italic', 'underline', 'foreColor', 'hiliteColor', '|', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', '|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', '|', 'createLink'];
+                node = new Editor(params, domConstruct.create("div"));
+                node.startup();
+              } else if (fieldInfo.stringFieldOption === "textarea") {
+                node = new SimpleTextarea({
+                  "class": "ee-inputField ee-inputFieldTextArea",
+                  name: fieldInfo.fieldName,
+                  maxlength: maxlength
+                }, domConstruct.create("div"));
+              } else {
+                node = new TextBox({
+                  "class": "ee-inputField",
+                  name: fieldInfo.fieldName,
+                  maxlength: maxlength
+                }, domConstruct.create("div"));
+              }
+            } else {
+              node = new TextBox({
+                "class": "ee-inputField",
+                name: fieldInfo.fieldName,
+                maxlength: maxlength
+              }, domConstruct.create("div"));
+            }
+            nodes.push(node);
+            break;
+          // todo: check for more types
+          case "esriFieldTypeSmallInteger":
+          case "esriFieldTypeInteger":
+            node = new NumberTextBox({
+              "class": "ee-inputField",
+              name: fieldInfo.fieldName,
+              constraints: { places: 0 }
+            }, domConstruct.create("div"));
+
+            nodes.push(node);
+
+            break;
+          case "esriFieldTypeSingle":
+          case "esriFieldTypeDouble":
+            node = new NumberTextBox({
+              "class": "ee-inputField",
+              name: fieldInfo.fieldName
+            }, domConstruct.create("div"));
+
+            nodes.push(node);
+
+            break;
+          default:
+            node = new TextBox({
+              "class": "ee-unsupportField",
+              name: fieldInfo.fieldName,
+              value: "N/A",
+              readOnly: true
+            }, domConstruct.create("div"));
+            nodes.push(node);
+            break;
+        }
+      }
+      array.forEach(nodes, function (node) {
+        this.own(on(node, 'change', lang.hitch(this, this._presetChange)));
+      }, this);
+      return nodes;
+    },
     _presetChange: function _presetChange() {
       this._toggleUsePresetValues(true);
     },
@@ -2729,7 +1695,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       } else {
         var processIndicators = query(".processing-indicator");
         var processIndicatorsPanel = query(".processing-indicator-panel");
-        var saveBtn = query(".saveButton", this.buttonHeader)[0];
+        var saveBtn = query(".saveButton")[0];
         array.forEach(processIndicators, function (processIndicator) {
           if (!domClass.contains(processIndicator, "busy")) {
             domClass.add(processIndicator, "busy");
@@ -2753,41 +1719,12 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             });
           } else {
             this.updateFeatures.splice(this.updateFeatures.indexOf(this.currentFeature), 1);
-            //after delete if features length is greater than 0
-            //then refresh attribute inspector & show next feature else
-            //if showing features of related layer and
+
             if (this.updateFeatures && this.updateFeatures.length > 0) {
-              //In case of deleting features from table the selection does not updates,
-              //although we removed it from updateFeatures Array.
-              //So again select records with remaining oIds
-              if (layer.type === "Table") {
-                var oIds = [];
-                this.loading.show();
-                array.forEach(this.updateFeatures, function (feature) {
-                  oIds.push(feature.attributes[layer.objectIdField]);
-                });
-                var query = new Query();
-                query.objectIds = oIds;
-                layer.selectFeatures(query, FeatureLayer.SELECTION_NEW, lang.hitch(this, function (selectedFeatures) {
-                  this.updateFeatures = selectedFeatures;
-                  this.attrInspector.refresh();
-                  this.attrInspector.first();
-                  this.loading.hide();
-                }), lang.hitch(this, function () {
-                  this.loading.hide();
-                }));
-              } else {
-                this.attrInspector.refresh();
-                this.attrInspector.first();
-              }
+              this.attrInspector.refresh();
+              this.attrInspector.first();
             } else {
-              //show template picker if showing details of layer
-              //& when showing related tables/layers details go back to parent features details
-              if (this._traversal.length < 2) {
-                this._showTemplate(true);
-              } else {
-                on.emit(this.cancelButton, 'click', { cancelable: true, bubbles: true });
-              }
+              this._showTemplate(true);
             }
           }
           array.forEach(processIndicators, function (processIndicator) {
@@ -2825,22 +1762,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _editGeometry: function _editGeometry(checked) {
-      //if current layerInfo dont have editFlag return
-      if (checked && (this._ignoreEditGeometryToggle || this.currentLayerInfo && !this.currentLayerInfo._editFlag)) {
+      if (this._ignoreEditGeometryToggle) {
         return;
       }
 
       if (checked === true) {
-        if (this.currentLayerInfo && this.currentLayerInfo.disableGeometryUpdate && !this.currentLayerInfo.isCache) {
-          return;
-        }
         this.map.setInfoWindowOnClick(false);
 
         if (this.map.infoWindow.isShowing) {
           this.map.infoWindow.hide();
         }
-        //enable editing only if it is disabled & current feature is valid have geometry
-        if (this._editingEnabled === false && this.currentFeature && this.currentFeature.geometry) {
+
+        if (this._editingEnabled === false) {
           this._editingEnabled = true;
           // store the original geometry for later use
           this.currentFeature.origGeom = this.currentFeature.geometry.toJson();
@@ -2853,127 +1786,15 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       } else {
         this.map.setInfoWindowOnClick(true);
-        //I am not sure what this is doing, but it causes issue
-        //if (this.editToolbar.getCurrentState().tool !== 0) {
-        this.editToolbar.deactivate();
-        //}
+        if (this.editToolbar.getCurrentState().tool !== 0) {
+          this.editToolbar.deactivate();
+        }
         this._editingEnabled = false;
       }
-      this._toggleAttributeButtonVisibility(checked);
-      this._toggleLocateButtonVisibility(checked);
-      this._toggleXYCoordinatesButtonVisibility(checked);
-      this._toggleMapNavigationButtonVisibility(checked);
     },
 
-    /**
-     * This function is used to toggle the state of attribute button from auto update on to off mode & vice versa
-     */
-    _toggleAttributeButtonState: function _toggleAttributeButtonState() {
-      // replace the state of button from on to off mode, if user clicks on button in auto on mode
-      if (this._refreshButton && domClass.contains(this._refreshButton, "esriCTAutoUpdateOnMode")) {
-        domClass.replace(this._refreshButton, "esriCTAutoUpdateOffMode", "esriCTAutoUpdateOnMode");
-        domAttr.set(this._refreshButton, "title", this.nls.automaticAttributeUpdatesOff);
-      } else if (this._refreshButton && domClass.contains(this._refreshButton, "esriCTAutoUpdateOffMode")) {
-        domClass.replace(this._refreshButton, "esriCTAutoUpdateOnMode", "esriCTAutoUpdateOffMode");
-        domAttr.set(this._refreshButton, "title", this.nls.automaticAttributeUpdatesOn);
-        //Since the button is turned on, the updated geometry should be used for fetching attributes
-        this._refreshAttributes();
-      }
-    },
-
-    /**
-     * This function is used to show/hide the map navigation button depending upon certain conditions
-     * @param {checked} : boolean value consisting a state of the edit geometry checkbox. if checked show the icon else hide it
-     */
-    _toggleAttributeButtonVisibility: function _toggleAttributeButtonVisibility(checked) {
-      // Show/Hide map navigation button based on edit checkbox state
-      // and enableLockingMapNavigation configuration
-      if (checked && this.config.editor.enableAttributeUpdates) {
-        domClass.remove(this._refreshButton, "hidden");
-      } else {
-        domClass.add(this._refreshButton, "hidden");
-      }
-    },
-
-    /**
-     * This function is used to show/hide the locate button depending upon certain conditions
-     * @param {checked} : a state of the edit geometry checkbox. if checked show the icon else hide it
-     */
-    _toggleLocateButtonVisibility: function _toggleLocateButtonVisibility(checked) {
-      //if edit checkbox is checked and enableMovingSelectedFeatureToGPS is enabled
-      //and selected feature is point then show locate button
-      if (checked && this.config.editor.enableMovingSelectedFeatureToGPS && this.currentFeature && this.currentFeature.geometry && this.currentFeature.geometry.type === "point") {
-        domClass.remove(this._locateButtonDiv, "hidden");
-      } else {
-        domClass.add(this._locateButtonDiv, "hidden");
-      }
-    },
-
-    /**
-     * This function is used to show/hide the xy coordinates button depending upon certain conditions
-     * @param {checked} : a state of the edit geometry checkbox. if checked show the icon else hide it
-     */
-    _toggleXYCoordinatesButtonVisibility: function _toggleXYCoordinatesButtonVisibility(checked) {
-      //if edit checkbox is checked and enableMovingSelectedFeatureToXY is enabled
-      //and selected feature is point then show xyCoordinates button
-      if (checked && this.config.editor.enableMovingSelectedFeatureToXY && this.currentFeature && this.currentFeature.geometry && this.currentFeature.geometry.type === "point") {
-        domClass.remove(this._xyCoordinates, "hidden");
-      } else {
-        domClass.add(this._xyCoordinates, "hidden");
-      }
-    },
-
-    /**
-     * This function is used to invoke the state change of map navigation button
-     */
-    _toggleMapNavigationButtonState: function _toggleMapNavigationButtonState() {
-      if (domClass.contains(this._mapNavigation, "esriCTMapNavigationUnLocked")) {
-        this._lockMapNavigation();
-      } else if (domClass.contains(this._mapNavigation, "esriCTMapNavigationLocked")) {
-        this._unLockMapNavigation();
-      }
-    },
-
-    /**
-     * This function is used to lock the map navigation
-     */
-    _lockMapNavigation: function _lockMapNavigation() {
-      if (this._mapNavigation) {
-        domClass.replace(this._mapNavigation, "esriCTMapNavigationLocked", "esriCTMapNavigationUnLocked");
-        domAttr.set(this._mapNavigation, "title", this.nls.mapNavigationLocked);
-        this.map.disableMapNavigation();
-      }
-    },
-
-    /**
-     * This function is used to unlock the map navigation
-     */
-    _unLockMapNavigation: function _unLockMapNavigation() {
-      if (this._mapNavigation) {
-        domClass.replace(this._mapNavigation, "esriCTMapNavigationUnLocked", "esriCTMapNavigationLocked");
-        domAttr.set(this._mapNavigation, "title", this.nls.mapNavigationUnLocked);
-        this.map.enableMapNavigation();
-      }
-    },
-
-    /**
-     * This function is used to show/hide the map navigation button depending upon certain conditions
-     * @param {checked} : boolean value consisting a state of the edit geometry checkbox. if checked show the icon else hide it
-     */
-    _toggleMapNavigationButtonVisibility: function _toggleMapNavigationButtonVisibility(checked) {
-      // Show/Hide map navigation button based on edit checkbox state
-      // and enableLockingMapNavigation configuration
-      if (checked && this.config.editor.enableLockingMapNavigation) {
-        domClass.remove(this._mapNavigation, "hidden");
-      } else {
-        domClass.add(this._mapNavigation, "hidden");
-      }
-      this._unLockMapNavigation();
-    },
-
-    _enableAttrInspectorSaveButton: function _enableAttrInspectorSaveButton(enable, isNewRelatedFeature) {
-      var saveBtn = query(".saveButton", this.buttonHeader)[0];
-      var isSaveButtonEnable = false;
+    _enableAttrInspectorSaveButton: function _enableAttrInspectorSaveButton(enable) {
+      var saveBtn = query(".saveButton")[0];
       if (!saveBtn) {
         return;
       }
@@ -2982,93 +1803,155 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         if (domClass.contains(saveBtn, "jimu-state-disabled")) {
           domClass.remove(saveBtn, "jimu-state-disabled");
         }
-        isSaveButtonEnable = true;
       } else {
         if (!domClass.contains(saveBtn, "jimu-state-disabled")) {
           domClass.add(saveBtn, "jimu-state-disabled");
         }
       }
-      //Update the save buttons state in its respective related table info
-      if (!isNewRelatedFeature && this.currentFeature && this._relatedTablesInfo[this.currentFeature._layer.id]) {
-        this._relatedTablesInfo[this.currentFeature._layer.id].isSaveEnable = isSaveButtonEnable;
-      }
-    },
-
-    _setConfiguredFieldInfos: function _setConfiguredFieldInfos(layerFieldInfo, configuredFieldInfo) {
-      var fieldInfos = [];
-      array.forEach(configuredFieldInfo, function (field) {
-        var fieldInfoFromLayer = presetUtils.getFieldInfoByFieldName(layerFieldInfo, field.fieldName);
-        var fInfo = lang.mixin(lang.clone(fieldInfoFromLayer), field);
-        fieldInfos.push(fInfo);
-      });
-      return fieldInfos;
     },
 
     _getLayerInfoByID: function _getLayerInfoByID(id) {
+
       if (id.indexOf("_lfl") > 0) {
         id = id.replace("_lfl", "");
       }
-      //if user is seeing related tables details get it from relationShip info
-      //else  get the details from layerInfos directly
-      if (this._traversal && this._traversal.length > 0) {
-        var currentConfig;
-        currentConfig = this.config.editor.configInfos;
-        //Loop through all configured layers and
-        //traverse to the selected layer / table by using traversal lineage & returns layerInfo
-        array.some(this._traversal, function (layerId, layerIndex) {
-          array.some(currentConfig, function (info) {
-            if (info.featureLayer.id === layerId) {
-              currentConfig = info;
-              return true;
-            }
-          });
-          //if current table is not of all-layers and the index is not last then consider the next relations
-          if (this._traversal.length > 1 && layerIndex + 1 < this._traversal.length) {
-            currentConfig = currentConfig.relationshipInfos;
-          }
-        }, this);
-        //layer info will not be available for related layer infos so add it
-        if (!currentConfig.layerInfo) {
-          currentConfig.layerInfo = this._jimuLayerInfos.getLayerOrTableInfoById(currentConfig.featureLayer.id);
-          //get layers configFeatureLayer info
-          var layerConfig = editUtils.getConfigInfo(currentConfig.layerInfo, {});
-          var layerObject = currentConfig.layerInfo.layerObject;
-          // modify templates with space in string fields
-          this._removeSpacesInLayerTemplates(layerObject);
-          //set configured field with the detailed field info from layers fieldInfos
-          currentConfig.fieldInfos = this._setConfiguredFieldInfos(layerConfig.fieldInfos, currentConfig.fieldInfos);
-          this.processConfigForRuntime(currentConfig);
-          currentConfig.configFeatureLayer = layerConfig.featureLayer;
-          currentConfig.featureLayer = layerObject;
-          currentConfig.showDeleteButton = false;
-        }
-        return currentConfig;
-      } else {
-        var result = null;
-        this.config.editor.configInfos.some(function (configInfo) {
-          return configInfo.featureLayer.id === id ? (result = configInfo, true) : false;
-        });
-        return result;
-      }
-    },
-
-    _fillPresetValueTable: function _fillPresetValueTable(editLayerInfos) {
-      var addedAnyField = false;
-      var presetAllFields = new PresetAllFields({
-        nls: this.nls,
-        configInfos: editLayerInfos,
-        _jimuLayerInfos: this._jimuLayerInfos,
-        _configuredPresetInfos: this.config.editor.presetInfos,
-        showingInWidget: true
+      var result = null;
+      this.config.editor.configInfos.some(function (configInfo) {
+        return configInfo.featureLayer.id === id ? (result = configInfo, true) : false;
       });
+      return result;
+    },
+    _changeFieldToMostRestrictive: function _changeFieldToMostRestrictive(existingField, newField) {
 
-      this._presetFieldInfos = presetAllFields.presetFieldInfos;
+      if (newField.length && Number(newField.length) && Number(newField.length) > 0) {
+        if (existingField.length && Number(existingField.length)) {
+          if (newField.length < existingField.length) {
+            existingField.length = newField.length;
+          }
+        } else {
+          existingField.length = newField.length;
+        }
+      }
+      if (existingField.type === newField.type) {
+        switch (newField.type) {
+          case "esriFieldTypeString":
+            if (existingField.hasOwnProperty("stringFieldOption") && newField.hasOwnProperty("stringFieldOption")) {
+              if (existingField.stringFieldOption === "richtext" && newField.stringFieldOption !== "richtext") {
+                existingField.stringFieldOption = newField.stringFieldOption;
+              } else if (existingField.stringFieldOption === "textarea" && newField.stringFieldOption === "textbox") {
+                existingField.stringFieldOption = newField.stringFieldOption;
+              }
+            }
+            break;
+        }
+      }
+      //stubbed out code to change preset to most restrictive value
+      //var lbl = null;
+      //if (existingField.type !== newField.type) {
+      //  switch (newField.type) {
+      //    case "esriFieldTypeString":
+      //      if (newField.type === "esriFieldTypeString") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeString") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeSmallInteger") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeInteger") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeSingle") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeDouble") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeGUID") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeDate") {
+      //      }
+      //    case "esriFieldTypeSmallInteger":
+      //      break;
+      //    case "esriFieldTypeInteger":
+      //      break;
+      //    case "esriFieldTypeSingle":
+      //      break;
+      //    case "esriFieldTypeDouble":
+      //      if (newField.type === "esriFieldTypeString") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeString") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeSmallInteger") {
+      //        lbl = existingField.label;
+      //        existingField = lang.clone(newField);
+      //        existingField.label = lbl;
+      //      }
+      //      else if (newField.type === "esriFieldTypeInteger") {
+      //        lbl = existingField.label;
+      //        existingField = lang.clone(newField);
+      //        existingField.label = lbl;
+      //      }
+      //      else if (newField.type === "esriFieldTypeSingle") {
+      //        lbl = existingField.label;
+      //        existingField = lang.clone(newField);
+      //        existingField.label = lbl;
+      //      }
+      //      else if (newField.type === "esriFieldTypeDouble") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeGUID") {
+      //      }
+      //      else if (newField.type === "esriFieldTypeDate") {
+      //      }
+      //      break;
+      //    case "esriFieldTypeGUID":
+      //      break;
+      //    case "esriFieldTypeDate":
+      //      break;
+      //  }
+      //}
+      return existingField;
+    },
+    _fillPresetValueTable: function _fillPresetValueTable(editLayerInfos) {
+      this._presetFieldInfos = [];
 
+      array.forEach(editLayerInfos, function (layerInfo) {
+        // ignore preset values for layer with update features only
+        if (!layerInfo.allowUpdateOnly) {
+          array.forEach(layerInfo.fieldInfos, function (fieldInfo) {
+            if (fieldInfo.canPresetValue) {
+              var fieldExists = false;
+              // concat aliases if needed
+              var idx = fieldInfo.label.indexOf("<a ");
+              var fieldLabel = idx < 0 ? fieldInfo.label : fieldInfo.label.substring(0, idx);
+              if (fieldLabel === "") {
+                fieldLabel = fieldInfo.fieldName;
+              }
+              for (var i = 0; i < this._presetFieldInfos.length; i++) {
+                if (this._presetFieldInfos[i].fieldName === fieldInfo.fieldName) {
+                  // found the same field name
+                  fieldExists = true;
+                  // concat fieldAlias if needed
+                  if (!editUtils.checkIfFieldAliasAlreadyExists(this._presetFieldInfos[i].label, fieldLabel)) {
+                    this._presetFieldInfos[i].label = lang.replace("{alias},{anotherAlias}", {
+                      alias: this._presetFieldInfos[i].label,
+                      anotherAlias: fieldLabel
+                    });
+                    break;
+                  }
+                  this._presetFieldInfos[i] = this._changeFieldToMostRestrictive(this._presetFieldInfos[i], fieldInfo);
+                } //
+              }
+
+              // or add to the collection if new
+              if (!fieldExists) {
+                var newField = lang.clone(fieldInfo);
+                newField.label = fieldLabel;
+                this._presetFieldInfos.push(newField);
+              }
+            }
+          }, this);
+        }
+      }, this);
       var presetValueTable = query("#eePresetValueBody")[0];
       // fill the table
-      for (var fieldName in this._presetFieldInfos) {
-        var presetFieldInfo = this._presetFieldInfos[fieldName];
-        if (presetFieldInfo.hasOwnProperty('type') && presetFieldInfo.type !== "esriFieldTypeGeometry" && presetFieldInfo.type !== "esriFieldTypeOID" && presetFieldInfo.type !== "esriFieldTypeBlob" && presetFieldInfo.type !== "esriFieldTypeGlobalID" && presetFieldInfo.type !== "esriFieldTypeRaster" && presetFieldInfo.type !== "esriFieldTypeXML") {
+      array.forEach(this._presetFieldInfos, lang.hitch(this, function (presetFieldInfo) {
+        if (presetFieldInfo.type !== "esriFieldTypeGeometry" && presetFieldInfo.type !== "esriFieldTypeOID" && presetFieldInfo.type !== "esriFieldTypeBlob" && presetFieldInfo.type !== "esriFieldTypeGlobalID" && presetFieldInfo.type !== "esriFieldTypeRaster" && presetFieldInfo.type !== "esriFieldTypeXML") {
 
           var row = domConstruct.create("tr");
           var label = domConstruct.create("td", { "class": "ee-atiLabel" });
@@ -3080,13 +1963,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
           var valueColumnNode = domConstruct.create("td", { "class": "preset-value-editable" }, row);
 
-          var presetValueNodes = presetUtils.createPresetFieldContentNode(presetFieldInfo);
+          var presetValueNodes = this._createPresetFieldContentNode(presetFieldInfo);
           var dateWidget = null;
           var timeWidget = null;
-          for (var index = 0; index < presetValueNodes.length; index++) {
-            var presetValueNode = presetValueNodes[index];
-            var fieldValues;
-            this.own(on(presetValueNode, 'change', lang.hitch(this, this._presetChange)));
+          array.forEach(presetValueNodes, function (presetValueNode) {
             if (presetValueNode.declaredClass === "dijit.form.DateTextBox") {
               dateWidget = presetValueNode;
             }
@@ -3094,37 +1974,17 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
               timeWidget = presetValueNode;
             }
             domConstruct.place(presetValueNode.domNode, valueColumnNode, "last");
-            //get configured field values and set them to dijits
-            if (this.config.editor.presetInfos && this.config.editor.presetInfos[fieldName]) {
-              fieldValues = this.config.editor.presetInfos[fieldName];
-            }
-
-            if (fieldValues && fieldValues.length > 0) {
-              /**
-              * After updating the preset approach and removed configure values from preset popup,
-              * we will now always store only one value.
-              * so in case of dates with multiple nodes for date and time use 0th index value only.
-              */
-              var value = fieldValues[0];
-              if (presetValueNode.declaredClass === "dijit.form.DateTextBox" || presetValueNode.declaredClass === "dijit.form.TimeTextBox") {
-                value = value === "" || value === null ? null : new Date(value);
-              }
-              presetValueNode.set('value', value);
-            }
-          }
+          }, this);
           if (dateWidget !== null) {
             this.own(on(label, 'click', lang.hitch(this, this._dateClick(dateWidget, timeWidget))));
           }
           presetValueTable.appendChild(row);
-          addedAnyField = true;
         }
-      }
+      }));
 
       // BEGIN: ECAN CHANGE - Refresh UI Links to account for preset value parameters
       this._updateLinksUI();
       // END: ECAN CHANGE
-
-      return addedAnyField;
     },
 
     _dateClick: function _dateClick(dateWidget, timeWidget) {
@@ -3140,13 +2000,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _getEditableLayers: function _getEditableLayers(layerInfos, allLayers) {
       var layers = [];
       array.forEach(layerInfos, function (layerInfo) {
-        if (layerInfo._editFlag) {
-          if (!layerInfo.allowUpdateOnly || allLayers) {
-            //
-            var layerObject = this.map.getLayer(layerInfo.featureLayer.id);
-            if (layerObject && layerObject.visible && layerObject.isVisibleAtScale(this.map.getScale()) && layerObject.isEditable && layerObject.isEditable()) {
-              layers.push(layerObject);
-            }
+        if (!layerInfo.allowUpdateOnly || allLayers) {
+          //
+          var layerObject = this.map.getLayer(layerInfo.featureLayer.id);
+          if (layerObject && layerObject.visible && layerObject.isVisibleAtScale(this.map.getScale()) && layerObject.isEditable && layerObject.isEditable()) {
+            layers.push(layerObject);
           }
         }
       }, this);
@@ -3156,36 +2014,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _getEditableLayersInfos: function _getEditableLayersInfos(layerInfos, allLayers) {
       var layers = [];
       array.forEach(layerInfos, function (layerInfo) {
-        if (layerInfo._editFlag) {
-          if (!layerInfo.allowUpdateOnly || allLayers) {
-            //
-            var layerObject = this.map.getLayer(layerInfo.featureLayer.id);
-            if (layerObject && layerObject.visible && layerObject.isVisibleAtScale(this.map.getScale()) && layerObject.isEditable && layerObject.isEditable()) {
-              layers.push(layerInfo);
-            }
+        if (!layerInfo.allowUpdateOnly || allLayers) {
+          //
+          var layerObject = this.map.getLayer(layerInfo.featureLayer.id);
+          if (layerObject && layerObject.visible && layerObject.isVisibleAtScale(this.map.getScale()) && layerObject.isEditable && layerObject.isEditable()) {
+            layers.push(layerInfo);
           }
         }
       }, this);
 
       return layers;
-    },
-    _getClonedRelationInfo: function _getClonedRelationInfo(relations) {
-      var newRelations = [];
-      for (var i = 0; i < relations.length; i++) {
-        var relatedInfo = {};
-        for (var key in relations[i]) {
-          if (relations[i].hasOwnProperty(key) && key !== 'featureLayer' && key !== 'layerInfo') {
-            //Get recursive relationship info's
-            if (key === "relationshipInfos") {
-              relatedInfo[key] = this._getClonedRelationInfo(relations[i][key]);
-            } else {
-              relatedInfo[key] = lang.clone(relations[i][key]);
-            }
-          }
-        }
-        newRelations.push(relatedInfo);
-      }
-      return newRelations;
     },
     _getLayerInfoForLocalLayer: function _getLayerInfoForLocalLayer(localLayer) {
 
@@ -3198,11 +2036,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         layerInfo = {};
         for (var k in result) {
           if (result.hasOwnProperty(k) && k !== 'featureLayer' && k !== 'layerInfo') {
-            if (k === "relationshipInfos") {
-              layerInfo[k] = this._getClonedRelationInfo(result[k]);
-            } else {
-              layerInfo[k] = lang.clone(result[k]);
-            }
+            layerInfo[k] = lang.clone(result[k]);
           }
         }
 
@@ -3295,6 +2129,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             //}
           }
         }));
+
+        /* BEGIN: ECAN CHANGES - Call to update the link button urls if preset values change */
+        this._updateLinksUI();
+        /* END: ECAN CHANGES */
       }
     },
 
@@ -3315,6 +2153,15 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
                 "value": elem.get("value")
               });
             }
+            //else {
+            //  var element = query("input[type='hidden']", ele);
+            //  if (!element || element.length === 0) {
+            //    element = query("input", ele);
+            //  }
+            //  if (element[0].name === fieldName) {
+            //    element[0].value = value;
+            //  }
+            //}
           }
         }));
       }
@@ -3324,56 +2171,15 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     /* END: Ecan Changes */
 
-    _modifyAttributesWithPresetValues: function _modifyAttributesWithPresetValues(attributes, newTempLayerInfos, copyAttrInfo) {
+    _modifyAttributesWithPresetValues: function _modifyAttributesWithPresetValues(attributes, newTempLayerInfos) {
       var presetValueTable = query("#eePresetValueBody")[0];
-      var presetFieldInfos = [],
-          presetFields = [];
-      //if fieldValues exist means copy actions are applied
-      if (newTempLayerInfos.fieldValues) {
-        //loop through all copy actions and get the values as per priority for individual actions
-        for (var fieldName in newTempLayerInfos.fieldValues) {
-          for (var i = 0; i < newTempLayerInfos.fieldValues[fieldName].length; i++) {
-            var copyAction = newTempLayerInfos.fieldValues[fieldName][i];
-            var foundInIntersection = false;
-            //get value form intersection if it is enabled
-            if (copyAttrInfo && copyAction.actionName === "Intersection" && copyAction.enabled) {
-              for (var j = 0; j < copyAction.fields.length; j++) {
-                var fieldInfo = copyAction.fields[j];
-                if (copyAttrInfo.Intersection.hasOwnProperty(fieldInfo.layerId) && copyAttrInfo.Intersection[fieldInfo.layerId].hasOwnProperty(fieldInfo.field)) {
-                  attributes[fieldName] = copyAttrInfo.Intersection[fieldInfo.layerId][fieldInfo.field];
-                  foundInIntersection = true;
-                  break;
-                }
-              }
-              if (foundInIntersection) {
-                break;
-              }
-            }
-            //get value from address if it is enabled
-            if (copyAttrInfo && copyAction.actionName === "Address" && copyAction.enabled && copyAttrInfo.Address.hasOwnProperty(copyAction.field)) {
-              attributes[fieldName] = copyAttrInfo.Address[copyAction.field];
-              break;
-            }
-            //get value from coordinates if it is enabled
-            if (copyAttrInfo && copyAction.actionName === "Coordinates" && copyAction.enabled) {
-              attributes[fieldName] = copyAttrInfo.Coordinates[copyAction.coordinatesSystem][copyAction.field];
-              break;
-            }
-            //get value from preset if it is enabled
-            if (copyAction.actionName === "Preset" && copyAction.enabled && this._usePresetValues) {
-              presetFields.push(fieldName);
-              break;
-            }
-          }
-        }
-        //get fieldsInfos of only those fields which are configured for preset
-        presetFieldInfos = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
-          return presetFields.indexOf(fieldInfo.name) > -1;
-        });
-      }
-      //if valid presetValueTable and preset is configured for some fields
-      //then modify Attributes with preset values entered in the preset form
-      if (presetValueTable && presetFields.length > 0) {
+      var presetFieldInfos = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
+        return fieldInfo.canPresetValue === true;
+      });
+      var presetFields = array.map(presetFieldInfos, function (presetFieldInfo) {
+        return presetFieldInfo.fieldName;
+      });
+      if (presetValueTable) {
         var inputElements = query(".preset-value-editable .ee-inputField");
         array.forEach(inputElements, lang.hitch(this, function (ele) {
 
@@ -3422,11 +2228,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       if (!configInfo) {
         return;
-      }
-      //if layer is not editable set editable flag to false
-      //so that attribute inspector will open in disabled mode
-      if (!configInfo._editFlag) {
-        configInfo.isEditable = false;
       }
       configInfo.fieldInfos = array.filter(configInfo.fieldInfos, function (fieldInfo) {
         if (fieldInfo.type === "esriFieldTypeBlob" || fieldInfo.type === "esriFieldTypeGlobalID" || fieldInfo.type === "esriFieldTypeRaster" || fieldInfo.type === "esriFieldTypeXML") {
@@ -3557,16 +2358,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (returnFeature === null) {
         deferred.resolve("success");
       } else if (type === "Add") {
-        if (this._traversal.length > 1) {
-          this.addNewRelatedRecord = true;
-        }
-        //Get layer or table info as now user can update related records/features
-        layer = this._jimuLayerInfos.getLayerOrTableInfoById(layerId).layerObject;
+        layer = this.map.getLayer(layerId);
         postDef = layer.applyEdits([returnFeature], null, null);
         this.addDeferred(postDef, returnFeature, layer, deferred);
       } else {
-        //Get layer or table info as now user can update related records/features
-        layer = this._jimuLayerInfos.getLayerOrTableInfoById(layerId).layerObject;
+        layer = this.map.getLayer(layerId);
         if (Object.keys(returnFeature.attributes).length === 0 && returnFeature.geometry === null) {
           deferred.resolve("success");
         } else if (Object.keys(returnFeature.attributes).length === 1 && returnFeature.attributes.hasOwnProperty(layer.objectIdField) && returnFeature.geometry === null) {
@@ -3619,9 +2415,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
         if (feature.getLayer().originalLayerId) {
           // added feature
-          //featureLayer = this.map.getLayer(feature.getLayer().originalLayerId);
-          //Get layer or table info as now user can update related records/features
-          featureLayer = this._jimuLayerInfos.getLayerOrTableInfoById(feature.getLayer().originalLayerId).layerObject;
+          featureLayer = this.map.getLayer(feature.getLayer().originalLayerId);
           if (featureLayer) {
             returnFeature.geometry = feature.geometry;
             returnFeature.symbol = null;
@@ -3695,15 +2489,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         } else if (added && added.length > 0) {
           feature.preEditAttrs = JSON.parse(JSON.stringify(feature.attributes));
           var defs = null;
-          if (this.attrInspector._attachmentUploader) {
-            defs = this.attrInspector._attachmentUploader.postAttachments(featureLayer, added[0].objectId);
+          if (this._attachmentUploader) {
+            defs = this._attachmentUploader.postAttachments(featureLayer, added[0].objectId);
           }
           if (defs === undefined || defs === null || defs.length === 0) {
-            if (this.addNewRelatedRecord) {
-              deferred.resolve("success");
-            } else {
-              this._completePost(featureLayer, added[0].objectId, deferred);
-            }
+            this._completePost(featureLayer, added[0].objectId, deferred);
           } else {
             all(defs).then(lang.hitch(this, this._attachmentsComplete(featureLayer, added[0].objectId, deferred)));
           }
@@ -3722,30 +2512,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       // in the draw end event of the draw tool
 
       this.map.infoWindow.hide();
-      //Destroy all prev attributeInspectors
-      array.forEach(this._attributeInspectorCollection, function (attributeInspector) {
-        attributeInspector.destroy();
-      });
-      //reset array
-      this._traversal = [];
-      this._nodesCollection = [];
-      this._paginationNodeCollection = [];
-      this._buttonsWrapper = [];
-      this._attributeInspectorCollection = [];
-      this._relatedTablesInfo = {};
-
       // recreate the attr inspector if needed
       this._createAttributeInspector(this.config.editor.configInfos);
 
       var layers = this.map.getLayersVisibleAtScale().filter(lang.hitch(this, function (lyr) {
         if (lyr.type && lyr.type === "Feature Layer" && lyr.url) {
-          return array.some(this.config.editor.configInfos, lang.hitch(this, function (configInfo) {
-            if (configInfo.layerId === lyr.id && this._hasAnyEditableLayerInRelation([configInfo])) {
+          return array.some(this.config.editor.configInfos, function (configInfo) {
+            if (configInfo.layerId === lyr.id && configInfo.configFeatureLayer.layerAllowsUpdate === true) {
               return true;
             } else {
               return false;
             }
-          }));
+          });
         } else {
           return false;
         }
@@ -3770,14 +2548,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         var selectQuery = new Query();
 
         /* BEGIN: Ecan Change - Altered to support polyline and polygon inputs rather than assuming just the map point */
-        // ORIGINAL CODE
-        // selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
 
         if (evt.mapPoint) {
           selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
         } else {
           selectQuery.geometry = evt.geometry;
         }
+
         /* END: Ecan Change */
 
         var deferred = layer.selectFeatures(selectQuery, FeatureLayer.SELECTION_NEW, lang.hitch(this, function (features) {
@@ -3845,7 +2622,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
             //The below is the preferred way, but this fails on public services and the user is logged in
 
-            if (!layer.getEditCapabilities({ feature: feature }).canDelete) {
+            if (!layer.getEditCapabilities({ feature: feature }).canUpdate) {
+              //feature.allowDelete = false;
+              OIDsToRemove.push(feature.attributes[layer.objectIdField]);
+              featureValid = false;
+            } else if (!layer.getEditCapabilities({ feature: feature }).canDelete) {
               feature.allowDelete = false;
             }
             if (featureValid === true) {
@@ -3883,18 +2664,14 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
     },
     _attachLayerHandler: function _attachLayerHandler() {
-      /*
-      //CT - Commented the code as it was clearing parent features selection when moving to related feature
+
       if (this.layerHandle) {
         this.layerHandle.remove();
       }
-      this.layerHandle = on(this.currentFeature._layer, 'selection-clear',
-        lang.hitch(this, this._layerChangeOutside));
+      this.layerHandle = on(this.currentFeature._layer, 'selection-clear', lang.hitch(this, this._layerChangeOutside));
       this.own(this.layerHandle);
-      */
 
       this._eventHandler = this.own(on(this.currentFeature._layer, "visibility-change", lang.hitch(this, function () {
-        /*
         setTimeout(lang.hitch(this, function () {
           var cancelBtn = query(".cancelButton")[0];
           if (!cancelBtn) {
@@ -3903,7 +2680,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             on.emit(cancelBtn, 'click', { cancelable: true, bubbles: true });
           }
         }), 100);
-        */
       })));
     },
 
@@ -3944,6 +2720,12 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._toggleEditGeoSwitch(this.currentLayerInfo.disableGeometryUpdate || !this.currentLayerInfo.configFeatureLayer.layerAllowsUpdate);
         //|| this.currentLayerInfo.featureLayer.hasZ || this.currentLayerInfo.featureLayer.hasM
         this.currentFeature.setSymbol(this._getSelectionSymbol(evt.feature.getLayer().geometryType, true));
+        if (this.currentLayerInfo.editDescription && this.currentLayerInfo.editDescription !== null) {
+          this.editDescription.innerHTML = this.currentLayerInfo.editDescription;
+          this.editDescription.style.display = "block";
+        } else {
+          this.editDescription.style.display = "none";
+        }
         //this.getConfigDefaults();
       }
     },
@@ -3978,7 +2760,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _promptToResolvePendingEdit: function _promptToResolvePendingEdit(switchToTemplate, evt, showClose, skipPostEvent) {
       skipPostEvent = skipPostEvent || false;
       var disable = !this._validateAttributes();
-      var pendingEditsDef = new Deferred();
       var buttons = [{
         label: this.nls.yes,
         classNames: ['jimu-btn'],
@@ -3992,7 +2773,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
                 this._postFeatureSave(evt);
               }
             }
-            pendingEditsDef.resolve("yes");
           }));
           dialog.close();
         })
@@ -4010,7 +2790,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             }
           }
           dialog.close();
-          pendingEditsDef.resolve("no");
         })
       }];
       if (showClose && showClose === true) {
@@ -4018,7 +2797,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           label: this.nls.back,
           classNames: ['jimu-btn'],
           onClick: lang.hitch(this, function () {
-            pendingEditsDef.reject();
             dialog.close();
           })
         });
@@ -4033,7 +2811,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         buttons: buttons,
         onClose: lang.hitch(this, function () {})
       });
-      return pendingEditsDef.promise;
     },
 
     _removeLocalLayers: function _removeLocalLayers() {
@@ -4109,7 +2886,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (this._validateAttributes()) {
         var processIndicators = query(".processing-indicator");
         var processIndicatorsPanel = query(".processing-indicator-panel");
-        var saveBtn = query(".saveButton", this.buttonHeader)[0];
+        var saveBtn = query(".saveButton")[0];
         array.forEach(processIndicators, function (processIndicator) {
           if (!domClass.contains(processIndicator, "busy")) {
             domClass.add(processIndicator, "busy");
@@ -4120,73 +2897,20 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             domClass.add(processIndicator, "busy");
           }
         });
-        if (saveBtn && !domClass.contains(saveBtn, "hide")) {
+        if (!domClass.contains(saveBtn, "hide")) {
           domClass.add(saveBtn, "hide");
         }
         // call applyEdit
         this._postChanges(feature).then(lang.hitch(this, function (e) {
-          var addingRelatedRecord = false;
           if (e === "failed") {
             deferred.resolve("failed");
-            this.addNewRelatedRecord = false;
           } else {
-            if (this.addNewRelatedRecord) {
-              addingRelatedRecord = true;
-              this.attrInspector.destroy();
-              domConstruct.destroy(this.contentWrapper);
-              domConstruct.destroy(this.buttonHeader);
-              this.attrInspector = this._attributeInspectorCollection.pop();
-              domStyle.set(this.attrInspector.attributeTable, "display", "block");
-              domStyle.set(this.attrInspector.editButtons, "display", "block");
-              domStyle.set(this.attrInspector.deleteBtn.domNode, "display", "none");
-              this.attrInspector._featureIdx = this.attrInspector.ctStoredFeatureIndex;
-              this.attrInspector.refresh();
-              setTimeout(lang.hitch(this, function () {
-                domStyle.set(this.attrInspector.navButtons, "display", !this.attrInspector._hideNavButtons && this.attrInspector._numFeatures > 1 ? "" : "none");
-                this.attrInspector.navMessage.innerHTML = esriLang.substitute({
-                  idx: this.attrInspector._featureIdx + 1,
-                  of: this.attrInspector.NLS_of,
-                  numFeatures: this.attrInspector._numFeatures
-                }, this.attrInspector._navMessage);
-                this.currentFeature = this.attrInspector._numFeatures ? this.attrInspector._selection[this.attrInspector._featureIdx] : null;
-                if (this.currentFeature && this.currentFeature.attributes) {
-                  this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-                }
-              }), 200);
-              this.contentWrapper = this._nodesCollection.pop();
-              this.buttonHeader = this._buttonsWrapper.pop();
-              this.navButtonsDiv = this._paginationNodeCollection.pop();
-              this._traversal.pop();
-              if (this.navButtonsDiv && this.config.editor.autoSaveEdits) {
-                domConstruct.destroy(this.navButtonsDiv);
-              }
-              //If the related feature count is 0, change it to 1 as new reacord is added
-              //This will trigger the further process automatically
-              if (this.currentRelatedDom) {
-                var relatedRecordCount = domAttr.get(this.currentRelatedDom, "relatedRecordCount");
-                if (relatedRecordCount && parseInt(relatedRecordCount, 10) === 0) {
-                  domAttr.set(this.currentRelatedDom, "relatedRecordCount", 1);
-                }
-              }
-              this.currentRelatedDom.click();
-            }
-            if (this.currentFeature && this.currentFeature.attributes) {
-              this.currentFeature.preEditAttrs = JSON.parse(JSON.stringify(this.currentFeature.attributes));
-            }
-            if (this._relatedTablesInfo[feature._layer.id]) {
-              this._relatedTablesInfo[feature._layer.id].updateFeatureInstance(feature.attributes);
-            }
             // if currently only one selected feature
-            //also this is not related feature
-            if (this.config.editor.removeOnSave && this.updateFeatures.length <= 1 && this._traversal.length <= 1 && !addingRelatedRecord) {
+            if (this.config.editor.removeOnSave && this.updateFeatures.length <= 1) {
               switchToTemplate = true;
             }
             if (switchToTemplate && switchToTemplate === true) {
               this._showTemplate(true);
-            } else if (this.config.editor.removeOnSave && this.updateFeatures.length <= 1 && this._traversal.length > 1) {
-              //when saving related tables/layers details and only one record and remove on save is true
-              //go back to parent features details after save
-              on.emit(this.cancelButton, 'click', { cancelable: true, bubbles: true });
             } else {
               this._resetEditingVariables();
               this.map.setInfoWindowOnClick(true);
@@ -4199,7 +2923,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
                 layer.selectFeatures(query, FeatureLayer.SELECTION_SUBTRACT, lang.hitch(this, this._feature_removed(feature, curidx)));
               } else {
                 // reselect the feature
-                if (this.currentFeature && this.currentFeature.hasOwnProperty("allowDelete")) {
+                if (this.currentFeature.hasOwnProperty("allowDelete")) {
                   this._toggleDeleteButton(this.currentFeature.allowDelete && this.currentLayerInfo.allowDelete);
                 } else {
                   this._toggleDeleteButton(this.currentLayerInfo.allowDelete && this.currentLayerInfo.configFeatureLayer.layerAllowsDelete);
@@ -4207,15 +2931,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
                 this._toggleEditGeoSwitch(this.currentLayerInfo.disableGeometryUpdate || !this.currentLayerInfo.configFeatureLayer.layerAllowsUpdate);
                 //|| this.currentLayerInfo.featureLayer.hasZ || this.currentLayerInfo.featureLayer.hasM
 
-                if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
-                  //perform any edit geom switch functionality
-                  //only when working with main layers feature and not on related features
-                  setTimeout(lang.hitch(this, function () {
-                    if (this._traversal.length < 2) {
-                      this._editGeomSwitch.set('checked', true);
-                    }
-                  }), 100);
-                }
                 feature.setSymbol(this._getSelectionSymbol(feature.getLayer().geometryType, true));
               }
             }
@@ -4265,16 +2980,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (showTemplate) {
         this._mapClickHandler(true);
         this._showTemplatePicker();
-        //reset array
-        this._traversal = [];
-        this._nodesCollection = [];
-        this._paginationNodeCollection = [];
-        this._buttonsWrapper = [];
-        this._attributeInspectorCollection = [];
-        this._relatedTablesInfo = {};
-        this.currentFeature = null;
-        this.geometryChanged = false;
-        this.currentLayerInfo = null;
 
         // esriBundle.widgets.attachmentEditor.NLS_attachments = this._orignls;
       } else {
@@ -4286,24 +2991,68 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
         if (this.attrInspector) {
 
-          if (!this.currentFeature && this.attrInspector && this.attrInspector._numFeatures > 0) {
+          if (!this.currentFeature) {
             this.attrInspector.first();
           }
+          this._createSmartAttributes();
+          this._createAttributeInspectorTools();
           this.attrInspector.refresh();
 
           /* BEGIN CHANGE - Configure feature editing tools */
           this._createFeatureEditTools();
+
           /* END CHANGE */
 
-          this._createSmartAttributes();
-          this._createAttributeInspectorTools();
+          var attTable = query("td.atiLabel", this.attrInspector.domNode);
+          var presets = this._getPresetValues();
+          array.forEach(presets, lang.hitch(this, function (preset) {
+            if (attTable !== undefined && attTable !== null) {
+              var fieldName = preset.fieldName;
+              var row = dojo.filter(attTable, lang.hitch(this, function (row) {
+                if (row.childNodes) {
+                  if (row.childNodes.length > 0) {
+                    //if (this.useFieldName === true) {
+                    if (row.hasAttribute("data-fieldname")) {
+                      return row.getAttribute("data-fieldname") === fieldName;
+                    } else {
+                      return row.childNodes[0].data === fieldName;
+                    }
+                  }
+                  //else {
+                  //  return row.childNodes[0].data === fieldName;
+                  //}
+                  //}
+                }
+                return false;
+              }));
+
+              var nl = null;
+              if (row !== null) {
+                if (row.length > 0) {
+                  var rowInfo = this._getRowInfo(row[0]);
+
+                  var valueCell = rowInfo[0];
+                  var valueCell2 = rowInfo[4];
+                  var parent = rowInfo[1];
+                  var widget = rowInfo[2];
+                  domClass.add(parent, "hideField");
+                }
+              }
+            }
+          }));
+
           this._attributeInspectorTools.triggerFormValidation();
           //this._sytleFields(this.attrInspector);
-          if (this.currentFeature && this.currentFeature.getLayer().originalLayerId) {
+          if (this.currentFeature.getLayer().originalLayerId) {
             this._enableAttrInspectorSaveButton(this._validateAttributes());
           } else {
-            this._validateAttributes(false);
             this._enableAttrInspectorSaveButton(false);
+          }
+          if (this.currentLayerInfo.editDescription && this.currentLayerInfo.editDescription !== null) {
+            this.editDescription.innerHTML = this.currentLayerInfo.editDescription;
+            this.editDescription.style.display = "block";
+          } else {
+            this.editDescription.style.display = "none";
           }
           if (this.currentLayerInfo.isCache && this.currentLayerInfo.isCache === true) {
             this._toggleEditGeoSwitch(false);
@@ -4331,8 +3080,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       };
       this._attributeInspectorTools = new attributeInspectorTools(attributeInspectorToolsParams);
     },
-
-    /* BEGIN: ECan Changes - additional geometry tools */
 
     _createFeatureEditTools: function _createFeatureEditTools() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
@@ -4426,8 +3173,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
     },
 
-    /* END: ECan Changes */
-
     _createSmartAttributes: function _createSmartAttributes() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
         return;
@@ -4454,8 +3199,8 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       };
       this._smartAttributes = new smartAttributes(smartAttParams);
     },
-    _showTemplatePicker: function _showTemplatePicker() {
 
+    _showTemplatePicker: function _showTemplatePicker() {
       // hide the attr inspector and show the main template picker div
       query(".jimu-widget-smartEditor-ecan .attributeInspectorMainDiv")[0].style.display = "none";
       query(".jimu-widget-smartEditor-ecan .templatePickerMainDiv")[0].style.display = "block";
@@ -4490,7 +3235,14 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           }
         }));
       }
-      this._clearLayerSelection();
+      if (this.currentFeature) {
+        var layer = this.currentFeature.getLayer();
+        if (layersRefresh && layersRefresh.indexOf(layer.id) === -1) {
+          layersRefresh.push(layer.id);
+          layer.clearSelection();
+          layer.refresh();
+        }
+      }
       this.currentFeature = null;
       this.geometryChanged = false;
       this.currentLayerInfo = null;
@@ -4515,21 +3267,20 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     _setPresetValue: function _setPresetValue() {
       var sw = registry.byId("savePresetValueSwitch");
       this._usePresetValues = sw.checked;
     },
+
     _toggleUsePresetValues: function _toggleUsePresetValues(checked) {
       var sw = registry.byId("savePresetValueSwitch");
       sw.set('checked', checked === null ? !sw.checked : checked);
       this._usePresetValues = sw.checked;
     },
+
     _turnEditGeometryToggleOff: function _turnEditGeometryToggleOff() {
-      //perform any edit geom switch functionality
-      //only when working with main layers feature and not on related features
-      if (this._traversal.length > 1) {
-        return;
-      }
+
       if (this._editGeomSwitch && this._editGeomSwitch.checked) {
         if (this.editToolbar) {
           if (this.editToolbar.getCurrentState().tool !== 0) {
@@ -4545,6 +3296,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }), 2);
       }
     },
+
     _validateFeatureChanged: function _validateFeatureChanged() {
 
       if (this.currentFeature) {
@@ -4563,6 +3315,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return true;
     },
+
     // todo: modify to feature as input parameter?
     _validateRequiredFields: function _validateRequiredFields() {
       var errorObj = {};
@@ -4610,7 +3363,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _workBeforeCreate: function _workBeforeCreate() {
-
       // change string of mouse tooltip
       var additionStr = "<br/>" + "(" + this.nls.pressStr + "<b>" + this.nls.ctrlStr + "</b> " + this.nls.snapStr + ")";
       this._defaultStartStr = esriBundle.toolbars.draw.start;
@@ -4711,6 +3463,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }, this);
       return layerInfos;
     },
+
     getLayerObjectFromMapByUrl: function getLayerObjectFromMapByUrl(map, layerUrl) {
       var resultLayerObject = null;
       for (var i = 0; i < map.graphicsLayerIds.length; i++) {
@@ -4756,14 +3509,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return foundInfo;
     },
+
     getConfigDefaults: function getConfigDefaults() {
       if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
         setTimeout(lang.hitch(this, function () {
-          //perform any edit geom switch functionality
-          //only when working with main layers feature and not on related features
-          if (this._traversal.length < 2 && this._editGeomSwitch.domNode) {
-            this._editGeomSwitch.set('checked', true);
-          }
+          this._editGeomSwitch.set('checked', true);
         }), 100);
       } else {
         this._turnEditGeometryToggleOff();
@@ -4771,21 +3521,17 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _processConfig: function _processConfig() {
-      /*CT- commented as we need to show non editable layers also
       this.config.editor.configInfos = array.filter(this.config.editor.configInfos, function (configInfo) {
-           if (configInfo._editFlag && configInfo._editFlag === true) {
-             return true;
-           } else {
-             return false;
-           }
-         });*/
-      array.forEach(this.config.editor.configInfos, function (configInfo) {
-        //To support backward compatibility if _editFlag is not available add it
-        if (!configInfo.hasOwnProperty('_editFlag')) {
-          configInfo._editFlag = true;
+        if (configInfo._editFlag && configInfo._editFlag === true) {
+          return true;
+        } else {
+          return false;
         }
+      });
+      array.forEach(this.config.editor.configInfos, function (configInfo) {
+
         var layerObject = configInfo.layerInfo.layerObject;
-        if (layerObject) {
+        if (layerObject && layerObject.isEditable && layerObject.isEditable()) {
           if (configInfo.allowUpdateOnly === false) {
             this.own(on(layerObject, "visibility-change, scale-visibility-change", lang.hitch(this, function () {
               //console.log("layer change" + state);
@@ -4801,6 +3547,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }, this);
     },
+
     onClose: function onClose() {
       this._worksAfterClose();
 
@@ -4825,11 +3572,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //{
       this._mapClickHandler(false);
       this._removeLayerVisibleHandler();
-      this._unLockMapNavigation();
       //}
       // close method will call onDeActive automaticlly
       // so do not need to call onDeActive();
     },
+
     _update: function _update() {
       //if (this.templatePicker) {
       //comments out, this results in teh scroll bar disappearing, unsure why
@@ -4851,6 +3598,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     resize: function resize() {
       this._update();
     },
+
     onNormalize: function onNormalize() {
       setTimeout(lang.hitch(this, this._update), 100);
     },
@@ -4861,618 +3609,225 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     onMaximize: function onMaximize() {
       setTimeout(lang.hitch(this, this._update), 100);
-    },
+    }
 
-    /**
-    * The function will add new item to item list as per the data
-    */
-    addItem: function addItem(title, isOpen, itemListContainer, layerId, isTempFeature) {
-      var itemContainer;
-      itemContainer = domConstruct.create("div", {
-        "class": "esriCTItem"
-      }, null);
-      //domAttr.set(itemContainer, "index", index);
-      this._createItemTitle(title, itemContainer, isOpen, isTempFeature);
-      this._createItemContent(itemContainer, isOpen, layerId);
-      if (isTempFeature) {
-        domClass.add(itemContainer, "esriCTDisableToggling");
-      }
-      itemListContainer.appendChild(itemContainer);
-      return itemContainer;
-    },
-
-    /**
-    * Create item title node
-    */
-    _createItemTitle: function _createItemTitle(title, itemContainer, isOpen, isTempFeature) {
-      var itemTitleContainer, itemTitle, arrowIcon, itemHighlighter;
-      itemTitleContainer = domConstruct.create("div", {
-        "class": "esriCTItemTitleContainer"
-      }, itemContainer);
-      //Item highlighter
-      itemHighlighter = domConstruct.create("div", {
-        "class": "esriCTItemHighlighter"
-      }, itemTitleContainer);
-      //create esriCTItemTitle
-      itemTitle = domConstruct.create("div", {
-        "class": "esriCTItemTitle esriCTFloatLeft",
-        "innerHTML": title,
-        "title": title
-      }, itemTitleContainer);
-      //create arrow icon div
-      arrowIcon = domConstruct.create("div", {
-        "class": "itemTitleArrowIcon"
-      }, itemTitleContainer);
-      if (isOpen) {
-        domClass.add(arrowIcon, "itemTitleUpArrow");
-      } else {
-        domClass.add(arrowIcon, "itemTitleDownArrow");
-      }
-      this.own(on(itemTitleContainer, "click", lang.hitch(this, function (evt) {
-        if (!domClass.contains(evt.currentTarget.parentElement, "esriCTDisableToggling") && !isTempFeature) {
-          this._togglePanel(itemContainer);
-        }
-      })));
-    },
-
-    /**
-    * Create content for each title row
-    */
-    _createItemContent: function _createItemContent(itemContainer, isOpen, layerId) {
-      var itemContent, editDescription, configuredLayerDesc;
-      //create node for adding item content
-      itemContent = domConstruct.create("div", {
-        "class": "esriCTItemContent esriCTRelatedItemContent"
-      }, itemContainer);
-      if (isOpen) {
-        configuredLayerDesc = this._fetchLayerDescription(layerId);
-        if (configuredLayerDesc) {
-          //show configured description
-          editDescription = domConstruct.create("div", {
-            "class": "editDescription",
-            "innerHTML": configuredLayerDesc
-          }, itemContent);
-        }
-        domConstruct.place(this.attrInspector.domNode, itemContent, "last");
-        this._togglePanel(itemContainer);
-      } else {
-        domConstruct.place(this._relatedTablesInfo[this.attrInspector._currentFeature._layer.id].domNode, itemContent, "last");
-      }
-    },
-
-    /**
-    * Create item list based on the data passed
-    */
-    _togglePanel: function _togglePanel(node) {
-      var title, panel, arrowIcon, itemHighlighter;
-      title = query(".esriCTItemTitle", node)[0];
-      arrowIcon = query(".itemTitleArrowIcon", node)[0];
-      panel = query(".esriCTItemContent", node)[0];
-      itemHighlighter = query(".esriCTItemHighlighter", node)[0];
-      if (title && panel && !domClass.contains(node, "esriCTDisableToggling")) {
-        if (!domClass.contains(panel, "esriCTItemContentActive")) {
-          //set the item highlighter
-          domStyle.set(itemHighlighter, "backgroundColor", this.config.selectedThemeColor);
-          //toggle arrow icon class
-          domClass.replace(arrowIcon, "itemTitleUpArrow", "itemTitleDownArrow");
-        } else {
-          //set the item highlighter
-          domStyle.set(itemHighlighter, "backgroundColor", "transparent");
-          //toggle arrow icon class
-          domClass.replace(arrowIcon, "itemTitleDownArrow", "itemTitleUpArrow");
-        }
-        domClass.toggle(panel, "esriCTItemContentActive");
-      }
-    },
-
-    /**
-    * Disable expand/collapse of layer panel
-    */
-    _disableToggling: function _disableToggling(layerNode) {
-      //var arrowNode;
-      //remove layers expand/collapse arrow as it doesn't have any relation
-      if (layerNode) {
-        domClass.add(layerNode, "esriCTDisableToggling");
-      }
-    },
-
-    _fetchLayerDescription: function _fetchLayerDescription(selectedLayerId) {
-      var configuredDesc;
-      var currentConfig;
-      currentConfig = this.config.editor.layerInfos;
-      //get the config info of the selected breadcrumb and display its table
-      if (this._traversal && this._traversal.length > 0) {
-        array.some(this._traversal, function (layerId, layerIndex) {
-          array.some(currentConfig, function (info) {
-            if (info.featureLayer.id === layerId) {
-              currentConfig = info;
-              return true;
-            }
-          });
-          //if current table is not of all-layers and the index is not last then consider the next relations
-          if (this._traversal.length > 1 && layerIndex + 1 < this._traversal.length) {
-            currentConfig = currentConfig.relationshipInfos;
-          }
-        }, this);
-      } else {
-        array.some(currentConfig, function (info) {
-          if (info.featureLayer.id === selectedLayerId) {
-            currentConfig = info;
-            return true;
-          }
-        });
-      }
-      if (currentConfig.editDescription) {
-        configuredDesc = currentConfig.editDescription;
-      }
-      return configuredDesc;
-    },
-
-    _getRelationshipInfo: function _getRelationshipInfo(feature) {
-      var id = feature._layer.id;
-      if (this._traversal && this._traversal.length > 0) {
-        var currentConfig;
-        currentConfig = this.config.editor.configInfos;
-        array.some(this._traversal, function (layerId, layerIndex) {
-          array.some(currentConfig, function (info) {
-            if (info.featureLayer.id === layerId) {
-              currentConfig = info;
-              return true;
-            }
-          });
-          //if current table is not of all-layers and the index is not last then consider the next relations
-          if (this._traversal.length > 1 && layerIndex + 1 < this._traversal.length) {
-            currentConfig = currentConfig.relationshipInfos;
-          }
-        }, this);
-        return currentConfig.relationshipInfos;
-      } else {
-        var result = null;
-        this.config.editor.configInfos.some(function (configInfo) {
-          return configInfo.featureLayer.id === id ? (result = configInfo.relationshipInfos, true) : false;
-        });
-        return result;
-      }
-    },
-
-    /***
-    * Function gets the selected theme Color from app config and theme properties
-    * In case of errors it will use "#000000" color
-    */
-    _getSelectedThemeColor: function _getSelectedThemeColor() {
-      var requestArgs, styleName, selectedTheme;
-      // by default set it to black
-      this.config.selectedThemeColor = "#000000";
-      //Get selected theme Name
-      selectedTheme = this.appConfig.theme.name;
-      //get selected theme's style
-      if (this.appConfig && this.appConfig.theme && this.appConfig.theme.styles) {
-        styleName = this.appConfig.theme.styles[0];
-      } else {
-        styleName = "default";
-      }
-      //if custom styles are selected then use the selected color directly
-      if (this.appConfig && this.appConfig.theme && this.appConfig.theme.customStyles && this.appConfig.theme.customStyles.mainBackgroundColor) {
-        this.config.selectedThemeColor = this.appConfig.theme.customStyles.mainBackgroundColor;
-        return;
-      }
-      //create request to get the selected theme's manifest to fetch the color
-      requestArgs = {
-        url: "./themes/" + selectedTheme + "/manifest.json",
-        content: {
-          f: "json"
-        },
-        handleAs: "json",
-        callbackParamName: "callback"
-      };
-      esriRequest(requestArgs).then(lang.hitch(this, function (response) {
-        var i, styleObj;
-        //match the selected style name and get its color
-        if (response && response.styles && response.styles.length > 0) {
-          for (i = 0; i < response.styles.length; i++) {
-            styleObj = response.styles[i];
-            if (styleObj.name === styleName) {
-              this.config.selectedThemeColor = styleObj.styleColor;
-              break;
-            }
-          }
-        }
-      }));
-    },
-
-    _getRelatedRecordsByRelatedQuery: function _getRelatedRecordsByRelatedQuery(layerObject, relationshipId, relatedLayersId, parentOID) {
-      var def = new Deferred();
-      var relatedQuery = new RelationshipQuery();
-      var objectId = parentOID; //this.attrInspector._currentFeature.attributes[layerObject.objectIdField];
-      var relatedLayer = this._jimuLayerInfos.getLayerOrTableInfoById(relatedLayersId).layerObject;
-      var relatedObjectId = relatedLayer.objectIdField;
-
-      relatedQuery.returnGeometry = false;
-      relatedQuery.outSpatialReference = this.map.spatialReference;
-      relatedQuery.relationshipId = relationshipId;
-      relatedQuery.objectIds = [objectId];
-      relatedQuery.outFields = [relatedObjectId]; //get only related tables OID so that it will be used for selection
-      this.loading.show();
-      layerObject.queryRelatedFeatures(relatedQuery, lang.hitch(this, function (relatedRecords) {
-        var features = relatedRecords[objectId] && relatedRecords[objectId].features;
-        var relatedObjectIds = [];
-        array.forEach(features, function (feature) {
-          relatedObjectIds.push(feature.attributes[relatedObjectId]);
-        });
-        this.loading.hide();
-        if (features) {
-          def.resolve(relatedObjectIds);
-        } else {
-          def.resolve(relatedObjectIds);
-        }
-      }), lang.hitch(this, function () {
-        this.loading.hide();
-        def.resolve([]);
-      }));
-      return def;
-    },
-
-    /* Refresh attributes on geometry change */
-    _getCurrentFieldDijit: function _getCurrentFieldDijit(fieldName) {
-      var fieldDijit;
-      array.some(this.attrInspector._currentLInfo.fieldInfos, lang.hitch(this, function (fInfo) {
-        if (fInfo.name === fieldName) {
-          fieldDijit = fInfo.dijit;
-          return true;
-        }
-      }));
-      return fieldDijit;
-    },
-
-    _updateRefreshButtonState: function _updateRefreshButtonState() {
-      var hasGeometryDependency;
-      if (this._refreshButton && this.config.editor.enableAttributeUpdates) {
-        //if automatic update is configured to true show refresh button
-        if (this.config.editor.enableAutomaticAttributeUpdates) {
-          domClass.remove(this._refreshButton, "hidden");
-          //if automatic update is 'ON' in the widget then call refresh attribute function
-          if (domClass.contains(this._refreshButton, "esriCTAutoUpdateOnMode")) {
-            this._refreshAttributes();
-          }
-        } else if (domAttr.has(this._refreshButton, "hasGeometryDependency")) {
-          hasGeometryDependency = domAttr.get(this._refreshButton, "hasGeometryDependency");
-          if (hasGeometryDependency) {
-            domClass.remove(this._refreshButton, "hidden");
-          }
-        } else {
-          if (this.currentLayerInfo.fieldValues) {
-            hasGeometryDependency = false;
-            //loop through all copy actions and get the values as per priority for individual actions
-            for (var fieldName in this.currentLayerInfo.fieldValues) {
-              for (var i = 0; i < this.currentLayerInfo.fieldValues[fieldName].length; i++) {
-                var copyAction = this.currentLayerInfo.fieldValues[fieldName][i];
-                //get value form intersection if it is enabled
-                if (copyAction.actionName === "Intersection" && copyAction.enabled) {
-                  hasGeometryDependency = true;
-                  break;
-                }
-                //get value from address if it is enabled
-                if (copyAction.actionName === "Address" && copyAction.enabled) {
-                  hasGeometryDependency = true;
-                  break;
-                }
-                //get value from coordinates if it is enabled
-                if (copyAction.actionName === "Coordinates" && copyAction.enabled) {
-                  hasGeometryDependency = true;
-                  break;
-                }
-              }
-              if (hasGeometryDependency) {
-                break;
-              }
-            }
-            domAttr.set(this._refreshButton, "hasGeometryDependency", hasGeometryDependency);
-            if (hasGeometryDependency) {
-              domClass.remove(this._refreshButton, "hidden");
-            }
-          }
-        }
-      }
-    },
-
-    _refreshAttributes: function _refreshAttributes() {
-      this.loading.show();
-      //load all the info required to copy attributes
-      this._getCopyAttributes(this.currentLayerInfo, this.currentFeature.geometry).then(lang.hitch(this, function (copyAttrInfo) {
-        //if fieldValues exist means copy actions are applied
-        if (this.currentLayerInfo.fieldValues) {
-          //loop through all copy actions and get the values as per priority for individual actions
-          for (var fieldName in this.currentLayerInfo.fieldValues) {
-            //  array.some(this.currentLayerInfo.fieldValues[fieldName], lang.hitch(this, function (copyAction) {
-            for (var i = 0; i < this.currentLayerInfo.fieldValues[fieldName].length; i++) {
-              var copyAction = this.currentLayerInfo.fieldValues[fieldName][i];
-              var foundInIntersection = false;
-              var dijit, value;
-              //get value form intersection if it is enabled
-              if (copyAttrInfo && copyAction.actionName === "Intersection" && copyAction.enabled) {
-                for (var j = 0; j < copyAction.fields.length; j++) {
-                  var fieldInfo = copyAction.fields[j];
-                  if (copyAttrInfo.Intersection.hasOwnProperty(fieldInfo.layerId) && copyAttrInfo.Intersection[fieldInfo.layerId].hasOwnProperty(fieldInfo.field)) {
-                    dijit = this._getCurrentFieldDijit(fieldName);
-                    value = copyAttrInfo.Intersection[fieldInfo.layerId][fieldInfo.field];
-                    if (dijit && dijit.set) {
-                      dijit.set("value", value, true);
-                    }
-                    foundInIntersection = true;
-                    break;
-                  }
-                }
-                if (foundInIntersection) {
-                  break;
-                }
-              }
-              //get value from address if it is enabled
-              if (copyAttrInfo && copyAction.actionName === "Address" && copyAction.enabled && copyAttrInfo.Address.hasOwnProperty(copyAction.field)) {
-                dijit = this._getCurrentFieldDijit(fieldName);
-                value = copyAttrInfo.Address[copyAction.field];
-                if (dijit && dijit.set) {
-                  dijit.set("value", value, true);
-                }
-                break;
-              }
-              //get value from coordinates if it is enabled
-              if (copyAttrInfo && copyAction.actionName === "Coordinates" && copyAction.enabled) {
-                dijit = this._getCurrentFieldDijit(fieldName);
-                value = copyAttrInfo.Coordinates[copyAction.coordinatesSystem][copyAction.field];
-                value = value;
-                if (dijit && dijit.set) {
-                  dijit.set("value", value, true);
-                }
-                break;
-              }
-              //get value from preset if it is enabled
-              if (copyAction.actionName === "Preset" && copyAction.enabled && this._usePresetValues) {
-                break;
-              }
-            }
-          }
-        }
-        this.loading.hide();
-      }));
-    },
-    /* End Refresh attributes on geometry change */
-
-    /* BEGIN: Ecan Changes - Operation Links */
-
-    _setLinkInfo: function _setLinkInfo() {
-      console.log('SmartEditorEcan::_setLinkInfo');
-      this._links = this.config.links || [];
-    },
-
-    _updateLinksUI: function _updateLinksUI() {
-      if (!this._links || this._links.length == 0) {
-        domConstruct.destroy(this.linksDiv);
-      } else {
-        // Destroy the old links if any
-        if (this._linkControls) {
-          array.forEach(this._linkControls, lang.hitch(this, function (linkControl) {
-            linkControl.destroy();
-          }));
-        } else {
-          this._linkControls = [];
-        }
-
-        // Populate the links
-        var fieldValues = this._getPresetValues();
-
-        //Append url parameters
-        var loc = window.location;
-        var urlObject = esriUrlUtils.urlToObject(loc.href);
-
-        // Check for filter
-        if (urlObject.query !== null) {
-          for (var key in urlObject.query) {
-            fieldValues.push({
-              "fieldName": key,
-              "value": urlObject.query[key]
-            });
-          }
-        }
-
-        array.forEach(this._links, lang.hitch(this, function (linkConfig) {
-          var link = new OperationLink({
-            item: linkConfig,
-            fieldValues: fieldValues
-          });
-
-          link.placeAt(this.linksTableNode);
-          link.startup();
-          this._linkControls.push(link);
+  }, _defineProperty(_declare, 'resize', function resize() {
+    console.log('SmartEditorEcan::resize');
+    this._update();
+  }), _defineProperty(_declare, '_setLinkInfo', function _setLinkInfo() {
+    console.log('SmartEditorEcan::_setLinkInfo');
+    this._links = this.config.links || [];
+  }), _defineProperty(_declare, '_updateLinksUI', function _updateLinksUI() {
+    if (!this._links || this._links.length == 0) {
+      domConstruct.destroy(this.linksDiv);
+    } else {
+      // Destroy the old links if any
+      if (this._linkControls) {
+        array.forEach(this._linkControls, lang.hitch(this, function (linkControl) {
+          linkControl.destroy();
         }));
-        this.resize();
-      }
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Hide Attribute display on preset fields */
-
-    _mapAddRemoveLayerHandler: function _mapAddRemoveLayerHandler(action) {
-
-      if (action) {
-        if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
-          this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
-        }
-        if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
-          this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
-        }
       } else {
-        if (this._mapAddLayer) {
-          this._mapAddLayer.remove();
-        }
-        if (this._mapRemoveLayer) {
-          this._mapRemoveLayer.remove();
-        }
-      }
-    },
-
-    _onMapAddLayer: function _onMapAddLayer(result) {
-      var gl = false;
-
-      switch (result.layer.declaredClass) {
-        case "esri.layers.FeatureLayer":
-        case "esri.layers.GraphicsLayer":
-        case "esri.layers.CSVLayer":
-          gl = true;
-          break;
-
-        default:
-          // Do Nothing
-          break;
+        this._linkControls = [];
       }
 
-      if (this.map.snappingManager && gl) {
-        // Check if layer existing in snapping manager layer infos
-        var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
-          return layerInfo.layer.id === result.layer.id;
-        })).length > 0;
+      // Populate the links
+      var fieldValues = this._getPresetValues();
 
-        if (!isSnap) {
-          var layerInfos = [];
-          array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
-            layerInfos.push(layerInfo);
+      //Append url parameters
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        for (var key in urlObject.query) {
+          fieldValues.push({
+            "fieldName": key,
+            "value": urlObject.query[key]
           });
-          layerInfos.push({
-            layer: result.layer
-          });
-
-          this.map.snappingManager.setLayerInfos(layerInfos);
         }
       }
-    },
 
-    _onMapRemoveLayer: function _onMapRemoveLayer(result) {
-      var gl = false;
+      array.forEach(this._links, lang.hitch(this, function (linkConfig) {
+        var link = new OperationLink({
+          item: linkConfig,
+          fieldValues: fieldValues
+        });
 
-      switch (result.layer.declaredClass) {
-        case "esri.layers.FeatureLayer":
-        case "esri.layers.GraphicsLayer":
-        case "esri.layers.CSVLayer":
-          gl = true;
-          break;
+        link.placeAt(this.linksTableNode);
+        link.startup();
+        this._linkControls.push(link);
+      }));
+      this.resize();
+    }
+  }), _defineProperty(_declare, 'copyFeatureSet', function copyFeatureSet(featureSet) {
+    // Get geometry type and ensure editable layer of this geometry type is available
+    var geometryType = featureSet.geometryType;
+    if (!geometryType) {
+      geometryType = featureSet.features[0].geometry.type;
+    }
+    geometryType = this._getEsriGeometryType(geometryType);
 
-        default:
-          // Do Nothing
-          break;
-      }
+    var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+    layers = layers.filter(function (layer) {
+      return layer.geometryType && layer.geometryType === geometryType;
+    });
 
-      if (this.map.snappingManager && gl) {
-        // Check if layer existing in snapping manager layer infos
-        var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
-          return layerInfo.layer.id === result.layer.id;
-        })).length > 0;
+    var copyPopup, param;
+    param = {
+      map: this.map,
+      nls: this.nls,
+      config: this.config,
+      featureSet: featureSet,
+      layers: layers
+    };
 
-        if (isSnap) {
-          var layerInfos = [];
-          array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
-            if (layerInfo.layer.id !== result.layer.id) {
-              layerInfos.push(layerInfo);
-            }
-          });
-          this.map.snappingManager.setLayerInfos(layerInfos);
+    copyPopup = new CopyFeaturesPopup(param);
+    copyPopup.startup();
+
+    copyPopup.onOkClick = lang.hitch(this, function () {
+      var template = copyPopup.getSelectedTemplate();
+      if (template) {
+        if (copyPopup.featureSet.features.length === 1) {
+          this._addFeature(copyPopup.featureSet.features[0], template);
+        } else {
+          this._bulkAddFeatures(copyPopup.featureSet.features, template);
         }
       }
-    },
+      copyPopup.popup.close();
+    });
+  }), _defineProperty(_declare, '_getEsriGeometryType', function _getEsriGeometryType(geometryType) {
+    var esriGeometryType = '';
+    switch (geometryType) {
+      case 'polygon':
+        esriGeometryType = 'esriGeometryPolygon';
+        break;
 
-    /* END: Ecan Changes */
+      case 'polyline':
+        esriGeometryType = 'esriGeometryPolyline';
+        break;
 
-    /* BEGIN: Ecan Changes - Copy Features */
+      case 'point':
+        esriGeometryType = 'esriGeometryPoint';
+        break;
 
-    copyFeatureSet: function copyFeatureSet(featureSet) {
-      // Get geometry type and ensure editable layer of this geometry type is available
-      var geometryType = featureSet.geometryType;
-      if (!geometryType) {
-        geometryType = featureSet.features[0].geometry.type;
+      default:
+        esriGeometryType = geometryType;
+        break;
+    }
+    return esriGeometryType;
+  }), _defineProperty(_declare, '_addFeature', function _addFeature(feature, template) {
+    // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+    var newTempLayerInfos;
+    var localLayerInfo = null;
+
+    if (this.attrInspector) {
+      this.attrInspector.destroy();
+      this.attrInspector = null;
+    }
+
+    if (this._attachmentUploader && this._attachmentUploader !== null) {
+      this._attachmentUploader.clear();
+    }
+
+    this._removeLocalLayers();
+    // preparation for a new attributeInspector for the local layer
+    this.cacheLayer = this._cloneLayer(template.featureLayer);
+    this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
+
+    localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+    newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
+
+    this._createAttributeInspector([localLayerInfo]);
+
+    if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
+      setTimeout(lang.hitch(this, function () {
+        this._editGeomSwitch.set('checked', true);
+      }), 100);
+    }
+
+    var newAttributes = lang.clone(template.template.prototype.attributes);
+    if (this._copyExistingValues) {
+      this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
+    }
+
+    if (this._usePresetValues) {
+      this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
+    }
+
+    var newGraphic = new Graphic(feature.geometry, null, newAttributes);
+
+    // store original attrs for later use
+    newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
+    this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
+      var queryTask = new Query();
+      queryTask.objectIds = [e[0].objectId];
+      this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+
+      this.currentFeature = this.updateFeatures[0] = newGraphic;
+      this.getConfigDefaults();
+      this.geometryChanged = false;
+      if (this._attributeInspectorTools) {
+        this._attributeInspectorTools.triggerFormValidation();
       }
-      geometryType = this._getEsriGeometryType(geometryType);
+      this._attachLayerHandler();
+      this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+      this.currentLayerInfo.isCache = true;
+      this._toggleDeleteButton(false);
+      //this._toggleEditGeoSwitch(false);
 
-      var layers = this._getEditableLayers(this.config.editor.configInfos, false);
-      layers = layers.filter(function (layer) {
-        return layer.geometryType && layer.geometryType === geometryType;
-      });
+      //this._createSmartAttributes();
+      //
+      this._enableAttrInspectorSaveButton(this._validateAttributes());
+    }));
 
-      var copyPopup, param;
-      param = {
-        map: this.map,
-        nls: this.nls,
-        config: this.config,
-        featureSet: featureSet,
-        layers: layers
-      };
+    this._showTemplate(false, false);
 
-      copyPopup = new CopyFeaturesPopup(param);
-      copyPopup.startup();
-
-      copyPopup.onOkClick = lang.hitch(this, function () {
-        var template = copyPopup.getSelectedTemplate();
-        if (template) {
-          if (copyPopup.featureSet.features.length === 1) {
-            this._addFeature(copyPopup.featureSet.features[0], template);
-          } else {
-            this._bulkAddFeatures(copyPopup.featureSet.features, template);
-          }
+    if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
+      setTimeout(lang.hitch(this, function () {
+        var saveBtn = query(".saveButton")[0];
+        if (!saveBtn) {
+          //do nothing
+        } else {
+          on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
         }
-        copyPopup.popup.close();
-      });
-    },
+      }), 100);
+    }
+  }), _defineProperty(_declare, '_bulkAddFeatures', function _bulkAddFeatures(featureSet, template) {
+    // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
+    var newTempLayerInfos;
+    var localLayerInfo = null;
 
-    _getEsriGeometryType: function _getEsriGeometryType(geometryType) {
-      var esriGeometryType = '';
-      switch (geometryType) {
-        case 'polygon':
-          esriGeometryType = 'esriGeometryPolygon';
-          break;
+    if (this.attrInspector) {
+      this.attrInspector.destroy();
+      this.attrInspector = null;
+    }
 
-        case 'polyline':
-          esriGeometryType = 'esriGeometryPolyline';
-          break;
+    if (this._attachmentUploader && this._attachmentUploader !== null) {
+      this._attachmentUploader.clear();
+    }
 
-        case 'point':
-          esriGeometryType = 'esriGeometryPoint';
-          break;
+    if (this._attachmentUploader && this._attachmentUploader !== null) {
+      this._attachmentUploader.clear();
+    }
 
-        default:
-          esriGeometryType = geometryType;
-          break;
-      }
-      return esriGeometryType;
-    },
+    this._removeLocalLayers();
+    // preparation for a new attributeInspector for the local layer
+    this.cacheLayer = this._cloneLayer(template.featureLayer);
+    this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
 
-    _addFeature: function _addFeature(feature, template) {
-      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
-      var newTempLayerInfos;
-      var localLayerInfo = null;
+    localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
+    newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
 
-      if (this.attrInspector) {
-        this.attrInspector.destroy();
-        this.attrInspector = null;
-      }
+    this._createAttributeInspector([localLayerInfo]);
 
-      if (this._attachmentUploader && this._attachmentUploader !== null) {
-        this._attachmentUploader.clear();
-      }
+    if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
+      setTimeout(lang.hitch(this, function () {
+        this._editGeomSwitch.set('checked', true);
+      }), 100);
+    }
 
-      this._removeLocalLayers();
-      // preparation for a new attributeInspector for the local layer
-      this.cacheLayer = this._cloneLayer(template.featureLayer);
-      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
-
-      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
-      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
-
-      this._createAttributeInspector([localLayerInfo]);
-
-      if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
-        setTimeout(lang.hitch(this, function () {
-          this._editGeomSwitch.set('checked', true);
-        }), 100);
-      }
-
+    var updateFeatures = [];
+    array.forEach(featureSet, lang.hitch(this, function (feature) {
       var newAttributes = lang.clone(template.template.prototype.attributes);
       if (this._copyExistingValues) {
         this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
@@ -5486,26 +3841,37 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       // store original attrs for later use
       newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
-      this.cacheLayer.applyEdits([newGraphic], null, null, lang.hitch(this, function (e) {
-        var queryTask = new Query();
-        queryTask.objectIds = [e[0].objectId];
-        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
+      updateFeatures.push(newGraphic);
+    }));
 
-        this.currentFeature = this.updateFeatures[0] = newGraphic;
-        this.getConfigDefaults();
-        this.geometryChanged = false;
-        if (this._attributeInspectorTools) {
-          this._attributeInspectorTools.triggerFormValidation();
-        }
-        this._attachLayerHandler();
-        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
-        this.currentLayerInfo.isCache = true;
-        this._toggleDeleteButton(false);
-        //this._toggleEditGeoSwitch(false);
+    this.cacheLayer.applyEdits(updateFeatures, null, null, lang.hitch(this, function (e) {
+      var queryTask = new Query();
+      var objectIds = e.map(function (feature) {
+        return feature.objectId;
+      });
+      queryTask.objectIds = objectIds;
+      this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
 
+      /*
+        this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
+      this.getConfigDefaults();
+      this.geometryChanged = false;
+      if (this._attributeInspectorTools) {
+        this._attributeInspectorTools.triggerFormValidation();
+      }
+      this._attachLayerHandler();
+      this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
+      this.currentLayerInfo.isCache = true;
+      this._toggleDeleteButton(false);
+      //this._toggleEditGeoSwitch(false);
         //this._createSmartAttributes();
-        //
-        this._enableAttrInspectorSaveButton(this._validateAttributes());
+      //
+      this._enableAttrInspectorSaveButton(this._validateAttributes());
+      */
+      array.forEach(updateFeatures, lang.hitch(this, function (feature) {
+        this._postChanges(feature).then(lang.hitch(this, function (e) {
+          if (e === "failed") {} else {}
+        }));
       }));
 
       this._showTemplate(false, false);
@@ -5520,721 +3886,638 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           }
         }), 100);
       }
-    },
-
-    _bulkAddFeatures: function _bulkAddFeatures(featureSet, template) {
-      // COPY OF CODE FROM _addGraphicToLocalLayer FUNCTION
-      var newTempLayerInfos;
-      var localLayerInfo = null;
-
-      if (this.attrInspector) {
-        this.attrInspector.destroy();
-        this.attrInspector = null;
-      }
-
-      if (this._attachmentUploader && this._attachmentUploader !== null) {
-        this._attachmentUploader.clear();
-      }
-
-      if (this._attachmentUploader && this._attachmentUploader !== null) {
-        this._attachmentUploader.clear();
-      }
-
-      this._removeLocalLayers();
-      // preparation for a new attributeInspector for the local layer
-      this.cacheLayer = this._cloneLayer(template.featureLayer);
-      this.cacheLayer.setSelectionSymbol(this._getSelectionSymbol(this.cacheLayer.geometryType, true));
-
-      localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
-      newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
-
-      this._createAttributeInspector([localLayerInfo]);
-
-      if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
-        setTimeout(lang.hitch(this, function () {
-          this._editGeomSwitch.set('checked', true);
-        }), 100);
-      }
-
-      var updateFeatures = [];
-      array.forEach(featureSet, lang.hitch(this, function (feature) {
-        var newAttributes = lang.clone(template.template.prototype.attributes);
-        if (this._copyExistingValues) {
-          this._modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, feature.attributes);
-        }
-
-        if (this._usePresetValues) {
-          this._modifyAttributesWithPresetValues(newAttributes, newTempLayerInfos[0]);
-        }
-
-        var newGraphic = new Graphic(feature.geometry, null, newAttributes);
-
-        // store original attrs for later use
-        newGraphic.preEditAttrs = JSON.parse(JSON.stringify(newGraphic.attributes));
-        updateFeatures.push(newGraphic);
-      }));
-
-      this.cacheLayer.applyEdits(updateFeatures, null, null, lang.hitch(this, function (e) {
-        var queryTask = new Query();
-        var objectIds = e.map(function (feature) {
-          return feature.objectId;
-        });
-        queryTask.objectIds = objectIds;
-        this.cacheLayer.selectFeatures(queryTask, FeatureLayer.SELECTION_NEW);
-
-        /*
-          this.currentFeature = this.updateFeatures[0] = updateFeatures[0];
-        this.getConfigDefaults();
-        this.geometryChanged = false;
-        if (this._attributeInspectorTools) {
-          this._attributeInspectorTools.triggerFormValidation();
-        }
-        this._attachLayerHandler();
-        this.currentLayerInfo = this._getLayerInfoByID(this.currentFeature._layer.id);
-        this.currentLayerInfo.isCache = true;
-        this._toggleDeleteButton(false);
-        //this._toggleEditGeoSwitch(false);
-          //this._createSmartAttributes();
-        //
-        this._enableAttrInspectorSaveButton(this._validateAttributes());
-        */
-        array.forEach(updateFeatures, lang.hitch(this, function (feature) {
-          this._postChanges(feature).then(lang.hitch(this, function (e) {
-            if (e === "failed") {} else {}
-          }));
-        }));
-
-        this._showTemplate(false, false);
-
-        if (this.config.editor.hasOwnProperty("autoSaveEdits") && this._autoSaveRuntime === true) {
-          setTimeout(lang.hitch(this, function () {
-            var saveBtn = query(".saveButton")[0];
-            if (!saveBtn) {
-              //do nothing
-            } else {
-              on.emit(saveBtn, 'click', { cancelable: true, bubbles: true });
-            }
-          }), 100);
-        }
-      }));
-    },
-
-    _modifyAttributesWithCopyValues: function _modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, attributes) {
-      for (var key in newAttributes) {
-        // Check if attribute exists in new feature
-        if (attributes[key]) {
-          // Validate the attribute value is valid for data type
-          if (this._validateCopyAttribute(attributes[key], key, newTempLayerInfos[0].fieldInfos)) {
-            newAttributes[key] = attributes[key];
-          }
+    }));
+  }), _defineProperty(_declare, '_modifyAttributesWithCopyValues', function _modifyAttributesWithCopyValues(newAttributes, newTempLayerInfos, attributes) {
+    for (var key in newAttributes) {
+      // Check if attribute exists in new feature
+      if (attributes[key]) {
+        // Validate the attribute value is valid for data type
+        if (this._validateCopyAttribute(attributes[key], key, newTempLayerInfos[0].fieldInfos)) {
+          newAttributes[key] = attributes[key];
         }
       }
-    },
+    }
+  }), _defineProperty(_declare, '_validateCopyAttribute', function _validateCopyAttribute(fieldValue, fieldName, fieldInfos) {
+    var isValid = false;
+    var field = fieldInfos.filter(function (fieldInfo) {
+      return fieldInfo.name === fieldName;
+    })[0];
 
-    _validateCopyAttribute: function _validateCopyAttribute(fieldValue, fieldName, fieldInfos) {
-      var isValid = false;
-      var field = fieldInfos.filter(function (fieldInfo) {
-        return fieldInfo.name === fieldName;
-      })[0];
+    // Validate data type
+    switch (field.type) {
+      case 'esriFieldTypeGUID':
+        var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
+        if (pattern.test(fieldValue) === true) {
+          isValid = true;
+        }
+        break;
 
-      // Validate data type
-      switch (field.type) {
-        case 'esriFieldTypeGUID':
-          var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
-          if (pattern.test(fieldValue) === true) {
-            isValid = true;
-          }
+      case "esriFieldTypeInteger":
+        var regInt = parseInt(fieldValue);
+        if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
+          isValid = true;
+        }
+        break;
+
+      case "esriFieldTypeSmallInteger":
+        var shtInt = parseInt(fieldValue);
+        if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
+          isValid = true;
+        }
+        break;
+
+      case "esriFieldTypeSingle":
+      case "esriFieldTypeDouble":
+        if (Number.isNumeric(fieldValue)) {
+          isValid = true;
+        }
+        break;
+
+      case "esriFieldTypeDate":
+        var newDate = new Date(fieldValue);
+        isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
+        break;
+
+      case 'esriFieldTypeString':
+      default:
+        isValid = field["length"] >= fieldValue.length;
+        break;
+    }
+
+    // Check Domain values
+    if (field.domain && isValid) {
+      switch (field.domain.type) {
+        case "codedValue":
+          // Validate value is with domain list
+          isValid = field.domain.codedValues.filter(function (value) {
+            return value.code === fieldValue;
+          }).length > 0;
           break;
 
-        case "esriFieldTypeInteger":
-          var regInt = parseInt(fieldValue);
-          if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
-            isValid = true;
-          }
+        case "range":
+          var numValue = Number(fieldValue);
+          isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
           break;
 
-        case "esriFieldTypeSmallInteger":
-          var shtInt = parseInt(fieldValue);
-          if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
-            isValid = true;
-          }
-          break;
-
-        case "esriFieldTypeSingle":
-        case "esriFieldTypeDouble":
-          if (Number.isNumeric(fieldValue)) {
-            isValid = true;
-          }
-          break;
-
-        case "esriFieldTypeDate":
-          var newDate = new Date(fieldValue);
-          isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
-          break;
-
-        case 'esriFieldTypeString':
         default:
-          isValid = field["length"] >= fieldValue.length;
           break;
       }
+    }
 
-      // Check Domain values
-      if (field.domain && isValid) {
-        switch (field.domain.type) {
-          case "codedValue":
-            // Validate value is with domain list
-            isValid = field.domain.codedValues.filter(function (value) {
-              return value.code === fieldValue;
-            }).length > 0;
-            break;
+    // Check editable
+    if (!field.ediatble && isValid) {
+      isValid = false;
+    }
 
-          case "range":
-            var numValue = Number(fieldValue);
-            isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
-            break;
-
-          default:
-            break;
-        }
+    return isValid;
+  }), _defineProperty(_declare, '_setMergeHandler', function _setMergeHandler(create, error) {
+    if (create) {
+      // Remove disable button style
+      if (domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+        domClass.remove(this.featureMergeBtnNode, "jimu-state-disabled");
       }
 
-      // Check editable
-      if (!field.ediatble && isValid) {
-        isValid = false;
+      domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeToolTitle);
+
+      // Apply the click event
+      if (!this._mergeClick) {
+        this._mergeClick = on(this.featureMergeBtnNode, "click", lang.hitch(this, this._startMerge));
+      }
+    } else {
+      // Apply disable button style
+      if (!domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
+        domClass.add(this.featureMergeBtnNode, "jimu-state-disabled");
       }
 
-      return isValid;
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Merge Features */
-
-    _setMergeHandler: function _setMergeHandler(create, error) {
-      if (create) {
-        // Remove disable button style
-        if (domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
-          domClass.remove(this.featureMergeBtnNode, "jimu-state-disabled");
-        }
-
-        domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeToolTitle);
-
-        // Apply the click event
-        if (!this._mergeClick) {
-          this._mergeClick = on(this.featureMergeBtnNode, "click", lang.hitch(this, this._startMerge));
-        }
-      } else {
-        // Apply disable button style
-        if (!domClass.contains(this.featureMergeBtnNode, "jimu-state-disabled")) {
-          domClass.add(this.featureMergeBtnNode, "jimu-state-disabled");
-        }
-
-        // Deactiviate the click event
-        if (this._mergeClick) {
-          this._mergeClick.remove();
-          this._mergeClick = null;
-        }
-
-        switch (error) {
-          case "multiple layers":
-            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.multipleLayersError);
-            break;
-
-          case "unsupported geometry":
-            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.unsupportedGeometryError);
-            break;
-
-          case "number of features":
-            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.numberOfFeaturesError);
-            break;
-
-          default:
-            domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.generalError);
-            break;
-        }
-      }
-    },
-
-    _startMerge: function _startMerge() {
-      var mergePopup, param;
-      param = {
-        map: this.map,
-        nls: this.nls,
-        config: this.config,
-        features: this.updateFeatures,
-        currentFeature: this.currentFeature
-      };
-
-      mergePopup = new MergeFeaturesPopup(param);
-      mergePopup.startup();
-
-      mergePopup.onOkClick = lang.hitch(this, function () {
-        this._mergeFeatures();
-        mergePopup.popup.close();
-      });
-    },
-
-    _mergeFeatures: function _mergeFeatures() {
-      var geometries = [];
-      var removeFeatures = [];
-      for (var i = 0, il = this.updateFeatures.length; i < il; i++) {
-        var feature = this.updateFeatures[i];
-        geometries.push(feature.geometry);
-
-        if (feature !== this.currentFeature) removeFeatures.push(feature);
+      // Deactiviate the click event
+      if (this._mergeClick) {
+        this._mergeClick.remove();
+        this._mergeClick = null;
       }
 
-      var newGeometry = geometryEngine.union(geometries);
-      var newFeature = new Graphic(this.currentFeature.toJson());
-      newFeature.setGeometry(newGeometry);
+      switch (error) {
+        case "multiple layers":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.multipleLayersError);
+          break;
 
-      // Apply the changes
-      var layer = this.currentFeature.getLayer();
-      layer.applyEdits(null, [newFeature], removeFeatures, lang.hitch(this, function (adds, updates, deletes) {
-        if (updates && updates.length > 0 && updates[0].hasOwnProperty("error")) {
-          Message({
-            message: updates[0].error.toString()
-          });
-        }
-        if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
-          Message({
-            message: deletes[0].error.toString()
-          });
-        }
+        case "unsupported geometry":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.unsupportedGeometryError);
+          break;
 
-        this.load_from_featureaction(layer, newFeature);
-      }), lang.hitch(this, function (err) {
+        case "number of features":
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.numberOfFeaturesError);
+          break;
+
+        default:
+          domAttr.set(this.featureMergeBtnNode, "title", this.nls.tools.mergeErrors.generalError);
+          break;
+      }
+    }
+  }), _defineProperty(_declare, '_startMerge', function _startMerge() {
+    var mergePopup, param;
+    param = {
+      map: this.map,
+      nls: this.nls,
+      config: this.config,
+      features: this.updateFeatures,
+      currentFeature: this.currentFeature
+    };
+
+    mergePopup = new MergeFeaturesPopup(param);
+    mergePopup.startup();
+
+    mergePopup.onOkClick = lang.hitch(this, function () {
+      this._mergeFeatures();
+      mergePopup.popup.close();
+    });
+  }), _defineProperty(_declare, '_mergeFeatures', function _mergeFeatures() {
+    var geometries = [];
+    var removeFeatures = [];
+    for (var i = 0, il = this.updateFeatures.length; i < il; i++) {
+      var feature = this.updateFeatures[i];
+      geometries.push(feature.geometry);
+
+      if (feature !== this.currentFeature) removeFeatures.push(feature);
+    }
+
+    var newGeometry = geometryEngine.union(geometries);
+    var newFeature = new Graphic(this.currentFeature.toJson());
+    newFeature.setGeometry(newGeometry);
+
+    // Apply the changes
+    var layer = this.currentFeature.getLayer();
+    layer.applyEdits(null, [newFeature], removeFeatures, lang.hitch(this, function (adds, updates, deletes) {
+      if (updates && updates.length > 0 && updates[0].hasOwnProperty("error")) {
         Message({
-          message: err.message.toString() + "\n" + err.details
+          message: updates[0].error.toString()
         });
-      }));
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Explode Features */
-
-    _setExplodeHandler: function _setExplodeHandler(create, error) {
-      if (create) {
-        // Remove disable button style
-        if (domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
-          domClass.remove(this.featureExplodeBtnNode, "jimu-state-disabled");
-        }
-
-        domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeToolTitle);
-
-        // Apply the click event
-        if (!this._explodeClick) {
-          this._explodeClick = on(this.featureExplodeBtnNode, "click", lang.hitch(this, this._startExplode));
-        }
-      } else {
-        // Apply disable button style
-        if (!domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
-          domClass.add(this.featureExplodeBtnNode, "jimu-state-disabled");
-        }
-
-        // Deactiviate the click event
-        if (this._explodeClick) {
-          this._explodeClick.remove();
-          this._explodeClick = null;
-        }
-
-        switch (error) {
-          case "unsupported geometry":
-            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
-            break;
-
-          case "not multipart":
-            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.notMultipartError);
-            break;
-
-          default:
-            domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.generalError);
-            break;
-        }
       }
-    },
+      if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+        Message({
+          message: deletes[0].error.toString()
+        });
+      }
 
-    _startExplode: function _startExplode() {
-      var explodePopup, param;
-      param = {
-        map: this.map,
-        nls: this.nls,
-        config: this.config,
-        features: this.updateFeatures,
-        currentFeature: this.currentFeature
-      };
-
-      explodePopup = new ExplodeFeaturesPopup(param);
-      explodePopup.startup();
-
-      explodePopup.onOkClick = lang.hitch(this, function () {
-        this._explodeFeatures();
-        explodePopup.popup.close();
+      this.load_from_featureaction(layer, newFeature);
+    }), lang.hitch(this, function (err) {
+      Message({
+        message: err.message.toString() + "\n" + err.details
       });
-    },
+    }));
+  }), _defineProperty(_declare, '_setExplodeHandler', function _setExplodeHandler(create, error) {
+    if (create) {
+      // Remove disable button style
+      if (domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+        domClass.remove(this.featureExplodeBtnNode, "jimu-state-disabled");
+      }
 
-    _explodeFeatures: function _explodeFeatures() {
-      // Check for multipart geometry
-      var feature = null,
-          process = '',
-          geometry = null,
-          newFeatures = [];
-      feature = this.currentFeature;
-      switch (feature.geometry.type) {
-        case 'polyline':
-          if (feature.geometry.paths.length > 0) process = 'paths';
+      domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeToolTitle);
+
+      // Apply the click event
+      if (!this._explodeClick) {
+        this._explodeClick = on(this.featureExplodeBtnNode, "click", lang.hitch(this, this._startExplode));
+      }
+    } else {
+      // Apply disable button style
+      if (!domClass.contains(this.featureExplodeBtnNode, "jimu-state-disabled")) {
+        domClass.add(this.featureExplodeBtnNode, "jimu-state-disabled");
+      }
+
+      // Deactiviate the click event
+      if (this._explodeClick) {
+        this._explodeClick.remove();
+        this._explodeClick = null;
+      }
+
+      switch (error) {
+        case "unsupported geometry":
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
           break;
 
-        case 'polygon':
-          if (feature.geometry.rings.length > 0) process = 'rings';
+        case "not multipart":
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.notMultipartError);
           break;
 
         default:
+          domAttr.set(this.featureExplodeBtnNode, "title", this.nls.tools.explodeErrors.generalError);
           break;
       }
+    }
+  }), _defineProperty(_declare, '_startExplode', function _startExplode() {
+    var explodePopup, param;
+    param = {
+      map: this.map,
+      nls: this.nls,
+      config: this.config,
+      features: this.updateFeatures,
+      currentFeature: this.currentFeature
+    };
 
-      if (process !== '') {
-        geometry = feature.geometry;
-        for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+    explodePopup = new ExplodeFeaturesPopup(param);
+    explodePopup.startup();
+
+    explodePopup.onOkClick = lang.hitch(this, function () {
+      this._explodeFeatures();
+      explodePopup.popup.close();
+    });
+  }), _defineProperty(_declare, '_explodeFeatures', function _explodeFeatures() {
+    // Check for multipart geometry
+    var feature = null,
+        process = '',
+        geometry = null,
+        newFeatures = [];
+    feature = this.currentFeature;
+    switch (feature.geometry.type) {
+      case 'polyline':
+        if (feature.geometry.paths.length > 0) process = 'paths';
+        break;
+
+      case 'polygon':
+        if (feature.geometry.rings.length > 0) process = 'rings';
+        break;
+
+      default:
+        break;
+    }
+
+    if (process !== '') {
+      geometry = feature.geometry;
+      for (var p = 0, pl = geometry[process].length; p < pl; p++) {
+        var newFeature = new Graphic(feature.toJson());
+        var newGeometry = null;
+
+        switch (process) {
+          case 'rings':
+            newGeometry = new Polygon({
+              "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
+              "spatialReference": geometry.spatialReference.toJson()
+            });
+            break;
+
+          case 'paths':
+            newGeometry = new Polyline({
+              "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
+              "spatialReference": geometry.spatialReference.toJson()
+            });
+            break;
+        }
+        newFeature.setGeometry(newGeometry);
+        newFeatures.push(newFeature);
+      }
+    } else {
+      newFeatures.push(feature);
+    }
+
+    // Apply the changes
+    var layer = this.currentFeature.getLayer();
+    layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
+      if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+        Message({
+          message: adds[0].error.toString()
+        });
+      }
+      if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+        Message({
+          message: deletes[0].error.toString()
+        });
+      }
+
+      // Return to templates 
+      this._showTemplate(true);
+    }), lang.hitch(this, function (err) {
+      Message({
+        message: err.message.toString() + "\n" + err.details
+      });
+    }));
+  }), _defineProperty(_declare, '_applyEditToolButtonStyle', function _applyEditToolButtonStyle(tool, active) {
+    // Update cut tool state
+    if (tool !== 'CUT' || tool === 'CUT' && !active) {
+      if (domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+        domClass.remove(this.featureCutBtnNode, "btn-toggle");
+      }
+    } else {
+      if (!domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
+        domClass.add(this.featureCutBtnNode, "btn-toggle");
+      }
+    }
+  }), _defineProperty(_declare, '_actionEditTool', function _actionEditTool(evt) {
+    switch (this._drawToolEditType) {
+      case 'CUT':
+        this._cutFeatures(evt);
+        break;
+      default:
+        alert('_actionEditTool: Not finished');
+        break;
+    }
+  }), _defineProperty(_declare, '_setCutHandler', function _setCutHandler(create, error) {
+    if (create) {
+      // Remove disable button style
+      if (domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+        domClass.remove(this.featureCutBtnNode, "jimu-state-disabled");
+      }
+
+      domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutToolTitle);
+
+      // Apply the click event
+      if (!this._cutClick) {
+        this._cutClick = on(this.featureCutBtnNode, "click", lang.hitch(this, this._setCutMode));
+      }
+    } else {
+      // Apply disable button style
+      if (!domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
+        domClass.add(this.featureCutBtnNode, "jimu-state-disabled");
+      }
+
+      // Deactiviate the click event
+      if (this._cutClick) {
+        this._cutClick.remove();
+        this._cutClick = null;
+      }
+
+      switch (error) {
+        case "unsupported geometry":
+          domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.unsupportedGeometryError);
+          break;
+
+        default:
+          domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.generalError);
+          break;
+      }
+    }
+  }), _defineProperty(_declare, '_setCutMode', function _setCutMode(reset) {
+    if (reset === true || this._drawToolEditMode && this._drawToolEditType && this._drawToolEditType === 'CUT') {
+      // Deactivate the cut tool
+      this._drawToolEditMode = false;
+      this._drawToolEditType = null;
+      this.drawToolbar.deactivate();
+
+      this.map.setInfoWindowOnClick(true);
+
+      // Remove active style on button
+      this._applyEditToolButtonStyle('CUT', false);
+    } else {
+
+      // Check if another edit tool is active
+      if (this._drawToolEditType !== 'CUT') {}
+      // disable this tool
+
+
+      // Activate the draw tool to define the cut line
+      this._drawToolEditType = 'CUT';
+      this._drawToolEditMode = true;
+      this.drawToolbar.activate(Draw.POLYLINE, null);
+
+      this.map.setInfoWindowOnClick(false);
+
+      // Remove active style on button
+      this._applyEditToolButtonStyle('CUT', true);
+    }
+  }), _defineProperty(_declare, '_cutFeatures', function _cutFeatures(evt) {
+    // Check for line feature
+    if (this.currentFeature && evt && evt.geometry) {
+      var cutLine = evt.geometry;
+
+      // Reset the cut tool
+      this._setCutMode(true);
+
+      if (cutLine.type !== 'polyline') {
+        Message({
+          message: this.nls.tools.cutErrors.invalidCutGeometryError
+        });
+
+        // stop here and reset tool
+        return;
+      }
+
+      var feature = this.currentFeature;
+      var newShapes = geometryEngine.cut(feature.geometry, cutLine);
+
+      if (newShapes.length === 0) {
+        Message({
+          message: this.nls.tools.cutErrors.noFeaturesCutError
+        });
+      } else {
+        // Create new records based on the original and remove the original record
+        var newFeatures = [],
+            newGeometry = null;
+        for (var p = 0, pl = newShapes.length; p < pl; p++) {
           var newFeature = new Graphic(feature.toJson());
-          var newGeometry = null;
-
-          switch (process) {
-            case 'rings':
-              newGeometry = new Polygon({
-                "rings": [JSON.parse(JSON.stringify(geometry[process][p]))],
-                "spatialReference": geometry.spatialReference.toJson()
-              });
-              break;
-
-            case 'paths':
-              newGeometry = new Polyline({
-                "paths": [JSON.parse(JSON.stringify(geometry[process][p]))],
-                "spatialReference": geometry.spatialReference.toJson()
-              });
-              break;
-          }
+          newGeometry = newShapes[p];
           newFeature.setGeometry(newGeometry);
           newFeatures.push(newFeature);
         }
-      } else {
-        newFeatures.push(feature);
-      }
 
-      // Apply the changes
-      var layer = this.currentFeature.getLayer();
-      layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
-        if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
-          Message({
-            message: adds[0].error.toString()
-          });
-        }
-        if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
-          Message({
-            message: deletes[0].error.toString()
-          });
-        }
-
-        // Return to templates 
-        this._showTemplate(true);
-      }), lang.hitch(this, function (err) {
-        Message({
-          message: err.message.toString() + "\n" + err.details
-        });
-      }));
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Edit DrawTools */
-
-    _applyEditToolButtonStyle: function _applyEditToolButtonStyle(tool, active) {
-      // Update cut tool state
-      if (tool !== 'CUT' || tool === 'CUT' && !active) {
-        if (domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
-          domClass.remove(this.featureCutBtnNode, "btn-toggle");
-        }
-      } else {
-        if (!domClass.contains(this.featureCutBtnNode, "btn-toggle")) {
-          domClass.add(this.featureCutBtnNode, "btn-toggle");
-        }
-      }
-    },
-
-    _actionEditTool: function _actionEditTool(evt) {
-      switch (this._drawToolEditType) {
-        case 'CUT':
-          this._cutFeatures(evt);
-          break;
-        default:
-          alert('_actionEditTool: Not finished');
-          break;
-      }
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Cut Tool */
-
-    _setCutHandler: function _setCutHandler(create, error) {
-      if (create) {
-        // Remove disable button style
-        if (domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
-          domClass.remove(this.featureCutBtnNode, "jimu-state-disabled");
-        }
-
-        domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutToolTitle);
-
-        // Apply the click event
-        if (!this._cutClick) {
-          this._cutClick = on(this.featureCutBtnNode, "click", lang.hitch(this, this._setCutMode));
-        }
-      } else {
-        // Apply disable button style
-        if (!domClass.contains(this.featureCutBtnNode, "jimu-state-disabled")) {
-          domClass.add(this.featureCutBtnNode, "jimu-state-disabled");
-        }
-
-        // Deactiviate the click event
-        if (this._cutClick) {
-          this._cutClick.remove();
-          this._cutClick = null;
-        }
-
-        switch (error) {
-          case "unsupported geometry":
-            domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.unsupportedGeometryError);
-            break;
-
-          default:
-            domAttr.set(this.featureCutBtnNode, "title", this.nls.tools.cutErrors.generalError);
-            break;
-        }
-      }
-    },
-
-    _setCutMode: function _setCutMode(reset) {
-      if (reset === true || this._drawToolEditMode && this._drawToolEditType && this._drawToolEditType === 'CUT') {
-        // Deactivate the cut tool
-        this._drawToolEditMode = false;
-        this._drawToolEditType = null;
-        this.drawToolbar.deactivate();
-
-        this.map.setInfoWindowOnClick(true);
-
-        // Remove active style on button
-        this._applyEditToolButtonStyle('CUT', false);
-      } else {
-
-        // Check if another edit tool is active
-        if (this._drawToolEditType !== 'CUT') {}
-        // disable this tool
-
-
-        // Activate the draw tool to define the cut line
-        this._drawToolEditType = 'CUT';
-        this._drawToolEditMode = true;
-        this.drawToolbar.activate(Draw.POLYLINE, null);
-
-        this.map.setInfoWindowOnClick(false);
-
-        // Remove active style on button
-        this._applyEditToolButtonStyle('CUT', true);
-      }
-    },
-
-    _cutFeatures: function _cutFeatures(evt) {
-      // Check for line feature
-      if (this.currentFeature && evt && evt.geometry) {
-        var cutLine = evt.geometry;
-
-        // Reset the cut tool
-        this._setCutMode(true);
-
-        if (cutLine.type !== 'polyline') {
-          Message({
-            message: this.nls.tools.cutErrors.invalidCutGeometryError
-          });
-
-          // stop here and reset tool
-          return;
-        }
-
-        var feature = this.currentFeature;
-        var newShapes = geometryEngine.cut(feature.geometry, cutLine);
-
-        if (newShapes.length === 0) {
-          Message({
-            message: this.nls.tools.cutErrors.noFeaturesCutError
-          });
-        } else {
-          // Create new records based on the original and remove the original record
-          var newFeatures = [],
-              newGeometry = null;
-          for (var p = 0, pl = newShapes.length; p < pl; p++) {
-            var newFeature = new Graphic(feature.toJson());
-            newGeometry = newShapes[p];
-            newFeature.setGeometry(newGeometry);
-            newFeatures.push(newFeature);
-          }
-
-          var layer = feature.getLayer();
-          layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
-            if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
-              Message({
-                message: adds[0].error.toString()
-              });
-            }
-            if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
-              Message({
-                message: deletes[0].error.toString()
-              });
-            }
-
-            // Return to templates 
-            this._showTemplate(true);
-          }), lang.hitch(this, function (err) {
+        var layer = feature.getLayer();
+        layer.applyEdits(newFeatures, null, [feature], lang.hitch(this, function (adds, updates, deletes) {
+          if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
             Message({
-              message: err.message.toString() + "\n" + err.details
-            });
-          }));
-        }
-      }
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - URL Parameter Preset Fields */
-
-    _initURLPresetValues: function _initURLPresetValues() {
-      var loc = window.location;
-      var urlObject = esriUrlUtils.urlToObject(loc.href);
-
-      // Check for filter
-      if (urlObject.query !== null) {
-        var valuesQuery = urlObject.query["preset"];
-        if (valuesQuery) {
-          var values = this._getPresetParams(valuesQuery);
-          array.forEach(values, function (field) {
-            this._setPresetValueValue(field.name, field.value);
-          }, this);
-        }
-      }
-    },
-
-    _getPresetParams: function _getPresetParams(query) {
-      var presetValues = [];
-      if (query) {
-        var items = query.split(',');
-        array.forEach(items, lang.hitch(this, function (item) {
-          var itemparts = item.split(':');
-          if (itemparts.length === 2) {
-            presetValues.push({
-              name: itemparts[0],
-              value: itemparts[1]
+              message: adds[0].error.toString()
             });
           }
-        }));
-      }
-      return presetValues;
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - URL Parameter Template Filter */
-
-    _applyURLTemplateFilter: function _applyURLTemplateFilter() {
-      var loc = window.location;
-      var urlObject = esriUrlUtils.urlToObject(loc.href);
-
-      // Check for filter
-      if (urlObject.query !== null) {
-        var templatesQuery = urlObject.query["templates"];
-        if (templatesQuery) {
-          var templateIDs = this._getTemplateParams(templatesQuery);
-          this._filterEditor.filterTextBox.value = templateIDs;
-          this._filterEditor._onTemplateFilterChanged();
-        }
-      }
-    },
-
-    _getTemplateParams: function _getTemplateParams(query) {
-      var templatesString = '';
-
-      var filterParams = query.split(',');
-
-      if (filterParams.length > 0) {
-        // Check layer templates for domain codes that match template urls
-        var layers = this._getEditableLayers(this.config.editor.configInfos, false);
-        var tmps = [],
-            tmpIds = [];
-        array.forEach(layers, lang.hitch(this, function (layer) {
-          var dmVals = layer.types.map(function (item) {
-            return {
-              "id": item["id"],
-              "label": item.templates[0]["name"]
-            };
-          });
-
-          for (var i = 0, l = dmVals.length; i < l; i++) {
-            if (tmpIds.indexOf(dmVals[i].label) === -1) {
-              tmps.push(dmVals[i]);
-              tmpIds.push(dmVals[i].label);
-            } else if (tmpIds.indexOf(dmVals[i].id) === -1) {
-              tmps.push(dmVals[i]);
-              tmpIds.push(dmVals[i].id);
-            }
+          if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+            Message({
+              message: deletes[0].error.toString()
+            });
           }
+
+          // Return to templates 
+          this._showTemplate(true);
+        }), lang.hitch(this, function (err) {
+          Message({
+            message: err.message.toString() + "\n" + err.details
+          });
         }));
+      }
+    }
+  }), _defineProperty(_declare, '_initURLPresetValues', function _initURLPresetValues() {
+    var loc = window.location;
+    var urlObject = esriUrlUtils.urlToObject(loc.href);
 
-        var templates = [];
-        array.forEach(filterParams, function (param) {
-          var paramlc = param.toLowerCase();
-          var options = tmps.filter(function (item, index) {
-            return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+    // Check for filter
+    if (urlObject.query !== null) {
+      var valuesQuery = urlObject.query["preset"];
+      if (valuesQuery) {
+        var values = this._getPresetParams(valuesQuery);
+        array.forEach(values, function (field) {
+          this._setPresetValueValue(field.name, field.value);
+        }, this);
+      }
+    }
+  }), _defineProperty(_declare, '_getPresetParams', function _getPresetParams(query) {
+    var presetValues = [];
+    if (query) {
+      var items = query.split(',');
+      array.forEach(items, lang.hitch(this, function (item) {
+        var itemparts = item.split(':');
+        if (itemparts.length === 2) {
+          presetValues.push({
+            name: itemparts[0],
+            value: itemparts[1]
           });
+        }
+      }));
+    }
+    return presetValues;
+  }), _defineProperty(_declare, '_applyURLTemplateFilter', function _applyURLTemplateFilter() {
+    var loc = window.location;
+    var urlObject = esriUrlUtils.urlToObject(loc.href);
 
-          array.forEach(options, function (item) {
-            if (templates.indexOf(item.label) === -1) {
-              templates.push(item.label);
-            }
-          });
+    // Check for filter
+    if (urlObject.query !== null) {
+      var templatesQuery = urlObject.query["templates"];
+      if (templatesQuery) {
+        var templateIDs = this._getTemplateParams(templatesQuery);
+        this._filterEditor.filterTextBox.value = templateIDs;
+        this._filterEditor._onTemplateFilterChanged();
+      }
+    }
+  }), _defineProperty(_declare, '_getTemplateParams', function _getTemplateParams(query) {
+    var templatesString = '';
+
+    var filterParams = query.split(',');
+
+    if (filterParams.length > 0) {
+      // Check layer templates for domain codes that match template urls
+      var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+      var tmps = [],
+          tmpIds = [];
+      array.forEach(layers, lang.hitch(this, function (layer) {
+        var dmVals = layer.types.map(function (item) {
+          return {
+            "id": item["id"],
+            "label": item.templates[0]["name"]
+          };
         });
-        templatesString = templates.join(',');
-      }
 
-      return templatesString;
-    },
-
-    /* END: Ecan Changes */
-
-    /* BEGIN: Ecan Changes - Hide Attribute display on preset fields */
-
-    _getRowInfo: function _getRowInfo(row) {
-      var valueCell = row.parentNode.childNodes[1].childNodes[0];
-      var valueCell2 = null;
-      if (row.parentNode.childNodes[1].childNodes.length > 1) {
-        valueCell2 = row.parentNode.childNodes[1].childNodes[1];
-      }
-      var label;
-      if (this.useFieldName === true) {
-        if (row.hasAttribute("data-fieldname")) {
-          label = row.getAttribute("data-fieldname");
-        } else {
-          label = row.childNodes[0].data;
+        for (var i = 0, l = dmVals.length; i < l; i++) {
+          if (tmpIds.indexOf(dmVals[i].label) === -1) {
+            tmps.push(dmVals[i]);
+            tmpIds.push(dmVals[i].label);
+          } else if (tmpIds.indexOf(dmVals[i].id) === -1) {
+            tmps.push(dmVals[i]);
+            tmpIds.push(dmVals[i].id);
+          }
         }
+      }));
+
+      var templates = [];
+      array.forEach(filterParams, function (param) {
+        var paramlc = param.toLowerCase();
+        var options = tmps.filter(function (item, index) {
+          return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+        });
+
+        array.forEach(options, function (item) {
+          if (templates.indexOf(item.label) === -1) {
+            templates.push(item.label);
+          }
+        });
+      });
+      templatesString = templates.join(',');
+    }
+
+    return templatesString;
+  }), _defineProperty(_declare, '_getRowInfo', function _getRowInfo(row) {
+    var valueCell = row.parentNode.childNodes[1].childNodes[0];
+    var valueCell2 = null;
+    if (row.parentNode.childNodes[1].childNodes.length > 1) {
+      valueCell2 = row.parentNode.childNodes[1].childNodes[1];
+    }
+    var label;
+    if (this.useFieldName === true) {
+      if (row.hasAttribute("data-fieldname")) {
+        label = row.getAttribute("data-fieldname");
       } else {
         label = row.childNodes[0].data;
       }
-
-      var parent = row.parentNode;
-      var widget = registry.getEnclosingWidget(valueCell);
-
-      return [valueCell, parent, widget, label, valueCell2];
+    } else {
+      label = row.childNodes[0].data;
     }
 
-    /* END: Ecan Changes */
+    var parent = row.parentNode;
+    var widget = registry.getEnclosingWidget(valueCell);
 
-  });
+    return [valueCell, parent, widget, label, valueCell2];
+  }), _defineProperty(_declare, '_mapAddRemoveLayerHandler', function _mapAddRemoveLayerHandler(action) {
+
+    if (action) {
+      if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
+        this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+      }
+      if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
+        this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+      }
+    } else {
+      if (this._mapAddLayer) {
+        this._mapAddLayer.remove();
+      }
+      if (this._mapRemoveLayer) {
+        this._mapRemoveLayer.remove();
+      }
+    }
+  }), _defineProperty(_declare, '_onMapAddLayer', function _onMapAddLayer(result) {
+    var gl = false;
+
+    switch (result.layer.declaredClass) {
+      case "esri.layers.FeatureLayer":
+      case "esri.layers.GraphicsLayer":
+      case "esri.layers.CSVLayer":
+        gl = true;
+        break;
+
+      default:
+        // Do Nothing
+        break;
+    }
+
+    if (this.map.snappingManager && gl) {
+      // Check if layer existing in snapping manager layer infos
+      var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+        return layerInfo.layer.id === result.layer.id;
+      })).length > 0;
+
+      if (!isSnap) {
+        var layerInfos = [];
+        array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+          layerInfos.push(layerInfo);
+        });
+        layerInfos.push({
+          layer: result.layer
+        });
+
+        this.map.snappingManager.setLayerInfos(layerInfos);
+      }
+    }
+  }), _defineProperty(_declare, '_onMapRemoveLayer', function _onMapRemoveLayer(result) {
+    var gl = false;
+
+    switch (result.layer.declaredClass) {
+      case "esri.layers.FeatureLayer":
+      case "esri.layers.GraphicsLayer":
+      case "esri.layers.CSVLayer":
+        gl = true;
+        break;
+
+      default:
+        // Do Nothing
+        break;
+    }
+
+    if (this.map.snappingManager && gl) {
+      // Check if layer existing in snapping manager layer infos
+      var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+        return layerInfo.layer.id === result.layer.id;
+      })).length > 0;
+
+      if (isSnap) {
+        var layerInfos = [];
+        array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+          if (layerInfo.layer.id !== result.layer.id) {
+            layerInfos.push(layerInfo);
+          }
+        });
+        this.map.snappingManager.setLayerInfos(layerInfos);
+      }
+    }
+  }), _declare));
 });

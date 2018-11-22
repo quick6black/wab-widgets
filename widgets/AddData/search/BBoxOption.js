@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ define(["dojo/_base/declare",
 
       postCreate: function() {
         this.inherited(arguments);
-        this.bboxToggle.set("checked", false);
+        this.bboxToggle.set("checked", true);
       },
 
       bboxClicked: function() {

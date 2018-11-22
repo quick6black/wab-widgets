@@ -5,5 +5,5 @@
 		"style.scss"
 	],
 	"names": [],
-	"mappings": "AAAA,AAAA,wBAAwB,CAAC,KAAK,CAAC;EAC7B,WAAW,EAAE,IAAI,GAClB"
+	"mappings": "AAAA,AAAyB,wBAAD,CAAC,KAAK,CAAC;EAC7B,WAAW,EAAE,IAAI,GAClB"
 }

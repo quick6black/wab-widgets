@@ -1,10 +1,10 @@
 {
   "name": "AddData",
   "platform": "HTML",
-  "version": "2.9",
-  "wabVersion": "2.(5)",
   "author": "Esri, with Modifications by ECan GIS Team",
   "description": "Modified version of the standard ESRI WAB AddData widget, modified to customise certains actions, such as the location opened when the layer details link is clicked, and additional currated groups",
+  "version": "2.10",
+  "wabVersion": "2.10",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
