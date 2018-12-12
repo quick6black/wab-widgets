@@ -2188,7 +2188,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           if (elem.declaredClass !== "dijit.form.TimeTextBox") {
             var valToSet = elem.get("value");
             if (valToSet !== undefined && valToSet !== null && valToSet !== "") {
-
               if (elem.declaredClass === "dijit.form.DateTextBox") {
                 var timeElement = query(".dijitTimeTextBox", ele.parentNode)[0];
                 // retrieve the value
@@ -2211,7 +2210,17 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
               if (valToSet !== undefined && valToSet !== null && valToSet !== "") {
                 for (var attribute in attributes) {
                   if (attributes.hasOwnProperty(attribute) && attribute === elem.get("name") && presetFields.indexOf(elem.get("name")) >= 0) {
-                    attributes[attribute] = valToSet;
+
+                    var editfieldInfo = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
+                      return fieldInfo.fieldName === elem.get("name");
+                    })[0];
+
+                    if (editfieldInfo && editFieldInfo.type === "esriFieldTypeGUID" && valToSet.indexOf("{") === -1) {
+                      attributes[attribute] = "{" + valToSet + "}";
+                    } else {
+                      attributes[attribute] = valToSet;
+                    }
+
                     break;
                   }
                 }
@@ -4364,7 +4373,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     // Check for filter
     if (urlObject.query !== null) {
-      var templatesQuery = urlObject.query["templates"];
+      var templatesQuery = urlObject.query["templates"] || urlObject.query["TEMPLATES"];
       if (templatesQuery) {
         var templateIDs = this._getTemplateParams(templatesQuery);
         this._filterEditor.filterTextBox.value = templateIDs;
