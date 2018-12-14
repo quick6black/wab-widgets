@@ -2091,27 +2091,28 @@ function(
                         // update the symbol based on the renderer
                         if (getRendererSymbol) {
                             var symbolJson = symbols[graphic.attributes["symbolClass"]];
-                            switch(symbolJson.type) {
-                                case "esriSFS":
-                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
-                                    break;
+                            if (symbolJson) {
+                                switch(symbolJson.type) {
+                                    case "esriSFS":
+                                        graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                        break;
 
-                                case "esriSLS":
-                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
-                                    break;
+                                    case "esriSLS":
+                                        graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                        break;
 
-                                case "esriSMS":
-                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriSMS":
+                                        graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                        break;
 
-                                case "esriPMS":
-                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriPMS":
+                                        graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                        break;
 
-
-                                default:
-                                    //do nothing
-                                    break;
+                                    default:
+                                        //do nothing
+                                        break;
+                                }
                             }
                         }
 
