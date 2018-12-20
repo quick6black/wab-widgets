@@ -1,5 +1,12 @@
 {
-  "serviceUrl": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer",
+  "llurGeometryURL": "https://mapportaltest.ecan.govt.nz/arcgis/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/10",
+  "llurAPI":{
+    "apiBaseURL":"https://localhost:44301",
+    "proxy":"https://llurproxy.ashx"
+  }, 
+  "allowEditExisting": true,
+  "allowStatementRequest": true,
+  "allowEscalateEnquiry": true,
   "recordTemplates": [
     {
       "title": "Activity",
@@ -220,5 +227,18 @@
         }
       ]
     }
-  ]
+  ],
+
+  "labelOverrides": {
+    "edit": {
+      "editGeometryLabel": "",
+      "editGeometryTooltip": "",
+      "requestStatementLabel":"",
+      "requestStatementTooltip":"" ,
+      "submitLabel":"",
+      "submitTooltip":"",
+      "cancelLabel":"",
+      "cancelTooltip":""
+    }
+  }
 }
