@@ -35,9 +35,21 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     _queryForFeatures: function _queryForFeatures(featureSet) {
       var layer = featureSet.features[0].getLayer();
       var objectIdField = layer.objectIdField;
-      var objectIds = featureSet.features.map(function (feature) {
-        return feature.attributes[objectIdField];
-      });
+
+      var objectIds = null;
+      /* CHANGE 2018-12-20 : Check for multiple selected features */
+      var selectedFeatures = layer.getSelectedFeatures();
+      if (selectedFeatures && selectedFeatures.length > featureSet.features.length) {
+        //use selected feature details
+        objectIds = selectedFeatures.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      } else {
+        //use featureset details
+        objectIds = featureSet.features.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      }
 
       var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
         return field.name;
