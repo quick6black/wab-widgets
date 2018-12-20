@@ -128,7 +128,6 @@ function (
 	        // Enable toolbar components
 	        this.drawToolbar = new Draw(this.map);
 
-
 	        // draw event
 	        this.own(on(this.drawToolbar, "draw-complete", lang.hitch(this, 
 	            function (evt) {
@@ -229,7 +228,8 @@ function (
 	                    } else {
 	                        //disable tools
 	                        if (this.drawToolbar) {
-	                            this.drawToolbar.deactivate();            
+	                            this.drawToolbar.deactivate();  
+                              this.toggleDrawingToolVisible(false);        
 	                        }
 	                    } 
 	                })
@@ -251,6 +251,7 @@ function (
               	id: "drawingTool"
             }, drawingOptionsToolDiv);
             this.drawingTool.startup();
+            this.toggleDrawingToolVisible(false);                
             this._setDrawingToolbar("select", null);
 	    },
 
@@ -400,7 +401,8 @@ function (
 
       	_setDrawingToolbar: function (shapeType, drawType) {
         	if (this.drawingTool === null || this.drawingTool === undefined) {
-          		return;
+            this.toggleDrawingToolVisible(false);
+          	return;
         	}
         
         	if (this.currentShapeType === null ||
@@ -431,9 +433,24 @@ function (
           		this.drawingTool.set('iconClass', LEDrawingOptions[shapeType][0].iconClass);
           		this.currentDrawType = LEDrawingOptions[shapeType][0]._drawType;
         	}
-      	}
 
+          this.toggleDrawingToolVisible(shapeType !== 'select');
+      	},
 
+        //toggles the visibility of the drawing tool dropdown
+        toggleDrawingToolVisible: function (showTool) {
+          if (showTool === undefined) {
+            //toggle the drawing tool to the opposite of what it currently is e.g visible => invisible)
+            showTool = domStyle.get(this.drawingTool.domNode, "display") === "none"; 
+          } 
+
+          if (showTool) {
+            domStyle.set(this.drawingTool.domNode, 'display', 'inline-block');
+          }
+          else {
+            domStyle.set(this.drawingTool.domNode, 'display', 'none');
+          }
+        }
 
     });
 

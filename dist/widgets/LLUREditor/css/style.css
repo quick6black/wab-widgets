@@ -24,6 +24,9 @@
   position: relative;
   height: 296px !important; }
 
+.llur-editor .templatePicker .grid .groupLabel {
+  font-size: 2em; }
+
 .llur-editor .jimu-btn.layer-btn {
   margin-right: 5px;
   margin-bottom: 5px;
@@ -280,5 +283,24 @@
 
 div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
   width: 20px; }
+
+/* Messages */
+.message-info-icon {
+  background-image: url("images/info.png");
+  float: left;
+  height: 48px;
+  width: 48px; }
+
+.message-error-icon {
+  background-image: url("images/error.png");
+  float: left;
+  height: 48px;
+  width: 48px; }
+
+.message-warning-icon {
+  background-image: url("images/warning.png");
+  float: left;
+  height: 48px;
+  width: 48px; }
 
 /*# sourceMappingURL=style.css.map */

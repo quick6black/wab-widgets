@@ -21,7 +21,9 @@ define([
     'jimu/WidgetManager',
     'jimu/dijit/TabContainer3',
     'jimu/dijit/AGOLLoading',
+    'jimu/dijit/Message',
     'jimu/portalUtils',
+    'jimu/portalUrlUtils',    
 
     "esri/geometry/geometryEngine",
     "esri/graphic",
@@ -40,6 +42,7 @@ define([
     "esri/symbols/SimpleFillSymbol",
     "esri/Color",
     "esri/request",
+    "esri/arcgis/Portal",
 
     './components/createFeaturePane',
     './components/editFeaturePane',
@@ -63,7 +66,9 @@ function(
     WidgetManager,
     TabContainer3,
     AGOLLoading,
+    Message,
     jimuPortalUtils,
+    jimuPortalUrlUtils,
 
     geometryEngine,
     Graphic,
@@ -82,6 +87,7 @@ function(
     SimpleFillSymbol,
     Color,
     esriRequest,
+    arcgisPortal,
 
     CreateFeaturePane,
     EditFeaturePane,
@@ -416,10 +422,10 @@ function(
                 this.displayLayer = recordTemplate.displayLayer;
                 this.map.addLayer(this.displayLayer);
                 this.displayLayer.show();
-
-                //update the current record template
-                this.editFeaturePane.setEditFeature(recordTemplate, editMode);                
             }
+
+            //update the current record template
+            this.editFeaturePane.setEditFeature(recordTemplate, editMode);                
 
             if (!template.template) {
                 template.template = template.displayLayer.types[0].templates[0];
@@ -461,7 +467,8 @@ function(
         if (featureset && featureset.features && featureset.features.length > 0) {
             this.showCreatePopup(featureset);
         } else {
-            alert('LLUR Edit Tool - Invalid features supplied.');
+            console.log('LLUREditor::copyFeatureSet::Invalid features supplied');
+            this.showMessage('LLUR Edit Tool - Invalid features supplied.',"error");
         }
     },
 
@@ -475,6 +482,7 @@ function(
         }
     },
 
+    //show the create feature popup screen when uisng the create record feature action
     showCreatePopup: function (featureSet) {
         var copyPopup, param;
         param = {
@@ -496,10 +504,12 @@ function(
                 return;
             }
 
+            //check if multiple features were supplied
             var shape = null;
             if (copyPopup.featureSet.features.length === 1) {
                 shape = copyPopup.featureSet.features[0].geometry;
             } else {
+                //multiple records - create a single merged shape
                 var shapes = graphicsUtils.getGeometries(copyPopup.featureSet.features);
                 shape = geometryEngine.union(shapes);
             }
@@ -508,6 +518,40 @@ function(
         copyPopup.popup.close();
         copyPopup.destroy();
       });
+    },
+
+    //show a message box with buttons if necessary
+    showMessage : function (msg, type, buttons) {
+
+        var class_icon = "message-info-icon";
+        switch (type) {
+            case "error":
+                class_icon = "message-error-icon";
+                break;
+            case "warning":
+                class_icon = "message-warning-icon";
+                break;
+        }
+
+        var content = '<i class="' + class_icon + '">&nbsp;</i>' + msg;
+
+        if (buttons === undefined) {
+            buttons = [];
+        }
+
+        this.message = new Message({
+            message : content,
+            buttons : buttons
+        });
+    },
+
+    //destroy the message dijit if instantiated.
+    hideMessage : function () {
+        if (this.message && this.message.close) {
+            this.message.close();
+            this.message.destroy();
+            this.message = false;
+        }
     },
 
     _removeDisplayLayer: function () {
@@ -521,14 +565,9 @@ function(
     },
 
     saveChanges: function (editRecord, apiRecord) {
-        
-        
         //temp -for testing api
         //editRecord.attributes["ID"] = 166593;
         //apiRecord.id = 166593;
-
-        //this.token = 'Bearer bZy3awf0Ox_JN5zUgNNPbCQHu-dJG2SjHWKKMoSS-HFBxK_YEnweeC9WcJxkaelnF8nIojDM2oErvF-F9QJRARfyLEpABAErMEHEMwAsakicSRKeQLRhqHz_7mhj7D13mAF_Pm87fBm86jeGf2c6zpVW5L2nHhPpkqM83z20cSAzba_1yIENmplaBTbB7fCn6XmXjsR56XfLXNT2CdhCTSqE7792Kppv7ORCSXvOCA60-eWGguWFSfzi7Yqh4TSiRjwcDCgTfDwxP6jYn2_wBB9j3OW2RkhHFYpcDLmkC0Upwk7dNpRjWY8sVoPvv0_JFAT51sY4tWvEpI72Gn7K9xfToRYmGFciO_c9PTHpGnA';
-        this.token = this.tokenText.value;
 
         //Check is this update or new record
         if (editRecord && editRecord.attributes["ID"] !== null) {
@@ -550,20 +589,28 @@ function(
                                 .then(lang.hitch(this, 
                                     function (user) {
                                         var now = new Date();
-                                        shapeDto.modifiedBy = user.credential.userId;
-                                        shapeDto.modifiedDate = now.toISOString();
+                                        now = now.getUTCFullYear() + '-' +
+                                        ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
+                                        ('00' + now.getUTCDate()).slice(-2) + ' ' +
+                                        ('00' + now.getUTCHours()).slice(-2) + ':' +
+                                        ('00' + now.getUTCMinutes()).slice(-2) + ':' +
+                                        ('00' + now.getUTCSeconds()).slice(-2);  
 
-                                        this._putExistingAPIEntity(shapeDto, this.token)
+                                        shapeDto.modifiedBy = user.credential.userId;
+                                        shapeDto.modifiedDate = now;
+
+                                        this._putExistingAPIEntity(shapeDto)
                                             .then(
                                                 lang.hitch(this, 
                                                     function (result) { 
                                                         var r = 0;
                                                         //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
-                                                        this._postGeometryChanges(editRecord);
+                                                        this._postGeometryChanges(editRecord, false);
                                                     }),
                                                 lang.hitch(this, 
                                                     function (error) {
                                                         var e = 0;
+                                                        this._changeEditToolState(true);
                                                     })
                                             );
                                     })
@@ -589,10 +636,16 @@ function(
             );
 
             //post entity to api and await response
-            this._postNewAPIEntity(apiRecord, template.apiSettings.controller, this.token)
+            this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
                 .then(
                     lang.hitch(this, function (result) {
-                        this._postGeometryChanges(editRecord);
+                        var resultData = JSON.parse(result.data);
+                        if (resultData.id) {
+                            editRecord.attributes["ID"] = resultData.id;
+                            editRecord.attributes["EntType_ID"] = resultData.entTypeId;
+                        }
+
+                        this._postGeometryChanges(editRecord, true);
                     }),
                     lang.hitch(this, function (error) {
                         alert(error.message);
@@ -602,6 +655,7 @@ function(
         }
     },
 
+    //abandon the current edit session and reset the tools
     cancelChanges: function () {
         var template = this.editFeaturePane.currentTargetTemplate;
 
@@ -610,12 +664,13 @@ function(
 
         if (this.createFeaturePane.templatePicker) {
             this.createFeaturePane.templatePicker.clearSelection();
+            this.createFeaturePane.toggleDrawingToolVisible(false);
         }
         this.tabContainer.selectTab(this.nls.tabs.create);
     },
 
     //post the data to tye LLUR Geometry layer
-    _postGeometryChanges: function (rec) {
+    _postGeometryChanges: function (rec, isInsert) {
         if (this._geometryLayer) {
             var feature = new Graphic(rec.toJson()), 
                 newAttributes = automapperUtil.map('graphic','llurGeoFeature', rec);
@@ -624,22 +679,35 @@ function(
             feature.setAttributes(newAttributes);
             feature.setSymbol(null);
             this._updateGeometryProperties(feature);
+            this._updateUserProperties(feature);
 
             var inserts = null, updates = null, deletes = null;
 
-            if (feature.attributes["ID"] === null) {
+            if (feature.attributes["ID"] === null||isInsert) {
                 //insert as new feature
-                inserts = [rec];
+                inserts = [feature];
             } else {
                 //update existing feature
-                updates = [rec];
+                updates = [feature];
             }
 
             this._geometryLayer.applyEdits(inserts, updates, deletes, 
                 lang.hitch(this, 
                     function (results) {
-                        this.tabContainer.selectTab(this.nls.tabs.create);                        
+                        var template = this.editFeaturePane.currentTargetTemplate;
+
+                        template.displayLayer.clearSelection;
+                        template.displayLayer.clear();
+
+                        if (this.createFeaturePane.templatePicker) {
+                            this.createFeaturePane.templatePicker.clearSelection();
+                        }
+
+                        this.tabContainer.selectTab(this.nls.tabs.create); 
                         this._changeEditToolState(true);
+
+                        var ext = feature.geometry.getExtent().expand(1.5);
+                        this.map.setExtent(ext,true);                        
                     }),
                 lang.hitch(this, 
                     function (error) {
@@ -650,7 +718,7 @@ function(
         }
     },
 
-    //update geometry properties
+    //update geometry properties for area and perimeter
     _updateGeometryProperties: function (rec) {
         if (rec) {
             var area = geometryEngine.planarArea(rec.geometry, 'square-meters');
@@ -662,10 +730,29 @@ function(
         }
     },
 
+    //update the user details on the GIS record
+    _updateUserProperties: function (rec) {
+        if (rec) {
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
+
+            var userName = portal.user !== null ? portal.user.username : 'Unknown';
+            var currentDate = new Date().valueOf();
+
+            if (rec.attributes["CREATEDBY"] === null){
+                rec.attributes["CREATEDBY"] = userName;
+                rec.attributes["CREATEDDATE"] = currentDate;
+            }
+
+            rec.attributes["MODIFIEDBY"] = userName;
+            rec.attributes["MODIFIEDDATE"] = currentDate;
+        }
+   },
 
     /*---------------------------------------------------------
       LLUR API FUNCTIONS */
 
+    //request an existing feature's details from the LLUR API
     _requestLLUREntity: function (rec) {
         //get the template for the rec type - match against configured layer settings
         var template = null;
@@ -679,29 +766,28 @@ function(
  
         //if valid template found
         if (template) {
-            return this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token);
+            return this._requestAPIEntityGet(rec, template.apiSettings.controller);
         } else {
             alert('Invalid record requested');
             return null;
         }
     },
 
-    _requestAPIEntityGet: function (rec, entType, token) {
+    //call LLUR API get record
+    _requestAPIEntityGet: function (rec, entType) {
         var deferred = new Deferred();
 
+        //set the endpoint url
         var url = this.config.llurAPI.apiBaseURL + '/' + entType + '/?entityId=' + rec.id;
 
         //append proxy - requires call be made via proxy
-        url = this.appConfig.httpProxy.url + '?' + url; 
+        url = this.config.llurAPI.proxy + '?' + url; 
 
         //construct request
         var entityRequest = request(url, {
             method: 'GET',
             handleAs: 'json',
-            callbackParameter: 'callback',
-            headers: {
-                'Authorization': token
-            }
+            callbackParameter: 'callback'
         });
 
         //make request
@@ -717,36 +803,23 @@ function(
         return deferred.promise;
     },
 
-    _postNewAPIEntity: function (rec, entType, token) {
+    //call LLUR API to create a new database record
+    _postNewAPIEntity: function (rec, entType) {
         var deferred = new Deferred();
+        entType = this._getEntTypeFromRecord(rec);
 
-        var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + 's';
-
+        //set the endpoint url
+        var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType;
+        
         //append proxy - requires call be made via proxy
-        url = this.appConfig.httpProxy.url + '?' + url; 
+        url = this.config.llurAPI.proxy + '?' + url; 
 
         //construct request
-        /*
         var entityRequest = request(url, {
             method: 'POST',
-            handleAs: 'json',
-            callbackParameter: 'callback',
-            headers: {
-                'Authorization': token
-            },
-            data: rec,
-            preventCache: true
-        });
-        */
-        var entityRequest = request(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': token
-            },
             data: JSON.stringify(rec)
         });
 
-
         //make request
         entityRequest.response.then(
             function (response) {
@@ -760,20 +833,19 @@ function(
         return deferred.promise;
     },
 
-    _putExistingAPIEntity: function (rec, token) {
+    //call LLUR API to update an existing database record
+    _putExistingAPIEntity: function (rec) {
         var deferred = new Deferred();
+        var entType = this._getEntTypeFromRecord(rec);
 
-        var entType = null;
-        if (rec.entTypeId === 'ACT') entType = 'Activities';
-        if (rec.entTypeId === 'SIT') entType = 'Sites';
-        if (rec.entTypeId === 'INV') entType = 'Investigations';
-        if (rec.entTypeId === 'ENQ') entType = 'Enquiries';
-        if (rec.entTypeId === 'COM') entType = 'Communications';
-
+        //set the endpoint url
         var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + '/' + rec.id;
 
+        //add put parameter to signal LLUR Proxy to convert this to a PUT request
+        url = url + '?put=true'
+
         //append proxy - requires call be made via proxy
-        url = this.appConfig.httpProxy.url + '?' + url; 
+        url = this.config.llurAPI.proxy + '?' + url; 
 
         //construct request
         var data = {
@@ -781,26 +853,21 @@ function(
             eCanMapsLocationShapeDto: rec
         };
 
-        /*
 
-        var entityRequest =  request(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': token
-            },
+        var entityRequest = request(url, {
+            method: 'POST',
             data: JSON.stringify(data)
         });
 
-        **/
-
+        /*
         var entityRequest = xhr.put(url, {
             headers: {
-                'Authorization': token,
                 "Content-Type": "application/json"
             },
             data: JSON.stringify(rec),
             handleAs: 'json'
         });
+        */
 
         //make request
         entityRequest.response.then(
@@ -813,6 +880,17 @@ function(
         );
 
         return deferred.promise;
+    },
+
+    //helper methdoi to get the record type endpoint name for the LLUR API
+    _getEntTypeFromRecord: function (rec) {
+        var entType = null;
+        if (rec.entTypeId === 'ACT') entType = 'Activities';
+        if (rec.entTypeId === 'SIT') entType = 'Sites';
+        if (rec.entTypeId === 'INV') entType = 'Investigations';
+        if (rec.entTypeId === 'ENQ') entType = 'Enquiries';
+        if (rec.entTypeId === 'COM') entType = 'Communications';
+        return entType;
     },
 
 
@@ -862,17 +940,34 @@ function(
                     this.tabContainer.containerNode.style.top = "0px";
                 }
             } catch(ex1) {
-
+                //Do something
             }
                 
-            this.own(aspect.after(this.tabContainer,"selectTab",function(title){
+            this.own(aspect.before(this.tabContainer,"selectTab", lang.hitch(this, function(title){
+                if (this.tabContainer.getSelectedTitle() !== title) {
+                    if (this.editFeaturePane.editToolbar) {
+                        var state = this.editFeaturePane.editToolbar.getCurrentState();
+                        if (state.graphic && state.isModified){
+                            //incomplete edit - ask to save prior to chnaging tab
+
+
+
+                        }
+                    }
+                }
+
+
+
+            }),true));
+
+            this.own(aspect.after(this.tabContainer,"selectTab", lang.hitch(this, function(title){
                 //console.warn("selectTab",title);
-                if (self.editPane && title === self.nls.tabs.edit) {
+                if (self.editFeaturePane && title === self.nls.tabs.edit) {
                     this._attrInspIsCurrentlyDisplayed = true;
                 } else {
                     this._attrInspIsCurrentlyDisplayed = false;
                 }
-            },true));
+            }),true));
         } else if (tabs.length === 0) {
             this.tabsNode.appendChild(document.createTextNode(this.nls.noOptionsConfigured));
         } 
@@ -999,22 +1094,28 @@ function(
     _mapClickHandler: function (create) {
         if (create === true && this._attrInspIsCurrentlyDisplayed === false) {
             this.map.setInfoWindowOnClick(false);
+            /*
             if (this._mapClick === undefined || this._mapClick === null) {
                 this._mapClick = on(this.map, "click", lang.hitch(this, this._onMapClick));
             }
+            */
         }
         else if (create === true && this._attrInspIsCurrentlyDisplayed === true) {
+            /*
             if (this._mapClick) {
                 this._mapClick.remove();
                 this._mapClick = null;
             }
+            */
             this.map.setInfoWindowOnClick(true);
         }
         else {
+            /*
             if (this._mapClick) {
                 this._mapClick.remove();
                 this._mapClick = null;
             }
+            */
             this.map.setInfoWindowOnClick(true);
             if (this.createFeaturePane && this.createFeaturePane.drawToolbar) {
                 this.createFeaturePane.drawToolbar.deactivate();
@@ -1148,12 +1249,42 @@ function(
             .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
             .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
             .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
-            .forMember('riskId', function (opts) { null; })
+            .forMember('riskId', function (opts) { return null; })
             .forMember('fileNo', function (opts) { return null; })
             .forMember('categoryId', function (opts) { return opts.sourceObject.attributes["CategoryType"]; })
             .forMember('active', function (opts) { return null; })
             .forMember('previousId', function (opts) { return null; })
             .ignoreAllNonExisting();
+
+        //investigation feature to INV entitydto
+        automapperUtil.createMap('graphic','INV')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { return 'INV'; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('reportTitle', function (opts) { return null; })
+            .forMember('reportDate', function (opts) { return null; })
+            .forMember('receivedDate', function (opts) { return null; })
+            .forMember('auditedBy', function (opts) { return null; })
+            .forMember('auditedDate', function (opts) { return null; })
+            .forMember('reviewedBy', function (opts) { return null; })
+            .forMember('reviewedDate', function (opts) { return null; })
+            .forMember('reportFromId', function (opts) { return null; })
+            .forMember('proposedChangeId', function (opts) { return null; })
+            .forMember('investigationPriorityId', function (opts) { return null; })
+            .forMember('fileNo', function (opts) { return null; })
+            .forMember('investigationTypeId', function (opts) { return opts.sourceObject.attributes["InvestigationType"]; })
+            .forMember('documentNo', function (opts) { return null; })
+            .forMember('preparedFor', function (opts) { return null; })
+            .ignoreAllNonExisting();
+
+
+
+
 
         //edit feature to geometry feature attributes
         automapperUtil.createMap('graphic','llurGeoFeature')

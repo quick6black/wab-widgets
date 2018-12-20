@@ -144,6 +144,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
           //disable tools
           if (this.drawToolbar) {
             this.drawToolbar.deactivate();
+            this.toggleDrawingToolVisible(false);
           }
         }
       }));
@@ -164,6 +165,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         id: "drawingTool"
       }, drawingOptionsToolDiv);
       this.drawingTool.startup();
+      this.toggleDrawingToolVisible(false);
       this._setDrawingToolbar("select", null);
     },
 
@@ -306,6 +308,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
     _setDrawingToolbar: function _setDrawingToolbar(shapeType, drawType) {
       if (this.drawingTool === null || this.drawingTool === undefined) {
+        this.toggleDrawingToolVisible(false);
         return;
       }
 
@@ -333,6 +336,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         this.drawingTool.set('label', LEDrawingOptions[shapeType][0].label);
         this.drawingTool.set('iconClass', LEDrawingOptions[shapeType][0].iconClass);
         this.currentDrawType = LEDrawingOptions[shapeType][0]._drawType;
+      }
+
+      this.toggleDrawingToolVisible(shapeType !== 'select');
+    },
+
+    //toggles the visibility of the drawing tool dropdown
+    toggleDrawingToolVisible: function toggleDrawingToolVisible(showTool) {
+      if (showTool === undefined) {
+        //toggle the drawing tool to the opposite of what it currently is e.g visible => invisible)
+        showTool = domStyle.get(this.drawingTool.domNode, "display") === "none";
+      }
+
+      if (showTool) {
+        domStyle.set(this.drawingTool.domNode, 'display', 'inline-block');
+      } else {
+        domStyle.set(this.drawingTool.domNode, 'display', 'none');
       }
     }
 

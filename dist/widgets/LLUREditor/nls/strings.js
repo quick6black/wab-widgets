@@ -47,6 +47,11 @@ define({
       cancel: "Cancel",
       titleLabel: "Create a LLUR Record",
       instruction: "Select a Record Type"
+    },
+
+    messages: {
+      confirmYes: "Yes",
+      confirmNo: "No"
     }
 
   })
