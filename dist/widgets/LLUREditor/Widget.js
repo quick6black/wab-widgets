@@ -404,13 +404,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         },
 
         saveChanges: function saveChanges(editRecord, apiRecord) {
-
             //temp -for testing api
             //editRecord.attributes["ID"] = 166593;
             //apiRecord.id = 166593;
-
-            //this.token = 'Bearer bZy3awf0Ox_JN5zUgNNPbCQHu-dJG2SjHWKKMoSS-HFBxK_YEnweeC9WcJxkaelnF8nIojDM2oErvF-F9QJRARfyLEpABAErMEHEMwAsakicSRKeQLRhqHz_7mhj7D13mAF_Pm87fBm86jeGf2c6zpVW5L2nHhPpkqM83z20cSAzba_1yIENmplaBTbB7fCn6XmXjsR56XfLXNT2CdhCTSqE7792Kppv7ORCSXvOCA60-eWGguWFSfzi7Yqh4TSiRjwcDCgTfDwxP6jYn2_wBB9j3OW2RkhHFYpcDLmkC0Upwk7dNpRjWY8sVoPvv0_JFAT51sY4tWvEpI72Gn7K9xfToRYmGFciO_c9PTHpGnA';
-            this.token = this.tokenText.value;
 
             //Check is this update or new record
             if (editRecord && editRecord.attributes["ID"] !== null) {
@@ -432,7 +428,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                             shapeDto.modifiedBy = user.credential.userId;
                             shapeDto.modifiedDate = now.toISOString();
 
-                            this._putExistingAPIEntity(shapeDto, this.token).then(lang.hitch(this, function (result) {
+                            this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
                                 var r = 0;
                                 //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
                                 this._postGeometryChanges(editRecord);
@@ -457,8 +453,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 }));
 
                 //post entity to api and await response
-                this._postNewAPIEntity(apiRecord, template.apiSettings.controller, this.token).then(lang.hitch(this, function (result) {
-                    this._postGeometryChanges(editRecord);
+                this._postNewAPIEntity(apiRecord, template.apiSettings.controller).then(lang.hitch(this, function (result) {
+                    var resultData = JSON.parse(result.data);
+                    if (resultData.id) {
+                        editRecord.attributes["ID"] = resultData.id;
+                        editRecord.attributes["EntType_ID"] = resultData.entTypeId;
+                    }
+
+                    this._postGeometryChanges(editRecord, true);
                 }), lang.hitch(this, function (error) {
                     alert(error.message);
                     this._changeEditToolState(true);
@@ -537,14 +539,15 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             //if valid template found
             if (template) {
-                return this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token);
+                return this._requestAPIEntityGet(rec, template.apiSettings.controller);
             } else {
                 alert('Invalid record requested');
                 return null;
             }
         },
 
-        _requestAPIEntityGet: function _requestAPIEntityGet(rec, entType, token) {
+        //call LLUR API get record
+        _requestAPIEntityGet: function _requestAPIEntityGet(rec, entType) {
             var deferred = new Deferred();
 
             var url = this.config.llurAPI.apiBaseURL + '/' + entType + '/?entityId=' + rec.id;
@@ -581,23 +584,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             url = this.appConfig.httpProxy.url + '?' + url;
 
             //construct request
-            /*
             var entityRequest = request(url, {
                 method: 'POST',
-                handleAs: 'json',
-                callbackParameter: 'callback',
-                headers: {
-                    'Authorization': token
-                },
-                data: rec,
-                preventCache: true
-            });
-            */
-            var entityRequest = request(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token
-                },
                 data: JSON.stringify(rec)
             });
 
@@ -611,7 +599,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             return deferred.promise;
         },
 
-        _putExistingAPIEntity: function _putExistingAPIEntity(rec, token) {
+        //call LLUR API to update an existing database record
+        _putExistingAPIEntity: function _putExistingAPIEntity(rec) {
             var deferred = new Deferred();
 
             var entType = null;
@@ -632,24 +621,20 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 eCanMapsLocationShapeDto: rec
             };
 
-            /*
-              var entityRequest =  request(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': token
-                },
+            var entityRequest = request(url, {
+                method: 'POST',
                 data: JSON.stringify(data)
             });
-              **/
 
+            /*
             var entityRequest = xhr.put(url, {
                 headers: {
-                    'Authorization': token,
                     "Content-Type": "application/json"
                 },
                 data: JSON.stringify(rec),
                 handleAs: 'json'
             });
+            */
 
             //make request
             entityRequest.response.then(function (response) {
