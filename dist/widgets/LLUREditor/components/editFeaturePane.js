@@ -214,6 +214,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                         //hide the message box
                         this.wabWidget.hideMessage();
 
+                        //deactivate edit tools
+                        this._toggleEditTool(true);
+
                         //get the current selection record
                         var rec = this.attributeInspector._selection[0];
 

@@ -292,6 +292,9 @@ function (
                                 //hide the message box
                                 this.wabWidget.hideMessage();
 
+                                //deactivate edit tools
+                                this._toggleEditTool(true);
+
                                 //get the current selection record
                                 var rec = this.attributeInspector._selection[0];
 

@@ -223,7 +223,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                             }, true);
                         }
                     } else {
-                        alert('No Record found');
+                        this.showMessage('No Record found', "error");
                     }
                 }), lang.hitch(this, this._requestError));
             }
@@ -251,9 +251,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     if (!caps.canCreate || !caps.canUpdate) {
                         //disable edit tools
 
-
                         //alert user
-                        alert("LLUR Edit Widget: Edit capability disabled. Some functionality will not work as expected.");
+                        this.showMessage("LLUR Edit Widget: Edit capability disabled. Some functionality will not work as expected.", "error");
                     }
                 }), lang.hitch(this, function (error) {
                     console.log('LLUREditor::_prepEditorService::Geometry layer load failed');
@@ -377,7 +376,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 var recordTemplate = copyPopup.getSelectedRecordType();
                 if (recordTemplate) {
                     if (copyPopup.featureSet.features.length === 0) {
-                        alert('No shapes to copy');
+                        this.showMessage('No shapes to copy', "error");
                         return;
                     }
 
@@ -441,11 +440,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.updateFeatures = [];
         },
 
+        //start save process 
         saveChanges: function saveChanges(editRecord, apiRecord) {
-            //temp -for testing api
-            //editRecord.attributes["ID"] = 166593;
-            //apiRecord.id = 166593;
-
             //Check is this update or new record
             if (editRecord && editRecord.attributes["ID"] !== null) {
                 this._changeEditToolState(false, "Starting Update Process");
@@ -473,7 +469,12 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                                 //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
                                 this._postGeometryChanges(editRecord, false);
                             }), lang.hitch(this, function (error) {
-                                var e = 0;
+                                if (error) {
+                                    this.showMessage(error.message, "error");
+                                } else {
+                                    this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
+                                }
+
                                 this._changeEditToolState(true);
                             }));
                         }));
@@ -503,7 +504,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
                     this._postGeometryChanges(editRecord, true);
                 }), lang.hitch(this, function (error) {
-                    alert(error.message);
+                    this.showMessage(error.message, "error");
                     this._changeEditToolState(true);
                 }));
             }
@@ -538,16 +539,48 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 var inserts = null,
                     updates = null,
                     deletes = null;
+                var ext = feature.geometry.getExtent().expand(1.5);
 
                 if (feature.attributes["ID"] === null || isInsert) {
                     //insert as new feature
                     inserts = [feature];
+
+                    //send edits to geometry layer
+                    this._applyGeometryEdits(inserts, updates, deletes, ext);
                 } else {
                     //update existing feature
-                    updates = [feature];
-                }
+                    var id = feature.attributes["ID"];
+                    var enttype = feature.attributes["EntType_ID"];
 
-                this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
+                    this._getObjectID(id, enttype).then(lang.hitch(this, function (objectid) {
+                        if (objectid) {
+                            feature.attributes["OBJECTID"] = objectid;
+                            updates = [feature];
+
+                            //send edits to geometry layer
+                            this._applyGeometryEdits(inserts, updates, deletes, ext);
+                        } else {
+                            this.showMessage('LLUR Edit Tool - Object ID Not Found.', "error");
+                        }
+                    }));
+                }
+            }
+        },
+
+        //call the apply edits service for the llur geometry
+        _applyGeometryEdits: function _applyGeometryEdits(inserts, updates, deletes, extent) {
+            this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
+                //check if app should redirect to the llur application for a added/modified record
+                if (this.config.redirectToLLUROnComplete) {
+                    var feature = updates.concat(inserts)[0];
+
+                    var id = feature.attributes["ID"];
+                    var enttype = feature.attributes["EntType_ID"];
+
+                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+
+                    window.location = url;
+                } else {
                     var template = this.editFeaturePane.currentTargetTemplate;
 
                     template.displayLayer.clearSelection;
@@ -560,13 +593,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     this.tabContainer.selectTab(this.nls.tabs.create);
                     this._changeEditToolState(true);
 
-                    var ext = feature.geometry.getExtent().expand(1.5);
-                    this.map.setExtent(ext, true);
-                }), lang.hitch(this, function (error) {
-                    alert(error.message);
-                    this._changeEditToolState(true);
-                }));
-            }
+                    if (extent) {
+                        this.map.setExtent(extent, true);
+                    }
+                }
+            }), lang.hitch(this, function (error) {
+                this.showMessage(error.message, "error");
+                this._changeEditToolState(true);
+            }));
         },
 
         //update geometry properties for area and perimeter
@@ -600,6 +634,24 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
+        //return the object id associated with a given llur feature
+        _getObjectID: function _getObjectID(id, enttype) {
+            var deferred = new Deferred();
+
+            if (this._geometryLayer && id && enttype) {
+                var query = new Query();
+                query.where = "ID = " + id + " AND EntType_ID = '" + enttype + "'";
+
+                this._geometryLayer.queryIds(query, lang.hitch(this, function (objectIds) {
+                    deferred.resolve(objectIds[0]);
+                }));
+            } else {
+                deferred.resolve(null);
+            }
+
+            return deferred.promise;
+        },
+
         /*---------------------------------------------------------
           LLUR API FUNCTIONS */
 
@@ -617,7 +669,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             if (template) {
                 return this._requestAPIEntityGet(rec, template.apiSettings.controller);
             } else {
-                alert('Invalid record requested');
+                this.showMessage('Invalid record requested', "error");
                 return null;
             }
         },
@@ -690,26 +742,12 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             //append proxy - requires call be made via proxy
             url = this.config.llurAPI.proxy + '?' + url;
 
-            //construct request
-            var data = {
-                locationId: rec.id,
-                eCanMapsLocationShapeDto: rec
-            };
-
+            var data = rec;
             var entityRequest = request(url, {
                 method: 'POST',
+                handleAs: 'json',
                 data: JSON.stringify(data)
             });
-
-            /*
-            var entityRequest = xhr.put(url, {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                data: JSON.stringify(rec),
-                handleAs: 'json'
-            });
-            */
 
             //make request
             entityRequest.response.then(function (response) {

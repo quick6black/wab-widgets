@@ -4,9 +4,22 @@
     "apiBaseURL":"https://localhost:44301",
     "proxy":"https://llurproxy.ashx"
   }, 
+  "llurApplication": {
+    "appBaseURL":"https://localhost:44311/#/",
+    "appRecordTypeEndpoints":{
+      "SIT":"sites/",
+      "ACT":"activities/",
+      "INV":"investigations/",
+      "ENQ":"enquiries/",
+      "COM":"communications/"
+    }
+  },
   "allowEditExisting": true,
   "allowStatementRequest": true,
   "allowEscalateEnquiry": true,
+  
+  "redirectToLLUROnComplete":true,
+
   "recordTemplates": [
     {
       "title": "Activity",
