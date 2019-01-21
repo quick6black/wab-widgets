@@ -42,6 +42,12 @@ define({
 
     },
 
+    filterEditor:{
+      all: "All",
+      noAvailableTempaltes: "No available templates",
+      searchTemplates: "Search Templates"
+    },
+
     createCreateLLURFeaturePopup: {
       ok: "Ok",
       cancel: "Cancel",

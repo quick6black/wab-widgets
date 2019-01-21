@@ -48,6 +48,7 @@ define([
     './components/editFeaturePane',
     './components/searchFeaturePane',
     './components/createLLURFeaturePopup',
+    './components/LEFilterEditor',
 
     './libs/automapper',
 
@@ -93,6 +94,7 @@ function(
     EditFeaturePane,
     SearchFeaturePane,
     CreateLLURFeaturePopup,
+    LEFilterEditor,
 
     automapperUtil,
     Terraformer

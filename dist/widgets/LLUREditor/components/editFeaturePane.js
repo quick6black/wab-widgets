@@ -78,10 +78,20 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
         //update the application ui to reflect the current edit mode - create or update
         _updateUI: function _updateUI() {
+            var labelOverrides = this.wabWidget.config.labelOverrides;
+
             if (this.editMode == "update") {
-                this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionUpdate);
+                if (labelOverrides.edit.instructionUpdate && labelOverrides.edit.instructionUpdate !== '') {
+                    this._setNodeHTML(this.instructionsDiv, labelOverrides.edit.instructionUpdate);
+                } else {
+                    this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionUpdate);
+                }
             } else {
-                this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionCreate);
+                if (labelOverrides.edit.instructionCreate && labelOverrides.edit.instructionCreate !== '') {
+                    this._setNodeHTML(this.instructionsDiv, labelOverrides.edit.instructionCreate);
+                } else {
+                    this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionCreate);
+                }
             }
         },
 

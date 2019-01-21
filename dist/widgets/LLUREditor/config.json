@@ -1,31 +1,29 @@
 {
-  "llurGeometryURL": "https://mapportaltest.ecan.govt.nz/arcgis/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/10",
-  "llurAPI":{
-    "apiBaseURL":"https://localhost:44301",
-    "proxy":"https://llurproxy.ashx"
-  }, 
+  "llurGeometryURL": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/10",
+  "llurAPI": {
+    "apiBaseURL": "https://localhost:44301",
+    "proxy": "https://localhost:44364/llurProxy.ashx"
+  },
   "llurApplication": {
-    "appBaseURL":"https://localhost:44311/#/",
-    "appRecordTypeEndpoints":{
-      "SIT":"sites/",
-      "ACT":"activities/",
-      "INV":"investigations/",
-      "ENQ":"enquiries/",
-      "COM":"communications/"
+    "appBaseURL": "https://localhost:44311/#/",
+    "appRecordTypeEndpoints": {
+      "SIT": "sites/",
+      "ACT": "activities/",
+      "INV": "investigations/",
+      "ENQ": "enquiries/",
+      "COM": "communications/"
     }
   },
   "allowEditExisting": true,
   "allowStatementRequest": true,
   "allowEscalateEnquiry": true,
-  
-  "redirectToLLUROnComplete":true,
-
+  "redirectToLLUROnComplete": true,
   "recordTemplates": [
     {
       "title": "Activity",
-      "layerUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/11",
+      "layerUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/11",
       "layerKeyField": "ID",
-      "lookupUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/5",
+      "lookupUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/5",
       "lookupKeyField": "HAILNo",
       "lookupPatterns": [
         {
@@ -37,10 +35,11 @@
           "format": "^Activity\\,"
         },
         {
-          "pattern": "^(ACT)$",
+          "pattern": "^ACT$",
           "format": null
         }
       ],
+      "lookupTypeField": "ActivityType_ID",
       "fieldInfos": [
         {
           "fieldName": "ID",
@@ -83,7 +82,7 @@
           "visible": true,
           "stringFieldOption": "textbox",
           "format": null,
-          "editModeVisible": false,
+          "editModeVisible": true,
           "editModeIsEditable": false
         },
         {
@@ -102,6 +101,125 @@
           "label": "Period To",
           "isEditable": true,
           "tooltip": "Enter approximate end date of activity",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedBy",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Name of person who created the record",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedDate",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Date the record was created",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": {
+            "time": true
+          },
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedBy",
+          "label": "Last Modified By",
+          "isEditable": false,
+          "tooltip": "Name of person who last modified the record",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedDate",
+          "label": "Date Last Modified",
+          "isEditable": false,
+          "tooltip": "Date the record was last modified",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        }
+      ],
+      "apiSettings": {
+        "controller": "Activity",
+        "mappingClass": "ACT",
+        "methods": [ "Get", "Post", "Put" ]
+      }
+    },
+    {
+      "title": "Site",
+      "layerUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/12",
+      "layerKeyField": "ID",
+      "lookupUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/1",
+      "lookupKeyField": "SiteID",
+      "lookupPatterns": [
+        {
+          "pattern": "^SIT\\d{1,6}$",
+          "format": "^SIT"
+        },
+        {
+          "pattern": "^Site\\,\\d{1,6}$",
+          "format": "^Site\\,"
+        },
+        {
+          "pattern": "^SIT$",
+          "format": null
+        }
+      ],
+      "lookupTypeField": "Category_ID",
+      "fieldInfos": [
+        {
+          "fieldName": "ID",
+          "label": "Site ID",
+          "isEditable": false,
+          "tooltip": "",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "Title",
+          "label": "Name",
+          "isEditable": true,
+          "tooltip": "Enter a location descriptive name",
+          "visible": true,
+          "stringFieldOption": "textarea",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "Location",
+          "label": "Street Address",
+          "isEditable": true,
+          "tooltip": "Enter a representative address for the location",
+          "visible": true,
+          "stringFieldOption": "textarea",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "Category",
+          "label": "Category",
+          "isEditable": true,
+          "tooltip": "Select the initial category of site",
           "visible": true,
           "stringFieldOption": "textbox",
           "format": null,
@@ -154,34 +272,18 @@
           "editModeVisible": false,
           "editModeIsEditable": false
         }
-      ]
-    },
-    {
-      "title": "Site",
-      "layerUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/12",
-      "layerKeyField": "ID",
-      "lookupUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/1",
-      "lookupKeyField": "SiteID",
-      "lookupPatterns": [
-        {
-          "pattern": "^SIT\\d{1,6}$",
-          "format": "^SIT"
-        },
-        {
-          "pattern": "^Site\\,\\d{1,6}$",
-          "format": "^Site\\,"
-        },
-        {
-          "pattern": "^(SIT)$",
-          "format": null
-        }
-      ]
+      ],
+      "apiSettings": {
+        "controller": "Site",
+        "mappingClass": "SIT",
+        "methods": [ "Get", "Post", "Put" ]
+      }
     },
     {
       "title": "Investigation",
-      "layerUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/13",
+      "layerUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/13",
       "layerKeyField": "ID",
-      "lookupUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/2",
+      "lookupUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/2",
       "lookupKeyField": "InvestigationNo",
       "lookupPatterns": [
         {
@@ -193,16 +295,92 @@
           "format": "^Investigation\\,"
         },
         {
-          "pattern": "^(INV)$",
+          "pattern": "^INV$",
           "format": null
         }
-      ]
+      ],
+      "lookupTypeField": "InvestigationType_ID",
+      "fieldInfos": [
+        {
+          "fieldName": "ID",
+          "label": "Investigation No",
+          "isEditable": false,
+          "tooltip": "",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "InvestigationType",
+          "label": "Investigation Type",
+          "isEditable": true,
+          "tooltip": "Select the type of investigation",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedBy",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Name of person who created the record",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedDate",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Date the record was created",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": {
+            "time": true
+          },
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedBy",
+          "label": "Last Modified By",
+          "isEditable": false,
+          "tooltip": "Name of person who last modified the record",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedDate",
+          "label": "Date Last Modified",
+          "isEditable": false,
+          "tooltip": "Date the record was last modified",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        }
+      ],
+      "apiSettings": {
+        "controller": "Investigation",
+        "mappingClass": "INV",
+        "methods": [ "Get", "Post", "Put" ]
+      }
     },
     {
       "title": "Enquiry",
-      "layerUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/14",
+      "layerUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/14",
       "layerKeyField": "ID",
-      "lookupUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/3",
+      "lookupUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/3",
       "lookupKeyField": "EnquiryNo",
       "lookupPatterns": [
         {
@@ -214,16 +392,164 @@
           "format": "^Enquiry\\,"
         },
         {
-          "pattern": "^(ENQ)$",
+          "pattern": "^ENQ$",
           "format": null
         }
-      ]
+      ],
+      "lookupTypeField": "EnquiryType_ID",
+      "fieldInfos": [
+        {
+          "fieldName": "ID",
+          "label": "Enquiry ID",
+          "isEditable": false,
+          "tooltip": "",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "EnquirerName",
+          "label": "Enquirer Name",
+          "isEditable": true,
+          "tooltip": "Enter the name of the person making the enquiry",
+          "visible": true,
+          "stringFieldOption": "textarea",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "EnquiryType",
+          "label": "Enquiry",
+          "isEditable": false,
+          "tooltip": "Select the type of enquiry",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "SiteName",
+          "label": "Site Name",
+          "isEditable": true,
+          "tooltip": "Description for the site",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": true
+        },
+        {
+          "fieldName": "ConsentNo",
+          "label": "Consent Number",
+          "isEditable": true,
+          "tooltip": "Consent ID number this enquiry is associated with",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": true
+        },
+        {
+          "fieldName": "DueDate",
+          "label": "Due Date",
+          "isEditable": true,
+          "tooltip": "Approximate date info required by",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": {
+            "time": false
+          },
+          "editModeVisible": true,
+          "editModeIsEditable": true
+        },
+        {
+          "fieldName": "NatureOfEnquiry",
+          "label": "Nature of Enquiry",
+          "isEditable": true,
+          "tooltip": "Enter the specific details of the enquiry",
+          "visible": true,
+          "stringFieldOption": "textarea",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": true
+        },
+        {
+          "fieldName": "SearchRadius",
+          "label": "Search Radius",
+          "isEditable": true,
+          "tooltip": "Select the distance beyond the area of interest to be included in the search.",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": true
+        },
+        {
+          "fieldName": "CreatedBy",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Name of person who created the record",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedDate",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Date the record was created",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": {
+            "time": true
+          },
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedBy",
+          "label": "Last Modified By",
+          "isEditable": false,
+          "tooltip": "Name of person who last modified the record",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedDate",
+          "label": "Date Last Modified",
+          "isEditable": false,
+          "tooltip": "Date the record was last modified",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        }
+      ],
+      "apiSettings": {
+        "controller": "Enquiry",
+        "mappingClass": "ENQ",
+        "methods": [ "Get", "Post", "Put" ]
+      },
+      "templates": {
+        "filter": "Consent Enquiry,PropertyEnquiry",
+        "showFilter": true
+      }
     },
     {
       "title": "Communication",
-      "layerUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/15",
+      "layerUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/15",
       "layerKeyField": "ID",
-      "lookupUrl": "https://ecanmapsdev.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/4",
+      "lookupUrl": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_View/MapServer/4",
       "lookupKeyField": "CommunicationNo",
       "lookupPatterns": [
         {
@@ -235,10 +561,86 @@
           "format": "^Communication\\,"
         },
         {
-          "pattern": "^(COM)$",
+          "pattern": "^COM$",
           "format": null
         }
-      ]
+      ],
+      "lookupTypeField": null,
+      "fieldInfos": [
+        {
+          "fieldName": "ID",
+          "label": "Communication No",
+          "isEditable": false,
+          "tooltip": "",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": true,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CommunicationType",
+          "label": "Communication Type",
+          "isEditable": true,
+          "tooltip": "Select the type of Communication",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedBy",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Name of person who created the record",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "CreatedDate",
+          "label": "Created By",
+          "isEditable": false,
+          "tooltip": "Date the record was created",
+          "visible": false,
+          "stringFieldOption": "textbox",
+          "format": {
+            "time": true
+          },
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedBy",
+          "label": "Last Modified By",
+          "isEditable": false,
+          "tooltip": "Name of person who last modified the record",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        },
+        {
+          "fieldName": "ModifiedDate",
+          "label": "Date Last Modified",
+          "isEditable": false,
+          "tooltip": "Date the record was last modified",
+          "visible": true,
+          "stringFieldOption": "textbox",
+          "format": null,
+          "editModeVisible": false,
+          "editModeIsEditable": false
+        }
+      ],
+      "apiSettings": {
+        "controller": "Communication",
+        "mappingClass": "COM",
+        "methods": [ "Get", "Post", "Put" ]
+      }
     }
   ],
 
@@ -246,12 +648,12 @@
     "edit": {
       "editGeometryLabel": "",
       "editGeometryTooltip": "",
-      "requestStatementLabel":"",
-      "requestStatementTooltip":"" ,
-      "submitLabel":"",
-      "submitTooltip":"",
-      "cancelLabel":"",
-      "cancelTooltip":""
+      "requestStatementLabel": "",
+      "requestStatementTooltip": "",
+      "submitLabel": "",
+      "submitTooltip": "",
+      "cancelLabel": "",
+      "cancelTooltip": ""
     }
   }
 }

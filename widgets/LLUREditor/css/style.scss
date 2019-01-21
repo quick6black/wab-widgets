@@ -38,6 +38,23 @@
       font-size: 2em;
     }
 
+    .jimu-widget-sefilterEditor {
+      .flDropDown {
+          height: 30px!important;
+          width: 100%;
+          margin-top: 2px;
+          margin-bottom: 10px;
+      }
+
+      .searchtextbox {
+          height: 30px!important;
+          width: 100%;
+          padding: 5px;
+          margin-bottom: 5px;
+      
+      }
+    }
+
     .jimu-btn {
       &.layer-btn {
         margin-right: 5px;
@@ -118,16 +135,25 @@
   float: right;
 }
 .esriAttributeInspector .atiButton {
-  margin: 0;
+  margin: 0 0 15px 0;
   padding-right: 6px;
-  width: auto;
-  height: 16px;
+  width: 100%;
+  min-height: 16px;
   background-image: none;
+
+  .dijitButton .dijitButtonNode {
+    width: inherit;
+    text-align: center;
+  }
+
 }
 
 .claro .dijitButton .dijitButtonNode {
   background-image: none;
   background-repeat: none;
+
+    width: inherit;
+    text-align: center;  
 }
 
 .esriAttributeInspector .atiPrevIcon {
