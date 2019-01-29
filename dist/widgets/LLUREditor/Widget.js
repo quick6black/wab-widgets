@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/request/xhr', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', 'jimu/dijit/Message', 'jimu/portalUtils', 'jimu/portalUrlUtils', "esri/geometry/geometryEngine", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", "esri/arcgis/Portal", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './components/LEFilterEditor', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, xhr, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, Message, jimuPortalUtils, jimuPortalUrlUtils, geometryEngine, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, arcgisPortal, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, LEFilterEditor, automapperUtil, Terraformer) {
+define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/request/xhr', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', 'jimu/dijit/Message', 'jimu/portalUtils', 'jimu/portalUrlUtils', "esri/geometry/geometryEngine", "esri/geometry/Extent", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", "esri/arcgis/Portal", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './components/LEFilterEditor', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, xhr, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, Message, jimuPortalUtils, jimuPortalUrlUtils, geometryEngine, Extent, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, arcgisPortal, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, LEFilterEditor, automapperUtil, Terraformer) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
         name: 'LLUREditor',
@@ -442,6 +442,15 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
         //start save process 
         saveChanges: function saveChanges(editRecord, apiRecord) {
+            //get user and current time details
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
+
+            var userName = portal.user !== null ? portal.user.username : 'Unknown';
+
+            var now = new Date();
+            now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
+
             //Check is this update or new record
             if (editRecord && editRecord.attributes["ID"] !== null) {
                 this._changeEditToolState(false, "Starting Update Process");
@@ -457,26 +466,21 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                         shapeDto.createdBy = response.data.createdBy;
                         shapeDto.createdDate = response.data.createdDate;
 
-                        var user = jimuPortalUtils.portals[0].getUser().then(lang.hitch(this, function (user) {
-                            var now = new Date();
-                            now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
+                        shapeDto.modifiedBy = userName;
+                        shapeDto.modifiedDate = now;
 
-                            shapeDto.modifiedBy = user.credential.userId;
-                            shapeDto.modifiedDate = now;
+                        this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
+                            var r = 0;
+                            //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
+                            this._postGeometryChanges(editRecord, false);
+                        }), lang.hitch(this, function (error) {
+                            if (error) {
+                                this.showMessage(error.message, "error");
+                            } else {
+                                this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
+                            }
 
-                            this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
-                                var r = 0;
-                                //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
-                                this._postGeometryChanges(editRecord, false);
-                            }), lang.hitch(this, function (error) {
-                                if (error) {
-                                    this.showMessage(error.message, "error");
-                                } else {
-                                    this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
-                                }
-
-                                this._changeEditToolState(true);
-                            }));
+                            this._changeEditToolState(true);
                         }));
                     }
                 }), lang.hitch(this, function (error) {
@@ -485,6 +489,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 }));
             } else {
                 this._changeEditToolState(false, "Starting Save New Record Process");
+
+                //update user and time on record
+                apiRecord.createdBy = userName;
+                apiRecord.createdDate = now;
+
+                apiRecord.modifiedBy = userName;
+                apiRecord.modifiedDate = now;
 
                 //get the template for the rec type - match against configured layer settings
                 var template = null;
@@ -496,7 +507,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
                 //post entity to api and await response
                 this._postNewAPIEntity(apiRecord, template.apiSettings.controller).then(lang.hitch(this, function (result) {
-                    var resultData = JSON.parse(result.data);
+                    var resultData = result.data;
                     if (resultData.id) {
                         editRecord.attributes["ID"] = resultData.id;
                         editRecord.attributes["EntType_ID"] = resultData.entTypeId;
@@ -572,6 +583,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
                 //check if app should redirect to the llur application for a added/modified record
                 if (this.config.redirectToLLUROnComplete) {
+                    if (!updates) {
+                        updates = [];
+                    }
+
                     var feature = updates.concat(inserts)[0];
 
                     var id = feature.attributes["ID"];
@@ -715,7 +730,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             //construct request
             var entityRequest = request(url, {
                 method: 'POST',
-                data: JSON.stringify(rec)
+                handleAs: 'json',
+                data: JSON.stringify(rec),
+                headers: { 'Content-Type': 'application/json' }
             });
 
             //make request
@@ -746,6 +763,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             var entityRequest = request(url, {
                 method: 'POST',
                 handleAs: 'json',
+                headers: { 'Content-Type': 'application/json' },
                 data: JSON.stringify(data)
             });
 
@@ -1132,6 +1150,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["ActivityType"];
             }).forMember('active', function (opts) {
                 return null;
+            }).forMember('createdBy', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedBy', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
+                return null;
             }).ignoreAllNonExisting();
 
             //site feature to SIT entitydto
@@ -1155,15 +1181,15 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["Title"];
             }).forMember('location', function (opts) {
                 return opts.sourceObject.attributes["Location"];
-            }).forMember('riskId', function (opts) {
-                return null;
-            }).forMember('fileNo', function (opts) {
-                return null;
             }).forMember('categoryId', function (opts) {
-                return opts.sourceObject.attributes["CategoryType"];
-            }).forMember('active', function (opts) {
+                return opts.sourceObject.attributes["Category"];
+            }).forMember('createdBy', function (opts) {
                 return null;
-            }).forMember('previousId', function (opts) {
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedBy', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
                 return null;
             }).ignoreAllNonExisting();
 
@@ -1211,6 +1237,67 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }).forMember('documentNo', function (opts) {
                 return null;
             }).forMember('preparedFor', function (opts) {
+                return null;
+            }).forMember('createdBy', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedBy', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
+                return null;
+            }).ignoreAllNonExisting();
+
+            //site feature to ENQ entitydto
+            automapperUtil.createMap('graphic', 'ENQ').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                return 'ENQ';
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            }).forMember('enquirerName', function (opts) {
+                return opts.sourceObject.attributes["EnquirerName"];
+            }).forMember('natureOfEnquiry', function (opts) {
+                var natureText = '';
+
+                //add in sitename no reference is populated
+                if (opts.sourceObject.attributes["SiteName"] && opts.sourceObject.attributes["SiteName"] !== '') {
+                    natureText += 'Site Name: ' + opts.sourceObject.attributes["SiteName"] + '\n';
+                }
+
+                //add in consent no reference is populated
+                if (opts.sourceObject.attributes["ConsentNo"] && opts.sourceObject.attributes["ConsentNo"] !== '') {
+                    natureText += 'Consent No: ' + opts.sourceObject.attributes["ConsentNo"] + '\n';
+                }
+
+                //add in due date as string 
+                if (opts.sourceObject.attributes["DueDate"] && opts.sourceObject.attributes["DueDate"]) {
+                    var dueDate = new Date(opts.sourceObject.attributes["DueDate"] * 1000);
+                    natureText += 'Due Date: ' + dueDate.toLocaleString() + '\n';
+                }
+
+                //add in the nature of enquirey text added to form
+                if (opts.sourceObject.attributes["NatureOfEnquiry"] && opts.sourceObject.attributes["NatureOfEnquiry"] !== '') {
+                    natureText += opts.sourceObject.attributes["NatureOfEnquiry"];
+                }
+                return natureText;
+            }).forMember('contactId', function (opts) {
+                return null;
+            }).forMember('enquiryTypeId', function (opts) {
+                return opts.sourceObject.attributes["EnquiryType"];
+            }).forMember('contact', function (opts) {
+                var contact = {};
+
                 return null;
             }).ignoreAllNonExisting();
 
@@ -1302,10 +1389,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.recordTemplateLayers = layers;
         },
 
-        //return record template withthe given url
-        _getRecordTemplate: function _getRecordTemplate(layerUrl) {
+        //return record template with the given parameter
+        _getRecordTemplate: function _getRecordTemplate(id) {
             var recordTemplates = arrayUtils.filter(this.recordTemplateLayers, function (item) {
-                return item.layerUrl === layerUrl;
+                return item.layerUrl === id || item.apiSettings.mappingClass === id;
             });
             return recordTemplates[0];
         },

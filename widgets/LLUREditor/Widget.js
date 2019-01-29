@@ -26,6 +26,7 @@ define([
     'jimu/portalUrlUtils',    
 
     "esri/geometry/geometryEngine",
+    "esri/geometry/Extent",
     "esri/graphic",
     "esri/layers/GraphicsLayer",
     "esri/layers/FeatureLayer",
@@ -72,6 +73,7 @@ function(
     jimuPortalUrlUtils,
 
     geometryEngine,
+    Extent,
     Graphic,
     GraphicsLayer,
     FeatureLayer,
@@ -567,6 +569,20 @@ function(
 
     //start save process 
     saveChanges: function (editRecord, apiRecord) {
+        //get user and current time details
+        var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+        var portal = jimuPortalUtils.getPortal(portalUrl);
+
+        var userName = portal.user !== null ? portal.user.username : 'Unknown';
+
+        var now = new Date();
+        now = now.getUTCFullYear() + '-' +
+        ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
+        ('00' + now.getUTCDate()).slice(-2) + ' ' +
+        ('00' + now.getUTCHours()).slice(-2) + ':' +
+        ('00' + now.getUTCMinutes()).slice(-2) + ':' +
+        ('00' + now.getUTCSeconds()).slice(-2); 
+
         //Check is this update or new record
         if (editRecord && editRecord.attributes["ID"] !== null) {
             this._changeEditToolState(false, "Starting Update Process");
@@ -583,40 +599,27 @@ function(
                             shapeDto.createdBy = response.data.createdBy;
                             shapeDto.createdDate = response.data.createdDate;
 
-                            var user = jimuPortalUtils.portals[0].getUser()
-                                .then(lang.hitch(this, 
-                                    function (user) {
-                                        var now = new Date();
-                                        now = now.getUTCFullYear() + '-' +
-                                        ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
-                                        ('00' + now.getUTCDate()).slice(-2) + ' ' +
-                                        ('00' + now.getUTCHours()).slice(-2) + ':' +
-                                        ('00' + now.getUTCMinutes()).slice(-2) + ':' +
-                                        ('00' + now.getUTCSeconds()).slice(-2);  
+                            shapeDto.modifiedBy = userName;
+                            shapeDto.modifiedDate = now;
 
-                                        shapeDto.modifiedBy = user.credential.userId;
-                                        shapeDto.modifiedDate = now;
+                            this._putExistingAPIEntity(shapeDto)
+                                .then(
+                                    lang.hitch(this, 
+                                        function (result) { 
+                                            var r = 0;
+                                            //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
+                                            this._postGeometryChanges(editRecord, false);
+                                        }),
+                                    lang.hitch(this, 
+                                        function (error) {
+                                            if (error) {
+                                                this.showMessage(error.message,"error");
+                                            } else {
+                                                this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error","error");
+                                            }
 
-                                        this._putExistingAPIEntity(shapeDto)
-                                            .then(
-                                                lang.hitch(this, 
-                                                    function (result) { 
-                                                        var r = 0;
-                                                        //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
-                                                        this._postGeometryChanges(editRecord, false);
-                                                    }),
-                                                lang.hitch(this, 
-                                                    function (error) {
-                                                        if (error) {
-                                                            this.showMessage(error.message,"error");
-                                                        } else {
-                                                            this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error","error");
-                                                        }
-
-                                                        this._changeEditToolState(true);
-                                                    })
-                                            );
-                                    })
+                                            this._changeEditToolState(true);
+                                        })
                                 );
                         }
                     }),
@@ -627,6 +630,13 @@ function(
                 );
         } else {
             this._changeEditToolState(false, "Starting Save New Record Process");
+
+            //update user and time on record
+            apiRecord.createdBy = userName;
+            apiRecord.createdDate = now;
+
+            apiRecord.modifiedBy = userName;
+            apiRecord.modifiedDate = now;            
 
             //get the template for the rec type - match against configured layer settings
             var template = null;
@@ -642,7 +652,7 @@ function(
             this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
                 .then(
                     lang.hitch(this, function (result) {
-                        var resultData = JSON.parse(result.data);
+                        var resultData = result.data;
                         if (resultData.id) {
                             editRecord.attributes["ID"] = resultData.id;
                             editRecord.attributes["EntType_ID"] = resultData.entTypeId;
@@ -720,6 +730,10 @@ function(
                 function (results) {
                     //check if app should redirect to the llur application for a added/modified record
                     if (this.config.redirectToLLUROnComplete) {
+                        if (!updates) {
+                            updates = [];
+                        }
+
                         var feature = updates.concat(inserts)[0];
 
                         var id = feature.attributes["ID"];
@@ -872,7 +886,9 @@ function(
         //construct request
         var entityRequest = request(url, {
             method: 'POST',
-            data: JSON.stringify(rec)
+            handleAs: 'json',       
+            data: JSON.stringify(rec),
+            headers: { 'Content-Type': 'application/json' }
         });
 
         //make request
@@ -905,7 +921,8 @@ function(
         var data = rec;
         var entityRequest = request(url, {
             method: 'POST',
-            handleAs: 'json',            
+            handleAs: 'json',    
+            headers: { 'Content-Type': 'application/json' },
             data: JSON.stringify(data)
         });
 
@@ -1273,6 +1290,10 @@ function(
             .forMember('periodTo', function (opts) { return opts.sourceObject.attributes["PeriodTo"]; })
             .forMember('activityTypeId', function (opts) { return opts.sourceObject.attributes["ActivityType"]; })
             .forMember('active', function (opts) { return null; })
+            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdDate', function (opts) { return null; })
+            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedDate', function (opts) { return null; })             
             .ignoreAllNonExisting();
 
         //site feature to SIT entitydto
@@ -1287,11 +1308,11 @@ function(
             .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
             .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
             .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
-            .forMember('riskId', function (opts) { return null; })
-            .forMember('fileNo', function (opts) { return null; })
-            .forMember('categoryId', function (opts) { return opts.sourceObject.attributes["CategoryType"]; })
-            .forMember('active', function (opts) { return null; })
-            .forMember('previousId', function (opts) { return null; })
+            .forMember('categoryId', function (opts) { return opts.sourceObject.attributes["Category"]; })
+            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdDate', function (opts) { return null; })
+            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedDate', function (opts) { return null; })     
             .ignoreAllNonExisting();
 
         //investigation feature to INV entitydto
@@ -1318,9 +1339,54 @@ function(
             .forMember('investigationTypeId', function (opts) { return opts.sourceObject.attributes["InvestigationType"]; })
             .forMember('documentNo', function (opts) { return null; })
             .forMember('preparedFor', function (opts) { return null; })
+            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdDate', function (opts) { return null; })
+            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedDate', function (opts) { return null; })             
             .ignoreAllNonExisting();
 
+        //site feature to ENQ entitydto
+        automapperUtil.createMap('graphic','ENQ')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { return 'ENQ'; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('enquirerName', function (opts) { return opts.sourceObject.attributes["EnquirerName"]; })
+            .forMember('natureOfEnquiry', function (opts) { 
+                var natureText = '';
 
+                //add in sitename no reference is populated
+                if (opts.sourceObject.attributes["SiteName"] && opts.sourceObject.attributes["SiteName"] !== '') {
+                    natureText += 'Site Name: ' + opts.sourceObject.attributes["SiteName"] + '\n';
+                }
+
+                //add in consent no reference is populated
+                if (opts.sourceObject.attributes["ConsentNo"] && opts.sourceObject.attributes["ConsentNo"] !== '') {
+                    natureText += 'Consent No: ' + opts.sourceObject.attributes["ConsentNo"] + '\n';
+                }
+
+                //add in due date as string 
+                if (opts.sourceObject.attributes["DueDate"] && opts.sourceObject.attributes["DueDate"]) {
+                    var dueDate = new Date( opts.sourceObject.attributes["DueDate"] *1000);
+                    natureText += 'Due Date: ' + dueDate.toLocaleString() + '\n';
+                }
+
+                //add in the nature of enquirey text added to form
+                if (opts.sourceObject.attributes["NatureOfEnquiry"] && opts.sourceObject.attributes["NatureOfEnquiry"] !== '') {
+                    natureText += opts.sourceObject.attributes["NatureOfEnquiry"];
+                }
+                return natureText; })
+            .forMember('contactId', function (opts) { return null; })
+            .forMember('enquiryTypeId', function (opts) { return opts.sourceObject.attributes["EnquiryType"]; })
+            .forMember('contact', function (opts) { 
+                var contact = {};
+
+                return null; })
+            .ignoreAllNonExisting();
 
 
 
@@ -1397,9 +1463,9 @@ function(
         this.recordTemplateLayers = layers;
     },
 
-    //return record template withthe given url
-    _getRecordTemplate: function (layerUrl) {
-        var recordTemplates = arrayUtils.filter(this.recordTemplateLayers, function (item) { return item.layerUrl === layerUrl; });
+    //return record template with the given parameter
+    _getRecordTemplate: function (id) {
+        var recordTemplates = arrayUtils.filter(this.recordTemplateLayers, function (item) { return item.layerUrl === id || item.apiSettings.mappingClass === id; });
         return recordTemplates[0];
     },
 
@@ -1424,8 +1490,40 @@ function(
         } else {
             return null;
         }
-    }
+    },
 
+    //return the specific extent property of the provided geometry
+    _getExtentProperty: function (geometry, property) {
+        if (!geometry) return null;
+
+        var extent = null;
+        switch (geometry.type) {
+
+            case 'point':
+                extent = new Extent(geometry.x, geometry.y, geometry.x, geometry.y, geometry.spatialReference);
+                break;
+
+            case 'multipoint':
+            case 'polyline':
+            case 'polygon':
+                extent = geometry.getExtent();
+                break;
+
+            case 'extent':
+                extent = geometry
+                break;
+
+            default:
+                // do nothing
+                break;
+        }
+
+        if (extent) {
+            return extent['property'];
+        } else {
+            return null;
+        }
+    }
   });
 
 });
