@@ -3,10 +3,16 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     iconFormat: 'png',
 
     isFeatureSupported: function isFeatureSupported(featureSet) {
+      this.fs = featureSet;
+
       return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
     },
 
     onExecute: function onExecute(featureSet) {
+      if (this.fs) {
+        var l = this.fs.features.length;
+      }
+
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
         wm.activateWidget(myWidget);
@@ -24,9 +30,11 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     },
 
     _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }
       }
 
       return false;

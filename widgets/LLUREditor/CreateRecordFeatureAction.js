@@ -23,11 +23,18 @@ define([
     iconFormat: 'png',
 
     isFeatureSupported: function (featureSet) {
+      this.fs = featureSet;
+
       return featureSet.features.length > 0 && 
         featureSet.features[0].geometry.type === 'polygon';
     },
 
     onExecute: function (featureSet) {
+      if (this.fs) {
+        var l = this.fs.features.length;
+      }
+
+
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId)
         .then(lang.hitch(this, function (myWidget) {
@@ -51,9 +58,11 @@ define([
     },
 
     _checkForFeatureLayers: function (featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }       
       }
 
       return false;

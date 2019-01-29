@@ -2,7 +2,8 @@
   "llurGeometryURL": "https://ecanmapstest.ecan.govt.nz/server1/rest/services/ContaminatedSites/LLUR_Edits/FeatureServer/10",
   "llurAPI": {
     "apiBaseURL": "https://localhost:44301",
-    "proxy": "https://localhost:44364/llurProxy.ashx"
+    "proxy": "https://localhost:44364/llurProxy.ashx",
+    "statementRequestTypeId": 71
   },
   "llurApplication": {
     "appBaseURL": "https://localhost:44311/#/",

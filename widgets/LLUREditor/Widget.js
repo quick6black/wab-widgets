@@ -951,6 +951,41 @@ function(
     },
 
 
+    //call LLUR API to  execute the notify enquirer function
+    _postNotifyAPIEntity: function (enquiryId) {
+        var deferred = new Deferred();
+
+        //set the endpoint url
+        var url = this.config.llurAPI.apiBaseURL + '/Enquiries/' + enquiryId + '/notifyEnquirer';
+        
+        //append proxy - requires call be made via proxy
+        url = this.config.llurAPI.proxy + '?' + url; 
+
+        var params = {
+            enquiryId: enquiryId,
+            sendEmail: true
+        };
+
+        //construct request
+        var entityRequest = request(url, {
+            method: 'POST',
+            data: JSON.stringify(params)
+        });
+
+        //make request
+        entityRequest.response.then(
+            function (response) {
+                deferred.resolve(response);
+            },
+            function (response) {
+                deferred.reject(response);
+            }
+        );
+
+        return deferred.promise;
+    },
+
+
     /*---------------------------------------------------------
       UI FUNCTIONS */
 
@@ -1065,15 +1100,114 @@ function(
     /*---------------------------------------------------------
       STATEMENT FUNCTIONS */
 
-    requestStatement: function (featureset) {
-        this._changeEditToolState(false, "Requesting Statement");
+    requestStatement: function (featureSet) {
+        //if (this.map.infoWindow.isShowing) {
+        //    this.map.infoWindow.hide();
+        //}
 
-        //submit request
-        setTimeout(lang.hitch(this, function () {
-            this._changeEditToolState(true);
-            alert("You will get the statement here");
-        }), 1000);
+        if (featureSet && featureSet.features && featureSet.features.length > 0) {
+            //set working animation
+            this._changeEditToolState(false, "Requesting Statement");
+
+            //confirm enquiry template is configured
+            var recordTemplate = this._getRecordTemplate('ENQ');
+            if (!recordTemplate) {
+                this.showMessage('LLUR Edit Tool - Enquiry functionality not configured.',"error");               
+                this._changeEditToolState(true);
+                return;
+            } 
+
+            //create enquiry record
+            var statementTypeId = this.config.llurAPI.statementRequestTypeId;
+            var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) { 
+                return type.id === statementTypeId;
+            })[0];
+
+            if (!enquiryTemplate) {
+                this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.',"error");               
+                this._changeEditToolState(true);
+                return;                
+            }
+
+            //check if multiple features were supplied
+            var shape = null;
+            if (featureSet.features.length === 1) {
+                shape = featureSet.features[0].geometry;
+            } else {
+                //multiple records - create a single merged shape
+                var shapes = graphicsUtils.getGeometries(featureSet.features);
+                shape = geometryEngine.union(shapes);
+            }
+
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
+
+            var userName = portal.user !== null ? portal.user.username : 'Unknown';
+            var currentDate = new Date().valueOf();
+
+            var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
+            newAttributes["EnquirerName"] = userName;
+            newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
+            newAttributes["SearchRaedius"] = 0;
+            var newGraphic = new Graphic(shape, null, newAttributes);
+
+            var ext = newGraphic.geometry.getExtent();
+
+
+            var saveRec = automapperUtil.map('graphic','ENQ', newGraphic);
+
+            //generate a shape dto to send through as an update
+            var shapeDto = automapperUtil.map('graphic','shapeDto', newGraphic);
+
+            //update user details
+            var now = new Date();
+            now = now.getUTCFullYear() + '-' +
+            ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
+            ('00' + now.getUTCDate()).slice(-2) + ' ' +
+            ('00' + now.getUTCHours()).slice(-2) + ':' +
+            ('00' + now.getUTCMinutes()).slice(-2) + ':' +
+            ('00' + now.getUTCSeconds()).slice(-2);  
+
+            shapeDto.createdBy = userName;
+            shapeDto.createdDate = now;
+            shapeDto.modifiedBy = userName;
+            shapeDto.modifiedDate = now;
+
+            //submit as a new enquiry
+            this._putExistingAPIEntity(shapeDto)
+                .then(
+                    lang.hitch(this, 
+                        function (result) { 
+                            this._postGeometryChanges(newGraphic, false);
+
+                            //send notify fubnction
+                            //this._postNotifyAPIEntity(result.)
+                            this.showMessage('you will be emailed statemeent details shortly');
+
+                            this._changeEditToolState(true);
+                        }),
+                    lang.hitch(this, 
+                        function (error) {
+                            if (error) {
+                                this.showMessage(error.message,"error");
+                            } else {
+                                this.showMessage('LLUR Edit Tool - Enquiry Statement Save Changes putExistingAPIEntity Error.',"error");               
+                            }
+
+                            this._changeEditToolState(true);
+                        })
+                );
+
+            //var ext = shape.getExtent();
+            //this.map.setExtent(ext,true);
+        } else {
+            console.log('LLUREditor::requestStatement::Invalid features supplied');
+            this.showMessage('LLUR Edit Tool - Invalid features supplied to Statement Create.',"error");
+        }
+
     },
+
+
 
 
     /*---------------------------------------------------------
