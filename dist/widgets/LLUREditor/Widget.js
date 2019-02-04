@@ -1366,7 +1366,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return null;
             }).ignoreAllNonExisting();
 
-            //site feature to ENQ entitydto
+            //enquiry feature to ENQ entitydto
             automapperUtil.createMap('graphic', 'ENQ').forMember('id', function (opts) {
                 return opts.sourceObject.attributes["ID"];
             }).forMember('entTypeId', function (opts) {
@@ -1416,6 +1416,35 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }).forMember('contact', function (opts) {
                 var contact = {};
 
+                return null;
+            }).ignoreAllNonExisting();
+
+            //communication feature to COM entitydto
+            automapperUtil.createMap('graphic', 'COM').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                return 'COM';
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            }).forMember('communicationTypeId', function (opts) {
+                return opts.sourceObject.attributes["CommunicationType"];
+            }).forMember('createdBy', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedBy', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
                 return null;
             }).ignoreAllNonExisting();
 
