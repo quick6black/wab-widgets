@@ -431,9 +431,12 @@ function(
             this.editFeaturePane.setEditFeature(recordTemplate, editMode);                
 
             if (!template.template) {
-                template.template = template.displayLayer.types[0].templates[0];
+                if (template.displayLayer.types.length > 0) {
+                    template.template = template.displayLayer.types[0].templates[0];
+                } else {
+                    template.template = template.displayLayer.templates[0];
+                }
             }
-
 
             var newAttributes = attributes === null ? lang.clone(template.template.prototype.attributes) : attributes;
             var newGraphic = new Graphic(shape, null, newAttributes);

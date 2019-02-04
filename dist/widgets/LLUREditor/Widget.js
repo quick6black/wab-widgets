@@ -308,7 +308,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 this.editFeaturePane.setEditFeature(recordTemplate, editMode);
 
                 if (!template.template) {
-                    template.template = template.displayLayer.types[0].templates[0];
+                    if (template.displayLayer.types.length > 0) {
+                        template.template = template.displayLayer.types[0].templates[0];
+                    } else {
+                        template.template = template.displayLayer.templates[0];
+                    }
                 }
 
                 var newAttributes = attributes === null ? lang.clone(template.template.prototype.attributes) : attributes;
