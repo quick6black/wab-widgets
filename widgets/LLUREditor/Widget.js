@@ -609,13 +609,13 @@ function(
                                 .then(
                                     lang.hitch(this, 
                                         function (result) { 
-                                            var r = 0;
-                                            //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
+                                            this._postGISFeatureChanges(editRecord, false);
                                             this._postGeometryChanges(editRecord, false);
                                         }),
                                     lang.hitch(this, 
                                         function (error) {
                                             if (error) {
+                                                console.error(error);
                                                 this.showMessage(error.message,"error");
                                             } else {
                                                 this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error","error");
@@ -661,6 +661,7 @@ function(
                             editRecord.attributes["EntType_ID"] = resultData.entTypeId;
                         }
 
+                        this._postGISFeatureChanges(editRecord, true);
                         this._postGeometryChanges(editRecord, true);
                     }),
                     lang.hitch(this, function (error) {
@@ -683,6 +684,75 @@ function(
             this.createFeaturePane.toggleDrawingToolVisible(false);
         }
         this.tabContainer.selectTab(this.nls.tabs.create);
+    },
+
+    //post the data to the LLUR feature type layer for that record (eventually to replace the geometry layer)
+    _postGISFeatureChanges: function (rec, isInsert) {
+        //get entity type
+        var enttype = rec.attributes["EntType_ID"];
+        var feature = new Graphic(rec.toJson()); 
+
+        //get template layer
+        var template = null;
+        arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+            function (recordTemplate) {
+                if (recordTemplate.apiSettings.mappingClass === enttype) {
+                    template = recordTemplate;
+                }
+            })
+        );
+
+        if (!template) {
+            console.error('LLUR Edit Tool::_postGISFeatureChanges::Invalid Template settings');
+            return;
+        }
+
+        var layer = template.layer;
+        var inserts = null, updates = null, deletes = null;
+
+        if (feature.attributes["ID"] === null||isInsert) {
+            //insert as new feature
+            inserts = [feature];
+
+            //send edits to feature layer
+            layer.applyEdits(inserts, updates, deletes, 
+                lang.hitch(this, 
+                    function (results) { 
+                    }, 
+                    function (error) {
+                        if (error) {
+                            console.error(error);
+                        }
+                        this.showMessage('LLUR Edit Tool - Error Updating GIS Geometry.',"error");
+                    }
+                )
+            );
+        } else {
+            //update existing feature
+            this._getObjectID(id, enttype, layer).then(lang.hitch(this, function (objectid) {
+                if (objectid) {
+                    feature.attributes["OBJECTID"] = objectid;
+                    updates = [feature];
+
+                    //send edits to geometry layer
+                    layer.applyEdits(inserts, updates, deletes, 
+                        lang.hitch(this, 
+                            function (results) { 
+
+                            }, 
+                            function (error) {
+                                if (error) {
+                                    console.error(error);
+                                }
+                                this.showMessage('LLUR Edit Tool - Error Updating GIS Geometry.',"error");
+                            }
+                        )
+                    );
+                } else {
+                    this.showMessage('LLUR Edit Tool - Object ID Not Found.',"error");
+                }
+            }));
+        }
     },
 
     //post the data to tye LLUR Geometry layer
@@ -803,18 +873,26 @@ function(
     },
 
     //return the object id associated with a given llur feature
-    _getObjectID: function (id, enttype) {
+    _getObjectID: function (id, enttype, layer) {
         var deferred = new Deferred();
+        var query = new Query();
 
-        if (this._geometryLayer && id && enttype) {
-            var query = new Query();
-            query.where = "ID = " + id + " AND EntType_ID = '" + enttype + "'";
+        if (!layer) {
+            if (this._geometryLayer && id && enttype) {
+                query.where = "ID = " + id + " AND EntType_ID = '" + enttype + "'";
 
-            this._geometryLayer.queryIds(query, lang.hitch(this, function(objectIds) {
+                this._geometryLayer.queryIds(query, lang.hitch(this, function(objectIds) {
+                    deferred.resolve(objectIds[0]);
+                }));
+            } else {
+                deferred.resolve(null);
+            }
+        } else {
+            query.where = "ID = " + id;
+
+            layer.queryIds(query, lang.hitch(this, function(objectIds) {
                 deferred.resolve(objectIds[0]);
             }));
-        } else {
-            deferred.resolve(null);
         }
 
         return deferred.promise;
