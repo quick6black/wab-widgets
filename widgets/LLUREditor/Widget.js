@@ -576,7 +576,7 @@ function(
         var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
         var portal = jimuPortalUtils.getPortal(portalUrl);
 
-        var userName = portal.user !== null ? portal.user.username : 'Unknown';
+        var userName = portal.user !== null ? portal.user.email : 'Unknown';
 
         var now = new Date();
         now = now.getUTCFullYear() + '-' +
@@ -789,7 +789,7 @@ function(
             var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            var userName = portal.user !== null ? portal.user.username : 'Unknown';
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
             var currentDate = new Date().valueOf();
 
             if (rec.attributes["CREATEDBY"] === null){

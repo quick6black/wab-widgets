@@ -450,7 +450,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            var userName = portal.user !== null ? portal.user.username : 'Unknown';
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
 
             var now = new Date();
             now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
@@ -640,7 +640,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                 var portal = jimuPortalUtils.getPortal(portalUrl);
 
-                var userName = portal.user !== null ? portal.user.username : 'Unknown';
+                var userName = portal.user !== null ? portal.user.email : 'Unknown';
                 var currentDate = new Date().valueOf();
 
                 if (rec.attributes["CREATEDBY"] === null) {
@@ -975,8 +975,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
                 var portal = jimuPortalUtils.getPortal(portalUrl);
 
-                var userName = portal.user !== null ? portal.user.username : 'Unknown';
-                var currentDate = new Date().valueOf();
+                var userName = portal.user !== null ? portal.user.email : 'Unknown';
 
                 var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
                 newAttributes["EnquirerName"] = userName;
