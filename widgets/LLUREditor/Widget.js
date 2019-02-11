@@ -577,32 +577,27 @@ function(
         var portal = jimuPortalUtils.getPortal(portalUrl);
 
         var userName = portal.user !== null ? portal.user.email : 'Unknown';
-
-        var now = new Date();
-        now = now.getUTCFullYear() + '-' +
-        ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
-        ('00' + now.getUTCDate()).slice(-2) + ' ' +
-        ('00' + now.getUTCHours()).slice(-2) + ':' +
-        ('00' + now.getUTCMinutes()).slice(-2) + ':' +
-        ('00' + now.getUTCSeconds()).slice(-2); 
+        var now = this._getUTCDatestamp();
 
         //Check is this update or new record
         if (editRecord && editRecord.attributes["ID"] !== null) {
             this._changeEditToolState(false, "Starting Update Process");
 
             //confirm the current record exists and get the current model
+            /*
             this._requestLLUREntity(apiRecord).then(
                     lang.hitch(this, function (response) {
                         //if valid record found
                         if (response.data !== null) {
+            */
                             //generate a shape dto to send through as an update
                             var shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
 
                             //update user details
-                            shapeDto.createdBy = response.data.createdBy;
-                            shapeDto.createdDate = response.data.createdDate;
+                            //shapeDto.createdByEmail = response.data.createdBy;
+                            //shapeDto.createdDate = response.data.createdDate;
 
-                            shapeDto.modifiedBy = userName;
+                            shapeDto.modifiedByEmail = userName;
                             shapeDto.modifiedDate = now;
 
                             this._putExistingAPIEntity(shapeDto)
@@ -624,21 +619,21 @@ function(
                                             this._changeEditToolState(true);
                                         })
                                 );
-                        }
+                        /*}
                     }),
                     lang.hitch(this, function (error) {
                         console.error(error);
                         this._changeEditToolState(true);
                     })
-                );
+                );*/
         } else {
             this._changeEditToolState(false, "Starting Save New Record Process");
 
             //update user and time on record
-            apiRecord.createdBy = userName;
+            apiRecord.createdByEmail = userName;
             apiRecord.createdDate = now;
 
-            apiRecord.modifiedBy = userName;
+            apiRecord.modifiedByEmail = userName;
             apiRecord.modifiedDate = now;            
 
             //get the template for the rec type - match against configured layer settings
@@ -1505,9 +1500,9 @@ function(
             .forMember('periodTo', function (opts) { return opts.sourceObject.attributes["PeriodTo"]; })
             .forMember('activityTypeId', function (opts) { return opts.sourceObject.attributes["ActivityType"]; })
             .forMember('active', function (opts) { return null; })
-            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) { return null; })
             .forMember('createdDate', function (opts) { return null; })
-            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
             .forMember('modifiedDate', function (opts) { return null; })             
             .ignoreAllNonExisting();
 
@@ -1524,9 +1519,9 @@ function(
             .forMember('title', function (opts) { return opts.sourceObject.attributes["Title"]; })
             .forMember('location', function (opts) { return opts.sourceObject.attributes["Location"]; })
             .forMember('categoryId', function (opts) { return opts.sourceObject.attributes["Category"]; })
-            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) { return null; })
             .forMember('createdDate', function (opts) { return null; })
-            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
             .forMember('modifiedDate', function (opts) { return null; })     
             .ignoreAllNonExisting();
 
@@ -1554,9 +1549,9 @@ function(
             .forMember('investigationTypeId', function (opts) { return opts.sourceObject.attributes["InvestigationType"]; })
             .forMember('documentNo', function (opts) { return null; })
             .forMember('preparedFor', function (opts) { return null; })
-            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) { return null; })
             .forMember('createdDate', function (opts) { return null; })
-            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
             .forMember('modifiedDate', function (opts) { return null; })             
             .ignoreAllNonExisting();
 
@@ -1614,9 +1609,9 @@ function(
             .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
             .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
             .forMember('communicationTypeId', function (opts) { return opts.sourceObject.attributes["CommunicationType"]; })
-            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) { return null; })
             .forMember('createdDate', function (opts) { return null; })
-            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
             .forMember('modifiedDate', function (opts) { return null; })             
             .ignoreAllNonExisting();
 
@@ -1659,9 +1654,9 @@ function(
             .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
             .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
             .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
-            .forMember('createdBy', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) { return null; })
             .forMember('createdDate', function (opts) { return null; })
-            .forMember('modifiedBy', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
             .forMember('modifiedDate', function (opts) { return null; })            
             .ignoreAllNonExisting();
     },
@@ -1752,6 +1747,18 @@ function(
         } else {
             return null;
         }
+    },
+
+    //return utc date format
+    _getUTCDatestamp: function () {
+        var now = new Date();
+        now = now.getUTCFullYear() + '-' +
+        ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
+        ('00' + now.getUTCDate()).slice(-2) + ' ' +
+        ('00' + now.getUTCHours()).slice(-2) + ':' +
+        ('00' + now.getUTCMinutes()).slice(-2) + ':' +
+        ('00' + now.getUTCSeconds()).slice(-2); 
+        return now;        
     }
   });
 

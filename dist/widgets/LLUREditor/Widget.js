@@ -451,54 +451,57 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
             var userName = portal.user !== null ? portal.user.email : 'Unknown';
-
-            var now = new Date();
-            now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
+            var now = this._getUTCDatestamp();
 
             //Check is this update or new record
             if (editRecord && editRecord.attributes["ID"] !== null) {
                 this._changeEditToolState(false, "Starting Update Process");
 
                 //confirm the current record exists and get the current model
-                this._requestLLUREntity(apiRecord).then(lang.hitch(this, function (response) {
-                    //if valid record found
-                    if (response.data !== null) {
-                        //generate a shape dto to send through as an update
-                        var shapeDto = automapperUtil.map('graphic', 'shapeDto', editRecord);
+                /*
+                this._requestLLUREntity(apiRecord).then(
+                        lang.hitch(this, function (response) {
+                            //if valid record found
+                            if (response.data !== null) {
+                */
+                //generate a shape dto to send through as an update
+                var shapeDto = automapperUtil.map('graphic', 'shapeDto', editRecord);
 
-                        //update user details
-                        shapeDto.createdBy = response.data.createdBy;
-                        shapeDto.createdDate = response.data.createdDate;
+                //update user details
+                //shapeDto.createdByEmail = response.data.createdBy;
+                //shapeDto.createdDate = response.data.createdDate;
 
-                        shapeDto.modifiedBy = userName;
-                        shapeDto.modifiedDate = now;
+                shapeDto.modifiedByEmail = userName;
+                shapeDto.modifiedDate = now;
 
-                        this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
-                            this._postGISFeatureChanges(editRecord, false);
-                            this._postGeometryChanges(editRecord, false);
-                        }), lang.hitch(this, function (error) {
-                            if (error) {
-                                console.error(error);
-                                this.showMessage(error.message, "error");
-                            } else {
-                                this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
-                            }
-
-                            this._changeEditToolState(true);
-                        }));
-                    }
+                this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
+                    this._postGISFeatureChanges(editRecord, false);
+                    this._postGeometryChanges(editRecord, false);
                 }), lang.hitch(this, function (error) {
-                    console.error(error);
+                    if (error) {
+                        console.error(error);
+                        this.showMessage(error.message, "error");
+                    } else {
+                        this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
+                    }
+
                     this._changeEditToolState(true);
                 }));
+                /*}
+                }),
+                lang.hitch(this, function (error) {
+                console.error(error);
+                this._changeEditToolState(true);
+                })
+                );*/
             } else {
                 this._changeEditToolState(false, "Starting Save New Record Process");
 
                 //update user and time on record
-                apiRecord.createdBy = userName;
+                apiRecord.createdByEmail = userName;
                 apiRecord.createdDate = now;
 
-                apiRecord.modifiedBy = userName;
+                apiRecord.modifiedByEmail = userName;
                 apiRecord.modifiedDate = now;
 
                 //get the template for the rec type - match against configured layer settings
@@ -1333,11 +1336,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["ActivityType"];
             }).forMember('active', function (opts) {
                 return null;
-            }).forMember('createdBy', function (opts) {
+            }).forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
-            }).forMember('modifiedBy', function (opts) {
+            }).forMember('modifiedByEmail', function (opts) {
                 return null;
             }).forMember('modifiedDate', function (opts) {
                 return null;
@@ -1366,11 +1369,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["Location"];
             }).forMember('categoryId', function (opts) {
                 return opts.sourceObject.attributes["Category"];
-            }).forMember('createdBy', function (opts) {
+            }).forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
-            }).forMember('modifiedBy', function (opts) {
+            }).forMember('modifiedByEmail', function (opts) {
                 return null;
             }).forMember('modifiedDate', function (opts) {
                 return null;
@@ -1421,11 +1424,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return null;
             }).forMember('preparedFor', function (opts) {
                 return null;
-            }).forMember('createdBy', function (opts) {
+            }).forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
-            }).forMember('modifiedBy', function (opts) {
+            }).forMember('modifiedByEmail', function (opts) {
                 return null;
             }).forMember('modifiedDate', function (opts) {
                 return null;
@@ -1503,11 +1506,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject._extent.ymax;
             }).forMember('communicationTypeId', function (opts) {
                 return opts.sourceObject.attributes["CommunicationType"];
-            }).forMember('createdBy', function (opts) {
+            }).forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
-            }).forMember('modifiedBy', function (opts) {
+            }).forMember('modifiedByEmail', function (opts) {
                 return null;
             }).forMember('modifiedDate', function (opts) {
                 return null;
@@ -1567,11 +1570,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject._extent.ymin;
             }).forMember('yMax', function (opts) {
                 return opts.sourceObject._extent.ymax;
-            }).forMember('createdBy', function (opts) {
+            }).forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
-            }).forMember('modifiedBy', function (opts) {
+            }).forMember('modifiedByEmail', function (opts) {
                 return null;
             }).forMember('modifiedDate', function (opts) {
                 return null;
@@ -1663,6 +1666,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             } else {
                 return null;
             }
+        },
+
+        //return utc date format
+        _getUTCDatestamp: function _getUTCDatestamp() {
+            var now = new Date();
+            now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
+            return now;
         }
     });
 });
