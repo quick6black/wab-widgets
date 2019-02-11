@@ -1026,26 +1026,19 @@ function(
         return entType;
     },
 
-
     //call LLUR API to  execute the notify enquirer function
     _postNotifyAPIEntity: function (enquiryId) {
         var deferred = new Deferred();
 
         //set the endpoint url
-        var url = this.config.llurAPI.apiBaseURL + '/Enquiries/' + enquiryId + '/notifyEnquirer';
+        var url = this.config.llurAPI.apiBaseURL + '/Enquiries/' + enquiryId + '/notifyEnquirer?sendEmail=true';
         
         //append proxy - requires call be made via proxy
         url = this.config.llurAPI.proxy + '?' + url; 
 
-        var params = {
-            enquiryId: enquiryId,
-            sendEmail: true
-        };
-
         //construct request
         var entityRequest = request(url, {
-            method: 'POST',
-            data: JSON.stringify(params)
+            method: 'POST'
         });
 
         //make request
@@ -1116,7 +1109,7 @@ function(
                     if (this.editFeaturePane.editToolbar) {
                         var state = this.editFeaturePane.editToolbar.getCurrentState();
                         if (state.graphic && state.isModified){
-                            //incomplete edit - ask to save prior to chnaging tab
+                            //incomplete edit - ask to save prior to changing tab
 
 
 
@@ -1177,10 +1170,6 @@ function(
       STATEMENT FUNCTIONS */
 
     requestStatement: function (featureSet) {
-        //if (this.map.infoWindow.isShowing) {
-        //    this.map.infoWindow.hide();
-        //}
-
         if (featureSet && featureSet.features && featureSet.features.length > 0) {
             //set working animation
             this._changeEditToolState(false, "Requesting Statement");
@@ -1218,69 +1207,111 @@ function(
             var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            var userName = portal.user !== null ? portal.user.username : 'Unknown';
-            var currentDate = new Date().valueOf();
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
 
             var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
             newAttributes["EnquirerName"] = userName;
             newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
-            newAttributes["SearchRaedius"] = 0;
+            newAttributes["SearchRadius"] = 0;
             var newGraphic = new Graphic(shape, null, newAttributes);
+            newGraphic._extent = newGraphic.geometry.getExtent();
 
-            var ext = newGraphic.geometry.getExtent();
-
-
-            var saveRec = automapperUtil.map('graphic','ENQ', newGraphic);
-
-            //generate a shape dto to send through as an update
-            var shapeDto = automapperUtil.map('graphic','shapeDto', newGraphic);
-
-            //update user details
-            var now = new Date();
-            now = now.getUTCFullYear() + '-' +
-            ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' +
-            ('00' + now.getUTCDate()).slice(-2) + ' ' +
-            ('00' + now.getUTCHours()).slice(-2) + ':' +
-            ('00' + now.getUTCMinutes()).slice(-2) + ':' +
-            ('00' + now.getUTCSeconds()).slice(-2);  
-
-            shapeDto.createdBy = userName;
-            shapeDto.createdDate = now;
-            shapeDto.modifiedBy = userName;
-            shapeDto.modifiedDate = now;
-
-            //submit as a new enquiry
-            this._putExistingAPIEntity(shapeDto)
-                .then(
-                    lang.hitch(this, 
-                        function (result) { 
-                            this._postGeometryChanges(newGraphic, false);
-
-                            //send notify fubnction
-                            //this._postNotifyAPIEntity(result.)
-                            this.showMessage('you will be emailed statemeent details shortly');
-
-                            this._changeEditToolState(true);
-                        }),
-                    lang.hitch(this, 
-                        function (error) {
-                            if (error) {
-                                this.showMessage(error.message,"error");
-                            } else {
-                                this.showMessage('LLUR Edit Tool - Enquiry Statement Save Changes putExistingAPIEntity Error.',"error");               
-                            }
-
-                            this._changeEditToolState(true);
-                        })
-                );
-
-            //var ext = shape.getExtent();
-            //this.map.setExtent(ext,true);
+            this._saveStatementRequest(newGraphic);
         } else {
             console.log('LLUREditor::requestStatement::Invalid features supplied');
             this.showMessage('LLUR Edit Tool - Invalid features supplied to Statement Create.',"error");
         }
 
+    },
+
+    _saveStatementRequest: function (newGraphic) {
+        //create the enquiry record dto
+        var apiRecord = automapperUtil.map('graphic','ENQ', newGraphic);
+
+        //update user and time on record
+        var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+        var portal = jimuPortalUtils.getPortal(portalUrl);
+
+        var userName = portal.user !== null ? portal.user.email : 'Unknown';
+        var now = this._getUTCDatestamp();
+
+        apiRecord.createdByEmail = userName;
+        apiRecord.createdDate = now;
+
+        apiRecord.modifiedByEmail = userName;
+        apiRecord.modifiedDate = now;            
+
+        //get the template for the enquiry rec type - match against configured layer settings
+        var template = null;
+        arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+            function (recordTemplate) {
+                if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
+                    template = recordTemplate;
+                }
+            })
+        );
+
+        //post entity to api and await response
+        this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
+            .then(
+                lang.hitch(this, function (result) {
+                    var resultData = result.data;
+                    if (resultData.id) {
+                        newGraphic.attributes["ID"] = resultData.id;
+                        newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
+                    }
+
+                    this._postGISFeatureChanges(newGraphic, true);
+                    if (this._geometryLayer) {
+                        var feature = new Graphic(newGraphic.toJson()), 
+                            newAttributes = automapperUtil.map('graphic','llurGeoFeature', newGraphic);
+
+                        //update feature roperties
+                        feature.setAttributes(newAttributes);
+                        feature.setSymbol(null);
+                        this._updateGeometryProperties(feature);
+                        this._updateUserProperties(feature);
+
+                        var inserts =  [feature], updates = null, deletes = null;
+
+                        //send edits to geometry layer
+                        this._geometryLayer.applyEdits(inserts, updates, deletes, 
+                            lang.hitch(this, 
+                                function (results) {
+                                    //call the notify process to request an email
+                                    if (!updates) {
+                                        updates = [];
+                                    }
+
+                                    var feature = updates.concat(inserts)[0];
+                                    var id = feature.attributes["ID"];
+                                    this._postNotifyAPIEntity(id).then(
+                                        lang.hitch(this,
+                                            function (result) {
+                                                this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.");
+                                                this._changeEditToolState(true);                                                
+                                            }),
+                                        lang.hitch(this,
+                                            function (error) {
+                                                console.error(error);
+                                                this.showMessage("An error has occured while requesting the statement document.  Your reference ID is ENQ" + id + ".  Please contact the LLUR system administrator if this problem persists using this reference ID.","error");
+                                                this._changeEditToolState(true);                                                
+                                            })
+                                        );
+                                }),
+                            lang.hitch(this,
+                                function (error) {
+                                    this.showMessage(error.message,"error");
+                                    this._changeEditToolState(true);
+                                })
+                            );
+                    }
+                }),
+                lang.hitch(this, function (error) {
+                    this.showMessage(error.message,"error");
+                    this._changeEditToolState(true);
+                })
+            );
     },
 
 

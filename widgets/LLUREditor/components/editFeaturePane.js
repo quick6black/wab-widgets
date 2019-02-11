@@ -269,8 +269,13 @@ function (
                                 //hide the message box
                                 this.wabWidget.hideMessage();
 
+                                //get the current selection record
+                                var rec = this.attributeInspector._selection[0];                                
+
                                 //call the request statement process
-                                 this.wabWidget.requestStatement();
+                                this.wabWidget.requestStatement({
+                                    features: [rec]
+                                 });
                             }), "warning");
 
                             /*
