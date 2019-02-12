@@ -203,9 +203,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                                     attributes = lang.clone(template.prototype.attributes);
                                 }
                             }));
-                        } else {}
-                        //select first template
-
+                        } else {
+                            //select first template
+                            template = queryItem.template.layer.templates[0];
+                            attributes = lang.clone(template.prototype.attributes);
+                        }
 
                         //set default attributes
                         attributes["ID"] = queryItem.lookupValue;

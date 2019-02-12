@@ -317,6 +317,8 @@ function(
                             );
                         } else {
                             //select first template
+                            template = queryItem.template.layer.templates[0];
+                            attributes = lang.clone(template.prototype.attributes);
                         }
 
                         //set default attributes
