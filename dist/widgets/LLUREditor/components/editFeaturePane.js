@@ -179,7 +179,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                 }
 
                 //add in request statement
-                if (this.config.allowStatementRequest) {
+                if (this.config.allowStatementRequest && recordTemplate && recordTemplate.apiSettings.mappingClass === 'ENQ') {
                     var requestStatementLabel = this.config.labelOverrides.edit.requestStatementLabel === "" ? this.i18n.edit.requestStatementLabel : this.config.labelOverrides.edit.requestStatementLabel;
                     var requestStatementTooltip = this.config.labelOverrides.edit.requestStatementTooltip === "" ? this.i18n.edit.requestStatementTooltip : this.config.labelOverrides.edit.requestStatementTooltip;
 
@@ -203,13 +203,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                                 features: [rec]
                             });
                         }), "warning");
-
-                        /*
-                        var c = confirm(this.i18n.edit.requestStatementConfirm);
-                        if (c) {
-                            this.wabWidget.requestStatement();
-                        }
-                        */
                     }));
                 }
 

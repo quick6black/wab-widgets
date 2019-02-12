@@ -533,6 +533,25 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
         //abandon the current edit session and reset the tools
         cancelChanges: function cancelChanges() {
+            //check if this was an existing record being modified - if so, return to llur api 
+            var loc = window.location;
+            var urlObject = esriUrlUtils.urlToObject(loc.href);
+            var value = null;
+
+            //check for location id and entity id parameters
+            var idQuery = urlObject.query["locationId"];
+            var typeQuery = urlObject.query["locationType"];
+            if (idQuery && typeQuery) {
+                value = this._getURLParams(typeQuery, idQuery);
+                if (value !== null) {
+                    // redirect to LLUR
+                    var enttype = value.template.apiSettings.mappingClass;
+                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + value.lookupValue;
+                    window.location = url;
+                    return;
+                }
+            }
+
             var template = this.editFeaturePane.currentTargetTemplate;
 
             template.displayLayer.clearSelection;
