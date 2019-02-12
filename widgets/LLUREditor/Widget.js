@@ -971,6 +971,9 @@ function(
 
     //call LLUR API to create a new database record
     _postNewAPIEntity: function (rec, entType) {
+        //set default id if not populated
+        if (!rec.id) rec.id = 0;
+
         var deferred = new Deferred();
         entType = this._getEntTypeFromRecord(rec);
 

@@ -811,6 +811,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
         //call LLUR API to create a new database record
         _postNewAPIEntity: function _postNewAPIEntity(rec, entType) {
+            //set default id if not populated
+            if (!rec.id) rec.id = 0;
+
             var deferred = new Deferred();
             entType = this._getEntTypeFromRecord(rec);
 
