@@ -593,11 +593,23 @@ function(
                         if (response.data !== null) {
             */
                             //generate a shape dto to send through as an update
-                            var shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
+                            var shapeDto = null;
+                            var entType = null;
+                            if (typeof editRecord.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                            if (typeof editRecord.attributes["Category"] !== 'undefined') entType = 'SIT';
+                            if (typeof editRecord.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                            if (typeof editRecord.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                            if (typeof editRecord.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
 
-                            //update user details
-                            //shapeDto.createdByEmail = response.data.createdBy;
-                            //shapeDto.createdDate = response.data.createdDate;
+                            switch(entType) {
+                                //case 'INV':
+                                //    shapeDto = automapperUtil.map('graphic','invShapeDto', editRecord);
+                                //    break;
+
+                                default:
+                                    shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
+                                    break;
+                            }
 
                             shapeDto.modifiedByEmail = userName;
                             shapeDto.modifiedDate = now;
@@ -1039,7 +1051,7 @@ function(
         return deferred.promise;
     },
 
-    //helper methdoi to get the record type endpoint name for the LLUR API
+    //helper method to get the record type endpoint name for the LLUR API
     _getEntTypeFromRecord: function (rec) {
         var entType = null;
         if (rec.entTypeId === 'ACT') entType = 'Activities';
@@ -1051,18 +1063,24 @@ function(
     },
 
     //call LLUR API to  execute the notify enquirer function
-    _postNotifyAPIEntity: function (enquiryId) {
+    _postNotifyAPIEntity: function (enquiryId, userEmail) {
         var deferred = new Deferred();
 
         //set the endpoint url
-        var url = this.config.llurAPI.apiBaseURL + '/Enquiries/' + enquiryId + '/notifyEnquirer?sendEmail=true';
+        var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/Enquiries/' + enquiryId + '/notifyEnquirer';
         
         //append proxy - requires call be made via proxy
         url = this.config.llurAPI.proxy + '?' + url; 
 
         //construct request
+        var data = {
+                createdByEmail: userEmail
+            };
+
         var entityRequest = request(url, {
-            method: 'POST'
+            method: 'POST',
+            data: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
         });
 
         //make request
@@ -1134,9 +1152,6 @@ function(
                         var state = this.editFeaturePane.editToolbar.getCurrentState();
                         if (state.graphic && state.isModified){
                             //incomplete edit - ask to save prior to changing tab
-
-
-
                         }
                     }
                 }
@@ -1309,11 +1324,12 @@ function(
 
                                     var feature = updates.concat(inserts)[0];
                                     var id = feature.attributes["ID"];
-                                    this._postNotifyAPIEntity(id).then(
+                                    this._postNotifyAPIEntity(id, userName).then(
                                         lang.hitch(this,
                                             function (result) {
                                                 this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.");
-                                                this._changeEditToolState(true);                                                
+                                                this._changeEditToolState(true);    
+                                                this.tabContainer.selectTab(this.nls.tabs.create);                                       
                                             }),
                                         lang.hitch(this,
                                             function (error) {
@@ -1327,6 +1343,7 @@ function(
                                 function (error) {
                                     this.showMessage(error.message,"error");
                                     this._changeEditToolState(true);
+
                                 })
                             );
                     }
@@ -1692,7 +1709,7 @@ function(
             .forMember('MODIFIEDDATE', function (opts) { return null; })
             .ignoreAllNonExisting();
 
-        //site feature to SIT entitydto
+        //general feature to entitydto
         automapperUtil.createMap('graphic','shapeDto')
             .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
             .forMember('entTypeId', function (opts) { 
@@ -1703,6 +1720,25 @@ function(
                 if (typeof opts.sourceObject.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
                 if (typeof opts.sourceObject.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
                 return entType; })
+            .forMember('cSID', function (opts) { return null; })
+            .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
+            .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
+            .forMember('xMax', function (opts) { return opts.sourceObject._extent.xmax; })
+            .forMember('yMin', function (opts) { return opts.sourceObject._extent.ymin; })
+            .forMember('yMax', function (opts) { return opts.sourceObject._extent.ymax; })
+            .forMember('createdByEmail', function (opts) { return null; })
+            .forMember('createdDate', function (opts) { return null; })
+            .forMember('modifiedByEmail', function (opts) { return null; })
+            .forMember('modifiedDate', function (opts) { return null; })            
+            .ignoreAllNonExisting();
+
+
+        //eature to INV Shape entitydto
+        automapperUtil.createMap('graphic','invShapeDto')
+            .forMember('id', function (opts) { return opts.sourceObject.attributes["ID"]; })
+            .forMember('entTypeId', function (opts) { 
+                return 'INV'; })
+            .forMember('investigationTypeId', function (opts) { return opts.sourceObject.attributes["InvestigationType"]; })
             .forMember('cSID', function (opts) { return null; })
             .forMember('shape', lang.hitch(this, function (opts) { return this._getWKT(opts.sourceObject.geometry); }))
             .forMember('xMin', function (opts) { return opts.sourceObject._extent.xmin; })
