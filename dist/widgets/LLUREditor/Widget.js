@@ -1530,24 +1530,30 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
                 //add in sitename no reference is populated
                 if (opts.sourceObject.attributes["SiteName"] && opts.sourceObject.attributes["SiteName"] !== '') {
-                    natureText += 'Site Name: ' + opts.sourceObject.attributes["SiteName"] + '\n';
+                    natureText += '<p><strong>Site Name:</strong> ' + opts.sourceObject.attributes["SiteName"] + '<p>';
                 }
 
                 //add in consent no reference is populated
                 if (opts.sourceObject.attributes["ConsentNo"] && opts.sourceObject.attributes["ConsentNo"] !== '') {
-                    natureText += 'Consent No: ' + opts.sourceObject.attributes["ConsentNo"] + '\n';
+                    natureText += '<p><strong>Consent No:</strong> ' + opts.sourceObject.attributes["ConsentNo"] + '<p>';
                 }
 
                 //add in due date as string 
-                if (opts.sourceObject.attributes["DueDate"] && opts.sourceObject.attributes["DueDate"]) {
-                    var dueDate = new Date(opts.sourceObject.attributes["DueDate"] * 1000);
-                    natureText += 'Due Date: ' + dueDate.toLocaleString() + '\n';
+                if (opts.sourceObject.attributes["DueDate"]) {
+                    var dueDate = new Date(opts.sourceObject.attributes["DueDate"]);
+                    natureText += '<p><strong>Due Date:</strong> ' + dueDate.toDateString() + '<p>';
+                }
+
+                //add in search radius as string 
+                if (opts.sourceObject.attributes["SearchRadius"]) {
+                    natureText += '<p><strong>Search Radius:</strong> ' + opts.sourceObject.attributes["SearchRadius"] + 'm<p>';
                 }
 
                 //add in the nature of enquirey text added to form
                 if (opts.sourceObject.attributes["NatureOfEnquiry"] && opts.sourceObject.attributes["NatureOfEnquiry"] !== '') {
-                    natureText += opts.sourceObject.attributes["NatureOfEnquiry"];
+                    natureText += '<p>' + opts.sourceObject.attributes["NatureOfEnquiry"] + '</p>';
                 }
+
                 return natureText;
             }).forMember('contactId', function (opts) {
                 return null;
