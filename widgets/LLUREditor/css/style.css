@@ -88,6 +88,9 @@
 .esriAttributeInspector .atiField {
   margin: 1px; }
 
+.esriAttributeInspector .atiTextAreaField {
+  height: 150px !important; }
+
 .esriAttributeInspector .atiRichTextField {
   margin: 5px auto; }
 
