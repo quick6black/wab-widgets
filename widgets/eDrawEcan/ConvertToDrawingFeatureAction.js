@@ -60,8 +60,9 @@ define([
       query.outFields = fields;
       query.returnGeometry = true;
 
-      // Create query task and execute against it - used instead of feature layer to override auto generalisation
-      var queryTask = new QueryTask(layer.url);
+      // Create query task and execute against it - used instead of feature layer to override auto generalisation.  Note also checks for dynamic layers and alters rul if found.
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);      
       return queryTask.execute(query);
     }
 
