@@ -46,23 +46,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
         wm.activateWidget(myWidget);
         myWidget.editRecord(this._recordTemplate.apiSettings.mappingClass, featureSet.features[0].attributes[this._recordTemplate.lookupKeyField]);
-
-        /*
-        if (this._checkForFeatureLayers(featureSet)) {
-            // Query the source layer to get the ungeneralised version of the feature
-            this._queryForFeatures(featureSet)
-              .then( lang.hitch(this, 
-                function(results) {
-                  myWidget.editRecord(results, this._recordTemplate.title);
-                }), 
-                function (error) {
-                  alert(error);
-                }
-              );
-        } else {
-          myWidget.editRecord(featureSet);
-        }
-        */
       }));
     },
 
@@ -74,25 +57,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
 
       return false;
     },
-
-    /*    _queryForFeatures: function (featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      var objectIdField = layer.objectIdField;
-      var objectIds = featureSet.features.map(function (feature) {
-         return feature.attributes[objectIdField];
-      });
-        var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
-        return field.name;
-      })) : ['*'];
-        var query = new Query();
-      query.maxAllowableOffset = 0;
-      query.objectIds = objectIds;
-      query.outFields = fields;
-      query.returnGeometry = true;
-        var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
-      var queryTask = new QueryTask(serviceUrl);
-      return queryTask.execute(query);
-    },*/
 
     _getThisConfig: function _getThisConfig() {
       if (this._widgetConfig === null) {

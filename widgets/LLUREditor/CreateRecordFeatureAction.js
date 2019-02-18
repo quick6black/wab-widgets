@@ -23,17 +23,29 @@ define([
     iconFormat: 'png',
 
     isFeatureSupported: function (featureSet) {
-      this.fs = featureSet;
-
-      return featureSet.features.length > 0 && 
-        featureSet.features[0].geometry.type === 'polygon';
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature(); 
+          return graphic.geometry.type === 'polygon';        
+        }
+      }
+      else {
+        return featureSet.features.length > 0 && 
+          featureSet.features[0].geometry.type === 'polygon';
+      }
     },
 
     onExecute: function (featureSet) {
-      if (this.fs) {
-        var l = this.fs.features.length;
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature(); 
+          featureSet.features.push(graphic);
+        }
       }
-
 
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId)
@@ -98,7 +110,9 @@ define([
       query.outFields = fields;
       query.returnGeometry = true;
 
-      var queryTask = new QueryTask(layer.url);
+      // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);      
       return queryTask.execute(query);
     }
 
