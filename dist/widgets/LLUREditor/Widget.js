@@ -347,7 +347,56 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
 
             if (featureset && featureset.features && featureset.features.length > 0) {
-                this.showCreatePopup(featureset);
+                //check how many templates user can choose from if one - send directly to edit screen for that template.
+                if (this.recordTemplateLayers.length === 1) {
+                    //check if multiple features were supplied
+                    var shape = null;
+                    var recordTypeTemplate = this.recordTemplateLayers[0];
+
+                    //check if layer has loaded
+                    if (!recordTypeTemplate.layer.loaded) {
+                        //add listenter and recall this function when loaded
+                        var loadhandler = recordTypeTemplate.layer.on('load', lang.hitch(this, function (event) {
+                            loadhandler.remove();
+                            this.copyFeatureSet(featureset);
+                        }));
+                        return;
+                    }
+
+                    //check for filter settings on the layer and choose the first filtered type
+                    if (recordTypeTemplate.templates.filter && recordTypeTemplate.templates.filter !== '') {
+                        // get the first (hard coded as customer services and consents only have one type)
+                        var flt = recordTypeTemplate.templates.filter.split(',')[0];
+                        var recordTemplate = {
+                            featureLayer: recordTypeTemplate.layer,
+                            template: null,
+                            type: null
+                        };
+                        if (recordTypeTemplate.layer.types.length > 0) {
+                            recordTemplate.type = arrayUtils.filter(recordTypeTemplate.layer.types, function (type) {
+                                return type.templates[0].name === flt;
+                            })[0];
+                            recordTemplate.template = recordTemplate.type.templates[0];
+
+                            //if (!recordTemplate) {
+                            //    recordTemplate = recordTypeTemplate.layer.types[0].templates[0];
+                            //}
+                        } else {
+                            recordTemplate = recordTypeTemplate;
+                        }
+                    }
+
+                    if (featureset.features.length === 1) {
+                        shape = featureset.features[0].geometry;
+                    } else {
+                        //multiple records - create a single merged shape
+                        var shapes = graphicsUtils.getGeometries(featureset.features);
+                        shape = geometryEngine.union(shapes);
+                    }
+                    this._prepareRecord(shape, null, recordTemplate);
+                } else {
+                    this.showCreatePopup(featureset);
+                }
             } else {
                 console.log('LLUREditor::copyFeatureSet::Invalid features supplied');
                 this.showMessage('LLUR Edit Tool - Invalid features supplied.', "error");
