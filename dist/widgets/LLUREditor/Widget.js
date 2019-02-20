@@ -1455,9 +1455,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["PeriodTo"];
             }).forMember('activityTypeId', function (opts) {
                 return opts.sourceObject.attributes["ActivityType"];
-            }).forMember('active', function (opts) {
-                return null;
-            }).forMember('createdByEmail', function (opts) {
+            })
+            //.forMember('active', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
@@ -1517,35 +1517,24 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject._extent.ymin;
             }).forMember('yMax', function (opts) {
                 return opts.sourceObject._extent.ymax;
-            }).forMember('reportTitle', function (opts) {
-                return null;
-            }).forMember('reportDate', function (opts) {
-                return null;
-            }).forMember('receivedDate', function (opts) {
-                return null;
-            }).forMember('auditedBy', function (opts) {
-                return null;
-            }).forMember('auditedDate', function (opts) {
-                return null;
-            }).forMember('reviewedBy', function (opts) {
-                return null;
-            }).forMember('reviewedDate', function (opts) {
-                return null;
-            }).forMember('reportFromId', function (opts) {
-                return null;
-            }).forMember('proposedChangeId', function (opts) {
-                return null;
-            }).forMember('investigationPriorityId', function (opts) {
-                return null;
-            }).forMember('fileNo', function (opts) {
-                return null;
-            }).forMember('investigationTypeId', function (opts) {
+            })
+            //.forMember('reportTitle', function (opts) { return null; })
+            //.forMember('reportDate', function (opts) { return null; })
+            //.forMember('receivedDate', function (opts) { return null; })
+            //.forMember('auditedBy', function (opts) { return null; })
+            //.forMember('auditedDate', function (opts) { return null; })
+            //.forMember('reviewedBy', function (opts) { return null; })
+            //.forMember('reviewedDate', function (opts) { return null; })
+            //.forMember('reportFromId', function (opts) { return null; })
+            //.forMember('proposedChangeId', function (opts) { return null; })
+            //.forMember('investigationPriorityId', function (opts) { return null; })
+            //.forMember('fileNo', function (opts) { return null; })
+            .forMember('investigationTypeId', function (opts) {
                 return opts.sourceObject.attributes["InvestigationType"];
-            }).forMember('documentNo', function (opts) {
-                return null;
-            }).forMember('preparedFor', function (opts) {
-                return null;
-            }).forMember('createdByEmail', function (opts) {
+            })
+            //.forMember('documentNo', function (opts) { return null; })
+            //.forMember('preparedFor', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) {
                 return null;
             }).forMember('createdDate', function (opts) {
                 return null;
@@ -1587,11 +1576,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     natureText += '<p><strong>Consent No:</strong> ' + opts.sourceObject.attributes["ConsentNo"] + '<p>';
                 }
 
-                //add in due date as string 
+                //add in due date as string  - removed from data follwoing UAT feedback
+                /*
                 if (opts.sourceObject.attributes["DueDate"]) {
-                    var dueDate = new Date(opts.sourceObject.attributes["DueDate"]);
+                    var dueDate = new Date( opts.sourceObject.attributes["DueDate"]);
                     natureText += '<p><strong>Due Date:</strong> ' + dueDate.toDateString() + '<p>';
                 }
+                */
 
                 //add in search radius as string 
                 if (opts.sourceObject.attributes["SearchRadius"]) {
@@ -1604,6 +1595,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 }
 
                 return natureText;
+            }).forMember('searchRadius', function (opts) {
+                opts.sourceObject.attributes["SearchRadius"];
             }).forMember('contactId', function (opts) {
                 return null;
             }).forMember('enquiryTypeId', function (opts) {
@@ -1685,35 +1678,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 if (typeof opts.sourceObject.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
                 if (typeof opts.sourceObject.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
                 return entType;
-            }).forMember('cSID', function (opts) {
-                return null;
-            }).forMember('shape', lang.hitch(this, function (opts) {
-                return this._getWKT(opts.sourceObject.geometry);
-            })).forMember('xMin', function (opts) {
-                return opts.sourceObject._extent.xmin;
-            }).forMember('xMax', function (opts) {
-                return opts.sourceObject._extent.xmax;
-            }).forMember('yMin', function (opts) {
-                return opts.sourceObject._extent.ymin;
-            }).forMember('yMax', function (opts) {
-                return opts.sourceObject._extent.ymax;
-            }).forMember('createdByEmail', function (opts) {
-                return null;
-            }).forMember('createdDate', function (opts) {
-                return null;
-            }).forMember('modifiedByEmail', function (opts) {
-                return null;
-            }).forMember('modifiedDate', function (opts) {
-                return null;
-            }).ignoreAllNonExisting();
-
-            //eature to INV Shape entitydto
-            automapperUtil.createMap('graphic', 'invShapeDto').forMember('id', function (opts) {
-                return opts.sourceObject.attributes["ID"];
-            }).forMember('entTypeId', function (opts) {
-                return 'INV';
-            }).forMember('investigationTypeId', function (opts) {
-                return opts.sourceObject.attributes["InvestigationType"];
             }).forMember('cSID', function (opts) {
                 return null;
             }).forMember('shape', lang.hitch(this, function (opts) {
