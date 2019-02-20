@@ -1542,13 +1542,13 @@ function(
             case "esriGeometryPolygon":
                 var line;
                 if (highlight === true) {
-                    selectionSymbol = new SimpleFillSymbol().setColor(new Color([0, 230, 169, 0.65]));
+                    selectionSymbol = new SimpleFillSymbol().setColor(new Color([0, 230, 169, 0.5]));
                     line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                        new Color([192, 192, 192, 1]), 2);
+                        new Color([192, 192, 192, 1]), 3);
                 } else { // yellow with black outline
-                    selectionSymbol = new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.65]));
+                    selectionSymbol = new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5]));
                     line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                        new Color([192, 192, 192, 1]), 2);
+                        new Color([192, 192, 192, 1]), 3);
                 }
                 selectionSymbol.setOutline(line);
                 break;
