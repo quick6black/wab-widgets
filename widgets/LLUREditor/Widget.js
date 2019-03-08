@@ -49,6 +49,7 @@ define([
     './components/editFeaturePane',
     './components/searchFeaturePane',
     './components/createLLURFeaturePopup',
+    './components/requestStatementPopup',
     './components/LEFilterEditor',
 
     './libs/automapper',
@@ -96,6 +97,7 @@ function(
     EditFeaturePane,
     SearchFeaturePane,
     CreateLLURFeaturePopup,
+    RequestStatementPopup,
     LEFilterEditor,
 
     automapperUtil,
@@ -576,6 +578,66 @@ function(
         copyPopup.popup.close();
         copyPopup.destroy();
       });
+    },
+
+    //show the request popup screen when using the request statemenbt feature action
+    showRequestStatementPopup: function (featureSet) {
+        var requestPopup, param;
+        param = {
+            map: this.map,
+            nls: this.nls,
+            config: this.config,
+            featureSet: featureSet,
+            wabWidget: this
+        };
+
+        requestPopup = new RequestStatementPopup(param);
+        requestPopup.startup();
+
+        requestPopup.onOkClick = lang.hitch(this, function() {
+            this._changeEditToolState(false, "Saving Request");
+
+            var searchRadius = requestPopup.getSelectedSearchRadius();
+            var recordTemplate = this._getRecordTemplate('ENQ');
+
+            //create enquiry record
+            var statementTypeId = this.config.llurAPI.statementRequestTypeId;
+            var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) { 
+                return type.id === statementTypeId;
+            })[0];
+
+            if (!enquiryTemplate) {
+                this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.',"error");               
+                this._changeEditToolState(true);
+                return;                
+            }
+
+            //check if multiple features were supplied
+            var shape = null;
+            if (requestPopup.featureSet.features.length === 1) {
+                shape = requestPopup.featureSet.features[0].geometry;
+            } else {
+                //multiple records - create a single merged shape
+                var shapes = graphicsUtils.getGeometries(requestPopup.featureSet.features);
+                shape = geometryEngine.union(shapes);
+            }
+
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
+
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
+
+            var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
+            newAttributes["EnquirerName"] = userName;
+            newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
+            newAttributes["SearchRadius"] = searchRadius || 0;
+            var newGraphic = new Graphic(shape, null, newAttributes);
+            newGraphic._extent = newGraphic.geometry.getExtent();
+
+            this._saveStatementRequest(newGraphic);
+            requestPopup.popup.close();
+            requestPopup.destroy();
+        });
     },
 
     //show a message box with buttons if necessary
@@ -1261,7 +1323,7 @@ function(
     requestStatement: function (featureSet) {
         if (featureSet && featureSet.features && featureSet.features.length > 0) {
             //set working animation
-            this._changeEditToolState(false, "Requesting Statement");
+            this._changeEditToolState(false, "Start Statement Request");
 
             //confirm enquiry template is configured
             var recordTemplate = this._getRecordTemplate('ENQ');
@@ -1271,49 +1333,23 @@ function(
                 return;
             } 
 
-            //create enquiry record
-            var statementTypeId = this.config.llurAPI.statementRequestTypeId;
-            var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) { 
-                return type.id === statementTypeId;
-            })[0];
-
-            if (!enquiryTemplate) {
-                this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.',"error");               
-                this._changeEditToolState(true);
-                return;                
+            if (!recordTemplate.layer.loaded) {
+                recordTemplate.layer.on('load', lang.hitch(this, function (event) {
+                    this.requestStatement(featureSet);
+                }));
+                return;
             }
 
-            //check if multiple features were supplied
-            var shape = null;
-            if (featureSet.features.length === 1) {
-                shape = featureSet.features[0].geometry;
-            } else {
-                //multiple records - create a single merged shape
-                var shapes = graphicsUtils.getGeometries(featureSet.features);
-                shape = geometryEngine.union(shapes);
-            }
-
-            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
-            var portal = jimuPortalUtils.getPortal(portalUrl);
-
-            var userName = portal.user !== null ? portal.user.email : 'Unknown';
-
-            var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
-            newAttributes["EnquirerName"] = userName;
-            newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
-            newAttributes["SearchRadius"] = 0;
-            var newGraphic = new Graphic(shape, null, newAttributes);
-            newGraphic._extent = newGraphic.geometry.getExtent();
-
-            this._saveStatementRequest(newGraphic);
+            this.showRequestStatementPopup(featureSet);
         } else {
             console.log('LLUREditor::requestStatement::Invalid features supplied');
             this.showMessage('LLUR Edit Tool - Invalid features supplied to Statement Create.',"error");
         }
-
     },
 
     _saveStatementRequest: function (newGraphic) {
+        this._changeEditToolState(false, "Saving Request");
+
         //create the enquiry record dto
         var apiRecord = automapperUtil.map('graphic','ENQ', newGraphic);
 
@@ -1349,7 +1385,7 @@ function(
                         newGraphic.attributes["ID"] = resultData.id;
                         newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
                     }
-
+                    this._changeEditToolState(false, "Updating GIS");
                     this._postGISFeatureChanges(newGraphic, true);
                     if (this._geometryLayer) {
                         var feature = new Graphic(newGraphic.toJson()), 
@@ -1374,10 +1410,28 @@ function(
 
                                     var feature = updates.concat(inserts)[0];
                                     var id = feature.attributes["ID"];
+                                    var enttype = feature.attributes["EntType_ID"];
+
+                                    this._changeEditToolState(false, "Requesting Document");
                                     this._postNotifyAPIEntity(id, userName).then(
                                         lang.hitch(this,
                                             function (result) {
-                                                this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.");
+                                                var buttons = [
+                                                    {
+                                                        label: this.nls.messagesDialog.gotoLLUR,
+                                                        onClick: lang.hitch(this,function () {
+                                                            var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+                                                            window.open(url, '_blank');                                                            
+                                                        })
+                                                    },{
+                                                        label: this.nls.messagesDialog.confirmOk,
+                                                    }
+                                                ];
+
+
+
+
+                                                this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.", null, buttons);
                                                 this._changeEditToolState(true);    
                                                 this.tabContainer.selectTab(this.nls.tabs.create);                                       
                                             }),

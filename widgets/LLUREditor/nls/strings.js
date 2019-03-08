@@ -55,9 +55,18 @@ define({
       instruction: "Select a Record Type"
     },
 
-    messages: {
+    requestLLURStatementPopup: {
+      ok: "Ok",
+      cancel: "Cancel",
+      titleLabel: "Request a LLUR Statement",
+      instruction: "Select a search radius"
+    },
+
+    messagesDialog: {
       confirmYes: "Yes",
-      confirmNo: "No"
+      confirmNo: "No",
+      confirmOk: "Ok",
+      gotoLLUR: "Go to LLUR Details"
     }
 
   })

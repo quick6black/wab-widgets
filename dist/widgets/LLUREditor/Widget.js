@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/request/xhr', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', 'jimu/dijit/Message', 'jimu/portalUtils', 'jimu/portalUrlUtils', "esri/geometry/geometryEngine", "esri/geometry/Extent", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", "esri/arcgis/Portal", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './components/LEFilterEditor', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, xhr, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, Message, jimuPortalUtils, jimuPortalUrlUtils, geometryEngine, Extent, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, arcgisPortal, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, LEFilterEditor, automapperUtil, Terraformer) {
+define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/request/xhr', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', 'jimu/dijit/Message', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', "esri/geometry/geometryEngine", "esri/geometry/Extent", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", "esri/arcgis/Portal", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './components/requestStatementPopup', './components/LEFilterEditor', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, xhr, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, Message, jimuPortalUtils, jimuPortalUrlUtils, LayerInfos, jimuUtils, geometryEngine, Extent, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, arcgisPortal, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, RequestStatementPopup, LEFilterEditor, automapperUtil, Terraformer) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
         name: 'LLUREditor',
@@ -413,7 +413,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
-        //show the create feature popup screen when uisng the create record feature action
+        //show the create feature popup screen when using the create record feature action
         showCreatePopup: function showCreatePopup(featureSet) {
             var copyPopup, param;
             param = {
@@ -448,6 +448,66 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 }
                 copyPopup.popup.close();
                 copyPopup.destroy();
+            });
+        },
+
+        //show the request popup screen when using the request statemenbt feature action
+        showRequestStatementPopup: function showRequestStatementPopup(featureSet) {
+            var requestPopup, param;
+            param = {
+                map: this.map,
+                nls: this.nls,
+                config: this.config,
+                featureSet: featureSet,
+                wabWidget: this
+            };
+
+            requestPopup = new RequestStatementPopup(param);
+            requestPopup.startup();
+
+            requestPopup.onOkClick = lang.hitch(this, function () {
+                this._changeEditToolState(false, "Saving Request");
+
+                var searchRadius = requestPopup.getSelectedSearchRadius();
+                var recordTemplate = this._getRecordTemplate('ENQ');
+
+                //create enquiry record
+                var statementTypeId = this.config.llurAPI.statementRequestTypeId;
+                var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) {
+                    return type.id === statementTypeId;
+                })[0];
+
+                if (!enquiryTemplate) {
+                    this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.', "error");
+                    this._changeEditToolState(true);
+                    return;
+                }
+
+                //check if multiple features were supplied
+                var shape = null;
+                if (requestPopup.featureSet.features.length === 1) {
+                    shape = requestPopup.featureSet.features[0].geometry;
+                } else {
+                    //multiple records - create a single merged shape
+                    var shapes = graphicsUtils.getGeometries(requestPopup.featureSet.features);
+                    shape = geometryEngine.union(shapes);
+                }
+
+                var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var portal = jimuPortalUtils.getPortal(portalUrl);
+
+                var userName = portal.user !== null ? portal.user.email : 'Unknown';
+
+                var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
+                newAttributes["EnquirerName"] = userName;
+                newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
+                newAttributes["SearchRadius"] = searchRadius || 0;
+                var newGraphic = new Graphic(shape, null, newAttributes);
+                newGraphic._extent = newGraphic.geometry.getExtent();
+
+                this._saveStatementRequest(newGraphic);
+                requestPopup.popup.close();
+                requestPopup.destroy();
             });
         },
 
@@ -1087,7 +1147,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         requestStatement: function requestStatement(featureSet) {
             if (featureSet && featureSet.features && featureSet.features.length > 0) {
                 //set working animation
-                this._changeEditToolState(false, "Requesting Statement");
+                this._changeEditToolState(false, "Start Statement Request");
 
                 //confirm enquiry template is configured
                 var recordTemplate = this._getRecordTemplate('ENQ');
@@ -1097,41 +1157,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     return;
                 }
 
-                //create enquiry record
-                var statementTypeId = this.config.llurAPI.statementRequestTypeId;
-                var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) {
-                    return type.id === statementTypeId;
-                })[0];
-
-                if (!enquiryTemplate) {
-                    this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.', "error");
-                    this._changeEditToolState(true);
+                if (!recordTemplate.layer.loaded) {
+                    recordTemplate.layer.on('load', lang.hitch(this, function (event) {
+                        this.requestStatement(featureSet);
+                    }));
                     return;
                 }
 
-                //check if multiple features were supplied
-                var shape = null;
-                if (featureSet.features.length === 1) {
-                    shape = featureSet.features[0].geometry;
-                } else {
-                    //multiple records - create a single merged shape
-                    var shapes = graphicsUtils.getGeometries(featureSet.features);
-                    shape = geometryEngine.union(shapes);
-                }
-
-                var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
-                var portal = jimuPortalUtils.getPortal(portalUrl);
-
-                var userName = portal.user !== null ? portal.user.email : 'Unknown';
-
-                var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
-                newAttributes["EnquirerName"] = userName;
-                newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
-                newAttributes["SearchRadius"] = 0;
-                var newGraphic = new Graphic(shape, null, newAttributes);
-                newGraphic._extent = newGraphic.geometry.getExtent();
-
-                this._saveStatementRequest(newGraphic);
+                this.showRequestStatementPopup(featureSet);
             } else {
                 console.log('LLUREditor::requestStatement::Invalid features supplied');
                 this.showMessage('LLUR Edit Tool - Invalid features supplied to Statement Create.', "error");
@@ -1139,6 +1172,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         },
 
         _saveStatementRequest: function _saveStatementRequest(newGraphic) {
+            this._changeEditToolState(false, "Saving Request");
+
             //create the enquiry record dto
             var apiRecord = automapperUtil.map('graphic', 'ENQ', newGraphic);
 
@@ -1170,7 +1205,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     newGraphic.attributes["ID"] = resultData.id;
                     newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
                 }
-
+                this._changeEditToolState(false, "Updating GIS");
                 this._postGISFeatureChanges(newGraphic, true);
                 if (this._geometryLayer) {
                     var feature = new Graphic(newGraphic.toJson()),
@@ -1195,8 +1230,21 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
                         var feature = updates.concat(inserts)[0];
                         var id = feature.attributes["ID"];
+                        var enttype = feature.attributes["EntType_ID"];
+
+                        this._changeEditToolState(false, "Requesting Document");
                         this._postNotifyAPIEntity(id, userName).then(lang.hitch(this, function (result) {
-                            this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.");
+                            var buttons = [{
+                                label: this.nls.messagesDialog.gotoLLUR,
+                                onClick: lang.hitch(this, function () {
+                                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+                                    window.open(url, '_blank');
+                                })
+                            }, {
+                                label: this.nls.messagesDialog.confirmOk
+                            }];
+
+                            this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.", null, buttons);
                             this._changeEditToolState(true);
                             this.tabContainer.selectTab(this.nls.tabs.create);
                         }), lang.hitch(this, function (error) {

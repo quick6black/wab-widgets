@@ -3,10 +3,28 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     iconFormat: 'png',
 
     isFeatureSupported: function isFeatureSupported(featureSet) {
-      return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature();
+          return graphic.geometry.type === 'polygon';
+        }
+      } else {
+        return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
+      }
     },
 
     onExecute: function onExecute(featureSet) {
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature();
+          featureSet.features.push(graphic);
+        }
+      }
+
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
         wm.activateWidget(myWidget);
@@ -35,9 +53,21 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     _queryForFeatures: function _queryForFeatures(featureSet) {
       var layer = featureSet.features[0].getLayer();
       var objectIdField = layer.objectIdField;
-      var objectIds = featureSet.features.map(function (feature) {
-        return feature.attributes[objectIdField];
-      });
+
+      var objectIds = null;
+      /* CHANGE 2018-12-20 : Check for multiple selected features */
+      var selectedFeatures = layer.getSelectedFeatures();
+      if (selectedFeatures && selectedFeatures.length > featureSet.features.length) {
+        //use selected feature details
+        objectIds = selectedFeatures.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      } else {
+        //use featureset details
+        objectIds = featureSet.features.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      }
 
       var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
         return field.name;
@@ -49,7 +79,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       query.outFields = fields;
       query.returnGeometry = true;
 
-      var queryTask = new QueryTask(layer.url);
+      // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0, layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);
       return queryTask.execute(query);
     }
 
