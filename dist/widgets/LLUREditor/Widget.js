@@ -54,6 +54,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.editFeaturePane.startup();
             //this.searchFeaturePane.startup();
 
+            //add listener for widget activation
+            topic.subscribe("widgetActived", lang.hitch(this, this._deactivateCheck));
+
             //Load up editor layer for submitting
             this._prepEditorService();
 
@@ -219,10 +222,22 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                             //zoom to shape extent
                             this._prepareRecord(record.geometry, attributes, queryItem.template, true);
                         } else {
+                            var layerNameOrId = queryItem.template.lookupName;
+
+                            this._getLayerByNameOrId('name', layerNameOrId, this.map).then(lang.hitch(this, function (layer) {
+                                if (layer !== null) {
+                                    this._selectLayerFeatures(layer, queryItem.lookupValue, queryItem.template.lookupKeyField);
+                                } else {
+                                    console.log('Error - unable to find feature layer');
+                                }
+                            }));
+
                             //call the search widget find method
+                            /*
                             topic.publish('publishData', 'framework', 'framework', {
-                                searchString: queryItem.lookupValue
+                              searchString: queryItem.lookupValue
                             }, true);
+                            */
                         }
                     } else {
                         this.showMessage('No Record found', "error");
@@ -659,17 +674,19 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             var urlObject = esriUrlUtils.urlToObject(loc.href);
             var value = null;
 
-            //check for location id and entity id parameters
-            var idQuery = urlObject.query["locationId"];
-            var typeQuery = urlObject.query["locationType"];
-            if (idQuery && typeQuery) {
-                value = this._getURLParams(typeQuery, idQuery);
-                if (value !== null) {
-                    // redirect to LLUR
-                    var enttype = value.template.apiSettings.mappingClass;
-                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + value.lookupValue;
-                    window.location = url;
-                    return;
+            if (urlObject.query) {
+                //check for location id and entity id parameters
+                var idQuery = urlObject.query["locationId"];
+                var typeQuery = urlObject.query["locationType"];
+                if (idQuery && typeQuery) {
+                    value = this._getURLParams(typeQuery, idQuery);
+                    if (value !== null) {
+                        // redirect to LLUR
+                        var enttype = value.template.apiSettings.mappingClass;
+                        var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + value.lookupValue;
+                        window.location = url;
+                        return;
+                    }
                 }
             }
 
@@ -1138,6 +1155,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 if (!showLayer && this.displayLayer.visible && !this.displayLayerOnWidgetClose) {
                     this.displayLayer.hide();
                 }
+            }
+        },
+
+        //check if the edit tool is active and deactive if widget loses focus.
+        _deactivateCheck: function _deactivateCheck(event) {
+            var w = this;
+            if (w.state !== 'active' && w.editFeaturePane && w.editFeaturePane._editToolActive) {
+                w.editFeaturePane._toggleEditTool(true);
             }
         },
 
@@ -1624,6 +1649,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     natureText += '<p><strong>Consent No:</strong> ' + opts.sourceObject.attributes["ConsentNo"] + '<p>';
                 }
 
+                //add in cost code reference is populated
+                if (opts.sourceObject.attributes["CostCode"] && opts.sourceObject.attributes["CostCode"] !== '') {
+                    natureText += '<p><strong>Cost Code:</strong> ' + opts.sourceObject.attributes["CostCode"] + '<p>';
+                }
+
                 //add in due date as string  - removed from data follwoing UAT feedback
                 /*
                 if (opts.sourceObject.attributes["DueDate"]) {
@@ -1644,7 +1674,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
                 return natureText;
             }).forMember('searchRadius', function (opts) {
-                opts.sourceObject.attributes["SearchRadius"];
+                return opts.sourceObject.attributes["SearchRadius"];
             }).forMember('contactId', function (opts) {
                 return null;
             }).forMember('enquiryTypeId', function (opts) {
@@ -1782,6 +1812,108 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
         /*---------------------------------------------------------
           UTIL FUNCTIONS */
+
+        //get the layer from the map based on its id  
+        _getLayerByNameOrId: function _getLayerByNameOrId(flag, layerNameOrId, map) {
+            var def = new Deferred();
+            var defs = [];
+            LayerInfos.getInstance(map, map.itemInfo).then(function (layerInfosObj) {
+                layerInfosObj.traversal(function (layerInfo) {
+                    if (def.isResolved()) {
+                        return true;
+                    }
+
+                    if (flag === 'id' && layerInfo.id.toLowerCase() === layerNameOrId.toLowerCase() || flag === 'name' && layerInfo.title.toLowerCase() === layerNameOrId.toLowerCase()) {
+                        defs.push(all({
+                            layerType: layerInfo.getLayerType(),
+                            layerObject: layerInfo.getLayerObject()
+                        }).then(function (result) {
+                            if (result.layerType === 'FeatureLayer') {
+                                def.resolve({
+                                    layerInfo: layerInfo,
+                                    layerObject: result.layerObject
+                                });
+                            }
+                        }, function (err) {
+                            console.error('Find layer error from query URL parameter', err);
+                            def.resolve(null);
+                        }));
+                    }
+                });
+
+                all(defs).then(function () {
+                    if (!def.isResolved()) {
+                        def.resolve(null);
+                    }
+                });
+            });
+            return def;
+        },
+
+        _selectLayerFeatures: function _selectLayerFeatures(layer, lookupValue, lookupKeyField) {
+            var map = this.map;
+            var query = new Query();
+            query.where = lookupKeyField + " = " + lookupValue;
+
+            query.maxAllowableOffset = 0.00001;
+            layer.layerObject.queryFeatures(query).then(function (featureSet) {
+                var features = featureSet.features;
+                if (features.length === 0) {
+                    console.log('No result from query URL parameter.');
+                    return;
+                }
+
+                if (layer.layerObject.geometryType === 'esriGeometryPoint' && features.length === 1) {
+                    map.setExtent(scaleUtils.getExtentForScale(map, 1000)); //same scale with search dijit
+                    map.centerAt(features[0].geometry);
+                } else {
+                    var resultExtent = jimuUtils.graphicsExtent(features);
+                    map.setExtent(resultExtent, true);
+                }
+
+                var infoTemplate = layer.layerInfo.getInfoTemplate();
+                if (!infoTemplate) {
+                    layer.layerInfo.loadInfoTemplate().then(function (it) {
+                        setFeaturesInfoTemplate(it, features);
+                        doShow(features);
+                    });
+                } else {
+                    setFeaturesInfoTemplate(infoTemplate);
+                    doShow(features);
+                }
+            });
+
+            function setFeaturesInfoTemplate(infoTemplate, features) {
+                arrayUtils.forEach(features, function (f) {
+                    f.setInfoTemplate(infoTemplate);
+                });
+            }
+
+            function doShow(features) {
+                map.infoWindow.setFeatures(features);
+                map.infoWindow.show(getFeatureCenter(features[0]));
+            }
+
+            function getFeatureCenter(feature) {
+                var geometry = feature.geometry;
+                var centerPoint;
+                if (geometry.type === 'point') {
+                    centerPoint = geometry;
+                } else if (geometry.type === 'multipoint') {
+                    centerPoint = geometry.getPoint(0);
+                } else if (geometry.type === 'polyline') {
+                    centerPoint = geometry.getExtent().getCenter();
+                } else if (geometry.type === 'polygon') {
+                    centerPoint = geometry.getExtent().getCenter();
+                } else if (geometry.type === 'extent') {
+                    centerPoint = geometry.getCenter();
+                } else {
+                    console.error('Can not get layer geometry type, unknow error.');
+                    return null;
+                }
+                return centerPoint;
+            }
+        },
 
         _getWKT: function _getWKT(geometry) {
             if (geometry) {

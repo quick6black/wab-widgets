@@ -441,10 +441,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         //display a confirm messagebox user has to answer to continue
         _confirm: function _confirm(message, callback, messagetype) {
             var buttons = [{
-                label: this.i18n.messages.confirmYes,
+                label: this.i18n.messagesDialog.confirmYes,
                 onClick: callback
             }, {
-                label: this.i18n.messages.confirmNo
+                label: this.i18n.messagesDialog.confirmNo
             }];
 
             this.wabWidget.showMessage(message, messagetype, buttons);

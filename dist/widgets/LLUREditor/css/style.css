@@ -50,7 +50,6 @@
 
 .llur-editor .dijitDropDownButton {
   margin: 0;
-  width: 100%;
   text-align: left; }
 
 .dijitButtonHover .dijitButtonNode {
@@ -80,6 +79,12 @@
   width: 100%;
   z-index: 99; }
 
+.esriAttributeInspector table {
+  width: 98%; }
+
+.esriAttributeInspector .dijitTextBox {
+  width: 98%; }
+
 .esriAttributeInspector .atiLayerName {
   margin: 5px auto;
   font-weight: bold;
@@ -89,7 +94,7 @@
   margin: 1px; }
 
 .esriAttributeInspector .atiTextAreaField {
-  min-height: 150px !important; }
+  min-height: 250px !important; }
 
 .esriAttributeInspector .atiRichTextField {
   margin: 5px auto; }

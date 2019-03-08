@@ -538,10 +538,10 @@ function (
         _confirm: function (message, callback, messagetype) {
             var buttons = [
                 {
-                    label: this.i18n.messages.confirmYes,
+                    label: this.i18n.messagesDialog.confirmYes,
                     onClick: callback
                 },{
-                    label: this.i18n.messages.confirmNo,
+                    label: this.i18n.messagesDialog.confirmNo,
                 }
             ];
 

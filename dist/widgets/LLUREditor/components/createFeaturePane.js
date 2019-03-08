@@ -100,6 +100,17 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
     //create the template picker showing the templates for the selected layer type
     _createTemplatePicker: function _createTemplatePicker(item) {
+      if (item.layer && !item.layer.loaded) {
+
+        var loaded = item.layer.on("load", lang.hitch(this, function (event) {
+          loaded.remove();
+          this._createTemplatePicker(item);
+        }, lang.hitch(this, function (error) {
+          console.log('LLUREditor::_createTemplatePicker::Layer load failed');
+        })));
+        return;
+      }
+
       if (this.drawingTool) {
         this.drawingTool.destroy();
       }

@@ -185,9 +185,28 @@ function (
 
 	    //create the template picker showing the templates for the selected layer type
 	    _createTemplatePicker: function (item) {
-			if (this.drawingTool) {
-				this.drawingTool.destroy();
-			}
+        if (item.layer && !item.layer.loaded) {
+          
+          var loaded = item.layer.on("load", 
+            lang.hitch(this, 
+              function (event) {
+                loaded.remove();
+                this._createTemplatePicker(item);
+              }, 
+            lang.hitch(this, 
+              function (error) {
+                  console.log('LLUREditor::_createTemplatePicker::Layer load failed');
+              })
+            )
+          );
+          return;
+        }
+
+
+
+    			if (this.drawingTool) {
+    				this.drawingTool.destroy();
+    			}
 
 	        if (this.templateInstructionDiv !== null) {
 	            domConstruct.destroy(this.templateInstructionDiv);
