@@ -3912,70 +3912,73 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       return fieldInfo.name === fieldName;
     })[0];
 
-    // Validate data type
-    switch (field.type) {
-      case 'esriFieldTypeGUID':
-        var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
-        if (pattern.test(fieldValue) === true) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeInteger":
-        var regInt = parseInt(fieldValue);
-        if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeSmallInteger":
-        var shtInt = parseInt(fieldValue);
-        if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeSingle":
-      case "esriFieldTypeDouble":
-        if (Number.isNumeric(fieldValue)) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeDate":
-        var newDate = new Date(fieldValue);
-        isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
-        break;
-
-      case 'esriFieldTypeString':
-      default:
-        isValid = field["length"] >= fieldValue.length;
-        break;
-    }
-
-    // Check Domain values
-    if (field.domain && isValid) {
-      switch (field.domain.type) {
-        case "codedValue":
-          // Validate value is with domain list
-          isValid = field.domain.codedValues.filter(function (value) {
-            return value.code === fieldValue;
-          }).length > 0;
+    if (field) {
+      // Validate data type
+      switch (field.type) {
+        case 'esriFieldTypeGUID':
+          var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
+          if (pattern.test(fieldValue) === true) {
+            isValid = true;
+          }
           break;
 
-        case "range":
-          var numValue = Number(fieldValue);
-          isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+        case "esriFieldTypeInteger":
+          var regInt = parseInt(fieldValue);
+          if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
+            isValid = true;
+          }
           break;
 
+        case "esriFieldTypeSmallInteger":
+          var shtInt = parseInt(fieldValue);
+          if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSingle":
+        case "esriFieldTypeDouble":
+          if (Number.isNumeric(fieldValue)) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeDate":
+          var newDate = new Date(fieldValue);
+          isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
+          break;
+
+        case 'esriFieldTypeString':
         default:
+          isValid = field["length"] >= fieldValue.length;
           break;
       }
-    }
 
-    // Check editable
-    if (!field.ediatble && isValid) {
-      isValid = false;
+      // Check Domain values
+      if (field.domain && isValid) {
+        switch (field.domain.type) {
+          case "codedValue":
+            // Validate value is with domain list
+            isValid = field.domain.codedValues.filter(function (value) {
+              return value.code === fieldValue;
+            }).length > 0;
+            break;
+
+          case "range":
+            var numValue = Number(fieldValue);
+            isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      // Check editable
+      /* CHANGE 20 MAR 2019 - type of field ediatble */
+      if (!field.editable && isValid) {
+        isValid = false;
+      }
     }
 
     return isValid;
