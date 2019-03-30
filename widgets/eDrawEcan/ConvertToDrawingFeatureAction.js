@@ -12,6 +12,25 @@ define([
 
     isFeatureSupported: function(featureSet){
       return featureSet.features.length > 0;
+
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing || pop.features.length > 0) {
+          var graphic = pop.getSelectedFeature(); 
+
+          if (!graphic) {
+            graphic = pop.features[0];
+          }
+
+          return true       
+        }
+
+        return false;
+      }
+      else {
+        return featureSet.features.length > 0;
+      }
     },
 
     onExecute: function(featureSet){
