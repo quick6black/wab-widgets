@@ -30,6 +30,7 @@ define([
           var graphic = pop.getSelectedFeature(); 
           return graphic.geometry.type === 'polygon';        
         }
+        return false;
       }
       else {
         return featureSet.features.length > 0 && 

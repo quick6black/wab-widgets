@@ -43,6 +43,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             //ready automapper for class conversion
             this._prepareAutomapper();
+
+            //add handlers for updating snapping manager
+            this._mapAddRemoveLayerHandler(true);
         },
 
         startup: function startup() {
@@ -62,6 +65,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             //check for any url query parameters
             this._checkURLParameters();
+
+            //verify current snapping environment - currently disabled as for cs team widget is open by default in viewer  
+            //this._verifyCurrentSnappingLayers();
         },
 
         onOpen: function onOpen() {
@@ -206,6 +212,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                                     attributes = lang.clone(template.prototype.attributes);
                                 }
                             }));
+
+                            //if not found this is a record of a subtype no longer selectable
+                            if (!template) {
+                                //default to first template
+                                template = layer.types[0].templates[0];
+                                attributes = lang.clone(template.prototype.attributes);
+                            }
                         } else {
                             //select first template
                             template = queryItem.template.layer.templates[0];
@@ -1422,6 +1435,104 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     break;
             }
             return selectionSymbol;
+        },
+
+        //toggle handlers for udpating the snapping tools when new layers are added to/removed from the map
+        _mapAddRemoveLayerHandler: function _mapAddRemoveLayerHandler(addHandlers) {
+
+            if (addHandlers) {
+                if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
+                    this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+                }
+                if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
+                    this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+                }
+            } else {
+                if (this._mapAddLayer) {
+                    this._mapAddLayer.remove();
+                }
+                if (this._mapRemoveLayer) {
+                    this._mapRemoveLayer.remove();
+                }
+            }
+        },
+
+        //called when a new layer is added to the map
+        _onMapAddLayer: function _onMapAddLayer(result) {
+            var gl = false;
+
+            switch (result.layer.declaredClass) {
+                case "esri.layers.FeatureLayer":
+                case "esri.layers.GraphicsLayer":
+                case "esri.layers.CSVLayer":
+                    gl = true;
+                    break;
+
+                default:
+                    // Do Nothing
+                    break;
+            }
+
+            if (this.map.snappingManager && gl) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = arrayUtils.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === result.layer.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = [];
+                    arrayUtils.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+                    layerInfos.push({
+                        layer: result.layer
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
+        //called when an existing layer is removed from the map
+        _onMapRemoveLayer: function _onMapRemoveLayer(result) {
+            var gl = false;
+
+            switch (result.layer.declaredClass) {
+                case "esri.layers.FeatureLayer":
+                case "esri.layers.GraphicsLayer":
+                case "esri.layers.CSVLayer":
+                    gl = true;
+                    break;
+
+                default:
+                    // Do Nothing
+                    break;
+            }
+
+            if (this.map.snappingManager && gl) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = arrayUtils.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === result.layer.id;
+                })).length > 0;
+
+                if (isSnap) {
+                    var layerInfos = [];
+                    arrayUtils.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        if (layerInfo.layer.id !== result.layer.id) {
+                            layerInfos.push(layerInfo);
+                        }
+                    });
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
+        //call to check that all legitimate layers are currely configured for snapping
+        _verifyCurrentSnappingLayers: function _verifyCurrentSnappingLayers() {
+            //check for current snapping layers
+            if (this.map.snappingManager) {
+                /* PLACEHOLDER - NOT CURRENTLY IMPLEMENTED AS CURRENT FUNCTION DOES NOT REQUIRE THIS CHECK */
+            }
         },
 
         /*---------------------------------------------------------

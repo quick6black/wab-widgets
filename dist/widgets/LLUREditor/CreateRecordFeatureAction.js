@@ -6,10 +6,17 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       if (featureSet.features.length === 0) {
         //bug check - is the popup showing and does it have a current record showing  
         var pop = this.map.infoWindow;
-        if (pop.isShowing) {
+        if (pop.isShowing || pop.features.length > 0) {
           var graphic = pop.getSelectedFeature();
+
+          if (!graphic) {
+            graphic = pop.features[0];
+          }
+
           return graphic.geometry.type === 'polygon';
         }
+
+        return false;
       } else {
         return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
       }
