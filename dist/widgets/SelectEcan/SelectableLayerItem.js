@@ -102,7 +102,8 @@ define(['dojo/_base/declare', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/_base/
         }
         this.emit('stateChange', {
           visible: this.layerVisible,
-          layerInfo: this.layerInfo
+          layerInfo: this.layerInfo,
+          featureLayer: this.featureLayer
         });
       }
     },

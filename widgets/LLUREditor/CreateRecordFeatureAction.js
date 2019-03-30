@@ -23,11 +23,37 @@ define([
     iconFormat: 'png',
 
     isFeatureSupported: function (featureSet) {
-      return featureSet.features.length > 0 && 
-        featureSet.features[0].geometry.type === 'polygon';
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing || pop.features.length > 0) {
+          var graphic = pop.getSelectedFeature(); 
+
+          if (!graphic) {
+            graphic = pop.features[0];
+          }
+
+          return graphic.geometry.type === 'polygon';        
+        }
+
+        return false;
+      }
+      else {
+        return featureSet.features.length > 0 && 
+          featureSet.features[0].geometry.type === 'polygon';
+      }
     },
 
     onExecute: function (featureSet) {
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature(); 
+          featureSet.features.push(graphic);
+        }
+      }
+
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId)
         .then(lang.hitch(this, function (myWidget) {
@@ -51,9 +77,11 @@ define([
     },
 
     _checkForFeatureLayers: function (featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }       
       }
 
       return false;
@@ -62,9 +90,22 @@ define([
     _queryForFeatures: function (featureSet) {
       var layer = featureSet.features[0].getLayer();
       var objectIdField = layer.objectIdField;
-      var objectIds = featureSet.features.map(function (feature) {
+
+      var objectIds = null;
+      /* CHANGE 2018-12-20 : Check for multiple selected features */
+      var selectedFeatures = layer.getSelectedFeatures();
+      if (selectedFeatures && selectedFeatures.length > featureSet.features.length) {
+        //use selected feature details
+        objectIds = selectedFeatures.map(function (feature) {
          return feature.attributes[objectIdField];
-      });
+        });
+      } 
+      else {
+        //use featureset details
+        objectIds = featureSet.features.map(function (feature) {
+         return feature.attributes[objectIdField];
+        });
+      }
 
       var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
         return field.name;
@@ -76,7 +117,9 @@ define([
       query.outFields = fields;
       query.returnGeometry = true;
 
-      var queryTask = new QueryTask(layer.url);
+      // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);      
       return queryTask.execute(query);
     }
 

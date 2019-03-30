@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', "esri/geometry/geometryEngine", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, geometryEngine, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, automapperUtil, Terraformer) {
+define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', "dojo/aspect", 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', "dojo/i18n", 'dojo/topic', 'dojo/request', 'dojo/request/xhr', 'dojo/Deferred', 'dojo/json', "dojo/dom-construct", 'dojo/dom-style', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/TabContainer3', 'jimu/dijit/AGOLLoading', 'jimu/dijit/Message', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/LayerInfos/LayerInfos', 'jimu/utils', "esri/geometry/geometryEngine", "esri/geometry/Extent", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", "esri/toolbars/edit", 'esri/urlUtils', 'esri/graphicsUtils', "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/request", "esri/arcgis/Portal", './components/createFeaturePane', './components/editFeaturePane', './components/searchFeaturePane', './components/createLLURFeaturePopup', './components/requestStatementPopup', './components/LEFilterEditor', './libs/automapper', './libs/terraformer'], function (declare, lang, html, arrayUtils, on, aspect, all, _WidgetsInTemplateMixin, i18n, topic, request, xhr, Deferred, JSON, domConstruct, domStyle, BaseWidget, WidgetManager, TabContainer3, AGOLLoading, Message, jimuPortalUtils, jimuPortalUrlUtils, LayerInfos, jimuUtils, geometryEngine, Extent, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, Edit, esriUrlUtils, graphicsUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, esriRequest, arcgisPortal, CreateFeaturePane, EditFeaturePane, SearchFeaturePane, CreateLLURFeaturePopup, RequestStatementPopup, LEFilterEditor, automapperUtil, Terraformer) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
         name: 'LLUREditor',
@@ -43,6 +43,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             //ready automapper for class conversion
             this._prepareAutomapper();
+
+            //add handlers for updating snapping manager
+            this._mapAddRemoveLayerHandler(true);
         },
 
         startup: function startup() {
@@ -54,11 +57,17 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.editFeaturePane.startup();
             //this.searchFeaturePane.startup();
 
+            //add listener for widget activation
+            topic.subscribe("widgetActived", lang.hitch(this, this._deactivateCheck));
+
             //Load up editor layer for submitting
             this._prepEditorService();
 
             //check for any url query parameters
             this._checkURLParameters();
+
+            //verify current snapping environment - currently disabled as for cs team widget is open by default in viewer  
+            //this._verifyCurrentSnappingLayers();
         },
 
         onOpen: function onOpen() {
@@ -203,9 +212,18 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                                     attributes = lang.clone(template.prototype.attributes);
                                 }
                             }));
-                        } else {}
-                        //select first template
 
+                            //if not found this is a record of a subtype no longer selectable
+                            if (!template) {
+                                //default to first template
+                                template = layer.types[0].templates[0];
+                                attributes = lang.clone(template.prototype.attributes);
+                            }
+                        } else {
+                            //select first template
+                            template = queryItem.template.layer.templates[0];
+                            attributes = lang.clone(template.prototype.attributes);
+                        }
 
                         //set default attributes
                         attributes["ID"] = queryItem.lookupValue;
@@ -213,17 +231,29 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                         //check if edit or view
                         var loc = window.location;
                         var urlObject = esriUrlUtils.urlToObject(loc.href);
-                        if (urlObject.query["editMode"] || forceEdit === true) {
+                        if (urlObject.query && urlObject.query["editMode"] || forceEdit === true) {
                             //zoom to shape extent
                             this._prepareRecord(record.geometry, attributes, queryItem.template, true);
                         } else {
+                            var layerNameOrId = queryItem.template.lookupName;
+
+                            this._getLayerByNameOrId('name', layerNameOrId, this.map).then(lang.hitch(this, function (layer) {
+                                if (layer !== null) {
+                                    this._selectLayerFeatures(layer, queryItem.lookupValue, queryItem.template.lookupKeyField);
+                                } else {
+                                    console.log('Error - unable to find feature layer');
+                                }
+                            }));
+
                             //call the search widget find method
+                            /*
                             topic.publish('publishData', 'framework', 'framework', {
-                                searchString: queryItem.lookupValue
+                              searchString: queryItem.lookupValue
                             }, true);
+                            */
                         }
                     } else {
-                        alert('No Record found');
+                        this.showMessage('No Record found', "error");
                     }
                 }), lang.hitch(this, this._requestError));
             }
@@ -251,9 +281,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     if (!caps.canCreate || !caps.canUpdate) {
                         //disable edit tools
 
-
                         //alert user
-                        alert("LLUR Edit Widget: Edit capability disabled. Some functionality will not work as expected.");
+                        this.showMessage("LLUR Edit Widget: Edit capability disabled. Some functionality will not work as expected.", "error");
                     }
                 }), lang.hitch(this, function (error) {
                     console.log('LLUREditor::_prepEditorService::Geometry layer load failed');
@@ -303,13 +332,17 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                     this.displayLayer = recordTemplate.displayLayer;
                     this.map.addLayer(this.displayLayer);
                     this.displayLayer.show();
-
-                    //update the current record template
-                    this.editFeaturePane.setEditFeature(recordTemplate, editMode);
                 }
 
+                //update the current record template
+                this.editFeaturePane.setEditFeature(recordTemplate, editMode);
+
                 if (!template.template) {
-                    template.template = template.displayLayer.types[0].templates[0];
+                    if (template.displayLayer.types.length > 0) {
+                        template.template = template.displayLayer.types[0].templates[0];
+                    } else {
+                        template.template = template.displayLayer.templates[0];
+                    }
                 }
 
                 var newAttributes = attributes === null ? lang.clone(template.template.prototype.attributes) : attributes;
@@ -342,9 +375,59 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
 
             if (featureset && featureset.features && featureset.features.length > 0) {
-                this.showCreatePopup(featureset);
+                //check how many templates user can choose from if one - send directly to edit screen for that template.
+                if (this.recordTemplateLayers.length === 1) {
+                    //check if multiple features were supplied
+                    var shape = null;
+                    var recordTypeTemplate = this.recordTemplateLayers[0];
+
+                    //check if layer has loaded
+                    if (!recordTypeTemplate.layer.loaded) {
+                        //add listenter and recall this function when loaded
+                        var loadhandler = recordTypeTemplate.layer.on('load', lang.hitch(this, function (event) {
+                            loadhandler.remove();
+                            this.copyFeatureSet(featureset);
+                        }));
+                        return;
+                    }
+
+                    //check for filter settings on the layer and choose the first filtered type
+                    if (recordTypeTemplate.templates.filter && recordTypeTemplate.templates.filter !== '') {
+                        // get the first (hard coded as customer services and consents only have one type)
+                        var flt = recordTypeTemplate.templates.filter.split(',')[0];
+                        var recordTemplate = {
+                            featureLayer: recordTypeTemplate.layer,
+                            template: null,
+                            type: null
+                        };
+                        if (recordTypeTemplate.layer.types.length > 0) {
+                            recordTemplate.type = arrayUtils.filter(recordTypeTemplate.layer.types, function (type) {
+                                return type.templates[0].name === flt;
+                            })[0];
+                            recordTemplate.template = recordTemplate.type.templates[0];
+
+                            //if (!recordTemplate) {
+                            //    recordTemplate = recordTypeTemplate.layer.types[0].templates[0];
+                            //}
+                        } else {
+                            recordTemplate = recordTypeTemplate;
+                        }
+                    }
+
+                    if (featureset.features.length === 1) {
+                        shape = featureset.features[0].geometry;
+                    } else {
+                        //multiple records - create a single merged shape
+                        var shapes = graphicsUtils.getGeometries(featureset.features);
+                        shape = geometryEngine.union(shapes);
+                    }
+                    this._prepareRecord(shape, null, recordTemplate);
+                } else {
+                    this.showCreatePopup(featureset);
+                }
             } else {
-                alert('LLUR Edit Tool - Invalid features supplied.');
+                console.log('LLUREditor::copyFeatureSet::Invalid features supplied');
+                this.showMessage('LLUR Edit Tool - Invalid features supplied.', "error");
             }
         },
 
@@ -358,6 +441,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
+        //show the create feature popup screen when using the create record feature action
         showCreatePopup: function showCreatePopup(featureSet) {
             var copyPopup, param;
             param = {
@@ -375,14 +459,16 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 var recordTemplate = copyPopup.getSelectedRecordType();
                 if (recordTemplate) {
                     if (copyPopup.featureSet.features.length === 0) {
-                        alert('No shapes to copy');
+                        this.showMessage('No shapes to copy', "error");
                         return;
                     }
 
+                    //check if multiple features were supplied
                     var shape = null;
                     if (copyPopup.featureSet.features.length === 1) {
                         shape = copyPopup.featureSet.features[0].geometry;
                     } else {
+                        //multiple records - create a single merged shape
                         var shapes = graphicsUtils.getGeometries(copyPopup.featureSet.features);
                         shape = geometryEngine.union(shapes);
                     }
@@ -391,6 +477,100 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 copyPopup.popup.close();
                 copyPopup.destroy();
             });
+        },
+
+        //show the request popup screen when using the request statemenbt feature action
+        showRequestStatementPopup: function showRequestStatementPopup(featureSet) {
+            var requestPopup, param;
+            param = {
+                map: this.map,
+                nls: this.nls,
+                config: this.config,
+                featureSet: featureSet,
+                wabWidget: this
+            };
+
+            requestPopup = new RequestStatementPopup(param);
+            requestPopup.startup();
+
+            requestPopup.onOkClick = lang.hitch(this, function () {
+                this._changeEditToolState(false, "Saving Request");
+
+                var searchRadius = requestPopup.getSelectedSearchRadius();
+                var recordTemplate = this._getRecordTemplate('ENQ');
+
+                //create enquiry record
+                var statementTypeId = this.config.llurAPI.statementRequestTypeId;
+                var enquiryTemplate = arrayUtils.filter(recordTemplate.layer.types, function (type) {
+                    return type.id === statementTypeId;
+                })[0];
+
+                if (!enquiryTemplate) {
+                    this.showMessage('LLUR Edit Tool - Enquiry Statement functionality not configured.', "error");
+                    this._changeEditToolState(true);
+                    return;
+                }
+
+                //check if multiple features were supplied
+                var shape = null;
+                if (requestPopup.featureSet.features.length === 1) {
+                    shape = requestPopup.featureSet.features[0].geometry;
+                } else {
+                    //multiple records - create a single merged shape
+                    var shapes = graphicsUtils.getGeometries(requestPopup.featureSet.features);
+                    shape = geometryEngine.union(shapes);
+                }
+
+                var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var portal = jimuPortalUtils.getPortal(portalUrl);
+
+                var userName = portal.user !== null ? portal.user.email : 'Unknown';
+
+                var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
+                newAttributes["EnquirerName"] = userName;
+                newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
+                newAttributes["SearchRadius"] = searchRadius || 0;
+                var newGraphic = new Graphic(shape, null, newAttributes);
+                newGraphic._extent = newGraphic.geometry.getExtent();
+
+                this._saveStatementRequest(newGraphic);
+                requestPopup.popup.close();
+                requestPopup.destroy();
+            });
+        },
+
+        //show a message box with buttons if necessary
+        showMessage: function showMessage(msg, type, buttons) {
+
+            var class_icon = "message-info-icon";
+            switch (type) {
+                case "error":
+                    class_icon = "message-error-icon";
+                    break;
+                case "warning":
+                    class_icon = "message-warning-icon";
+                    break;
+            }
+
+            var content = '<i class="' + class_icon + '">&nbsp;</i>' + msg;
+
+            if (buttons === undefined) {
+                buttons = [];
+            }
+
+            this.message = new Message({
+                message: content,
+                buttons: buttons
+            });
+        },
+
+        //destroy the message dijit if instantiated.
+        hideMessage: function hideMessage() {
+            if (this.message && this.message.close) {
+                this.message.close();
+                this.message.destroy();
+                this.message = false;
+            }
         },
 
         _removeDisplayLayer: function _removeDisplayLayer() {
@@ -403,30 +583,77 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.updateFeatures = [];
         },
 
+        //start save process 
         saveChanges: function saveChanges(editRecord, apiRecord) {
+            //get user and current time details
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            //temp -for testing api
-            //editRecord.attributes["ID"] = 166593;
-            //apiRecord.id = 166593;
-
-            //this.token = 'Bearer bZy3awf0Ox_JN5zUgNNPbCQHu-dJG2SjHWKKMoSS-HFBxK_YEnweeC9WcJxkaelnF8nIojDM2oErvF-F9QJRARfyLEpABAErMEHEMwAsakicSRKeQLRhqHz_7mhj7D13mAF_Pm87fBm86jeGf2c6zpVW5L2nHhPpkqM83z20cSAzba_1yIENmplaBTbB7fCn6XmXjsR56XfLXNT2CdhCTSqE7792Kppv7ORCSXvOCA60-eWGguWFSfzi7Yqh4TSiRjwcDCgTfDwxP6jYn2_wBB9j3OW2RkhHFYpcDLmkC0Upwk7dNpRjWY8sVoPvv0_JFAT51sY4tWvEpI72Gn7K9xfToRYmGFciO_c9PTHpGnA';
-            this.token = this.tokenText.value;
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
+            var now = this._getUTCDatestamp();
 
             //Check is this update or new record
             if (editRecord && editRecord.attributes["ID"] !== null) {
                 this._changeEditToolState(false, "Starting Update Process");
 
                 //confirm the current record exists and get the current model
-                this._requestLLUREntity(apiRecord);
+                /*
+                this._requestLLUREntity(apiRecord).then(
+                        lang.hitch(this, function (response) {
+                            //if valid record found
+                            if (response.data !== null) {
+                */
+                //generate a shape dto to send through as an update
+                var shapeDto = null;
+                var entType = null;
+                if (typeof editRecord.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                if (typeof editRecord.attributes["Category"] !== 'undefined') entType = 'SIT';
+                if (typeof editRecord.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                if (typeof editRecord.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                if (typeof editRecord.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
 
-                //
+                switch (entType) {
+                    //case 'INV':
+                    //    shapeDto = automapperUtil.map('graphic','invShapeDto', editRecord);
+                    //    break;
 
-                //submit update request
+                    default:
+                        shapeDto = automapperUtil.map('graphic', 'shapeDto', editRecord);
+                        break;
+                }
 
-                //---temp - submit changes to geometry layer - this will normally be called after changes submitted to llur api successfully
-                this._postGeometryChanges(editRecord);
+                shapeDto.modifiedByEmail = userName;
+                shapeDto.modifiedDate = now;
+
+                this._putExistingAPIEntity(shapeDto).then(lang.hitch(this, function (result) {
+                    this._postGISFeatureChanges(editRecord, false);
+                    this._postGeometryChanges(editRecord, false);
+                }), lang.hitch(this, function (error) {
+                    if (error) {
+                        console.error(error);
+                        this.showMessage(error.message, "error");
+                    } else {
+                        this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error", "error");
+                    }
+
+                    this._changeEditToolState(true);
+                }));
+                /*}
+                }),
+                lang.hitch(this, function (error) {
+                console.error(error);
+                this._changeEditToolState(true);
+                })
+                );*/
             } else {
                 this._changeEditToolState(false, "Starting Save New Record Process");
+
+                //update user and time on record
+                apiRecord.createdByEmail = userName;
+                apiRecord.createdDate = now;
+
+                apiRecord.modifiedByEmail = userName;
+                apiRecord.modifiedDate = now;
 
                 //get the template for the rec type - match against configured layer settings
                 var template = null;
@@ -437,16 +664,45 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 }));
 
                 //post entity to api and await response
-                this._postNewAPIEntity(apiRecord, template.apiSettings.controller, this.token).then(lang.hitch(this, function (result) {
-                    this._postGeometryChanges(editRecord);
+                this._postNewAPIEntity(apiRecord, template.apiSettings.controller).then(lang.hitch(this, function (result) {
+                    var resultData = result.data;
+                    if (resultData.id) {
+                        editRecord.attributes["ID"] = resultData.id;
+                        editRecord.attributes["EntType_ID"] = resultData.entTypeId;
+                    }
+
+                    this._postGISFeatureChanges(editRecord, true);
+                    this._postGeometryChanges(editRecord, true);
                 }), lang.hitch(this, function (error) {
-                    alert(error.message);
+                    this.showMessage(error.message, "error");
                     this._changeEditToolState(true);
                 }));
             }
         },
 
+        //abandon the current edit session and reset the tools
         cancelChanges: function cancelChanges() {
+            //check if this was an existing record being modified - if so, return to llur api 
+            var loc = window.location;
+            var urlObject = esriUrlUtils.urlToObject(loc.href);
+            var value = null;
+
+            if (urlObject.query) {
+                //check for location id and entity id parameters
+                var idQuery = urlObject.query["locationId"];
+                var typeQuery = urlObject.query["locationType"];
+                if (idQuery && typeQuery) {
+                    value = this._getURLParams(typeQuery, idQuery);
+                    if (value !== null) {
+                        // redirect to LLUR
+                        var enttype = value.template.apiSettings.mappingClass;
+                        var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + value.lookupValue;
+                        window.location = url;
+                        return;
+                    }
+                }
+            }
+
             var template = this.editFeaturePane.currentTargetTemplate;
 
             template.displayLayer.clearSelection;
@@ -454,12 +710,69 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             if (this.createFeaturePane.templatePicker) {
                 this.createFeaturePane.templatePicker.clearSelection();
+                this.createFeaturePane.toggleDrawingToolVisible(false);
             }
             this.tabContainer.selectTab(this.nls.tabs.create);
         },
 
+        //post the data to the LLUR feature type layer for that record (eventually to replace the geometry layer)
+        _postGISFeatureChanges: function _postGISFeatureChanges(rec, isInsert) {
+            //get entity type
+            var enttype = rec.attributes["EntType_ID"];
+            var feature = new Graphic(rec.toJson());
+
+            //get template layer
+            var template = null;
+            arrayUtils.forEach(this.recordTemplateLayers, lang.hitch(this, function (recordTemplate) {
+                if (recordTemplate.apiSettings.mappingClass === enttype) {
+                    template = recordTemplate;
+                }
+            }));
+
+            if (!template) {
+                console.error('LLUR Edit Tool::_postGISFeatureChanges::Invalid Template settings');
+                return;
+            }
+
+            var layer = template.layer;
+            var inserts = null,
+                updates = null,
+                deletes = null;
+
+            if (feature.attributes["ID"] === null || isInsert) {
+                //insert as new feature
+                inserts = [feature];
+
+                //send edits to feature layer
+                layer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {}, function (error) {
+                    if (error) {
+                        console.error(error);
+                    }
+                    this.showMessage('LLUR Edit Tool - Error Updating GIS Geometry.', "error");
+                }));
+            } else {
+                //update existing feature
+                this._getObjectID(id, enttype, layer).then(lang.hitch(this, function (objectid) {
+                    if (objectid) {
+                        feature.attributes["OBJECTID"] = objectid;
+                        updates = [feature];
+
+                        //send edits to geometry layer
+                        layer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {}, function (error) {
+                            if (error) {
+                                console.error(error);
+                            }
+                            this.showMessage('LLUR Edit Tool - Error Updating GIS Geometry.', "error");
+                        }));
+                    } else {
+                        this.showMessage('LLUR Edit Tool - Object ID Not Found.', "error");
+                    }
+                }));
+            }
+        },
+
         //post the data to tye LLUR Geometry layer
-        _postGeometryChanges: function _postGeometryChanges(rec) {
+        _postGeometryChanges: function _postGeometryChanges(rec, isInsert) {
             if (this._geometryLayer) {
                 var feature = new Graphic(rec.toJson()),
                     newAttributes = automapperUtil.map('graphic', 'llurGeoFeature', rec);
@@ -468,30 +781,80 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 feature.setAttributes(newAttributes);
                 feature.setSymbol(null);
                 this._updateGeometryProperties(feature);
+                this._updateUserProperties(feature);
 
                 var inserts = null,
                     updates = null,
                     deletes = null;
+                var ext = feature.geometry.getExtent().expand(1.5);
 
-                if (feature.attributes["ID"] === null) {
+                if (feature.attributes["ID"] === null || isInsert) {
                     //insert as new feature
-                    inserts = [rec];
+                    inserts = [feature];
+
+                    //send edits to geometry layer
+                    this._applyGeometryEdits(inserts, updates, deletes, ext);
                 } else {
                     //update existing feature
-                    updates = [rec];
-                }
+                    var id = feature.attributes["ID"];
+                    var enttype = feature.attributes["EntType_ID"];
 
-                this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
-                    this.tabContainer.selectTab(this.nls.tabs.create);
-                    this._changeEditToolState(true);
-                }), lang.hitch(this, function (error) {
-                    alert(error.message);
-                    this._changeEditToolState(true);
-                }));
+                    this._getObjectID(id, enttype).then(lang.hitch(this, function (objectid) {
+                        if (objectid) {
+                            feature.attributes["OBJECTID"] = objectid;
+                            updates = [feature];
+
+                            //send edits to geometry layer
+                            this._applyGeometryEdits(inserts, updates, deletes, ext);
+                        } else {
+                            this.showMessage('LLUR Edit Tool - Object ID Not Found.', "error");
+                        }
+                    }));
+                }
             }
         },
 
-        //update geometry properties
+        //call the apply edits service for the llur geometry
+        _applyGeometryEdits: function _applyGeometryEdits(inserts, updates, deletes, extent) {
+            this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
+                //check if app should redirect to the llur application for a added/modified record
+                if (this.config.redirectToLLUROnComplete) {
+                    if (!updates) {
+                        updates = [];
+                    }
+
+                    var feature = updates.concat(inserts)[0];
+
+                    var id = feature.attributes["ID"];
+                    var enttype = feature.attributes["EntType_ID"];
+
+                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+
+                    window.location = url;
+                } else {
+                    var template = this.editFeaturePane.currentTargetTemplate;
+
+                    template.displayLayer.clearSelection;
+                    template.displayLayer.clear();
+
+                    if (this.createFeaturePane.templatePicker) {
+                        this.createFeaturePane.templatePicker.clearSelection();
+                    }
+
+                    this.tabContainer.selectTab(this.nls.tabs.create);
+                    this._changeEditToolState(true);
+
+                    if (extent) {
+                        this.map.setExtent(extent, true);
+                    }
+                }
+            }), lang.hitch(this, function (error) {
+                this.showMessage(error.message, "error");
+                this._changeEditToolState(true);
+            }));
+        },
+
+        //update geometry properties for area and perimeter
         _updateGeometryProperties: function _updateGeometryProperties(rec) {
             if (rec) {
                 var area = geometryEngine.planarArea(rec.geometry, 'square-meters');
@@ -503,9 +866,55 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
+        //update the user details on the GIS record
+        _updateUserProperties: function _updateUserProperties(rec) {
+            if (rec) {
+                var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+                var portal = jimuPortalUtils.getPortal(portalUrl);
+
+                var userName = portal.user !== null ? portal.user.email : 'Unknown';
+                var currentDate = new Date().valueOf();
+
+                if (rec.attributes["CREATEDBY"] === null) {
+                    rec.attributes["CREATEDBY"] = userName;
+                    rec.attributes["CREATEDDATE"] = currentDate;
+                }
+
+                rec.attributes["MODIFIEDBY"] = userName;
+                rec.attributes["MODIFIEDDATE"] = currentDate;
+            }
+        },
+
+        //return the object id associated with a given llur feature
+        _getObjectID: function _getObjectID(id, enttype, layer) {
+            var deferred = new Deferred();
+            var query = new Query();
+
+            if (!layer) {
+                if (this._geometryLayer && id && enttype) {
+                    query.where = "ID = " + id + " AND EntType_ID = '" + enttype + "'";
+
+                    this._geometryLayer.queryIds(query, lang.hitch(this, function (objectIds) {
+                        deferred.resolve(objectIds[0]);
+                    }));
+                } else {
+                    deferred.resolve(null);
+                }
+            } else {
+                query.where = "ID = " + id;
+
+                layer.queryIds(query, lang.hitch(this, function (objectIds) {
+                    deferred.resolve(objectIds[0]);
+                }));
+            }
+
+            return deferred.promise;
+        },
+
         /*---------------------------------------------------------
           LLUR API FUNCTIONS */
 
+        //request an existing feature's details from the LLUR API
         _requestLLUREntity: function _requestLLUREntity(rec) {
             //get the template for the rec type - match against configured layer settings
             var template = null;
@@ -517,42 +926,28 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
             //if valid template found
             if (template) {
-                this._requestAPIEntityGet(rec, template.apiSettings.controller, this.token).then(lang.hitch(this, function (response) {
-                    //if valid record found - request the shape record 
-                    if (response.data !== null) {
-                        /*this._requestAPIEntityGet(rec, 'ECanMaps', this.token)
-                            .then(
-                                lang.hitch(this, function (response) {
-                                    var shapeRecord = response.data;                                        
-                                    //call shape update function
-                                    }),
-                                lang.hitch(this, function (error) {
-                                    console.error(error);
-                                })
-                              );*/
-                    }
-                }), lang.hitch(this, function (error) {
-                    console.error(error);
-                }));
+                return this._requestAPIEntityGet(rec, template.apiSettings.controller);
+            } else {
+                this.showMessage('Invalid record requested', "error");
+                return null;
             }
         },
 
-        _requestAPIEntityGet: function _requestAPIEntityGet(rec, entType, token) {
+        //call LLUR API get record
+        _requestAPIEntityGet: function _requestAPIEntityGet(rec, entType) {
             var deferred = new Deferred();
 
+            //set the endpoint url
             var url = this.config.llurAPI.apiBaseURL + '/' + entType + '/?entityId=' + rec.id;
 
             //append proxy - requires call be made via proxy
-            url = this.appConfig.httpProxy.url + '?' + url;
+            url = this.config.llurAPI.proxy + '?' + url;
 
             //construct request
             var entityRequest = request(url, {
                 method: 'GET',
                 handleAs: 'json',
-                callbackParameter: 'callback',
-                headers: {
-                    'Authorization': token
-                }
+                callbackParameter: 'callback'
             });
 
             //make request
@@ -565,33 +960,100 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             return deferred.promise;
         },
 
-        _postNewAPIEntity: function _postNewAPIEntity(rec, entType, token) {
-            var deferred = new Deferred();
+        //call LLUR API to create a new database record
+        _postNewAPIEntity: function _postNewAPIEntity(rec, entType) {
+            //set default id if not populated
+            if (!rec.id) rec.id = 0;
 
-            var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + 's';
+            var deferred = new Deferred();
+            entType = this._getEntTypeFromRecord(rec);
+
+            //set the endpoint url
+            var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType;
 
             //append proxy - requires call be made via proxy
-            url = this.appConfig.httpProxy.url + '?' + url;
+            url = this.config.llurAPI.proxy + '?' + url;
 
             //construct request
-            /*
             var entityRequest = request(url, {
                 method: 'POST',
                 handleAs: 'json',
-                callbackParameter: 'callback',
-                headers: {
-                    'Authorization': token
-                },
-                data: rec,
-                preventCache: true
+                data: JSON.stringify(rec),
+                headers: { 'Content-Type': 'application/json' }
             });
-            */
+
+            //make request
+            entityRequest.response.then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.reject(response);
+            });
+
+            return deferred.promise;
+        },
+
+        //call LLUR API to update an existing database record
+        _putExistingAPIEntity: function _putExistingAPIEntity(rec) {
+            var deferred = new Deferred();
+            var entType = this._getEntTypeFromRecord(rec);
+
+            //set the endpoint url
+            var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/' + entType + '/' + rec.id;
+
+            //add put parameter to signal LLUR Proxy to convert this to a PUT request
+            url = url + '?put=true';
+
+            //append proxy - requires call be made via proxy
+            url = this.config.llurAPI.proxy + '?' + url;
+
+            var data = rec;
             var entityRequest = request(url, {
                 method: 'POST',
-                headers: {
-                    'Authorization': token
-                },
-                data: JSON.stringify(rec)
+                handleAs: 'json',
+                headers: { 'Content-Type': 'application/json' },
+                data: JSON.stringify(data)
+            });
+
+            //make request
+            entityRequest.response.then(function (response) {
+                deferred.resolve(response);
+            }, function (response) {
+                deferred.reject(response);
+            });
+
+            return deferred.promise;
+        },
+
+        //helper method to get the record type endpoint name for the LLUR API
+        _getEntTypeFromRecord: function _getEntTypeFromRecord(rec) {
+            var entType = null;
+            if (rec.entTypeId === 'ACT') entType = 'Activities';
+            if (rec.entTypeId === 'SIT') entType = 'Sites';
+            if (rec.entTypeId === 'INV') entType = 'Investigations';
+            if (rec.entTypeId === 'ENQ') entType = 'Enquiries';
+            if (rec.entTypeId === 'COM') entType = 'Communications';
+            return entType;
+        },
+
+        //call LLUR API to  execute the notify enquirer function
+        _postNotifyAPIEntity: function _postNotifyAPIEntity(enquiryId, userEmail) {
+            var deferred = new Deferred();
+
+            //set the endpoint url
+            var url = this.config.llurAPI.apiBaseURL + '/ECanMaps/Enquiries/' + enquiryId + '/notifyEnquirer';
+
+            //append proxy - requires call be made via proxy
+            url = this.config.llurAPI.proxy + '?' + url;
+
+            //construct request
+            var data = {
+                createdByEmail: userEmail
+            };
+
+            var entityRequest = request(url, {
+                method: 'POST',
+                data: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
             });
 
             //make request
@@ -649,16 +1111,29 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                         this.tabContainer.controlNode.style.display = "none";
                         this.tabContainer.containerNode.style.top = "0px";
                     }
-                } catch (ex1) {}
+                } catch (ex1) {
+                    //Do something
+                }
 
-                this.own(aspect.after(this.tabContainer, "selectTab", function (title) {
+                this.own(aspect.before(this.tabContainer, "selectTab", lang.hitch(this, function (title) {
+                    if (this.tabContainer.getSelectedTitle() !== title) {
+                        if (this.editFeaturePane.editToolbar) {
+                            var state = this.editFeaturePane.editToolbar.getCurrentState();
+                            if (state.graphic && state.isModified) {
+                                //incomplete edit - ask to save prior to changing tab
+                            }
+                        }
+                    }
+                }), true));
+
+                this.own(aspect.after(this.tabContainer, "selectTab", lang.hitch(this, function (title) {
                     //console.warn("selectTab",title);
-                    if (self.editPane && title === self.nls.tabs.edit) {
+                    if (self.editFeaturePane && title === self.nls.tabs.edit) {
                         this._attrInspIsCurrentlyDisplayed = true;
                     } else {
                         this._attrInspIsCurrentlyDisplayed = false;
                     }
-                }, true));
+                }), true));
             } else if (tabs.length === 0) {
                 this.tabsNode.appendChild(document.createTextNode(this.nls.noOptionsConfigured));
             }
@@ -696,17 +1171,134 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
+        //check if the edit tool is active and deactive if widget loses focus.
+        _deactivateCheck: function _deactivateCheck(event) {
+            var w = this;
+            if (w.state !== 'active' && w.editFeaturePane && w.editFeaturePane._editToolActive) {
+                w.editFeaturePane._toggleEditTool(true);
+            }
+        },
+
         /*---------------------------------------------------------
           STATEMENT FUNCTIONS */
 
-        requestStatement: function requestStatement(featureset) {
-            this._changeEditToolState(false, "Requesting Statement");
+        requestStatement: function requestStatement(featureSet) {
+            if (featureSet && featureSet.features && featureSet.features.length > 0) {
+                //set working animation
+                this._changeEditToolState(false, "Start Statement Request");
 
-            //submit request
-            setTimeout(lang.hitch(this, function () {
+                //confirm enquiry template is configured
+                var recordTemplate = this._getRecordTemplate('ENQ');
+                if (!recordTemplate) {
+                    this.showMessage('LLUR Edit Tool - Enquiry functionality not configured.', "error");
+                    this._changeEditToolState(true);
+                    return;
+                }
+
+                if (!recordTemplate.layer.loaded) {
+                    recordTemplate.layer.on('load', lang.hitch(this, function (event) {
+                        this.requestStatement(featureSet);
+                    }));
+                    return;
+                }
+
+                this.showRequestStatementPopup(featureSet);
+            } else {
+                console.log('LLUREditor::requestStatement::Invalid features supplied');
+                this.showMessage('LLUR Edit Tool - Invalid features supplied to Statement Create.', "error");
+            }
+        },
+
+        _saveStatementRequest: function _saveStatementRequest(newGraphic) {
+            this._changeEditToolState(false, "Saving Request");
+
+            //create the enquiry record dto
+            var apiRecord = automapperUtil.map('graphic', 'ENQ', newGraphic);
+
+            //update user and time on record
+            var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
+            var portal = jimuPortalUtils.getPortal(portalUrl);
+
+            var userName = portal.user !== null ? portal.user.email : 'Unknown';
+            var now = this._getUTCDatestamp();
+
+            apiRecord.createdByEmail = userName;
+            apiRecord.createdDate = now;
+
+            apiRecord.modifiedByEmail = userName;
+            apiRecord.modifiedDate = now;
+
+            //get the template for the enquiry rec type - match against configured layer settings
+            var template = null;
+            arrayUtils.forEach(this.recordTemplateLayers, lang.hitch(this, function (recordTemplate) {
+                if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
+                    template = recordTemplate;
+                }
+            }));
+
+            //post entity to api and await response
+            this._postNewAPIEntity(apiRecord, template.apiSettings.controller).then(lang.hitch(this, function (result) {
+                var resultData = result.data;
+                if (resultData.id) {
+                    newGraphic.attributes["ID"] = resultData.id;
+                    newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
+                }
+                this._changeEditToolState(false, "Updating GIS");
+                this._postGISFeatureChanges(newGraphic, true);
+                if (this._geometryLayer) {
+                    var feature = new Graphic(newGraphic.toJson()),
+                        newAttributes = automapperUtil.map('graphic', 'llurGeoFeature', newGraphic);
+
+                    //update feature roperties
+                    feature.setAttributes(newAttributes);
+                    feature.setSymbol(null);
+                    this._updateGeometryProperties(feature);
+                    this._updateUserProperties(feature);
+
+                    var inserts = [feature],
+                        updates = null,
+                        deletes = null;
+
+                    //send edits to geometry layer
+                    this._geometryLayer.applyEdits(inserts, updates, deletes, lang.hitch(this, function (results) {
+                        //call the notify process to request an email
+                        if (!updates) {
+                            updates = [];
+                        }
+
+                        var feature = updates.concat(inserts)[0];
+                        var id = feature.attributes["ID"];
+                        var enttype = feature.attributes["EntType_ID"];
+
+                        this._changeEditToolState(false, "Requesting Document");
+                        this._postNotifyAPIEntity(id, userName).then(lang.hitch(this, function (result) {
+                            var buttons = [{
+                                label: this.nls.messagesDialog.gotoLLUR,
+                                onClick: lang.hitch(this, function () {
+                                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+                                    window.open(url, '_blank');
+                                })
+                            }, {
+                                label: this.nls.messagesDialog.confirmOk
+                            }];
+
+                            this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.", null, buttons);
+                            this._changeEditToolState(true);
+                            this.tabContainer.selectTab(this.nls.tabs.create);
+                        }), lang.hitch(this, function (error) {
+                            console.error(error);
+                            this.showMessage("An error has occured while requesting the statement document.  Your reference ID is ENQ" + id + ".  Please contact the LLUR system administrator if this problem persists using this reference ID.", "error");
+                            this._changeEditToolState(true);
+                        }));
+                    }), lang.hitch(this, function (error) {
+                        this.showMessage(error.message, "error");
+                        this._changeEditToolState(true);
+                    }));
+                }
+            }), lang.hitch(this, function (error) {
+                this.showMessage(error.message, "error");
                 this._changeEditToolState(true);
-                alert("You will get the statement here");
-            }), 1000);
+            }));
         },
 
         /*---------------------------------------------------------
@@ -781,20 +1373,26 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         _mapClickHandler: function _mapClickHandler(create) {
             if (create === true && this._attrInspIsCurrentlyDisplayed === false) {
                 this.map.setInfoWindowOnClick(false);
+                /*
                 if (this._mapClick === undefined || this._mapClick === null) {
                     this._mapClick = on(this.map, "click", lang.hitch(this, this._onMapClick));
                 }
+                */
             } else if (create === true && this._attrInspIsCurrentlyDisplayed === true) {
+                /*
                 if (this._mapClick) {
                     this._mapClick.remove();
                     this._mapClick = null;
                 }
+                */
                 this.map.setInfoWindowOnClick(true);
             } else {
+                /*
                 if (this._mapClick) {
                     this._mapClick.remove();
                     this._mapClick = null;
                 }
+                */
                 this.map.setInfoWindowOnClick(true);
                 if (this.createFeaturePane && this.createFeaturePane.drawToolbar) {
                     this.createFeaturePane.drawToolbar.deactivate();
@@ -826,17 +1424,115 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 case "esriGeometryPolygon":
                     var line;
                     if (highlight === true) {
-                        selectionSymbol = new SimpleFillSymbol().setColor(new Color([0, 230, 169, 0.65]));
-                        line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([192, 192, 192, 1]), 2);
+                        selectionSymbol = new SimpleFillSymbol().setColor(new Color([0, 230, 169, 0.5]));
+                        line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([192, 192, 192, 1]), 3);
                     } else {
                         // yellow with black outline
-                        selectionSymbol = new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.65]));
-                        line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([192, 192, 192, 1]), 2);
+                        selectionSymbol = new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5]));
+                        line = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([192, 192, 192, 1]), 3);
                     }
                     selectionSymbol.setOutline(line);
                     break;
             }
             return selectionSymbol;
+        },
+
+        //toggle handlers for udpating the snapping tools when new layers are added to/removed from the map
+        _mapAddRemoveLayerHandler: function _mapAddRemoveLayerHandler(addHandlers) {
+
+            if (addHandlers) {
+                if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
+                    this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+                }
+                if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
+                    this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+                }
+            } else {
+                if (this._mapAddLayer) {
+                    this._mapAddLayer.remove();
+                }
+                if (this._mapRemoveLayer) {
+                    this._mapRemoveLayer.remove();
+                }
+            }
+        },
+
+        //called when a new layer is added to the map
+        _onMapAddLayer: function _onMapAddLayer(result) {
+            var gl = false;
+
+            switch (result.layer.declaredClass) {
+                case "esri.layers.FeatureLayer":
+                case "esri.layers.GraphicsLayer":
+                case "esri.layers.CSVLayer":
+                    gl = true;
+                    break;
+
+                default:
+                    // Do Nothing
+                    break;
+            }
+
+            if (this.map.snappingManager && gl) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = arrayUtils.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === result.layer.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = [];
+                    arrayUtils.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+                    layerInfos.push({
+                        layer: result.layer
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
+        //called when an existing layer is removed from the map
+        _onMapRemoveLayer: function _onMapRemoveLayer(result) {
+            var gl = false;
+
+            switch (result.layer.declaredClass) {
+                case "esri.layers.FeatureLayer":
+                case "esri.layers.GraphicsLayer":
+                case "esri.layers.CSVLayer":
+                    gl = true;
+                    break;
+
+                default:
+                    // Do Nothing
+                    break;
+            }
+
+            if (this.map.snappingManager && gl) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = arrayUtils.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === result.layer.id;
+                })).length > 0;
+
+                if (isSnap) {
+                    var layerInfos = [];
+                    arrayUtils.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        if (layerInfo.layer.id !== result.layer.id) {
+                            layerInfos.push(layerInfo);
+                        }
+                    });
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
+        //call to check that all legitimate layers are currely configured for snapping
+        _verifyCurrentSnappingLayers: function _verifyCurrentSnappingLayers() {
+            //check for current snapping layers
+            if (this.map.snappingManager) {
+                /* PLACEHOLDER - NOT CURRENTLY IMPLEMENTED AS CURRENT FUNCTION DOES NOT REQUIRE THIS CHECK */
+            }
         },
 
         /*---------------------------------------------------------
@@ -943,7 +1639,15 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["PeriodTo"];
             }).forMember('activityTypeId', function (opts) {
                 return opts.sourceObject.attributes["ActivityType"];
-            }).forMember('active', function (opts) {
+            })
+            //.forMember('active', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedByEmail', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
                 return null;
             }).ignoreAllNonExisting();
 
@@ -968,15 +1672,156 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
                 return opts.sourceObject.attributes["Title"];
             }).forMember('location', function (opts) {
                 return opts.sourceObject.attributes["Location"];
-            }).forMember('riskId', function (opts) {
-                null;
-            }).forMember('fileNo', function (opts) {
-                return null;
             }).forMember('categoryId', function (opts) {
-                return opts.sourceObject.attributes["CategoryType"];
-            }).forMember('active', function (opts) {
+                return opts.sourceObject.attributes["Category"];
+            }).forMember('createdByEmail', function (opts) {
                 return null;
-            }).forMember('previousId', function (opts) {
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedByEmail', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
+                return null;
+            }).ignoreAllNonExisting();
+
+            //investigation feature to INV entitydto
+            automapperUtil.createMap('graphic', 'INV').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                return 'INV';
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            })
+            //.forMember('reportTitle', function (opts) { return null; })
+            //.forMember('reportDate', function (opts) { return null; })
+            //.forMember('receivedDate', function (opts) { return null; })
+            //.forMember('auditedBy', function (opts) { return null; })
+            //.forMember('auditedDate', function (opts) { return null; })
+            //.forMember('reviewedBy', function (opts) { return null; })
+            //.forMember('reviewedDate', function (opts) { return null; })
+            //.forMember('reportFromId', function (opts) { return null; })
+            //.forMember('proposedChangeId', function (opts) { return null; })
+            //.forMember('investigationPriorityId', function (opts) { return null; })
+            //.forMember('fileNo', function (opts) { return null; })
+            .forMember('investigationTypeId', function (opts) {
+                return opts.sourceObject.attributes["InvestigationType"];
+            })
+            //.forMember('documentNo', function (opts) { return null; })
+            //.forMember('preparedFor', function (opts) { return null; })
+            .forMember('createdByEmail', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedByEmail', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
+                return null;
+            }).ignoreAllNonExisting();
+
+            //enquiry feature to ENQ entitydto
+            automapperUtil.createMap('graphic', 'ENQ').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                return 'ENQ';
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            }).forMember('enquirerName', function (opts) {
+                return opts.sourceObject.attributes["EnquirerName"];
+            }).forMember('natureOfEnquiry', function (opts) {
+                var natureText = '';
+
+                //add in sitename no reference is populated
+                if (opts.sourceObject.attributes["SiteName"] && opts.sourceObject.attributes["SiteName"] !== '') {
+                    natureText += '<p><strong>Site Name:</strong> ' + opts.sourceObject.attributes["SiteName"] + '<p>';
+                }
+
+                //add in consent no reference is populated
+                if (opts.sourceObject.attributes["ConsentNo"] && opts.sourceObject.attributes["ConsentNo"] !== '') {
+                    natureText += '<p><strong>Consent No:</strong> ' + opts.sourceObject.attributes["ConsentNo"] + '<p>';
+                }
+
+                //add in cost code reference is populated
+                if (opts.sourceObject.attributes["CostCode"] && opts.sourceObject.attributes["CostCode"] !== '') {
+                    natureText += '<p><strong>Cost Code:</strong> ' + opts.sourceObject.attributes["CostCode"] + '<p>';
+                }
+
+                //add in due date as string  - removed from data follwoing UAT feedback
+                /*
+                if (opts.sourceObject.attributes["DueDate"]) {
+                    var dueDate = new Date( opts.sourceObject.attributes["DueDate"]);
+                    natureText += '<p><strong>Due Date:</strong> ' + dueDate.toDateString() + '<p>';
+                }
+                */
+
+                //add in search radius as string 
+                if (opts.sourceObject.attributes["SearchRadius"]) {
+                    natureText += '<p><strong>Search Radius:</strong> ' + opts.sourceObject.attributes["SearchRadius"] + 'm<p>';
+                }
+
+                //add in the nature of enquirey text added to form
+                if (opts.sourceObject.attributes["NatureOfEnquiry"] && opts.sourceObject.attributes["NatureOfEnquiry"] !== '') {
+                    natureText += '<p>' + opts.sourceObject.attributes["NatureOfEnquiry"] + '</p>';
+                }
+
+                return natureText;
+            }).forMember('searchRadius', function (opts) {
+                return opts.sourceObject.attributes["SearchRadius"];
+            }).forMember('contactId', function (opts) {
+                return null;
+            }).forMember('enquiryTypeId', function (opts) {
+                return opts.sourceObject.attributes["EnquiryType"];
+            }).forMember('contact', function (opts) {
+                var contact = {};
+
+                return null;
+            }).ignoreAllNonExisting();
+
+            //communication feature to COM entitydto
+            automapperUtil.createMap('graphic', 'COM').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                return 'COM';
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            }).forMember('communicationTypeId', function (opts) {
+                return opts.sourceObject.attributes["CommunicationType"];
+            }).forMember('createdByEmail', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedByEmail', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
                 return null;
             }).ignoreAllNonExisting();
 
@@ -1010,6 +1855,39 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }).forMember('MODIFIEDDATE', function (opts) {
                 return null;
             }).ignoreAllNonExisting();
+
+            //general feature to entitydto
+            automapperUtil.createMap('graphic', 'shapeDto').forMember('id', function (opts) {
+                return opts.sourceObject.attributes["ID"];
+            }).forMember('entTypeId', function (opts) {
+                var entType = null;
+                if (typeof opts.sourceObject.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                if (typeof opts.sourceObject.attributes["Category"] !== 'undefined') entType = 'SIT';
+                if (typeof opts.sourceObject.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                if (typeof opts.sourceObject.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                if (typeof opts.sourceObject.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
+                return entType;
+            }).forMember('cSID', function (opts) {
+                return null;
+            }).forMember('shape', lang.hitch(this, function (opts) {
+                return this._getWKT(opts.sourceObject.geometry);
+            })).forMember('xMin', function (opts) {
+                return opts.sourceObject._extent.xmin;
+            }).forMember('xMax', function (opts) {
+                return opts.sourceObject._extent.xmax;
+            }).forMember('yMin', function (opts) {
+                return opts.sourceObject._extent.ymin;
+            }).forMember('yMax', function (opts) {
+                return opts.sourceObject._extent.ymax;
+            }).forMember('createdByEmail', function (opts) {
+                return null;
+            }).forMember('createdDate', function (opts) {
+                return null;
+            }).forMember('modifiedByEmail', function (opts) {
+                return null;
+            }).forMember('modifiedDate', function (opts) {
+                return null;
+            }).ignoreAllNonExisting();
         },
 
         //setup the list of layers that the widget has been configured for
@@ -1035,16 +1913,118 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.recordTemplateLayers = layers;
         },
 
-        //return record template withthe given url
-        _getRecordTemplate: function _getRecordTemplate(layerUrl) {
+        //return record template with the given parameter
+        _getRecordTemplate: function _getRecordTemplate(id) {
             var recordTemplates = arrayUtils.filter(this.recordTemplateLayers, function (item) {
-                return item.layerUrl === layerUrl;
+                return item.layerUrl === id || item.apiSettings.mappingClass === id;
             });
             return recordTemplates[0];
         },
 
         /*---------------------------------------------------------
           UTIL FUNCTIONS */
+
+        //get the layer from the map based on its id  
+        _getLayerByNameOrId: function _getLayerByNameOrId(flag, layerNameOrId, map) {
+            var def = new Deferred();
+            var defs = [];
+            LayerInfos.getInstance(map, map.itemInfo).then(function (layerInfosObj) {
+                layerInfosObj.traversal(function (layerInfo) {
+                    if (def.isResolved()) {
+                        return true;
+                    }
+
+                    if (flag === 'id' && layerInfo.id.toLowerCase() === layerNameOrId.toLowerCase() || flag === 'name' && layerInfo.title.toLowerCase() === layerNameOrId.toLowerCase()) {
+                        defs.push(all({
+                            layerType: layerInfo.getLayerType(),
+                            layerObject: layerInfo.getLayerObject()
+                        }).then(function (result) {
+                            if (result.layerType === 'FeatureLayer') {
+                                def.resolve({
+                                    layerInfo: layerInfo,
+                                    layerObject: result.layerObject
+                                });
+                            }
+                        }, function (err) {
+                            console.error('Find layer error from query URL parameter', err);
+                            def.resolve(null);
+                        }));
+                    }
+                });
+
+                all(defs).then(function () {
+                    if (!def.isResolved()) {
+                        def.resolve(null);
+                    }
+                });
+            });
+            return def;
+        },
+
+        _selectLayerFeatures: function _selectLayerFeatures(layer, lookupValue, lookupKeyField) {
+            var map = this.map;
+            var query = new Query();
+            query.where = lookupKeyField + " = " + lookupValue;
+
+            query.maxAllowableOffset = 0.00001;
+            layer.layerObject.queryFeatures(query).then(function (featureSet) {
+                var features = featureSet.features;
+                if (features.length === 0) {
+                    console.log('No result from query URL parameter.');
+                    return;
+                }
+
+                if (layer.layerObject.geometryType === 'esriGeometryPoint' && features.length === 1) {
+                    map.setExtent(scaleUtils.getExtentForScale(map, 1000)); //same scale with search dijit
+                    map.centerAt(features[0].geometry);
+                } else {
+                    var resultExtent = jimuUtils.graphicsExtent(features);
+                    map.setExtent(resultExtent, true);
+                }
+
+                var infoTemplate = layer.layerInfo.getInfoTemplate();
+                if (!infoTemplate) {
+                    layer.layerInfo.loadInfoTemplate().then(function (it) {
+                        setFeaturesInfoTemplate(it, features);
+                        doShow(features);
+                    });
+                } else {
+                    setFeaturesInfoTemplate(infoTemplate);
+                    doShow(features);
+                }
+            });
+
+            function setFeaturesInfoTemplate(infoTemplate, features) {
+                arrayUtils.forEach(features, function (f) {
+                    f.setInfoTemplate(infoTemplate);
+                });
+            }
+
+            function doShow(features) {
+                map.infoWindow.setFeatures(features);
+                map.infoWindow.show(getFeatureCenter(features[0]));
+            }
+
+            function getFeatureCenter(feature) {
+                var geometry = feature.geometry;
+                var centerPoint;
+                if (geometry.type === 'point') {
+                    centerPoint = geometry;
+                } else if (geometry.type === 'multipoint') {
+                    centerPoint = geometry.getPoint(0);
+                } else if (geometry.type === 'polyline') {
+                    centerPoint = geometry.getExtent().getCenter();
+                } else if (geometry.type === 'polygon') {
+                    centerPoint = geometry.getExtent().getCenter();
+                } else if (geometry.type === 'extent') {
+                    centerPoint = geometry.getCenter();
+                } else {
+                    console.error('Can not get layer geometry type, unknow error.');
+                    return null;
+                }
+                return centerPoint;
+            }
+        },
 
         _getWKT: function _getWKT(geometry) {
             if (geometry) {
@@ -1064,7 +2044,46 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             } else {
                 return null;
             }
-        }
+        },
 
+        //return the specific extent property of the provided geometry
+        _getExtentProperty: function _getExtentProperty(geometry, property) {
+            if (!geometry) return null;
+
+            var extent = null;
+            switch (geometry.type) {
+
+                case 'point':
+                    extent = new Extent(geometry.x, geometry.y, geometry.x, geometry.y, geometry.spatialReference);
+                    break;
+
+                case 'multipoint':
+                case 'polyline':
+                case 'polygon':
+                    extent = geometry.getExtent();
+                    break;
+
+                case 'extent':
+                    extent = geometry;
+                    break;
+
+                default:
+                    // do nothing
+                    break;
+            }
+
+            if (extent) {
+                return extent['property'];
+            } else {
+                return null;
+            }
+        },
+
+        //return utc date format
+        _getUTCDatestamp: function _getUTCDatestamp() {
+            var now = new Date();
+            now = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).slice(-2) + '-' + ('00' + now.getUTCDate()).slice(-2) + ' ' + ('00' + now.getUTCHours()).slice(-2) + ':' + ('00' + now.getUTCMinutes()).slice(-2) + ':' + ('00' + now.getUTCSeconds()).slice(-2);
+            return now;
+        }
     });
 });

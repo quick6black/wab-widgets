@@ -16,7 +16,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
             hasEditableLayer = false;
         array.forEach(layerIds, lang.hitch(this, function (layerId) {
           var layer = this.map.getLayer(layerId);
-          if (layer.capabilities && layer.capabilities.indexOf('Create') >= 0) {
+          if (layer.capabilities && layer.capabilities.indexOf('Create') >= 0 && layer.url !== null) {
             // Check geometry type
             if (layer.geometryType && layer.geometryType === geometryType) {
               hasEditableLayer = true;
@@ -71,10 +71,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       query.maxAllowableOffset = 0;
       query.objectIds = objectIds;
       query.outFields = fields;
-      query.returnGeometry = true;
 
-      var queryTask = new QueryTask(layer.url);
-      return queryTask.execute(query);
+      return layer.queryFeatures(query);
     },
 
     _getEsriGeometryType: function _getEsriGeometryType(geometryType) {

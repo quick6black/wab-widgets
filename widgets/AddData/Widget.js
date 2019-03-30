@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 ///////////////////////////////////////////////////////////////////////////
 define(["dojo/_base/declare",
     "dojo/_base/lang",
-    'dojo/_base/array',
     "dojo/on",
     "dojo/aspect",
     "dojo/Deferred",
@@ -31,11 +30,12 @@ define(["dojo/_base/declare",
     "./search/SearchPane",
     "./search/AddFromUrlPane",
     "./search/AddFromFilePane",
-    "./search/LayerListPane"
+    "./search/LayerListPane",
+    "dojo/_base/array"
   ],
-  function(declare, lang, array, on, aspect, Deferred, domClass, portalUrlUtils, portalUtils,
+  function(declare, lang, on, aspect, Deferred, domClass, portalUrlUtils, portalUtils,
     tokenUtils, BaseWidget, TabContainer3, _WidgetsInTemplateMixin, SearchContext,
-    util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane) {
+    util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane, array) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
       name: "AddData",

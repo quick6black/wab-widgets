@@ -34,6 +34,27 @@
         height: 296px !important;
     }
 
+    .templatePicker .grid .groupLabel {
+      font-size: 2em;
+    }
+
+    .jimu-widget-sefilterEditor {
+      .flDropDown {
+          height: 30px!important;
+          width: 100%;
+          margin-top: 2px;
+          margin-bottom: 10px;
+      }
+
+      .searchtextbox {
+          height: 30px!important;
+          width: 100%;
+          padding: 5px;
+          margin-bottom: 5px;
+      
+      }
+    }
+
     .jimu-btn {
       &.layer-btn {
         margin-right: 5px;
@@ -48,7 +69,6 @@
 
     .dijitDropDownButton {
         margin: 0;
-        width: 100%;
         text-align: left;
     }
 }
@@ -86,6 +106,15 @@
   width: 100%;
   z-index: 99;
 }
+
+.esriAttributeInspector table {
+  width: 98%;
+}
+
+.esriAttributeInspector .dijitTextBox {
+  width: 98%;
+}
+
 .esriAttributeInspector .atiLayerName {
   margin: 5px auto;
   font-weight: bold;
@@ -94,6 +123,10 @@
 .esriAttributeInspector .atiField {
   margin: 1px;
 }
+.esriAttributeInspector .atiTextAreaField {
+  min-height: 250px !important;
+}
+
 .esriAttributeInspector .atiRichTextField {
   margin: 5px auto;
 }
@@ -114,16 +147,25 @@
   float: right;
 }
 .esriAttributeInspector .atiButton {
-  margin: 0;
+  margin: 0 0 15px 0;
   padding-right: 6px;
-  width: auto;
-  height: 16px;
+  width: 100%;
+  min-height: 16px;
   background-image: none;
+
+  .dijitButton .dijitButtonNode {
+    width: inherit;
+    text-align: center;
+  }
+
 }
 
 .claro .dijitButton .dijitButtonNode {
   background-image: none;
   background-repeat: none;
+
+    width: inherit;
+    text-align: center;  
 }
 
 .esriAttributeInspector .atiPrevIcon {
@@ -340,4 +382,27 @@
 
 div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     width: 20px;
+}
+
+
+/* Messages */
+.message-info-icon {
+    background-image: url("images/info.png");
+    float: left;
+    height: 48px;
+    width: 48px;
+}
+
+.message-error-icon {
+    background-image: url("images/error.png");
+    float: left;
+    height: 48px;
+    width: 48px;
+}
+
+.message-warning-icon {
+    background-image: url("images/warning.png");
+    float: left;
+    height: 48px;
+    width: 48px;
 }

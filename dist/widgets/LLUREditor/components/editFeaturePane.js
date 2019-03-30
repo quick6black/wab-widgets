@@ -36,8 +36,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
             this.inherited(arguments);
 
             var self = this;
-            var v,
-                config = this.wabWidget.config;
+            self.config = this.wabWidget.config;
 
             //setup the eidt tools
             this._setupEditTools();
@@ -70,15 +69,29 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
             }
         },
 
+        clearEditFeature: function clearEditFeature() {
+            this.editMode = "create";
+        },
+
         /*---------------------------------------------------------
           UI AND SETUP FUNCTIONS */
 
         //update the application ui to reflect the current edit mode - create or update
         _updateUI: function _updateUI() {
+            var labelOverrides = this.wabWidget.config.labelOverrides;
+
             if (this.editMode == "update") {
-                this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionUpdate);
+                if (labelOverrides.edit.instructionUpdate && labelOverrides.edit.instructionUpdate !== '') {
+                    this._setNodeHTML(this.instructionsDiv, labelOverrides.edit.instructionUpdate);
+                } else {
+                    this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionUpdate);
+                }
             } else {
-                this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionCreate);
+                if (labelOverrides.edit.instructionCreate && labelOverrides.edit.instructionCreate !== '') {
+                    this._setNodeHTML(this.instructionsDiv, labelOverrides.edit.instructionCreate);
+                } else {
+                    this._setNodeHTML(this.instructionsDiv, this.i18n.edit.instructionCreate);
+                }
             }
         },
 
@@ -118,31 +131,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         },
 
         _refreshAttributeEditor: function _refreshAttributeEditor(recordTemplate) {
+            //reset the attribute inspector
+            this._clearAttributeInspector();
+
             //check if inspector is focussed on current edit layer
-            if (this.attributeInspector !== null && this.currentTargetTemplate !== recordTemplate) {
-
-                //clear attached components and events
-                if (this.atttributeInspectorDelete) {
-                    this.atttributeInspectorDelete.remove();
-                }
-
-                if (this.cancelButton) {
-                    this.cancelButton.destroy();
-                }
-
-                if (this.editGeometryButton) {
-                    this.editGeometryButton.destroy();
-                }
-
-                //remove current inspector
-                this.attributeInspector.destroy();
-            }
-
             if (this.attributeInspector === null) {
                 this.currentTargetTemplate = recordTemplate;
 
                 //prepare attribute inspector
-                //var fieldInfos = lang.clone(recordTemplate.fieldInfos);
                 var fieldInfos = this._mapFields(recordTemplate.fieldInfos, this.editMode === "update");
                 var layerInfos = [{
                     'featureLayer': recordTemplate.displayLayer,
@@ -151,15 +147,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                     'showDeleteButton': false,
                     'fieldInfos': fieldInfos
                 }];
-
-                // if (this.editMode === "update") {
-                //     arrayUtils.forEach(layerInfos[0]["fieldInfos"], lang.hitch(this, 
-                //         function (fieldInfo) {
-                //             fieldInfo.visible = fieldInfo.editModeVisible;
-                //             fieldInfo.isEditable = fieldInfo.editModeIsEditable;
-                //         })
-                //     );
-                // }
 
                 //create a new attribute inspector
                 this.attributeInspectorDiv = domConstruct.create("div");
@@ -174,72 +161,116 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
                     feature.getLayer().applyEdits(null, [feature], null);
                 }));
 
-                // this.atttributeInspectorDelete = this.attributeInspector.on("delete", lang.hitch(this, function (evt) {
-                //     alert(this.currentTargetTemplate.title + ' - Delete Clicked');
-                // }));
-
                 //add in edit geometry button
-                this.editGeometryButton = new Button({
-                    label: this.i18n.edit.editGeometryLabel,
-                    title: this.i18n.edit.editGeometryTooltip,
-                    class: "atiButton atiEditGeometryButton"
-                });
-                this.attributeInspector.editButtons.insertBefore(this.editGeometryButton.domNode, this.attributeInspector.editButtons.childNodes[0]);
-                this.editGeometryButton.startup();
-                this.editGeometryButton.on("click", lang.hitch(this, function (evt) {
-                    this._startEditTool();
-                }));
+                if (this.config.allowEditExisting) {
+                    var editGeometryLabel = this.config.labelOverrides.edit.editGeometryLabel === "" ? this.i18n.edit.editGeometryLabel : this.config.labelOverrides.edit.editGeometryLabel;
+                    var editGeometryTooltip = this.config.labelOverrides.edit.editGeometryTooltip === "" ? this.i18n.edit.editGeometryTooltip : this.config.labelOverrides.edit.editGeometryTooltip;
 
-                //add in request statement 
-                this.requestButton = new Button({
-                    label: this.i18n.edit.requestStatementLabel,
-                    title: this.i18n.edit.requestStatementTooltip,
-                    class: "atiButton atiRequestButton"
-                });
-                this.attributeInspector.editButtons.appendChild(this.requestButton.domNode);
-                this.requestButton.startup();
-                this.requestButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm(this.i18n.edit.requestStatementConfirm);
-                    if (c) {
-                        this.wabWidget.requestStatement();
-                    }
-                }));
+                    this.editGeometryButton = new Button({
+                        label: editGeometryLabel,
+                        title: editGeometryTooltip,
+                        class: "atiButton atiEditGeometryButton"
+                    });
+                    this.attributeInspector.editButtons.insertBefore(this.editGeometryButton.domNode, this.attributeInspector.editButtons.childNodes[0]);
+                    this.editGeometryButton.startup();
+                    this.editGeometryButtonClickHandle = this.editGeometryButton.on("click", lang.hitch(this, function (evt) {
+                        this._toggleEditTool();
+                    }));
+                }
 
-                //add in submit 
+                //add in request statement
+                if (this.config.allowStatementRequest && recordTemplate && recordTemplate.apiSettings.mappingClass === 'ENQ') {
+                    var requestStatementLabel = this.config.labelOverrides.edit.requestStatementLabel === "" ? this.i18n.edit.requestStatementLabel : this.config.labelOverrides.edit.requestStatementLabel;
+                    var requestStatementTooltip = this.config.labelOverrides.edit.requestStatementTooltip === "" ? this.i18n.edit.requestStatementTooltip : this.config.labelOverrides.edit.requestStatementTooltip;
+
+                    this.requestButton = new Button({
+                        label: requestStatementLabel,
+                        title: requestStatementTooltip,
+                        class: "atiButton atiRequestButton"
+                    });
+                    this.attributeInspector.editButtons.appendChild(this.requestButton.domNode);
+                    this.requestButton.startup();
+                    this.requestButtonClickHandle = this.requestButton.on("click", lang.hitch(this, function (evt) {
+                        this._confirm(this.i18n.edit.requestStatementConfirm, lang.hitch(this, function () {
+                            //hide the message box
+                            this.wabWidget.hideMessage();
+
+                            //get the current selection record
+                            var rec = this.attributeInspector._selection[0];
+
+                            //call the request statement process
+                            this.wabWidget.requestStatement({
+                                features: [rec]
+                            });
+                        }), "warning");
+                    }));
+                }
+
+                //add in submit
+                var submitLabel = this.config.labelOverrides.edit.submitLabel === "" ? this.i18n.edit.submitLabel : this.config.labelOverrides.edit.submitLabel;
+                var submitTooltip = this.config.labelOverrides.edit.submitTooltip === "" ? this.i18n.edit.submitTooltip : this.config.labelOverrides.edit.submitTooltip;
+
                 this.submitButton = new Button({
-                    label: this.i18n.edit.submitLabel,
-                    title: this.i18n.edit.submitTooltip,
+                    label: submitLabel,
+                    title: submitTooltip,
                     class: "atiButton atiSubmitButton"
                 });
                 this.attributeInspector.editButtons.appendChild(this.submitButton.domNode);
                 this.submitButton.startup();
-                this.submitButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm(this.i18n.edit.submitConfirm);
-                    if (c) {
+                this.submitButtonClickHandle = this.submitButton.on("click", lang.hitch(this, function (evt) {
+                    this._confirm(this.i18n.edit.submitConfirm, lang.hitch(this, function () {
+                        //hide the message box
+                        this.wabWidget.hideMessage();
+
+                        //deactivate edit tools
+                        this._toggleEditTool(true);
+
+                        //get the current selection record
                         var rec = this.attributeInspector._selection[0];
 
                         //determine record type
                         var recordType = this.currentTargetTemplate.apiSettings.mappingClass;
                         var saveRec = automapperUtil.map('graphic', recordType, rec);
 
-                        //calll the widget
+                        //call the widget
+                        this.wabWidget.saveChanges(rec, saveRec);
+                    }), "warning");
+
+                    /*
+                    var c = confirm(this.i18n.edit.submitConfirm);
+                    if (c) {
+                        var rec = this.attributeInspector._selection[0];
+                          //determine record type
+                        var recordType = this.currentTargetTemplate.apiSettings.mappingClass;
+                        var saveRec = automapperUtil.map('graphic',recordType, rec);
+                          //calll the widget
                         this.wabWidget.saveChanges(rec, saveRec);
                     }
+                    */
                 }));
 
                 //add in cancel
+                var cancelLabel = this.config.labelOverrides.edit.cancelLabel === "" ? this.i18n.edit.cancelLabel : this.config.labelOverrides.edit.cancelLabel;
+                var cancelTooltip = this.config.labelOverrides.edit.cancelTooltip === "" ? this.i18n.edit.cancelTooltip : this.config.labelOverrides.edit.cancelTooltip;
+
                 this.cancelButton = new Button({
-                    label: this.i18n.edit.cancelLabel,
-                    title: this.i18n.edit.cancelTooltip,
+                    label: cancelLabel,
+                    title: cancelTooltip,
                     class: "atiButton atiCancelButton"
                 });
                 this.attributeInspector.editButtons.appendChild(this.cancelButton.domNode);
                 this.cancelButton.startup();
-                this.cancelButton.on("click", lang.hitch(this, function (evt) {
-                    var c = confirm(this.i18n.edit.cancelConfirm);
-                    if (c) {
+                this.cancelButtonClickHandle = this.cancelButton.on("click", lang.hitch(this, function (evt) {
+                    this._confirm(this.i18n.edit.cancelConfirm, lang.hitch(this, function () {
+                        //hide the message box
+                        this.wabWidget.hideMessage();
+
+                        //deactivate edit tools
+                        this._toggleEditTool(true);
+
+                        //call cancel job
                         this.wabWidget.cancelChanges();
-                    }
+                    }), "warning");
                 }));
             }
 
@@ -247,12 +278,66 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
             this._updateAttributeEditorFields();
         },
 
+        //clear the attribute inspector details for the current feature
+        _clearAttributeInspector: function _clearAttributeInspector() {
+            if (this.attributeInspector !== null) {
+
+                //clear attached components and events
+                if (this.atttributeInspectorDelete) {
+                    this.atttributeInspectorDelete.remove();
+                }
+
+                if (this.cancelButtonClickHandle) {
+                    this.cancelButtonClickHandle.remove();
+                }
+
+                if (this.cancelButton) {
+                    this.cancelButton.destroy();
+                }
+
+                if (this.submitButtonClickHandle) {
+                    this.submitButtonClickHandle.remove();
+                }
+
+                if (this.submitButton) {
+                    this.submitButton.destroy();
+                }
+
+                if (this.requestButtonClickHandle) {
+                    this.requestButtonClickHandle.remove();
+                }
+
+                if (this.requestButton) {
+                    this.requestButton.destroy();
+                }
+
+                if (this.editGeometryButtonClickHandle) {
+                    this.editGeometryButtonClickHandle.remove();
+                }
+
+                if (this.editGeometryButton) {
+                    this.editGeometryButton.destroy();
+                }
+
+                //remove current inspector
+                this.attributeInspector.destroy();
+                this.attributeInspector = null;
+            }
+        },
+
         /*---------------------------------------------------------
           EDIT TOOLS AND FUNCTIONS */
 
         //start geometry edit tool
-        _startEditTool: function _startEditTool() {
-            if (!this._editToolActive) {
+        _toggleEditTool: function _toggleEditTool(forceOff) {
+            if (this._editToolActive || forceOff) {
+                //enable info window
+                this.map.setInfoWindowOnClick(true);
+                if (this.editToolbar.getCurrentState().tool !== 0) {
+                    this.editToolbar.deactivate();
+                }
+                this._editToolActive = false;
+            } else {
                 //disable info window
                 this.map.setInfoWindowOnClick(false);
 
@@ -263,16 +348,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
                 this._activateEditToolbar(this.wabWidget.currentFeature);
                 this._editToolActive = true;
-            } else {
-                //disable info window
-                this.map.setInfoWindowOnClick(true);
-                if (this.editToolbar.getCurrentState().tool !== 0) {
-                    this.editToolbar.deactivate();
-                }
-                this._editToolActive = false;
             }
         },
 
+        //preare the edit tools dropdown menu for the types of tool appropriate to the feature type geometry 
         _activateEditToolbar: function _activateEditToolbar(feature) {
             var layer = feature.getLayer();
             if (this.editToolbar.getCurrentState().tool !== 0) {
@@ -357,6 +436,18 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
             }));
 
             return fieldInfos;
+        },
+
+        //display a confirm messagebox user has to answer to continue
+        _confirm: function _confirm(message, callback, messagetype) {
+            var buttons = [{
+                label: this.i18n.messagesDialog.confirmYes,
+                onClick: callback
+            }, {
+                label: this.i18n.messagesDialog.confirmNo
+            }];
+
+            this.wabWidget.showMessage(message, messagetype, buttons);
         },
 
         _setNodeText: function _setNodeText(nd, text) {

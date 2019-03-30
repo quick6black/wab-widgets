@@ -33,3 +33,7 @@
 - Addition of **selectbygeometry\_default.png** and **selectbygeometry\_hover.png** file to images folder of the widget folder.
 - Addition of **\_featureAction_SelectByGeometry** entry to the **strings.js** file for the display name to appear on the Select By Geometry feature action.
   
+**21 Nov 2018** 
+
+
+- Merged in changes from WAB 2.10 version of Select widget

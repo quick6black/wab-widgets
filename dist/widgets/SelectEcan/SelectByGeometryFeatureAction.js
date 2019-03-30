@@ -1,16 +1,96 @@
-define(['dojo/_base/declare', 'jimu/BaseFeatureAction', 'jimu/WidgetManager'], function (declare, BaseFeatureAction, WidgetManager) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseFeatureAction', 'jimu/WidgetManager', 'esri/tasks/query', 'esri/tasks/QueryTask'], function (declare, arrayUtils, lang, BaseFeatureAction, WidgetManager, Query, QueryTask) {
   var clazz = declare(BaseFeatureAction, {
-
     iconFormat: 'png',
 
     isFeatureSupported: function isFeatureSupported(featureSet) {
-      return featureSet.features.length > 0;
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing || pop.features.length > 0) {
+          var graphic = pop.getSelectedFeature();
+
+          if (!graphic) {
+            graphic = pop.features[0];
+          }
+
+          return graphic.geometry.type === 'polygon';
+        }
+
+        return false;
+      } else {
+        return featureSet.features.length > 0;
+      }
     },
 
     onExecute: function onExecute(featureSet) {
-      WidgetManager.getInstance().triggerWidgetOpen(this.widgetId).then(function (myWidget) {
-        myWidget.selectByFeature(featureSet);
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing) {
+          var graphic = pop.getSelectedFeature();
+          featureSet.features.push(graphic);
+        }
+      }
+
+      var wm = WidgetManager.getInstance();
+      wm.triggerWidgetOpen(this.widgetId).then(function (myWidget) {
+        if (this._checkForFeatureLayers(featureSet)) {
+          // Query the source layer to get the ungeneralised version of the feature
+          this._queryForFeatures(featureSet).then(function (results) {
+            myWidget.selectByFeature(featureSet);
+          }, function (error) {
+            alert(error);
+          });
+        } else {
+          myWidget.selectByFeature(featureSet);
+        }
       });
+    },
+
+    _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+
+    _queryForFeatures: function _queryForFeatures(featureSet) {
+      var layer = featureSet.features[0].getLayer();
+      var objectIdField = layer.objectIdField;
+
+      var objectIds = null;
+      /* CHANGE 2018-12-20 : Check for multiple selected features */
+      var selectedFeatures = layer.getSelectedFeatures();
+      if (selectedFeatures && selectedFeatures.length > featureSet.features.length) {
+        //use selected feature details
+        objectIds = selectedFeatures.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      } else {
+        //use featureset details
+        objectIds = featureSet.features.map(function (feature) {
+          return feature.attributes[objectIdField];
+        });
+      }
+
+      var fields = featureSet.fields ? featureSet.fields.map(lang.hitch(this, function (field) {
+        return field.name;
+      })) : ['*'];
+
+      var query = new Query();
+      query.maxAllowableOffset = 0;
+      query.objectIds = objectIds;
+      query.outFields = fields;
+      query.returnGeometry = true;
+
+      // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0, layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);
+      return queryTask.execute(query);
     }
 
   });

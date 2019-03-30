@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ define(["dojo/_base/declare",
     "dojo/_base/kernel",
     "esri/request",
     "esri/layers/FeatureLayer",
+    "esri/layers/KMLLayer",
     "esri/geometry/scaleUtils",
     "jimu/dijit/Message",
     "jimu/dijit/CheckBox"
   ],
   function(declare, lang, array, dojoJson, on, Deferred, domClass, Viewport, sniff,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,template, i18n,
-     LayerLoader, util, kernel, esriRequest, FeatureLayer, scaleUtils,
+     LayerLoader, util, kernel, esriRequest, FeatureLayer, KMLLayer, scaleUtils,
      Message) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -309,7 +310,7 @@ define(["dojo/_base/declare",
       _createFileTypeImage: function(fileTypeName) {
         var isRTL = window.isRTL;
         array.some(this.SHAPETYPE_ICONS, lang.hitch(this, function(filetypeIcon, index) {
-          if(fileTypeName.toLowerCase() === filetypeIcon.type) {
+          if(fileTypeName.toLowerCase() === filetypeIcon.type.toLowerCase()) {
             var iconImg = document.createElement("IMG");
             iconImg.src = this.wabWidget.folderUrl + filetypeIcon.url;
             iconImg.alt = fileTypeName;
@@ -368,7 +369,7 @@ define(["dojo/_base/declare",
             // e.g. The maximum number of records allowed (1000) has been exceeded.
             new Message({
               titleLabel: i18n._widgetLabel,
-              message: error.message
+              message: i18n.addFromFile.generalIssue+"<br><br>"+error.message
             });
           }
         });

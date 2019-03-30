@@ -118,7 +118,8 @@ _WidgetsInTemplateMixin, template, ClearSelectionAction) {
         }
         this.emit('stateChange', {
           visible: this.layerVisible,
-          layerInfo: this.layerInfo
+          layerInfo: this.layerInfo,
+          featureLayer: this.featureLayer
         });
       }
     },

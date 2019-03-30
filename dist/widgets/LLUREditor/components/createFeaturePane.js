@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", "dojo/Deferred", "dojo/dom-class", "dojo/dom-construct", 'dojo/dom-style', "dijit/Viewport", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dijit/form/DropDownButton", "dijit/DropDownMenu", "dijit/MenuItem", "dojo/text!./templates/CreateFeaturePane.html", "dojo/i18n!../nls/strings", "jimu/dijit/Message", "jimu/dijit/CheckBox", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", './layerButton', "./LEDrawingOptions"], function (declare, lang, arrayUtils, on, Deferred, domClass, domConstruct, domStyle, Viewport, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, DropDownButton, DropDownMenu, MenuItem, template, i18n, Message, Checkbox, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, layerButton, LEDrawingOptions) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", "dojo/Deferred", "dojo/dom-class", "dojo/dom-construct", 'dojo/dom-style', "dijit/Viewport", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dijit/form/DropDownButton", "dijit/DropDownMenu", "dijit/MenuItem", "dojo/text!./templates/CreateFeaturePane.html", "dojo/i18n!../nls/strings", "jimu/dijit/Message", "jimu/dijit/CheckBox", "esri/graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/tasks/query", "esri/tasks/QueryTask", "esri/toolbars/draw", './layerButton', "./LEDrawingOptions", './LEFilterEditor'], function (declare, lang, arrayUtils, on, Deferred, domClass, domConstruct, domStyle, Viewport, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, DropDownButton, DropDownMenu, MenuItem, template, i18n, Message, Checkbox, Graphic, GraphicsLayer, FeatureLayer, TemplatePicker, AttributeInspector, Query, QueryTask, Draw, layerButton, LEDrawingOptions, LEFilterEditor) {
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
     i18n: i18n,
@@ -100,6 +100,17 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
     //create the template picker showing the templates for the selected layer type
     _createTemplatePicker: function _createTemplatePicker(item) {
+      if (item.layer && !item.layer.loaded) {
+
+        var loaded = item.layer.on("load", lang.hitch(this, function (event) {
+          loaded.remove();
+          this._createTemplatePicker(item);
+        }, lang.hitch(this, function (error) {
+          console.log('LLUREditor::_createTemplatePicker::Layer load failed');
+        })));
+        return;
+      }
+
       if (this.drawingTool) {
         this.drawingTool.destroy();
       }
@@ -144,11 +155,17 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
           //disable tools
           if (this.drawToolbar) {
             this.drawToolbar.deactivate();
+            this.toggleDrawingToolVisible(false);
           }
         }
       }));
 
       this.templatePicker = templatePicker;
+
+      //add template filter
+      if (item.templates && item.templates.filter !== '') {
+        this._addFilterEditor([item.layer], item.templates.showFilter, item.templates.filter);
+      }
 
       //create draw optons tool
       var drawingOptionsToolDiv = domConstruct.create("div");
@@ -164,6 +181,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         id: "drawingTool"
       }, drawingOptionsToolDiv);
       this.drawingTool.startup();
+      this.toggleDrawingToolVisible(false);
       this._setDrawingToolbar("select", null);
     },
 
@@ -186,6 +204,37 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
       }, this);
       menu.startup();
       return menu;
+    },
+
+    //add template filter to the application
+    _addFilterEditor: function _addFilterEditor(layers, showFilter, templateIDs) {
+      //if (this.config.editor.useFilterEditor === true && this.templatePicker) {
+      if (this._filterEditor) {
+        this._filterEditor.setTemplatePicker(this.templatePicker, layers);
+      } else {
+        this._filterEditorNode = domConstruct.create("div", {});
+        domConstruct.place(this._filterEditorNode, this.templatePicker.domNode, "before");
+        this._filterEditor = new LEFilterEditor({
+          _templatePicker: this.templatePicker,
+          _layers: layers,
+          map: this.map,
+          nls: this.i18n
+        }, this._filterEditorNode);
+
+        //set templates to filter
+        if (templateIDs) {
+          this._filterEditor.filterTextBox.value = templateIDs;
+          this._filterEditor._onTemplateFilterChanged();
+        }
+
+        //hide if necessary
+        if (showFilter) {
+          dojo.style(this._filterEditor.domNode, "display", "block");
+        } else {
+          dojo.style(this._filterEditor.domNode, "display", "none");
+        }
+      }
+      //}
     },
 
     /*---------------------------------------------------------
@@ -306,6 +355,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
 
     _setDrawingToolbar: function _setDrawingToolbar(shapeType, drawType) {
       if (this.drawingTool === null || this.drawingTool === undefined) {
+        this.toggleDrawingToolVisible(false);
         return;
       }
 
@@ -333,6 +383,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         this.drawingTool.set('label', LEDrawingOptions[shapeType][0].label);
         this.drawingTool.set('iconClass', LEDrawingOptions[shapeType][0].iconClass);
         this.currentDrawType = LEDrawingOptions[shapeType][0]._drawType;
+      }
+
+      this.toggleDrawingToolVisible(shapeType !== 'select');
+    },
+
+    //toggles the visibility of the drawing tool dropdown
+    toggleDrawingToolVisible: function toggleDrawingToolVisible(showTool) {
+      if (showTool === undefined) {
+        //toggle the drawing tool to the opposite of what it currently is e.g visible => invisible)
+        showTool = domStyle.get(this.drawingTool.domNode, "display") === "none";
+      }
+
+      if (showTool) {
+        domStyle.set(this.drawingTool.domNode, 'display', 'inline-block');
+      } else {
+        domStyle.set(this.drawingTool.domNode, 'display', 'none');
       }
     }
 

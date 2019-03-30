@@ -36,6 +36,7 @@ define([
         'esri/renderers/SimpleRenderer',
         'esri/renderers/UniqueValueRenderer',
         'esri/units',
+        'esri/toolbars/draw',        
         'esri/toolbars/edit',
         'esri/geometry/webMercatorUtils',
         'esri/tasks/GeometryService',
@@ -106,7 +107,8 @@ function(
     Font, 
     SimpleRenderer,
     UniqueValueRenderer,
-    esriUnits, 
+    esriUnits,
+    Draw, 
     Edit, 
     webMercatorUtils, 
     GeometryService, 
@@ -447,11 +449,143 @@ function(
         },
         
         cut : function () {
-            alert('Cut goes here');
+            // Check if already cutting
+            if (this.geometryDrawToolAction === 'CUT') {
+                // deactivate draw tool
+                this._disableGeometryTools();
+                return;
+            }
+
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.map.setInfoWindowOnClick(false);
+
+            this._geometryDrawToolAddKeyPressHandler(true);
+            this.geometryDrawToolAction = 'CUT';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
         },
 
         reshape : function () {
-            alert('Reshape goes here');
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.geometryDrawToolAction = 'RESHAPE';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
+        },
+
+        explode : function() {
+            if (this._editorConfig["graphicCurrent"]) {
+                var graphics = [];
+                graphics.push(this._editorConfig["graphicCurrent"]);
+                this.setMode("list");
+                this._disableGeometryTools();
+                this._explodeDrawings(graphics);
+            }
+        },
+
+        _geometryDrawToolDrawEnd: function(evt) {
+            if (evt.geometry) {
+                switch (this.geometryDrawToolAction) {
+                    case 'CUT':
+                        this._cutFeatures(evt);
+                        break;
+
+                    case 'RESHAPE':
+                        alert('Reshaping now!');
+                        break;
+
+                    default:
+                        alert('Doing Nothing!!');
+                        break;
+                }
+            }
+        },
+
+        _geometryDrawToolAddKeyPressHandler: function (activate) {
+            if (activate) {
+                if (this.drawToolKeyPress == undefined) {
+                    this.drawToolKeyPress = on(document, "keyup", lang.hitch(this, this._geometryDrawToolHandleKeyPress));
+                }
+            } else {
+                if (this.drawToolKeyPress !== undefined) {
+                    this.drawToolKeyPress.remove();
+                    this.drawToolKeyPress = undefined;
+                }
+            }
+        },
+
+        _geometryDrawToolHandleKeyPress: function (evt) {
+
+            switch (evt.keyCode) {
+                case 27:
+                    // escape - deactivate draw tool
+                    this._disableGeometryTools();
+                    break;
+                default:
+                    // Do nothing
+                    break;
+
+            }
+        },
+
+        _cutFeatures: function (evt) {
+
+            // Check for cut line and a selected drawing
+            if (this._editorConfig["graphicCurrent"] && evt && evt.geometry) {
+                var cutLine = evt.geometry;
+
+                if (cutLine.type !== 'polyline') {
+                    this.showMessage(this.nls.tools.cutErrors.invalidCutGeometryError, 'error');
+
+                    // stop here and reset tool
+                    return;
+                }
+
+                var drawing = this._editorConfig["graphicCurrent"];
+                var newShapes = geometryEngine.cut(drawing.geometry, cutLine);
+
+                if (newShapes.length === 0) {
+                    this.showMessage(this.nls.tools.cutErrors.noFeaturesCutError, 'error');
+                } else {
+                    // Create new drawings based on the original and remove the original record
+                    var newDrawings = [],
+                        newGeometry = null;
+                    for (var p = 0, pl = newShapes.length; p < pl; p++) {
+                        var newDrawing = new Graphic(drawing.toJson());
+                        newGeometry = newShapes[p];
+                        newDrawing.setGeometry(newGeometry);
+                        newDrawings.push(newDrawing);
+                    }
+
+                    this.editorActivateGeometryEdit(false);
+
+                    // Remove the old drawing
+                    this._removeGraphic(drawing);
+
+                    // Add the new drawings
+                    this._pushAddOperation(newDrawings);
+                    var extent = graphicsUtils.graphicsExtent(newDrawings);
+                    this.map.setExtent(extent, true);
+                    this.listGenerateDrawTable();
+                    this.setMode("list");
+                    this._disableGeometryTools();
+
+                    this.map.setInfoWindowOnClick(true);
+                }
+            }
+        },
+
+        _disableGeometryTools: function () {
+            this.map.setInfoWindowOnClick(true);
+            if (this.geometryDrawTool) this.geometryDrawTool.deactivate();
+            this._geometryDrawToolAddKeyPressHandler(false);
+            this.geometryDrawToolAction = null;
+            this._geometryDrawToolAddKeyPressHandler(false);
         },
 
         _removeClickedGraphic:function(){
@@ -905,7 +1039,7 @@ function(
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
-            //this.editorModifyToolsConfigure(graphic.geometry);
+            this.editorModifyToolsConfigure(graphic.geometry);
 
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
@@ -919,12 +1053,32 @@ function(
 
             this.editorMeasureConfigure(graphic, false);
         },
+
         editorModifyToolsConfigure : function (geometry) {
             if (geometry) {
                 switch(geometry.type) {
                     case 'polyline':
                     case 'polygon':
                         domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+
+                        // Check for multipart features
+                        switch (geometry.type) {
+                            case 'polyline':
+                                if (geometry.paths.length > 0) process = 'paths';
+                                break;
+
+                            case 'polygon':
+                                if (geometry.rings.length > 0) process = 'rings';
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (geometry[process].length > 1) {
+                            domStyle.set(this.explodeDrawingSpan, 'display', 'inline-block');
+                        }
+
                         break;
 
                     default:
@@ -1909,18 +2063,25 @@ function(
         },
 
         _loadPortalDrawing : function (drawingData) {
-            var layer = null, graphics = [], symbols = null, renderer = null;
+            var layer = null, graphics = [], symbols = null, renderer = null, getRendererSymbol = false;
             array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
                 // Check for drawings in layer
                 if (drawingLayer.featureSet.features.length > 0) {
                     // Prepare the symbols
-                    symbols = {}, renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    symbols = {};
 
-                    if (renderer.defaultSymbol === null) {
+                    if (drawingLayer.layerDefinition.drawingInfo) {
+                        renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    }
+
+
+                    if (renderer && renderer.defaultSymbol === null) {
                         getRendererSymbol = true;
                         array.forEach(renderer.uniqueValueInfos, lang.hitch(this, function(info) {
                             symbols[info.value] = info.symbol;
                         }));
+                    } else {
+                        getRendererSymbol = false;
                     }
 
                     // Build the graphics
@@ -1930,27 +2091,28 @@ function(
                         // update the symbol based on the renderer
                         if (getRendererSymbol) {
                             var symbolJson = symbols[graphic.attributes["symbolClass"]];
-                            switch(symbolJson.type) {
-                                case "esriSFS":
-                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
-                                    break;
+                            if (symbolJson) {
+                                switch(symbolJson.type) {
+                                    case "esriSFS":
+                                        graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                        break;
 
-                                case "esriSLS":
-                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
-                                    break;
+                                    case "esriSLS":
+                                        graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                        break;
 
-                                case "esriSMS":
-                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriSMS":
+                                        graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                        break;
 
-                                case "esriPMS":
-                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriPMS":
+                                        graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                        break;
 
-
-                                default:
-                                    //do nothing
-                                    break;
+                                    default:
+                                        //do nothing
+                                        break;
+                                }
                             }
                         }
 
