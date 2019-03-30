@@ -31,3 +31,14 @@
 
 -  Alteration of following functions to **Widget.js** in section marked *BEGIN: ECAN CHANGES - Include fit value = true*: 
 	-  **\_queryExtentToZoom** function.  Alteration to setExtent call on map to include the fit parameter with value of true to make sure the extent is fully displayed within the display area of the map.
+
+
+**14 August 2018**
+
+-  **Upgrade to WAB 2.9 Code to include changes that are part of v2.9 Group Filter widget.**	
+	-  Changes to settings component: Setting.html, Setting.js, strings.js
+	-  Changes to config.json, Widget.js, widget.html, LayersHandler.js,manifest.json,strings.js,style.css
+
+**20 November 2018**
+
+-  **Upgrade to WAB 2.10 check.** No real changes introduced between v2.9 & v2.10 Group Filter widget, so left as-is from v2.9 update.

@@ -30,37 +30,43 @@ define([
     startup: function () {
       this.inherited(arguments);
 
-      this.templatePicker = new TemplatePicker({
-            featureLayers: this.layers,
-            rows: "auto",
-            columns: 6,
-            grouping: true,
-            /*style: "height: auto; overflow: auto;",*/
-            'class': 'esriTemplatePicker',
-            maxLabelLength: "25",
-            showTooltip: false
+      if (this.Layers && this.Layers.length > 0) {
 
-          }, this.divTemplatePicker);
+        this.templatePicker = new TemplatePicker({
+              featureLayers: this.layers,
+              rows: "auto",
+              columns: 6,
+              grouping: true,
+              /*style: "height: auto; overflow: auto;",*/
+              'class': 'esriTemplatePicker',
+              maxLabelLength: "25",
+              showTooltip: false
 
-      this.templatePicker.startup(); 
+            }, this.divTemplatePicker);
 
-      this.templatePicker.on("selection-change", lang.hitch(this, function() {
-        var selected = this.templatePicker.getSelected();
-        if (selected) {
-          var featureLayer = selected.featureLayer;
-          var type = selected.type;
-          var template = selected.template;    
-          this.popup.enableButton(0);
-        } else {
-          this.popup.disableButton(0);
-        }
-      }));
+        this.templatePicker.startup(); 
+
+        this.templatePicker.on("selection-change", lang.hitch(this, function() {
+          var selected = this.templatePicker.getSelected();
+          if (selected) {
+            var featureLayer = selected.featureLayer;
+            var type = selected.type;
+            var template = selected.template;    
+            this.popup.enableButton(0);
+          } else {
+            this.popup.disableButton(0);
+          }
+        }));
+      }
     },
     postCreate: function () {
-       //create popup for bufferSettings
-      this._createCopyFeaturesPopup();
-
-      this._initMultipleFeaturesContent();
+      if (this.Layers && this.Layers.length > 0) {
+        //create popup for bufferSettings
+        this._createCopyFeaturesPopup();
+        this._initMultipleFeaturesContent(); 
+      } else {
+        alert('There are currely no editable layers that can be used with this tool.');
+      }
     },
 
     _initMultipleFeaturesContent: function () {

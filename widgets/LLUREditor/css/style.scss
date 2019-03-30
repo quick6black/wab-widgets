@@ -1,0 +1,408 @@
+.llur-editor {
+  	
+  	h3 {
+    	font-size: 1.2em;
+  	}
+  	
+  	h3, p {
+    	margin-top: 0;
+  	}
+
+  	.jimu-tab3 {
+		height: 100%;
+  	}
+
+  	.search-pane,
+	.secondary-pane {
+  		height: 100%;
+  		width: 100%;
+  		background-color: #f8f8f8;
+  		position: relative;
+
+  		& > * {
+  			width: 100%;
+  		}
+	}
+
+  .instructions {
+    padding: 5px;
+  }
+
+
+    .templatePicker {
+        position: relative;
+        height: 296px !important;
+    }
+
+    .templatePicker .grid .groupLabel {
+      font-size: 2em;
+    }
+
+    .jimu-widget-sefilterEditor {
+      .flDropDown {
+          height: 30px!important;
+          width: 100%;
+          margin-top: 2px;
+          margin-bottom: 10px;
+      }
+
+      .searchtextbox {
+          height: 30px!important;
+          width: 100%;
+          padding: 5px;
+          margin-bottom: 5px;
+      
+      }
+    }
+
+    .jimu-btn {
+      &.layer-btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+        padding-left: 5px;
+        padding-right: 5px;
+        line-height: 26px;
+        font-size: 12px;
+        min-width: 50px;
+      }
+    }
+
+    .dijitDropDownButton {
+        margin: 0;
+        text-align: left;
+    }
+}
+
+    .dijitButtonHover {
+        .dijitButtonNode {
+            /*background-color: transparent !important;*/
+            background-image: none !important;
+            border: none !important;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+    }
+
+    .dijitButton {
+        /*background-color: transparent !important;*/
+        background-image: none !important;
+        border: none !important;
+        -webkit-box-shadow: none !important;
+        -moz-box-shadow: none !important;
+        box-shadow: none !important;
+
+        .dijitButtonNode {
+            /*background-color: transparent !important;*/
+            background-image: none !important;
+            border: none !important;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            box-shadow: none !important;
+        }
+    }
+
+.esriAttributeInspector {
+  width: 100%;
+  z-index: 99;
+}
+
+.esriAttributeInspector table {
+  width: 98%;
+}
+
+.esriAttributeInspector .dijitTextBox {
+  width: 98%;
+}
+
+.esriAttributeInspector .atiLayerName {
+  margin: 5px auto;
+  font-weight: bold;
+  border-bottom: 1px solid #A9A9A9;
+}
+.esriAttributeInspector .atiField {
+  margin: 1px;
+}
+.esriAttributeInspector .atiTextAreaField {
+  min-height: 250px !important;
+}
+
+.esriAttributeInspector .atiRichTextField {
+  margin: 5px auto;
+}
+.esriAttributeInspector .atiLabel {
+  margin: 1px;
+  padding-right: 5px;
+}
+.esriAttributeInspector .atiNavMessage {
+  float: left;
+  margin: 5px 5px auto auto;
+}
+.esriAttributeInspector .atiButtons {
+  margin: 5px auto;
+  padding-top: 5px;
+  border-top: 1px solid #A9A9A9;
+}
+.esriAttributeInspector .atiNavButtons {
+  float: right;
+}
+.esriAttributeInspector .atiButton {
+  margin: 0 0 15px 0;
+  padding-right: 6px;
+  width: 100%;
+  min-height: 16px;
+  background-image: none;
+
+  .dijitButton .dijitButtonNode {
+    width: inherit;
+    text-align: center;
+  }
+
+}
+
+.claro .dijitButton .dijitButtonNode {
+  background-image: none;
+  background-repeat: none;
+
+    width: inherit;
+    text-align: center;  
+}
+
+.esriAttributeInspector .atiPrevIcon {
+  background-position: -32px 0px;
+}
+.esriAttributeInspector .atiNextIcon {
+  background-position: -48px 0px;
+}
+.esriAttributeInspector .atiFirstIcon {
+  background-position: -16px 0px;
+}
+.esriAttributeInspector .atiLastIcon {
+  background-position: 0px 0px;
+}
+.esriAttributeInspector .atiEditGeometryButton,
+.esriAttributeInspector .atiDeleteButton {
+  float: left;
+}
+.esriAttributeInspector .atiRequestButton,
+.esriAttributeInspector .atiCancelButton,
+.esriAttributeInspector .atiSubmitButton {
+  float: right;
+}
+.esriAttributeInspector .atiAttachmentEditor {
+  padding: 10px;
+}
+.esriAttributeInspector .atiEditorTrackingInfo {
+  padding-top: 10px;
+}
+.esriAttributeInspector .atiAttributes .dijitTextBoxDisabled input{
+  color: #000;
+  -webkit-text-fill-color: #000;
+  -webkit-opacity: 1;
+}
+/**** Fix for dojo css bug introduced at 1.4 ***/
+.dj_ie7 .dijitButtonNode > BUTTON.dijitButtonContents > * {
+  position: static;
+}
+.esriAttributeInspector .dijitDateTextBox  {
+  margin: 1px;
+}
+.esriAttributeInspector .dijitTimeTextBox {
+  width: 15em;
+  margin: 1px;
+}
+.esriAttributeInspector .dijitNumberTextBox .dijitInputInner {
+  text-align: inherit;
+}
+.esriAttributeInspector .atiRequiredField {
+  color: #de2900;
+}
+
+
+/* Drawing Options */
+.leToolbarIcon {
+    background-image: url(../images/toolbar_icons.png);
+    width: 16px;
+    height: 16px;
+}
+
+.lePointIcon {
+    background-position: 0px 0px;
+}
+
+.lePointIconDisabled {
+    background-position: -16px 0px;
+}
+
+.lePolylineIcon {
+    background-position: -34px 0px;
+}
+
+.lePolylineIconDisabled {
+    background-position: -50px 0px;
+}
+
+.lePolygonIcon {
+    background-position: -69px 0px;
+}
+
+.lePolygonIconDisabled {
+    background-position: -84px 0px;
+}
+
+.leFreehandPolylineIcon {
+    background-position: -101px 0px;
+}
+
+.leFreehandPolylineIconDisabled {
+    background-position: -118px 0px;
+}
+
+.leFreehandPolygonIcon {
+    background-position: -135px 0px;
+}
+
+.leFreehandPolygonIconDisabled {
+    background-position: -152px 0px;
+}
+
+.leRectangleIcon {
+    background-position: -339px 0px;
+}
+
+.leTriangleIcon {
+    background-position: -356px 0px;
+}
+
+.leEllipseIcon {
+    background-position: -373px 0px;
+}
+
+.leCircleIcon {
+    background-position: -390px 0px;
+}
+
+.leArrowIcon {
+    background-position: -407px 0px;
+}
+
+.leArrowDownIcon {
+    background-position: -424px 0px;
+}
+
+.leArrowLeftIcon {
+    background-position: -441px 0px;
+}
+
+.leArrowUpIcon {
+    background-position: -458px 0px;
+}
+
+.leNe.lelectionIcon {
+    background-position: -237px 0px;
+}
+
+.leAddT.lelectionIcon {
+    background-position: -254px 0px;
+}
+
+.leRemoveFro.lelectionIcon {
+    background-position: -271px 0px;
+}
+
+.leClea.lelectionIcon {
+    background-position: -288px 0px;
+}
+/* dropdown */
+
+.drawingOptionsDiv .dijitDropDownButton {
+    margin: 0;
+    width: 100%;
+    text-align: left;
+}
+
+    .drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+        /*background: transparent;*/
+        border: 1px solid #7EABCD;
+        padding: 4px;
+        margin-top: 2px;
+        font-weight: bold;
+        box-shadow: none;
+        border-radius: 4px;
+        text-align: left;
+        width: 100%;
+    }
+
+.jimu-rtl .drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+    text-align: right;
+}
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitButtonContents {
+    border-color: transparent;
+}
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitInputField {
+    padding: 0 5px;
+}
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode .dijitArrowButton {
+    background: transparent;
+    border: 0;
+}
+
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode.diji.lelectFoc.led .dijitArrowButton {
+    padding: 0;
+}
+
+.drawingOptionsDiv .dijitDownArrowButton {
+    position: relative;
+}
+
+.drawingOptionsDiv .dijitArrowButtonInner {
+    position: absolute;
+    right: 8px;
+    top: 3px;
+    background-image: none;
+}
+
+
+    .drawingOptionsDiv .dijitArrowButtonInner:after {
+        content: "\e681";
+        font-family: 'CalciteWebCoreIcons' !important;
+        speak: none;
+        font-style: normal;
+        font-weight: bold;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
+    width: 20px;
+}
+
+
+/* Messages */
+.message-info-icon {
+    background-image: url("images/info.png");
+    float: left;
+    height: 48px;
+    width: 48px;
+}
+
+.message-error-icon {
+    background-image: url("images/error.png");
+    float: left;
+    height: 48px;
+    width: 48px;
+}
+
+.message-warning-icon {
+    background-image: url("images/warning.png");
+    float: left;
+    height: 48px;
+    width: 48px;
+}

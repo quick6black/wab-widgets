@@ -4,11 +4,11 @@
   "2D": true,
   "3D": false,
   "platform": "HTML",
-  "version": "0.0.1",
-  "wabVersion": "2.4",
   "author": "Environment Canterbury GIS Team based on code developed by Esri, Inc",
   "description": "Custom filter widget based on the group filter that set up specifically to handle editing settings in loosely coupled edit operations called from other applications.",
   "copyright": "",
+  "version": "2.10",
+  "wabVersion": "2.10",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
     "inPanel": true,

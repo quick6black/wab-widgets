@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/jsonUtils', 'esri/Color', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/ViewStack', 'jimu/dijit/FeatureSetChooserForMultipleLayers', 'jimu/LayerInfos/LayerInfos', 'jimu/SelectionManager', './layerUtil', './SelectableLayerItem', './FeatureItem', 'esri/graphic', 'esri/geometry/geometryEngine', 'esri/geometry/Polygon', 'jimu/dijit/LoadingShelter'], function (declare, lang, html, array, on, all, _WidgetsInTemplateMixin, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, SymbolJsonUtils, Color, BaseWidget, WidgetManager, ViewStack, FeatureSetChooserForMultipleLayers, LayerInfos, SelectionManager, layerUtil, SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
+define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/array', 'dojo/on', 'dojo/promise/all', 'dijit/_WidgetsInTemplateMixin', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/SimpleLineSymbol', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/jsonUtils', 'esri/Color', 'jimu/BaseWidget', 'jimu/WidgetManager', 'jimu/dijit/ViewStack', 'jimu/dijit/FeatureSetChooserForMultipleLayers', 'jimu/LayerInfos/LayerInfos', 'jimu/SelectionManager', 'jimu/dijit/FeatureActionPopupMenu', './layerUtil', './SelectableLayerItem', './FeatureItem', 'esri/graphic', 'esri/geometry/geometryEngine', 'esri/geometry/Polygon', 'jimu/dijit/LoadingShelter'], function (declare, lang, html, array, on, all, _WidgetsInTemplateMixin, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, SymbolJsonUtils, Color, BaseWidget, WidgetManager, ViewStack, FeatureSetChooserForMultipleLayers, LayerInfos, SelectionManager, PopupMenu, layerUtil, SelectableLayerItem, FeatureItem, Graphic, geometryEngine, Polygon) {
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     baseClass: 'jimu-widget-select-ecan',
 
@@ -29,6 +29,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       this.defaultPointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 16, null, selectionColor);
       this.defaultLineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, selectionColor, 2);
       this.defaultFillSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, this.defaultLineSymbol, new Color([selectionColor.r, selectionColor.g, selectionColor.b, 0.3]));
+      this.popupMenu = PopupMenu.getInstance();
       /**
        * Helper object to keep which layer is selectable.
        */
@@ -88,20 +89,32 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       this.own(on(layerInfosObject, 'layerInfosIsShowInMapChanged', lang.hitch(this, this._layerVisibilityChanged)));
 
       this.own(on(this.map, 'zoom-end', lang.hitch(this, this._layerVisibilityChanged)));
+      this.own(on(this.settingNode, 'click', lang.hitch(this, function (event) {
+        event.stopPropagation();
+        var position = html.position(event.target);
+        this.showPopup(position);
+      })));
+    },
 
-      ///////////////////////////// ECAN CHANGES /////////////////////////////
-
-      this.toggleAllChecked = false;
-
-      if (this.toggleAllChecked) {
-        html.addClass(this.toggleAllCheckBox, 'checked');
-      } else {
-        html.removeClass(this.toggleAllCheckBox, 'checked');
-      }
-
-      this.own(on(this.toggleAllCheckBox, 'click', lang.hitch(this, this._toggleAllChecked)));
-
-      ///////////////////////// END OF ECAN CHANGES //////////////////////////
+    showPopup: function showPopup(position) {
+      var actions = [{
+        iconClass: 'no-icon',
+        label: this.nls.turnonAll,
+        data: {},
+        onExecute: lang.hitch(this, this._turnOnAllLayers)
+      }, {
+        iconClass: 'no-icon',
+        label: this.nls.turnoffAll,
+        data: {},
+        onExecute: lang.hitch(this, this._turnOffAllLayers)
+      }, {
+        iconClass: 'no-icon',
+        label: this.nls.toggleSelect,
+        data: {},
+        onExecute: lang.hitch(this, this._toggleAllLayers)
+      }];
+      this.popupMenu.setActions(actions);
+      this.popupMenu.show(position);
     },
 
     onDeActive: function onDeActive() {
@@ -113,8 +126,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
     onActive: function onActive() {
       this._setSelectionSymbol();
-      if (!this.selectDijit.isActive()) {
+
+      // ECAN CHANGE - Specifiy whether select dijit should be activuated when widget activates
+      var setActive = this.config.selectOnActivate !== undefined ? this.config.selectOnActivate : true;
+
+      if (setActive && !this.selectDijit.isActive()) {
         this.selectDijit.activate();
+      } else if (!setActive && this.selectDijit.isActive()) {
+        this.selectDijit.deactivate();
       }
     },
 
@@ -127,6 +146,25 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         this.selectDijit.deactivate();
       }
       this._clearAllSelections();
+    },
+
+    _filterLayerInfo: function _filterLayerInfo(layerInfoArray) {
+      if (!this.config.layerState) {
+        return layerInfoArray;
+      }
+      var layerInfosObject = LayerInfos.getInstanceSync();
+      var webmapLayerInfos = layerInfosObject.getLayerInfoArrayOfWebmap();
+      return array.filter(layerInfoArray, lang.hitch(this, function (layerInfo) {
+        var inBlackList = this.config.layerState[layerInfo.id] && this.config.layerState[layerInfo.id].selected === false;
+        if (!inBlackList) {
+          return true;
+        } else if (this.config.includeRuntimeLayers !== false) {
+          return array.every(webmapLayerInfos, function (webmapLayerInfo) {
+            return layerInfo.getRootLayerInfo().id !== webmapLayerInfo.id;
+          });
+        }
+        return false;
+      }));
     },
 
     _initLayers: function _initLayers(layerInfoArray) {
@@ -144,9 +182,16 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             var layerInfo = layerInfoArray[index];
             var visible = layerInfo.isShowInMap() && layerInfo.isInScale();
 
+            // ECAN CHANGE - Configure initial state of selected check box to override visible state
+
+            var checked = visible;
+            if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
+              checked = this.config.selectedLayersMode === 'none' ? false : true;
+            }
+
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
-              checked: false, //visible, -- ECAN default to not-selected initially
+              checked: checked, //visible, -- ECAN default to not-selected initially
               layerVisible: visible,
               folderUrl: this.folderUrl,
               allowExport: this.config ? this.config.allowExport : false,
@@ -178,6 +223,33 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
         this._setSelectionSymbol();
         this.shelter.hide();
       }));
+    },
+
+    _turnOffAllLayers: function _turnOffAllLayers() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function (layerItem) {
+        layerItem.turnOff();
+      }));
+      this.selectDijit.setFeatureLayers([]);
+      this.shelter.hide();
+    },
+
+    _turnOnAllLayers: function _turnOnAllLayers() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function (layerItem) {
+        layerItem.turnOn();
+      }));
+      this.selectDijit.setFeatureLayers(this._getSelectableLayers());
+      this.shelter.hide();
+    },
+
+    _toggleAllLayers: function _toggleAllLayers() {
+      this.shelter.show();
+      array.forEach(this.layerItems, lang.hitch(this, function (layerItem) {
+        layerItem.toggleChecked();
+      }));
+      this.selectDijit.setFeatureLayers(this._getSelectableLayers());
+      this.shelter.hide();
     },
 
     _setSelectionSymbol: function _setSelectionSymbol() {
@@ -268,19 +340,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
     },
 
     ///////////////////////////// ECAN CHANGES /////////////////////////////
-
-    toggleAllChecked: false,
-
-    _toggleAllChecked: function _toggleAllChecked(event) {
-      //Event.stop(event);
-
-      html.toggleClass(this.toggleAllCheckBox, 'checked');
-      this.toggleAllChecked = html.hasClass(this.toggleAllCheckBox, 'checked');
-
-      array.forEach(this.layerItems, function (layerItem) {
-        layerItem.setChecked(this.toggleAllChecked);
-      }, this);
-    },
 
     /// Custome function added to handle a passed featureset to generate a shape to select features by
     selectByFeature: function selectByFeature(featureSet) {

@@ -36,6 +36,7 @@ define([
         'esri/renderers/SimpleRenderer',
         'esri/renderers/UniqueValueRenderer',
         'esri/units',
+        'esri/toolbars/draw',        
         'esri/toolbars/edit',
         'esri/geometry/webMercatorUtils',
         'esri/tasks/GeometryService',
@@ -61,6 +62,7 @@ define([
         'dijit/form/TextBox', 
         'dijit/form/ValidationTextBox',
         'dijit/form/Button',
+        'dijit/form/CheckBox', 
         'jimu/dijit/ViewStack',
         'jimu/dijit/SymbolChooser',
         'jimu/dijit/DrawBox',
@@ -105,7 +107,8 @@ function(
     Font, 
     SimpleRenderer,
     UniqueValueRenderer,
-    esriUnits, 
+    esriUnits,
+    Draw, 
     Edit, 
     webMercatorUtils, 
     GeometryService, 
@@ -131,6 +134,7 @@ function(
     TextBox,
     ValidationTextBox,
     Button,
+    CheckBox,
     ViewStack, 
     SymbolChooser, 
     DrawBox, 
@@ -445,11 +449,143 @@ function(
         },
         
         cut : function () {
-            alert('Cut goes here');
+            // Check if already cutting
+            if (this.geometryDrawToolAction === 'CUT') {
+                // deactivate draw tool
+                this._disableGeometryTools();
+                return;
+            }
+
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.map.setInfoWindowOnClick(false);
+
+            this._geometryDrawToolAddKeyPressHandler(true);
+            this.geometryDrawToolAction = 'CUT';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
         },
 
         reshape : function () {
-            alert('Reshape goes here');
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.geometryDrawToolAction = 'RESHAPE';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
+        },
+
+        explode : function() {
+            if (this._editorConfig["graphicCurrent"]) {
+                var graphics = [];
+                graphics.push(this._editorConfig["graphicCurrent"]);
+                this.setMode("list");
+                this._disableGeometryTools();
+                this._explodeDrawings(graphics);
+            }
+        },
+
+        _geometryDrawToolDrawEnd: function(evt) {
+            if (evt.geometry) {
+                switch (this.geometryDrawToolAction) {
+                    case 'CUT':
+                        this._cutFeatures(evt);
+                        break;
+
+                    case 'RESHAPE':
+                        alert('Reshaping now!');
+                        break;
+
+                    default:
+                        alert('Doing Nothing!!');
+                        break;
+                }
+            }
+        },
+
+        _geometryDrawToolAddKeyPressHandler: function (activate) {
+            if (activate) {
+                if (this.drawToolKeyPress == undefined) {
+                    this.drawToolKeyPress = on(document, "keyup", lang.hitch(this, this._geometryDrawToolHandleKeyPress));
+                }
+            } else {
+                if (this.drawToolKeyPress !== undefined) {
+                    this.drawToolKeyPress.remove();
+                    this.drawToolKeyPress = undefined;
+                }
+            }
+        },
+
+        _geometryDrawToolHandleKeyPress: function (evt) {
+
+            switch (evt.keyCode) {
+                case 27:
+                    // escape - deactivate draw tool
+                    this._disableGeometryTools();
+                    break;
+                default:
+                    // Do nothing
+                    break;
+
+            }
+        },
+
+        _cutFeatures: function (evt) {
+
+            // Check for cut line and a selected drawing
+            if (this._editorConfig["graphicCurrent"] && evt && evt.geometry) {
+                var cutLine = evt.geometry;
+
+                if (cutLine.type !== 'polyline') {
+                    this.showMessage(this.nls.tools.cutErrors.invalidCutGeometryError, 'error');
+
+                    // stop here and reset tool
+                    return;
+                }
+
+                var drawing = this._editorConfig["graphicCurrent"];
+                var newShapes = geometryEngine.cut(drawing.geometry, cutLine);
+
+                if (newShapes.length === 0) {
+                    this.showMessage(this.nls.tools.cutErrors.noFeaturesCutError, 'error');
+                } else {
+                    // Create new drawings based on the original and remove the original record
+                    var newDrawings = [],
+                        newGeometry = null;
+                    for (var p = 0, pl = newShapes.length; p < pl; p++) {
+                        var newDrawing = new Graphic(drawing.toJson());
+                        newGeometry = newShapes[p];
+                        newDrawing.setGeometry(newGeometry);
+                        newDrawings.push(newDrawing);
+                    }
+
+                    this.editorActivateGeometryEdit(false);
+
+                    // Remove the old drawing
+                    this._removeGraphic(drawing);
+
+                    // Add the new drawings
+                    this._pushAddOperation(newDrawings);
+                    var extent = graphicsUtils.graphicsExtent(newDrawings);
+                    this.map.setExtent(extent, true);
+                    this.listGenerateDrawTable();
+                    this.setMode("list");
+                    this._disableGeometryTools();
+
+                    this.map.setInfoWindowOnClick(true);
+                }
+            }
+        },
+
+        _disableGeometryTools: function () {
+            this.map.setInfoWindowOnClick(true);
+            if (this.geometryDrawTool) this.geometryDrawTool.deactivate();
+            this._geometryDrawToolAddKeyPressHandler(false);
+            this.geometryDrawToolAction = null;
+            this._geometryDrawToolAddKeyPressHandler(false);
         },
 
         _removeClickedGraphic:function(){
@@ -491,6 +627,8 @@ function(
         },
 
         _removeGraphic : function (graphic, holdSyncGraphics) {
+            this.setInfoWindow(false);
+
             if (graphic.measure && graphic.measure.graphic) {
                 this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
@@ -510,7 +648,9 @@ function(
             if (nb_graphics < 1)
                 return (asString) ? '' : false;
 
+            var localStoreOpen = this.localStorageOptionToggle.checked ? "true" : "false";
             var content = {
+                "loadOnOpen" : localStoreOpen,
                 "features" : [],
                 "displayFieldName" : "",
                 "fieldAliases" : {},
@@ -899,7 +1039,7 @@ function(
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
-            //this.editorModifyToolsConfigure(graphic.geometry);
+            this.editorModifyToolsConfigure(graphic.geometry);
 
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
@@ -920,6 +1060,25 @@ function(
                     case 'polyline':
                     case 'polygon':
                         domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+
+                        // Check for multipart features
+                        switch (geometry.type) {
+                            case 'polyline':
+                                if (geometry.paths.length > 0) process = 'paths';
+                                break;
+
+                            case 'polygon':
+                                if (geometry.rings.length > 0) process = 'rings';
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (geometry[process].length > 1) {
+                            domStyle.set(this.explodeDrawingSpan, 'display', 'inline-block');
+                        }
+
                         break;
 
                     default:
@@ -937,8 +1096,8 @@ function(
                 return;
 
             //Set this symbol in symbol chooser
-            this.editorSymbolChooser.showBySymbol(symbol);
             this.editorSymbolChooser.showByType(this.editorSymbolChooser.type);
+            this.editorSymbolChooser.showBySymbol(symbol);
             this._editorConfig['symboltype'] = this.editorSymbolChooser.type;
 
             var type = symbol.type;
@@ -982,6 +1141,7 @@ function(
         },
 
         editorActivateSnapping : function (bool) {
+            /*
             //If disable
             if (!bool) {
                 this.map.disableSnapping();
@@ -1005,6 +1165,7 @@ function(
                 ],
                 "tolerance" : 20
             });
+            */
         },
 
         editorUpdateTextPlus : function () {
@@ -1902,18 +2063,25 @@ function(
         },
 
         _loadPortalDrawing : function (drawingData) {
-            var layer = null, graphics = [], symbols = null, renderer = null;
+            var layer = null, graphics = [], symbols = null, renderer = null, getRendererSymbol = false;
             array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
                 // Check for drawings in layer
                 if (drawingLayer.featureSet.features.length > 0) {
                     // Prepare the symbols
-                    symbols = {}, renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    symbols = {};
 
-                    if (renderer.defaultSymbol === null) {
+                    if (drawingLayer.layerDefinition.drawingInfo) {
+                        renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    }
+
+
+                    if (renderer && renderer.defaultSymbol === null) {
                         getRendererSymbol = true;
                         array.forEach(renderer.uniqueValueInfos, lang.hitch(this, function(info) {
                             symbols[info.value] = info.symbol;
                         }));
+                    } else {
+                        getRendererSymbol = false;
                     }
 
                     // Build the graphics
@@ -1923,27 +2091,28 @@ function(
                         // update the symbol based on the renderer
                         if (getRendererSymbol) {
                             var symbolJson = symbols[graphic.attributes["symbolClass"]];
-                            switch(symbolJson.type) {
-                                case "esriSFS":
-                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
-                                    break;
+                            if (symbolJson) {
+                                switch(symbolJson.type) {
+                                    case "esriSFS":
+                                        graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                        break;
 
-                                case "esriSLS":
-                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
-                                    break;
+                                    case "esriSLS":
+                                        graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                        break;
 
-                                case "esriSMS":
-                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriSMS":
+                                        graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                        break;
 
-                                case "esriPMS":
-                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriPMS":
+                                        graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                        break;
 
-
-                                default:
-                                    //do nothing
-                                    break;
+                                    default:
+                                        //do nothing
+                                        break;
+                                }
                             }
                         }
 
@@ -3535,8 +3704,10 @@ function(
         },
 
         _initLocalStorage : function () {
-            if (!this.config.allowLocalStorage)
+            if (!this.config.allowLocalStorage) {
+                domStyle.set(this.localStorageSettingsSection, 'display', 'none');
                 return;
+            }
 
             this._localStorageKey =
                 (this.config.localStorageKey) ? 'WebAppBuilder.2D.eDrawEcan.' + this.config.localStorageKey : 'WebAppBuilder.2D.eDrawEcan';
@@ -3550,8 +3721,12 @@ function(
             (function (widget) {
                 setTimeout(
                     function () {
-                    widget.importJsonContent(content, "name", "description", "measure");
-                    widget.showMessage(widget.nls.localLoading);
+                    if(content.loadOnOpen === "true" || content.loadOnOpen === undefined) {
+                        widget.importJsonContent(content, "name", "description", "measure");
+                        widget.showMessage(widget.nls.localLoading);
+                    }
+            
+                    widget.localStorageOptionToggle.set("checked", content.loadOnOpen === "true");
                 }, 200);
             })(this);
         },
@@ -3903,7 +4078,37 @@ function(
                 this.map.addLayer(this._pointLayer);
                 this.map.addLayer(this._labelLayer);
             }
+
+            /* BEGIN: ECAN CHANGE - Add layers to snapping manager - lables not included for snapping */
+            this._updateSnapping(this._polygonLayer);
+            this._updateSnapping(this._polylineLayer);
+            this._updateSnapping(this._pointLayer);
+
+            /* END: ECAN CHANGES */
         },
+
+        _updateSnapping: function (graphicsLyr) {
+            if (this.map.snappingManager && graphicsLyr) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+                    return layerInfo.layer.id === graphicsLyr.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = []; 
+                    array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+            
+                    layerInfos.push({
+                        layer: graphicsLyr
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
+            }
+        },
+
 
         ///////////////////////// COPY FEATURES METHODS ///////////////////////////////////////////////////////////
 
@@ -4271,6 +4476,23 @@ function(
             }
             return result;
         },
+
+        _localStorageOptionChange : function (newState) {
+            this._updateLoadOnOpenSetting(newState);
+        },
+
+        _updateLoadOnOpenSetting : function (openOnLoad) {
+            if (!this.config.allowLocalStorage)
+                return;
+
+            var newValue = openOnLoad ? "true" : "false";
+            var content = localStore.get(this._localStorageKey) || {};
+            if (content.loadOnOpen !== newValue) {
+                content.loadOnOpen = newValue;
+                localStore.set(this._localStorageKey, content);
+            }
+        },
+
 
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////
 

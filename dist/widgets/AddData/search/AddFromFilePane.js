@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", "dojo/Deferred", "dojo/dom-class", "dijit/Viewport", "dojo/sniff", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/AddFromFilePane.html", "dojo/i18n!../nls/strings", "./LayerLoader", "./util", "esri/request", "esri/layers/FeatureLayer", "esri/geometry/scaleUtils", "jimu/dijit/Message", "jimu/dijit/CheckBox"], function (declare, lang, array, on, Deferred, domClass, Viewport, sniff, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, LayerLoader, util, esriRequest, FeatureLayer, scaleUtils, Message) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/_base/json", "dojo/on", "dojo/Deferred", "dojo/dom-class", "dijit/Viewport", "dojo/sniff", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./templates/AddFromFilePane.html", "dojo/i18n!../nls/strings", "./LayerLoader", "./util", "dojo/_base/kernel", "esri/request", "esri/layers/FeatureLayer", "esri/layers/KMLLayer", "esri/geometry/scaleUtils", "jimu/dijit/Message", "jimu/dijit/CheckBox"], function (declare, lang, array, dojoJson, on, Deferred, domClass, Viewport, sniff, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, LayerLoader, util, kernel, esriRequest, FeatureLayer, KMLLayer, scaleUtils, Message) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -28,6 +28,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
     }, {
       "type": "csv",
       "url": "images/filetypes/csv.svg"
+    }, {
+      "type": "kml",
+      "url": "images/filetypes/kml.svg"
     }, {
       "type": "gpx",
       "url": "images/filetypes/gpx.svg"
@@ -50,6 +53,18 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
     startup: function startup() {
       if (this._started) {
         return;
+      }
+      if (this.wabWidget.isPortal) {
+        this.SHAPETYPE_ICONS = [{
+          "type": "shapefile",
+          "url": "images/filetypes/zip.svg"
+        }, {
+          "type": "csv",
+          "url": "images/filetypes/csv.svg"
+        }, {
+          "type": "kml",
+          "url": "images/filetypes/kml.svg"
+        }];
       }
       this.inherited(arguments);
       //console.warn("AddFromFilePane.startup .......................");
@@ -148,7 +163,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
       this.own(on(this.hintButton, "click", lang.hitch(this, function (event) {
         event.preventDefault();
 
-        var test = '<div class="intro">' + '<label>' + i18n.addFromFile.intro + "</label>" + '<ul>' + '<li>' + i18n.addFromFile.types.Shapefile + '</li>' + '<li>' + i18n.addFromFile.types.CSV + '</li>' + '<li>' + i18n.addFromFile.types.GPX + '</li>' + '<li>' + i18n.addFromFile.types.GeoJSON + '</li>' + '<li><span class="note">' + i18n.addFromFile.maxFeaturesAllowedPattern.replace("{count}", this.maxRecordCount) + '</span></li>' + '</ul>' + '</div>';
+        var test = '<div class="intro">' + '<label>' + i18n.addFromFile.intro + "</label>" + '<ul>' + '<li>' + i18n.addFromFile.types.Shapefile + '</li>' + '<li>' + i18n.addFromFile.types.CSV + '</li>' + '<li>' + i18n.addFromFile.types.KML + '</li>' + '<li>' + i18n.addFromFile.types.GPX + '</li>' + '<li>' + i18n.addFromFile.types.GeoJSON + '</li>' + '<li><span class="note">' + i18n.addFromFile.maxFeaturesAllowedPattern.replace("{count}", this.maxRecordCount) + '</span></li>' + '</ul>' + '</div>';
+
+        if (this.wabWidget.isPortal) {
+          test = '<div class="intro">' + '<label>' + i18n.addFromFile.intro + "</label>" + '<ul>' + '<li>' + i18n.addFromFile.types.Shapefile + '</li>' + '<li>' + i18n.addFromFile.types.CSV + '</li>' + '<li>' + i18n.addFromFile.types.KML + '</li>' + '<li><span class="note">' + i18n.addFromFile.maxFeaturesAllowedPattern.replace("{count}", this.maxRecordCount) + '</span></li>' + '</ul>' + '</div>';
+        }
 
         new Message({ message: test });
       })));
@@ -204,10 +223,28 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         dfd.resolve(null);
         return dfd;
       }
+
+      var geocoder = null;
+      if (this.wabWidget.batchGeocoderServers && this.wabWidget.batchGeocoderServers.length > 0) {
+        geocoder = this.wabWidget.batchGeocoderServers[0];
+      }
+      var analyzeParams = {
+        "enableGlobalGeocoding": true,
+        "sourceLocale": kernel.locale
+      };
+      if (geocoder) {
+        analyzeParams.geocodeServiceUrl = geocoder.url;
+        if (geocoder.isWorldGeocodeServer) {
+          analyzeParams.sourceCountry = "world";
+          analyzeParams.sourceCountryHint = "";
+        }
+      }
+
       var url = job.sharingUrl + "/content/features/analyze";
       var content = {
         f: "json",
-        filetype: job.fileType.toLowerCase()
+        filetype: job.fileType.toLowerCase(),
+        analyzeParameters: window.JSON.stringify(analyzeParams)
       };
       var req = esriRequest({
         url: url,
@@ -227,7 +264,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
     _createFileTypeImage: function _createFileTypeImage(fileTypeName) {
       var isRTL = window.isRTL;
       array.some(this.SHAPETYPE_ICONS, lang.hitch(this, function (filetypeIcon, index) {
-        if (fileTypeName.toLowerCase() === filetypeIcon.type) {
+        if (fileTypeName.toLowerCase() === filetypeIcon.type.toLowerCase()) {
           var iconImg = document.createElement("IMG");
           iconImg.src = this.wabWidget.folderUrl + filetypeIcon.url;
           iconImg.alt = fileTypeName;
@@ -246,12 +283,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
     },
 
     _execute: function _execute(fileInfo) {
-      this._setBusy(true);
-      var fileName = fileInfo.fileName;
-      this._setStatus(i18n.addFromFile.addingPattern.replace("{filename}", fileName));
-      var self = this,
-          formData = new FormData();
-      formData.append("file", fileInfo.file);
       var job = {
         map: this.wabWidget.map,
         sharingUrl: this.wabWidget.getSharingUrl(),
@@ -262,6 +293,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         publishParameters: {},
         numFeatures: 0
       };
+      this._setBusy(true);
+      this._setStatus(i18n.addFromFile.addingPattern.replace("{filename}", fileInfo.fileName));
+      if (fileInfo.fileType.toLowerCase() === "kml") {
+        return this._executeKml(fileInfo);
+      }
+
+      var fileName = fileInfo.fileName;
+      var self = this,
+          formData = new FormData();
+      formData.append("file", fileInfo.file);
       self._analyze(job, formData).then(function () {
         return self._generateFeatures(job, formData);
       }).then(function (response) {
@@ -278,10 +319,118 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
           // e.g. The maximum number of records allowed (1000) has been exceeded.
           new Message({
             titleLabel: i18n._widgetLabel,
-            message: error.message
+            message: i18n.addFromFile.generalIssue + "<br><br>" + error.message
           });
         }
       });
+    },
+
+    _executeKml: function _executeKml(fileInfo) {
+      var _self = this;
+      var reader = new FileReader();
+      var map = this.wabWidget.map;
+
+      var handleError = function handleError(pfx, error) {
+        _self._setBusy(false);
+        _self._setStatus(i18n.addFromFile.addFailedPattern.replace("{filename}", fileInfo.fileName));
+        console.warn(pfx);
+        console.error(error);
+        if (error && typeof error.message === "string" && error.message.length > 0) {
+          new Message({
+            titleLabel: i18n._widgetLabel,
+            message: i18n.addFromFile.generalIssue + "<br><br>" + error.message
+          });
+        }
+      };
+
+      reader.onerror = function (err) {
+        handleError("FileReader::onerror", err);
+      };
+
+      reader.onload = function (event) {
+        if (reader.error) {
+          handleError("FileReader::error", reader.error);
+          return;
+        }
+        var v = event.target.result;
+        var url = "";
+        var loader = new LayerLoader();
+        var id = loader._generateLayerId();
+        var layer = new KMLLayer(url, {
+          id: id,
+          name: fileInfo.fileName,
+          linkInfo: {
+            visibility: false
+          }
+        });
+        layer.visible = true;
+        delete layer.linkInfo;
+
+        layer._parseKml = function () {
+          var self = this;
+          this._fireUpdateStart();
+          // Send viewFormat as necessary if this kml layer represents a
+          // network link i.e., in the constructor options.linkInfo is
+          // available and linkInfo has viewFormat property
+          this._io = esriRequest({
+            url: this.serviceUrl,
+            content: {
+              /*url: this._url.path + this._getQueryParameters(map),*/
+              kmlString: encodeURIComponent(v),
+              model: "simple",
+              folders: "",
+              refresh: this.loaded ? true : undefined,
+              outSR: dojoJson.toJson(this._outSR.toJson())
+            },
+            callbackParamName: "callback",
+            load: function load(response) {
+              //console.warn("response",response);
+              self._io = null;
+              self._initLayer(response);
+              loader._waitForLayer(layer).then(function (lyr) {
+                var num = 0;
+                lyr.name = fileInfo.fileName;
+                lyr.xtnAddData = true;
+                array.forEach(lyr.getLayers(), function (l) {
+                  if (l && l.graphics && l.graphics.length > 0) {
+                    num += l.graphics.length;
+                  }
+                });
+                var mapSR = map.spatialReference,
+                    outSR = lyr._outSR;
+                var projOk = mapSR && outSR && (mapSR.equals(outSR) || mapSR.isWebMercator() && outSR.wkid === 4326 || outSR.isWebMercator() && mapSR.wkid === 4326);
+                if (projOk) {
+                  map.addLayer(lyr);
+                } else {
+                  new Message({
+                    titleLabel: i18n._widgetLabel,
+                    message: i18n.addFromFile.kmlProjectionMismatch
+                  });
+                }
+                _self._setBusy(false);
+                _self._setStatus(i18n.addFromFile.featureCountPattern.replace("{filename}", fileInfo.fileName).replace("{count}", num));
+              }).otherwise(function (err) {
+                handleError("kml-_waitForLayer.error", err);
+              });
+            },
+            error: function error(err) {
+              self._io = null;
+              err = lang.mixin(new Error(), err);
+              err.message = "Unable to load KML: " + (err.message || "");
+              self._fireUpdateEnd(err);
+              self._errorHandler(err);
+              handleError("Unable to load KML", err);
+            }
+          }, { usePost: true });
+        };
+        layer._parseKml();
+      };
+
+      try {
+        reader.readAsText(fileInfo.file);
+      } catch (ex) {
+        handleError("FileReader::readAsText", ex);
+      }
     },
 
     _generateFeatures: function _generateFeatures(job, formData) {
@@ -363,6 +512,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
         } else if (util.endsWith(file.name, ".csv")) {
           info.ok = true;
           info.fileType = "CSV";
+        } else if (util.endsWith(file.name, ".kml")) {
+          info.ok = true;
+          info.fileType = "KML";
         } else if (util.endsWith(file.name, ".gpx")) {
           info.ok = true;
           info.fileType = "GPX";
@@ -370,6 +522,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/on", 
           info.ok = true;
           info.fileType = "GeoJSON";
         }
+      }
+      if (info.ok) {
+        info.ok = array.some(this.SHAPETYPE_ICONS, function (filetypeIcon) {
+          return filetypeIcon.type.toLowerCase() === info.fileType.toLowerCase();
+        });
       }
       if (info.ok) {
         info.baseFileName = this._getBaseFileName(info.fileName);

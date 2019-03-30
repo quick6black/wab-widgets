@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,15 +30,19 @@ define(["dojo/_base/declare",
     "./search/SearchPane",
     "./search/AddFromUrlPane",
     "./search/AddFromFilePane",
-    "./search/LayerListPane"
+    "./search/LayerListPane",
+    "dojo/_base/array"
   ],
   function(declare, lang, on, aspect, Deferred, domClass, portalUrlUtils, portalUtils,
     tokenUtils, BaseWidget, TabContainer3, _WidgetsInTemplateMixin, SearchContext,
-    util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane) {
+    util, SearchPane, AddFromUrlPane, AddFromFilePane, LayerListPane, array) {
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
       name: "AddData",
       baseClass: "jimu-widget-add-data",
+
+      batchGeocoderServers: null,
+      isPortal: false,
 
       _isOpen: false,
       _searchOnOpen: false,
@@ -156,6 +160,35 @@ define(["dojo/_base/declare",
         return dfd;
       },
 
+      _initBatchGeocoder: function(portal,user) {
+        //console.warn("_initBatchGeocoder.portal",portal);
+        //console.warn("_initBatchGeocoder.user",user);
+        var roleOK = false;
+        var regexWorld = /(arcgis.com\/arcgis\/rest\/services\/world\/geocodeserver).*/ig;
+        var regexWorldProxy = /(\/servers\/[\da-z\.-]+\/rest\/services\/world\/geocodeserver).*/ig;
+        var geocodeServers = portal && portal.helperServices && portal.helperServices.geocode || [];
+        var isWorld, isWorldProxy, batchGeocodeServers = [];
+        if (user && user.privileges) {
+          roleOK = array.indexOf(user.privileges, "premium:user:geocode") > -1;
+        }
+        array.forEach(geocodeServers, function (server) {
+          isWorld = !!server.url.match(regexWorld);
+          isWorldProxy = !!server.url.match(regexWorldProxy);
+          if ((isWorld && !portal.isPortal && roleOK) || isWorldProxy || !!server.batch) {
+            batchGeocodeServers.push({
+              "isWorldGeocodeServer": isWorld || isWorldProxy,
+              "isWorldGeocodeServerProxy": isWorldProxy,
+              "label": server.name,
+              "value": server.url,
+              "url": server.url,
+              "name": server.name
+            });
+          }
+        });
+        this.batchGeocoderServers = batchGeocodeServers;
+        //console.warn("batchGeocoderServers",this.batchGeocoderServers);
+      },
+
       _initContext: function(user) {
         var dfd = new Deferred(), bResolve = true;
         // TODO configure this?
@@ -164,6 +197,7 @@ define(["dojo/_base/declare",
         var hasUsername = (user && typeof user.username === "string" && user.username.length > 0);
         var searchContext = new SearchContext();
         var portal = portalUtils.getPortal(this.appConfig.portalUrl);
+        this.isPortal = portal.isPortal;
         searchContext.portal = portal;
         if (user) {
           if (typeof user.orgId === "string" && user.orgId.length > 0) {
@@ -179,8 +213,21 @@ define(["dojo/_base/declare",
           this.searchPane.searchContext = searchContext;
           this.searchPane.portal = portal;
         }
-        //console.warn("AddData.portal",portal);
+        this._initBatchGeocoder(portal,user);
 
+        // KML and GeoRSS utility services
+        if (portal.isPortal) {
+          try {
+            var kmlsvc = portalUrlUtils.getSharingUrl(portal.portalUrl) + "/kml";
+            kmlsvc = kmlsvc.replace("/sharing/rest/kml","/sharing/kml");
+            window.esri.config.defaults.kmlService = kmlsvc;
+            window.esri.config.defaults.geoRSSService = kmlsvc.replace("/kml","/rss");
+          } catch(ex) {
+            console.error(ex);
+          }
+        }
+
+        //console.warn("AddData.portal",portal);
         var msg = this.nls.search.loadError + arcgisOnlineUrl;
         var arcgisOnlineOption = scopeOptions.ArcGISOnline;
         searchContext.allowArcGISOnline = arcgisOnlineOption.allow;
@@ -293,6 +340,13 @@ define(["dojo/_base/declare",
               console.warn(ex);
             }
           }));
+
+          /* BEGIN : ECAN CHANGES - Update snapping when layers added or removed */
+
+          this.own(this.map.on("layer-add", lang.hitch(this, this._onMapAddLayer)));
+          this.own(this.map.on("layer-remove", lang.hitch(this, this._onMapRemoveLayer)));
+
+          /* END: ECAN CHANGES */
         }
       },
 
@@ -448,7 +502,80 @@ define(["dojo/_base/declare",
           this.layerListPane.placeAt(this.domNode);
         }
         this.layerListPane.show();
+      },
+
+      /* BEGIN: ECAN CHANGES - Update snapping settings when layer adder or removed */
+
+      _onMapAddLayer: function (result) {
+        var gl = false;
+
+        switch(result.layer.declaredClass) {
+          case "esri.layers.FeatureLayer":
+          case "esri.layers.GraphicsLayer":
+          case "esri.layers.CSVLayer":
+            gl = true;
+            break;
+
+          default:
+            // Do Nothing
+            break;
+        }
+
+        if (this.map.snappingManager && gl) {
+          // Check if layer existing in snapping manager layer infos
+          var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+            return layerInfo.layer.id === result.layer.id;
+          })).length > 0;
+
+          if (!isSnap) {
+            var layerInfos = []; 
+            array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
+              layerInfos.push(layerInfo);
+            });
+            layerInfos.push({
+              layer: result.layer
+            });
+
+            this.map.snappingManager.setLayerInfos(layerInfos);
+          }
+        }
+      },
+
+      _onMapRemoveLayer: function (result) {
+        var gl = false;
+
+        switch(result.layer.declaredClass) {
+          case "esri.layers.FeatureLayer":
+          case "esri.layers.GraphicsLayer":
+          case "esri.layers.CSVLayer":
+            gl = true;
+            break;
+
+          default:
+            // Do Nothing
+            break;
+        }
+
+        if (this.map.snappingManager && gl) {
+          // Check if layer existing in snapping manager layer infos
+          var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+            return layerInfo.layer.id === result.layer.id;
+          })).length > 0;
+
+          if (isSnap) {
+            var layerInfos = []; 
+            array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
+              if (layerInfo.layer.id !== result.layer.id) {
+                layerInfos.push(layerInfo);
+              }
+            });
+            this.map.snappingManager.setLayerInfos(layerInfos);
+          }
+        }
       }
+
+      /* END: ECAN CHANGES */
+
     });
 
   });

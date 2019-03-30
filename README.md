@@ -1,12 +1,12 @@
 # wab-widgets
 Collection of Widgets for Web AppBuilder for ArcGIS.  Some are modified versions of existing widgets customised for use within Environment Canterbury's systems (original widget credited where applicable).
 
-Source code for each widget is located in the **widgets** folder in the root of this project.  The comiled read to use versions are located in under the widgets folder in the **dist** folder. 
+Source code for each widget is located in the **widgets** folder in the root of this project.  The compiled versions are located in under the widgets folder in the **dist** folder. 
 
 Unless otherwise stated in the individual widget's readme file, the widgets have been constructed using the Yeoman ESRI widget generator  [https://github.com/Esri/generator-esri-appbuilder-js](https://github.com/Esri/generator-esri-appbuilder-js").    A "Grunt" script has been included as part of the Yeoman generated scaffolding which if run will compile and distribute the code to an instance of the Web AppBuilder application - take a copy of the *sampe-Gruntfile.js* file, rename it to Gruntfile.js, and alter the **appDir** and **stemappDir** variables in the file to the path of the WAB installation and test app that you want to deploy the widgets to.
 
  
-## AddData Widget
+## Add Data Widget
 This is a customised variant of the standard Add Data widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm) developed by ESRI.
 
 #### Changes made include:  
@@ -21,20 +21,11 @@ The following are changes that are still needed to be implemented:
 - The Open Data details option is currently hard coded for "http://opendata.canterburymaps.govt.nz/datasets/" - this should be updated at some point to be made a configurable item.
 - Hard coding in the widget related to the namespace means that this widget must be deployed over the top of the standard AddData widget as opposed to side by side.   
 
-
-
 #### Demo
 To be deployed in the future
 
-### Deployment
-Copy the **AddData** widget folder from the **dist** directory and paste it in the widgets repository. **THIS WILL OVERWRITE THE EXISTING ADD DATA WIDGET.**  By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
 
-Configure as per standard Add Data widget.
-
-### Use Notes
-To be completed...
-
-## eDrawEcan Widget
+## eDraw Ecan Widget
 This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
 
 #### Changes made include:  
@@ -50,36 +41,22 @@ This is a customised variant of the eDraw widget [https://github.com/magis-nc/es
 #### Demo
 To be deployed in the future
 
-### Deployment
-To be completed...
 
-### Use Notes
-To be completed...
-
-
-## SelectEcan Widget
+## Select Ecan Widget
 This is a customised variant of the standard Select widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm) developed by ESRI.
 
 #### Changes made include:  
 
 - Custom feature action **SelectByGeometryFeatureAction** added to widget that adds functionality to pass the geometry of a feature/featureSet to the Select widget to perform a search as though the user had drawn the shape.  A **Select By Geometry** option is added to the popup action menu for any valid featureSet option in the WAB framework e.g. on popup windows for feature layers, in the options off the select and query widgets, etc.  
+- Default selected layer checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
+- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
+
 
 #### Demo
 To be deployed in the future
 
-### Deployment
-Copy the **SelectEcan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
 
-The widget has its own namespace so it can sit quite happily besides the standard Select widget without interference.
-
-Configure as per standard Select widget.
-
-### Use Notes
-To be completed...
-
-
-
-## EditFilter Widget
+## Edit Filter Widget
 This is a customised variant of the standard Group Filter widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-group-filter.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-group-filter.htm) developed by ESRI.
 
 #### Changes made include:  
@@ -100,17 +77,6 @@ The following are changes that are still needed to be implemented:
 
 #### Demo
 To be deployed in the future
-
-### Deployment
-Copy the **EditFilter** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
-
-The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
-
-Configure as per standard Group Filter widget.
-
-### Use Notes
-To be completed...
-
 
 ## Smart Editor Widget
 This is a customised variant of the standard Smart Editor widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm) developed by ESRI.
@@ -134,16 +100,6 @@ The following are changes that are still needed to be implemented:
 #### Demo
 To be deployed in the future
 
-### Deployment
-Copy the **Smart Editor ECan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
-
-The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
-
-Configure in Builder. 
-
-### Use Notes
-To be completed...
-
 
 ## eLocate Ecan Widget
 This is a customised variant of the standard eLocate widget developed by R Sheitlin [https://community.esri.com/docs/DOC-7046](https://community.esri.com/docs/DOC-7046).  It has been modified to support coordinate systems utilised in New Zealand, with additional functionality for handling NZ Standard Topo Map Sheet grid references as an input/output.
@@ -166,12 +122,16 @@ The following are changes that are still needed to be implemented:
 #### Demo
 To be deployed in the future
 
-### Deployment
-Copy the **Smart Editor ECan** widget folder from the **dist** directory and paste it in the widgets repository. By default, the widgets repository is located under *\client\stemapp\widgets* folder for 2D apps. In this way, your widget is available to the builder. If you prefer to deploy the widget to a specific app only, you can copy the widget folder and paste it in the *stemapp\widgets* within a downloaded app, then configure it in the **app.config** file.
 
-The widget has its own namespace so it can sit quite happily besides the standard Group Filter widget without interference.
+## Map Switcher Widget
+Map Switcher Widget for Web AppBuilder for ArcGIS.
 
-Configure in Builder. 
+This widget allows users of to change to search for and load another web map from ArcGIS Online or Portal for ArcGIS.  When loading a map, it does so utilisng the URL parameters that the Web AppBuilder viewer framework supports and refreshing the browser, in much the same way as the Share Widget does. 
 
-### Use Notes
-To be completed...
+Much of the code and function is based on the standard ESRI Add Data widget [https://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm](https://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm").
+
+#### Notes
+
+
+#### Demo
+To be deployed in the future

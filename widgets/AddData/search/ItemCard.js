@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ define(["dojo/_base/declare",
     _WidgetsInTemplateMixin, template, i18n, util, LayerLoader) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
- 
+
       i18n: i18n,
       templateString: template,
 
@@ -42,9 +42,9 @@ define(["dojo/_base/declare",
       postCreate: function() {
         this.inherited(arguments);
 			  
-	  //ECan
-	  this.config = this.resultsPane.searchPane.wabWidget.config;
-	  //
+    	  //ECan
+    	  this.config = this.resultsPane.searchPane.wabWidget.config;
+    	  //
       },
 
       startup: function() {
@@ -52,9 +52,6 @@ define(["dojo/_base/declare",
           return;
         }
         this.inherited(arguments);
-		//ECan
-		//this.config = this.wabWidget.config;
-		//
         this.render();
       },
 
@@ -113,36 +110,35 @@ define(["dojo/_base/declare",
         var baseUrl = util.checkMixedContent(item.portalUrl);
         var url = baseUrl + "/home/item.html?id=" + encodeURIComponent(item.id);
 		
-		if(this.config.CMapsVersion.allow){
-		//ECAN CHANGE
-		if (item.tags.indexOf("Open Data") > -1) {
-          url = this.openDataUrl(item);
-        }
-		}
-		//ECAN CHANGE
-		
+        //ECAN CHANGE
+		    if(this.config.CMapsVersion.allow){
+		      if (item.tags.indexOf("Open Data") > -1) {
+            url = this.openDataUrl(item);
+          }
+		    }
+		    //ECAN CHANGE
         window.open(url);
       },
 	  
-	  //ECAN CHANGE
-	  
-	     isNumeric: function (n) {
+      //ECAN CHANGE
+      
+      isNumeric: function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
       },
 	  
-	  openDataUrl: function (item) {
-          var url = "http://opendata.canterburymaps.govt.nz/datasets/" + encodeURIComponent(item.id);
+  	  openDataUrl: function (item) {
+        var url = "http://opendata.canterburymaps.govt.nz/datasets/" + encodeURIComponent(item.id);
 
-          // Check url to see if it is a feature layer 
-          var urlParts = item.url.split("/");
-          var layerId = urlParts[urlParts.length -1];
-          if (urlParts.length > 0 && this.isNumeric(layerId)) {
-            url += "_" + encodeURIComponent(layerId);
-          }
+        // Check url to see if it is a feature layer 
+        var urlParts = item.url.split("/");
+        var layerId = urlParts[urlParts.length -1];
+        if (urlParts.length > 0 && this.isNumeric(layerId)) {
+          url += "_" + encodeURIComponent(layerId);
+        }
 
-          return url;
+        return url;
       },
-	  //ECAN CHANGE
+	    //ECAN CHANGE
 
       formatDate: function(date) {
         if (typeof(date) === "number") {
@@ -165,14 +161,14 @@ define(["dojo/_base/declare",
           util.setNodeText(this.addButton, i18n.search.item.actions.remove);
         }
 		
-		//ECAN CHANGE
-		// Change the details button text to download
-		if(this.config.CMapsVersion.allow){
-        if (this.item.tags.indexOf("Open Data") > -1) {
-          util.setNodeText(this.detailsButton, "Download");
-        }
-		}
-		///ECAN CHANGE
+    		//ECAN CHANGE
+    		// Change the details button text to download
+    		if(this.config.CMapsVersion.allow){
+            if (this.item.tags.indexOf("Open Data") > -1) {
+              util.setNodeText(this.detailsButton, "Download");
+            }
+    		}
+    		///ECAN CHANGE
       },
 
       _renderThumbnail: function() {
@@ -188,8 +184,8 @@ define(["dojo/_base/declare",
       _renderTypeOwnerDate: function() {
         var s, item = this.item;
 		
-		//ECAN Change
-		/* Change to display snippet rather than type/owner by default */
+		    //ECAN Change
+		    /* Change to display snippet rather than type/owner by default */
         if (item.snippet !== null && item.snippet !== '') {
             s = item.snippet;
         } else {
@@ -203,22 +199,21 @@ define(["dojo/_base/declare",
             s = s.replace("{owner}", item.owner);
         }
 		
-		util.setNodeText(this.typeByOwnerNode, s);
-
+		    util.setNodeText(this.typeByOwnerNode, s);
         util.setNodeTitleText(this.typeByOwnerNode, s);
 
 		
-		/* ORIGNAL CODE BLOCK
-        var sType = i18n.search.item.types[item.type];
-        if (typeof sType === "undefined" || sType === null) {
-          sType = item.type;
-        }
-        var typeByOwnerPattern = i18n.search.item.typeByOwnerPattern;
-        s = typeByOwnerPattern.replace("{type}", sType);
-        s = s.replace("{owner}", item.owner);
-        util.setNodeText(this.typeByOwnerNode, s);
-		*/
-		//ECAN CHANGE
+    		/* ORIGNAL CODE BLOCK
+            var sType = i18n.search.item.types[item.type];
+            if (typeof sType === "undefined" || sType === null) {
+              sType = item.type;
+            }
+            var typeByOwnerPattern = i18n.search.item.typeByOwnerPattern;
+            s = typeByOwnerPattern.replace("{type}", sType);
+            s = s.replace("{owner}", item.owner);
+            util.setNodeText(this.typeByOwnerNode, s);
+    		*/
+    		//ECAN CHANGE
 
         /*
         var sDate = this.formatDate(item.modified);

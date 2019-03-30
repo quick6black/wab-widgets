@@ -179,3 +179,4 @@ Gruntfile.js
 wab-widgets.sublime-project
 wab-widgets.sublime-workspace
 package-lock.json
+.vs/

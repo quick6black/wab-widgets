@@ -89,22 +89,6 @@ define(['dojo/_base/declare', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/_base/
       return this.checked;
     },
 
-    // ECAN addition setChecked(checked)
-    setChecked: function setChecked(checked) {
-      this.checked = checked;
-
-      if (this.checked) {
-        html.addClass(this.selectableCheckBox, 'checked');
-      } else {
-        html.removeClass(this.selectableCheckBox, 'checked');
-      }
-
-      this.emit('stateChange', {
-        checked: this.checked,
-        layerInfo: this.layerInfo
-      });
-    },
-
     updateLayerVisibility: function updateLayerVisibility() {
       var visible = this.layerInfo.isShowInMap() && this.layerInfo.isInScale();
 
@@ -118,8 +102,28 @@ define(['dojo/_base/declare', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/_base/
         }
         this.emit('stateChange', {
           visible: this.layerVisible,
-          layerInfo: this.layerInfo
+          layerInfo: this.layerInfo,
+          featureLayer: this.featureLayer
         });
+      }
+    },
+
+    turnOn: function turnOn() {
+      html.addClass(this.selectableCheckBox, 'checked');
+      this.checked = true;
+    },
+
+    turnOff: function turnOff() {
+      html.removeClass(this.selectableCheckBox, 'checked');
+      this.checked = false;
+    },
+
+    toggleChecked: function toggleChecked() {
+      this.checked = !this.checked;
+      if (this.checked) {
+        html.addClass(this.selectableCheckBox, 'checked');
+      } else {
+        html.removeClass(this.selectableCheckBox, 'checked');
       }
     },
 

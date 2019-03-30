@@ -11,7 +11,8 @@ define({
       groupDefault : "Preset Value:",
       groupDefaultTip : "Option to choose a value from an existing layer.",
       sameLayerAppend : "When a layer is listed more than once, use the following operator between fields:",
-      sameLayerConjunc : "Append Using:"
+      sameLayerConjunc : "Append Using:",
+      caseSearch: "Perform an case sensitive search: "
     },
     buttons : {
       addNewGroup : "Add a New Group",
@@ -23,9 +24,12 @@ define({
       groupName : "Give Your Group a Name",
       groupDesc : "Description for Your Group",
       groupDefault : "Enter a Predefined Value",
+      sameLayerAny: "Match any expression",
+      sameLayerAll: "Match all expression",
       simpleMode : "Start in Simple View",
       simpleModeTip : "Option to simplify the configured widget interface. When checked, the operator drop-down list and add criteria buttons are removed from the interface.",
-      webmapAppendMode : "Append Filter to Existing Web Map Filter Using ",
+      webmapAppendModeAny : "Append any expressions to existing map filter",
+      webmapAppendModeAll : "Append all expressions to existing map filter",
       webmapAppendModeTip : "Option to append the filter set to an existing web map filter. Operators that are supported are OR and AND.",
       persistOnClose: "Persist After Widget is Closed.",
       showEditButton: "Show Open Edit Tool Button. If checked, a button which will open the Smart Edit (Ecan) widget will be displayed if configured in the app.",

@@ -1,0 +1,35 @@
+<div class="search-pane">
+  <div class="search-pane-header" data-dojo-attach-point="headerNode">
+    <div class="search-bar main-search-bar">
+      <div data-dojo-type="widgets/MapSwitcher/search/ScopeOptions"
+        data-dojo-attach-point="scopeOptions">
+      </div>
+      <div data-dojo-type="widgets/MapSwitcher/search/SearchBox"
+        data-dojo-attach-point="searchBox">
+      </div>
+    </div>
+    <div class="search-bar-separator"></div>
+    <div class="search-bar search-bar-secondary" data-dojo-attach-point="optionsNode">
+      <span class="filter-placeholder" data-dojo-attach-point="filterPlaceholder"></span>
+      <div class="filter-wrapper" data-dojo-attach-point="filterWrapper">
+        <div data-dojo-type="widgets/MapSwitcher/search/SortOptions"
+          data-dojo-attach-point="sortOptions">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="search-pane-content" data-dojo-attach-point="contentNode">
+    <div data-dojo-type="widgets/MapSwitcher/search/ResultsPane"
+      data-dojo-attach-point="resultsPane">
+    </div>
+  </div>
+  <div class="search-pane-footer jimu-float-leading" data-dojo-attach-point="footerNode">
+    <div data-dojo-type="widgets/MapSwitcher/search/Paging"
+      data-dojo-attach-point="paging">
+    </div>
+    <div data-dojo-type="widgets/MapSwitcher/search/ResultCount"
+      data-dojo-attach-point="resultCount">
+    </div>
+    <div style="clear:both"></div>
+  </div>
+</div>

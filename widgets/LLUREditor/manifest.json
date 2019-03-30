@@ -1,0 +1,37 @@
+{
+  "name": "LLUREditor",
+  "label": "LLUR Editor",
+  "2D": true,
+  "3D": false,
+  "platform": "HTML",
+  "version": "2.0.0",
+  "wabVersion": "2.9",
+  "author": "Environment Canterbury GIS Team",
+  "description": "Custom widget for Web AppBuilder for ArcGIS.",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "inPanel": true,
+    "hasLocale": true,
+    "hasStyle": true,
+    "hasConfig": true,
+    "hasUIFile": true,
+    "hasSettingPage": true,
+    "hasSettingUIFile": true,
+    "hasSettingLocale": true,
+    "hasSettingStyle": true,
+    "IsController": false
+  },
+  "featureActions": [{
+    "name": "CreateRecord",
+    "uri": "CreateRecordFeatureAction"
+  },
+  {
+    "name": "EditRecord",
+    "uri": "EditRecordFeatureAction"
+  },
+  {
+    "name": "RequestStatement",
+    "uri": "RequestStatementFeatureAction"
+  }]
+}

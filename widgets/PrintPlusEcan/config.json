@@ -1,0 +1,238 @@
+{
+	"serviceURL": "https://gisimagery.ecan.govt.nz/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task",
+	"defaultTitle": "Ecan Maps",
+	"defaultAuthor": "Ecan Maps",
+	"defaultCopyright": "",
+	"defaultFormat": "PDF",
+	"defaultLayout": "A3 Landscape",
+	"defaultDpi": 96,
+	"noTitleBlockPrefix": "No TB ",
+	"outWkid": 2965,
+	"showLayout": true,
+	"showOpacitySlider": false,
+	"dpiOptions": [{
+		"label": "Normal",
+		"value": 96
+	}, {
+		"label": "High",
+		"value": 200
+	}],
+	"moveMapWithinLayoutText": "move map within layout",
+	"moveMapAndLayoutText": "move map and layout",
+	"widgetName": "PrintPlusEcan",
+	"layoutParams": {
+		"A4 Landscape": {
+			"alias": "A4 Landscape",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 29.7,
+				"y": 21
+			}, {
+				"x": 23.5,
+				"y": 19.0
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A4 Portrait with Overview": {
+			"alias": "A4 Portrait with Overview",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 21,
+				"y": 29.7
+			}, {
+				"x": 20.3,
+				"y": 20.3
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A4 Portrait Fullpage": {
+			"alias": "A4 Portrait Fullpage",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 21,
+				"y": 29.7
+			}, {
+				"x": 20.3,
+				"y": 24.7
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A4 Portrait with 15 second Lat-Long Graticules": {
+			"alias": "A4 Portrait with 15 second Lat-Long Graticules",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 21,
+				"y": 29.7
+			}, {
+				"x": 14.3,
+				"y": 25.0
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A3 Landscape": {
+			"alias": "A3 Landscape",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 42,
+				"y": 29.7
+			}, {
+				"x": 33.2,
+				"y": 26.9
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A3 Landscape Fullpage": {
+			"alias": "A3 Landscape Fullpage",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 42,
+				"y": 29.7
+			}, {
+				"x": 41.3,
+				"y": 26.9
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A3 Landscape with 15 second Lat-Long Graticules": {
+			"alias": "A3 Landscape with 15 second Lat-Long Graticules",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 42,
+				"y": 29.7
+			}, {
+				"x": 32.7,
+				"y": 25.2
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A3 Portrait Fullpage": {
+			"alias": "A3 Portrait Fullpage",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 29.7,
+				"y": 42
+			}, {
+				"x": 28.7,
+				"y": 35
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A1 Landscape - Slow": {
+			"alias": "A1 Landscape - Slow",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 84.1,
+				"y": 59.4
+			}, {
+				"x": 71.6,
+				"y": 53.4
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A1 Landscape Fullpage - Slow": {
+			"alias": "A1 Landscape Fullpage - Slow",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 84.1,
+				"y": 59.4
+			}, {
+				"x": 82.7,
+				"y": 53.8
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"A1 Portrait Fullpage - Slow": {
+			"alias": "A1 Portrait Fullpage - Slow",
+			"units": "esriCentimeters",
+			"params": [{
+				"x": 59.4,
+				"y": 84.1
+			}, {
+				"x": 57.4,
+				"y": 73.9
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		},
+		"MAP_ONLY": {
+			"alias": "Just the Map",
+			"units": "NaN",
+			"params": [{
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}, {
+				"x": 0,
+				"y": 0
+			}]
+		}
+	},
+	"relativeScale": "(1cm = [value]km)",
+	"relativeScaleFactor": 0.001,
+	"scalePrecision": 0,
+	"mapScales": [
+		16000000, 8000000, 4000000, 2000000, 1000000, 750000, 500000,
+		250000, 100000, 70000, 50000, 25000, 20000, 15000, 14000, 13000, 12000, 11000, 10000, 9000,
+		8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 100,
+		50
+	]
+}

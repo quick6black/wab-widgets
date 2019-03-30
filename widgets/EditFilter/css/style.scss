@@ -312,6 +312,26 @@
 		display: none;
 	}
 
+	.refresh-icon {
+		&:after {
+	   		content: url("../images/refresh.png");
+	    	width: 16px;
+	    	height: 16px;
+	    	cursor: hand;
+	    	cursor: pointer;
+		}
+	}
+
+	.refresh-done-icon {
+		&:after {
+		    content: url("../images/check.png");
+		    width: 16px;
+		    height: 16px;
+		    cursor: hand;
+		    cursor: pointer;
+		}
+	}
+
 	.operator-class {
 
 	}

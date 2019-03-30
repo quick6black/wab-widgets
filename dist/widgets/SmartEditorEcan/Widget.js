@@ -2188,7 +2188,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           if (elem.declaredClass !== "dijit.form.TimeTextBox") {
             var valToSet = elem.get("value");
             if (valToSet !== undefined && valToSet !== null && valToSet !== "") {
-
               if (elem.declaredClass === "dijit.form.DateTextBox") {
                 var timeElement = query(".dijitTimeTextBox", ele.parentNode)[0];
                 // retrieve the value
@@ -2211,7 +2210,17 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
               if (valToSet !== undefined && valToSet !== null && valToSet !== "") {
                 for (var attribute in attributes) {
                   if (attributes.hasOwnProperty(attribute) && attribute === elem.get("name") && presetFields.indexOf(elem.get("name")) >= 0) {
-                    attributes[attribute] = valToSet;
+
+                    var editfieldInfo = array.filter(newTempLayerInfos.fieldInfos, function (fieldInfo) {
+                      return fieldInfo.fieldName === elem.get("name");
+                    })[0];
+
+                    if (editfieldInfo && editFieldInfo.type === "esriFieldTypeGUID" && valToSet.indexOf("{") === -1) {
+                      attributes[attribute] = "{" + valToSet + "}";
+                    } else {
+                      attributes[attribute] = valToSet;
+                    }
+
                     break;
                   }
                 }
@@ -3903,70 +3912,73 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       return fieldInfo.name === fieldName;
     })[0];
 
-    // Validate data type
-    switch (field.type) {
-      case 'esriFieldTypeGUID':
-        var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
-        if (pattern.test(fieldValue) === true) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeInteger":
-        var regInt = parseInt(fieldValue);
-        if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeSmallInteger":
-        var shtInt = parseInt(fieldValue);
-        if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeSingle":
-      case "esriFieldTypeDouble":
-        if (Number.isNumeric(fieldValue)) {
-          isValid = true;
-        }
-        break;
-
-      case "esriFieldTypeDate":
-        var newDate = new Date(fieldValue);
-        isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
-        break;
-
-      case 'esriFieldTypeString':
-      default:
-        isValid = field["length"] >= fieldValue.length;
-        break;
-    }
-
-    // Check Domain values
-    if (field.domain && isValid) {
-      switch (field.domain.type) {
-        case "codedValue":
-          // Validate value is with domain list
-          isValid = field.domain.codedValues.filter(function (value) {
-            return value.code === fieldValue;
-          }).length > 0;
+    if (field) {
+      // Validate data type
+      switch (field.type) {
+        case 'esriFieldTypeGUID':
+          var pattern = /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i;
+          if (pattern.test(fieldValue) === true) {
+            isValid = true;
+          }
           break;
 
-        case "range":
-          var numValue = Number(fieldValue);
-          isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+        case "esriFieldTypeInteger":
+          var regInt = parseInt(fieldValue);
+          if (regInt && regInt >= -2147483648 && regInt <= 2147483647) {
+            isValid = true;
+          }
           break;
 
+        case "esriFieldTypeSmallInteger":
+          var shtInt = parseInt(fieldValue);
+          if (shtInt && shtInt >= -32768 && shtInt <= 32767) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeSingle":
+        case "esriFieldTypeDouble":
+          if (Number.isNumeric(fieldValue)) {
+            isValid = true;
+          }
+          break;
+
+        case "esriFieldTypeDate":
+          var newDate = new Date(fieldValue);
+          isValid = newDate instanceof Date && !isNaN(newDate.valueOf());
+          break;
+
+        case 'esriFieldTypeString':
         default:
+          isValid = field["length"] >= fieldValue.length;
           break;
       }
-    }
 
-    // Check editable
-    if (!field.ediatble && isValid) {
-      isValid = false;
+      // Check Domain values
+      if (field.domain && isValid) {
+        switch (field.domain.type) {
+          case "codedValue":
+            // Validate value is with domain list
+            isValid = field.domain.codedValues.filter(function (value) {
+              return value.code === fieldValue;
+            }).length > 0;
+            break;
+
+          case "range":
+            var numValue = Number(fieldValue);
+            isValid = field.domain.minValue <= numValue && field.domain.maxValue >= numValue;
+            break;
+
+          default:
+            break;
+        }
+      }
+
+      // Check editable
+      /* CHANGE 20 MAR 2019 - type of field ediatble */
+      if (!field.editable && isValid) {
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -4364,7 +4376,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     // Check for filter
     if (urlObject.query !== null) {
-      var templatesQuery = urlObject.query["templates"];
+      var templatesQuery = urlObject.query["templates"] || urlObject.query["TEMPLATES"];
       if (templatesQuery) {
         var templateIDs = this._getTemplateParams(templatesQuery);
         this._filterEditor.filterTextBox.value = templateIDs;

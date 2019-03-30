@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/renderers/SimpleRenderer', 'esri/renderers/UniqueValueRenderer', 'esri/units', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup', './search/DrawingDetailsPopup', './search/InfoCard'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, PictureMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, SimpleRenderer, UniqueValueRenderer, esriUnits, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup, DrawingDetailsPopup, InfoCard) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'esri/config', 'esri/request', 'dojo/on', 'dojo/Deferred', 'dojo/query', 'jimu/exportUtils', 'esri/graphic', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/PictureMarkerSymbol', 'esri/geometry/Polyline', 'esri/symbols/SimpleLineSymbol', 'esri/geometry/Polygon', 'esri/graphicsUtils', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/TextSymbol', 'esri/symbols/Font', 'esri/renderers/SimpleRenderer', 'esri/renderers/UniqueValueRenderer', 'esri/units', 'esri/toolbars/draw', 'esri/toolbars/edit', 'esri/geometry/webMercatorUtils', 'esri/tasks/GeometryService', 'esri/tasks/AreasAndLengthsParameters', 'esri/tasks/LengthsParameters', 'esri/tasks/ProjectParameters', 'jimu/SpatialReference/wkidUtils', 'jimu/SpatialReference/utils', 'esri/geometry/geodesicUtils', 'esri/geometry/geometryEngine', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/sniff', 'dojo/_base/Color', 'dojo/_base/array', 'dojo/dom-construct', 'dojo/dom', 'dojo/dom-style', 'dojo/dom-attr', 'dojo/promise/all', 'dijit/form/Select', 'dijit/form/NumberSpinner', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/Button', 'dijit/form/CheckBox', 'jimu/dijit/ViewStack', 'jimu/dijit/SymbolChooser', 'jimu/dijit/DrawBox', 'jimu/dijit/Message', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'jimu/symbolUtils', 'libs/storejs/store', 'esri/InfoTemplate', 'esri/dijit/PopupTemplate', 'esri/layers/GraphicsLayer', 'esri/layers/FeatureLayer', 'jimu/LayerInfos/LayerInfos', './proj4', 'jimu/portalUtils', 'jimu/portalUrlUtils', 'jimu/Role', 'dojo/_base/connect', './BufferFeaturesPopup', './search/DrawingDetailsPopup', './search/InfoCard'], function (declare, _WidgetsInTemplateMixin, BaseWidget, esriConfig, esriRequest, on, Deferred, dojoQuery, exportUtils, Graphic, SimpleMarkerSymbol, PictureMarkerSymbol, Polyline, SimpleLineSymbol, Polygon, graphicsUtils, SimpleFillSymbol, TextSymbol, Font, SimpleRenderer, UniqueValueRenderer, esriUnits, Draw, Edit, webMercatorUtils, GeometryService, AreasAndLengthsParameters, LengthsParameters, ProjectParameters, wkidUtils, SRUtils, geodesicUtils, geometryEngine, lang, html, has, Color, array, domConstruct, dom, domStyle, domAttr, all, Select, NumberSpinner, TextBox, ValidationTextBox, Button, CheckBox, ViewStack, SymbolChooser, DrawBox, Message, LoadingIndicator, jimuUtils, jimuSymbolUtils, localStore, InfoTemplate, PopupTemplate, GraphicsLayer, FeatureLayer, LayerInfos, proj4js, portalUtils, portalUrlUtils, Role, connect, BufferFeaturesPopup, DrawingDetailsPopup, InfoCard) {
     /*jshint unused: false*/
     return declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -281,11 +281,143 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         cut: function cut() {
-            alert('Cut goes here');
+            // Check if already cutting
+            if (this.geometryDrawToolAction === 'CUT') {
+                // deactivate draw tool
+                this._disableGeometryTools();
+                return;
+            }
+
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.map.setInfoWindowOnClick(false);
+
+            this._geometryDrawToolAddKeyPressHandler(true);
+            this.geometryDrawToolAction = 'CUT';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
         },
 
         reshape: function reshape() {
-            alert('Reshape goes here');
+            if (!this.geometryDrawTool) {
+                this.geometryDrawTool = new Draw(this.map);
+                this.geometryDrawTool.on("draw-end", lang.hitch(this, this._geometryDrawToolDrawEnd));
+            }
+
+            this.geometryDrawToolAction = 'RESHAPE';
+            this.geometryDrawTool.activate(Draw.POLYLINE);
+        },
+
+        explode: function explode() {
+            if (this._editorConfig["graphicCurrent"]) {
+                var graphics = [];
+                graphics.push(this._editorConfig["graphicCurrent"]);
+                this.setMode("list");
+                this._disableGeometryTools();
+                this._explodeDrawings(graphics);
+            }
+        },
+
+        _geometryDrawToolDrawEnd: function _geometryDrawToolDrawEnd(evt) {
+            if (evt.geometry) {
+                switch (this.geometryDrawToolAction) {
+                    case 'CUT':
+                        this._cutFeatures(evt);
+                        break;
+
+                    case 'RESHAPE':
+                        alert('Reshaping now!');
+                        break;
+
+                    default:
+                        alert('Doing Nothing!!');
+                        break;
+                }
+            }
+        },
+
+        _geometryDrawToolAddKeyPressHandler: function _geometryDrawToolAddKeyPressHandler(activate) {
+            if (activate) {
+                if (this.drawToolKeyPress == undefined) {
+                    this.drawToolKeyPress = on(document, "keyup", lang.hitch(this, this._geometryDrawToolHandleKeyPress));
+                }
+            } else {
+                if (this.drawToolKeyPress !== undefined) {
+                    this.drawToolKeyPress.remove();
+                    this.drawToolKeyPress = undefined;
+                }
+            }
+        },
+
+        _geometryDrawToolHandleKeyPress: function _geometryDrawToolHandleKeyPress(evt) {
+
+            switch (evt.keyCode) {
+                case 27:
+                    // escape - deactivate draw tool
+                    this._disableGeometryTools();
+                    break;
+                default:
+                    // Do nothing
+                    break;
+
+            }
+        },
+
+        _cutFeatures: function _cutFeatures(evt) {
+
+            // Check for cut line and a selected drawing
+            if (this._editorConfig["graphicCurrent"] && evt && evt.geometry) {
+                var cutLine = evt.geometry;
+
+                if (cutLine.type !== 'polyline') {
+                    this.showMessage(this.nls.tools.cutErrors.invalidCutGeometryError, 'error');
+
+                    // stop here and reset tool
+                    return;
+                }
+
+                var drawing = this._editorConfig["graphicCurrent"];
+                var newShapes = geometryEngine.cut(drawing.geometry, cutLine);
+
+                if (newShapes.length === 0) {
+                    this.showMessage(this.nls.tools.cutErrors.noFeaturesCutError, 'error');
+                } else {
+                    // Create new drawings based on the original and remove the original record
+                    var newDrawings = [],
+                        newGeometry = null;
+                    for (var p = 0, pl = newShapes.length; p < pl; p++) {
+                        var newDrawing = new Graphic(drawing.toJson());
+                        newGeometry = newShapes[p];
+                        newDrawing.setGeometry(newGeometry);
+                        newDrawings.push(newDrawing);
+                    }
+
+                    this.editorActivateGeometryEdit(false);
+
+                    // Remove the old drawing
+                    this._removeGraphic(drawing);
+
+                    // Add the new drawings
+                    this._pushAddOperation(newDrawings);
+                    var extent = graphicsUtils.graphicsExtent(newDrawings);
+                    this.map.setExtent(extent, true);
+                    this.listGenerateDrawTable();
+                    this.setMode("list");
+                    this._disableGeometryTools();
+
+                    this.map.setInfoWindowOnClick(true);
+                }
+            }
+        },
+
+        _disableGeometryTools: function _disableGeometryTools() {
+            this.map.setInfoWindowOnClick(true);
+            if (this.geometryDrawTool) this.geometryDrawTool.deactivate();
+            this._geometryDrawToolAddKeyPressHandler(false);
+            this.geometryDrawToolAction = null;
+            this._geometryDrawToolAddKeyPressHandler(false);
         },
 
         _removeClickedGraphic: function _removeClickedGraphic() {
@@ -323,6 +455,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _removeGraphic: function _removeGraphic(graphic, holdSyncGraphics) {
+            this.setInfoWindow(false);
+
             if (graphic.measure && graphic.measure.graphic) {
                 this._graphicsLayer.remove(graphic.measure.graphic); //Delete measure label
             } else if (graphic.measureParent) {
@@ -340,7 +474,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             if (nb_graphics < 1) return asString ? '' : false;
 
+            var localStoreOpen = this.localStorageOptionToggle.checked ? "true" : "false";
             var content = {
+                "loadOnOpen": localStoreOpen,
                 "features": [],
                 "displayFieldName": "",
                 "fieldAliases": {},
@@ -711,7 +847,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             this.editorSymbolChooserConfigure(graphic.symbol);
 
-            //this.editorModifyToolsConfigure(graphic.geometry);
+            this.editorModifyToolsConfigure(graphic.geometry);
 
             this.editorTitle.innerHTML = this.nls.editDrawTitle;
             this.editorFooterEdit.style.display = 'block';
@@ -732,6 +868,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     case 'polyline':
                     case 'polygon':
                         domStyle.set(this.editorToolsDiv, 'display', 'inline-block');
+
+                        // Check for multipart features
+                        switch (geometry.type) {
+                            case 'polyline':
+                                if (geometry.paths.length > 0) process = 'paths';
+                                break;
+
+                            case 'polygon':
+                                if (geometry.rings.length > 0) process = 'rings';
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (geometry[process].length > 1) {
+                            domStyle.set(this.explodeDrawingSpan, 'display', 'inline-block');
+                        }
+
                         break;
 
                     default:
@@ -748,8 +903,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (!symbol) return;
 
             //Set this symbol in symbol chooser
-            this.editorSymbolChooser.showBySymbol(symbol);
             this.editorSymbolChooser.showByType(this.editorSymbolChooser.type);
+            this.editorSymbolChooser.showBySymbol(symbol);
             this._editorConfig['symboltype'] = this.editorSymbolChooser.type;
 
             var type = symbol.type;
@@ -788,25 +943,30 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         editorActivateSnapping: function editorActivateSnapping(bool) {
+            /*
             //If disable
             if (!bool) {
                 this.map.disableSnapping();
                 return;
             }
-
-            //If enable
+              //If enable
             this.map.enableSnapping({
-                "layerInfos": [{
-                    "layer": this.drawBox.drawLayer
-                }, {
-                    "layer": this._pointLayer
-                }, {
-                    "layer": this._polylineLayer
-                }, {
-                    "layer": this._polygonLayer
-                }],
-                "tolerance": 20
+                "layerInfos" : [{
+                        "layer" : this.drawBox.drawLayer
+                    },
+                    {
+                        "layer" : this._pointLayer
+                    },
+                    {
+                        "layer" : this._polylineLayer
+                    },
+                    {
+                        "layer" : this._polygonLayer
+                    }
+                ],
+                "tolerance" : 20
             });
+            */
         },
 
         editorUpdateTextPlus: function editorUpdateTextPlus() {
@@ -1696,18 +1856,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             var layer = null,
                 graphics = [],
                 symbols = null,
-                renderer = null;
+                renderer = null,
+                getRendererSymbol = false;
             array.forEach(drawingData.layers, lang.hitch(this, function (drawingLayer) {
                 // Check for drawings in layer
                 if (drawingLayer.featureSet.features.length > 0) {
                     // Prepare the symbols
-                    symbols = {}, renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    symbols = {};
 
-                    if (renderer.defaultSymbol === null) {
+                    if (drawingLayer.layerDefinition.drawingInfo) {
+                        renderer = drawingLayer.layerDefinition.drawingInfo.renderer, getRendererSymbol = false;
+                    }
+
+                    if (renderer && renderer.defaultSymbol === null) {
                         getRendererSymbol = true;
                         array.forEach(renderer.uniqueValueInfos, lang.hitch(this, function (info) {
                             symbols[info.value] = info.symbol;
                         }));
+                    } else {
+                        getRendererSymbol = false;
                     }
 
                     // Build the graphics
@@ -1717,26 +1884,28 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                         // update the symbol based on the renderer
                         if (getRendererSymbol) {
                             var symbolJson = symbols[graphic.attributes["symbolClass"]];
-                            switch (symbolJson.type) {
-                                case "esriSFS":
-                                    graphic.setSymbol(new SimpleFillSymbol(symbolJson));
-                                    break;
+                            if (symbolJson) {
+                                switch (symbolJson.type) {
+                                    case "esriSFS":
+                                        graphic.setSymbol(new SimpleFillSymbol(symbolJson));
+                                        break;
 
-                                case "esriSLS":
-                                    graphic.setSymbol(new SimpleLineSymbol(symbolJson));
-                                    break;
+                                    case "esriSLS":
+                                        graphic.setSymbol(new SimpleLineSymbol(symbolJson));
+                                        break;
 
-                                case "esriSMS":
-                                    graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriSMS":
+                                        graphic.setSymbol(new SimpleMarkerSymbol(symbolJson));
+                                        break;
 
-                                case "esriPMS":
-                                    graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
-                                    break;
+                                    case "esriPMS":
+                                        graphic.setSymbol(new PictureMarkerSymbol(symbolJson));
+                                        break;
 
-                                default:
-                                    //do nothing
-                                    break;
+                                    default:
+                                        //do nothing
+                                        break;
+                                }
                             }
                         }
 
@@ -3248,7 +3417,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         },
 
         _initLocalStorage: function _initLocalStorage() {
-            if (!this.config.allowLocalStorage) return;
+            if (!this.config.allowLocalStorage) {
+                domStyle.set(this.localStorageSettingsSection, 'display', 'none');
+                return;
+            }
 
             this._localStorageKey = this.config.localStorageKey ? 'WebAppBuilder.2D.eDrawEcan.' + this.config.localStorageKey : 'WebAppBuilder.2D.eDrawEcan';
 
@@ -3259,8 +3431,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             //Closure with timeout to be sure widget is ready
             (function (widget) {
                 setTimeout(function () {
-                    widget.importJsonContent(content, "name", "description", "measure");
-                    widget.showMessage(widget.nls.localLoading);
+                    if (content.loadOnOpen === "true" || content.loadOnOpen === undefined) {
+                        widget.importJsonContent(content, "name", "description", "measure");
+                        widget.showMessage(widget.nls.localLoading);
+                    }
+
+                    widget.localStorageOptionToggle.set("checked", content.loadOnOpen === "true");
                 }, 200);
             })(this);
         },
@@ -3588,6 +3764,35 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 this.map.addLayer(this._polylineLayer);
                 this.map.addLayer(this._pointLayer);
                 this.map.addLayer(this._labelLayer);
+            }
+
+            /* BEGIN: ECAN CHANGE - Add layers to snapping manager - lables not included for snapping */
+            this._updateSnapping(this._polygonLayer);
+            this._updateSnapping(this._polylineLayer);
+            this._updateSnapping(this._pointLayer);
+
+            /* END: ECAN CHANGES */
+        },
+
+        _updateSnapping: function _updateSnapping(graphicsLyr) {
+            if (this.map.snappingManager && graphicsLyr) {
+                // Check if layer existing in snapping manager layer infos
+                var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this, function (layerInfo) {
+                    return layerInfo.layer.id === graphicsLyr.id;
+                })).length > 0;
+
+                if (!isSnap) {
+                    var layerInfos = [];
+                    array.forEach(this.map.snappingManager.layerInfos, function (layerInfo) {
+                        layerInfos.push(layerInfo);
+                    });
+
+                    layerInfos.push({
+                        layer: graphicsLyr
+                    });
+
+                    this.map.snappingManager.setLayerInfos(layerInfos);
+                }
             }
         },
 
@@ -3931,6 +4136,21 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                 }
             }
             return result;
+        },
+
+        _localStorageOptionChange: function _localStorageOptionChange(newState) {
+            this._updateLoadOnOpenSetting(newState);
+        },
+
+        _updateLoadOnOpenSetting: function _updateLoadOnOpenSetting(openOnLoad) {
+            if (!this.config.allowLocalStorage) return;
+
+            var newValue = openOnLoad ? "true" : "false";
+            var content = localStore.get(this._localStorageKey) || {};
+            if (content.loadOnOpen !== newValue) {
+                content.loadOnOpen = newValue;
+                localStore.set(this._localStorageKey, content);
+            }
         },
 
         //////////////////////////// WIDGET CORE METHODS //////////////////////////////////////////////////

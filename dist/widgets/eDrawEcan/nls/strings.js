@@ -92,7 +92,6 @@ define({
 		zoomAllLabel : "Zoom on selected drawings",
 		copyLabel : "Copy selected drawings",
 		copySuffix : " (copy)",
-		cutLabel: "Cut this drawing into multiple pieces",
 		reshapeLabel: "Reshape this drawing",
 		deleteAllLabel : "Delete selected drawings",
 		exportLabel : "Export selected drawings",
@@ -202,6 +201,22 @@ define({
 		          "Feature Collection": "Feature Collection"
 		        }        			        
 		    }
+	    },
+
+	    localStorage : {
+	    	loadOnOpenLabel: "Load last drawings when first opened?",
+	    	loadOnOpenTitle: "Click to toggle loading the last drawings you created when this tool is opened in a new session."
+	    },
+
+	    tools : {
+      		cutFeatures: "Cut",
+      		cutToolTitle: "Cut Feature into Parts",
+	      	cutErrors: {
+	        	invalidCutGeometryError: "There was a problem with the shape drawn to cut the selected feature.",
+	        	noFeaturesCutError: "The shape drawn did not intersect the selected feature.",
+	        	unsupportedGeometryError: "Cut is only available on line and polygon features.",
+	        	generalError: "The cut tool is disabled."
+	      	}
 	    },
 
 	    _featureAction_ConvertToDrawing: "Convert to Drawing"				

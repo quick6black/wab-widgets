@@ -1,0 +1,28 @@
+{
+  "numPerPage": 30,
+  "scopeOptions": {
+    "MyContent": {
+      "allow": true,
+      "label": null
+    },
+    "MyOrganization": {
+      "allow": true,
+      "label": null
+    },
+    "Curated1": {
+      "allow": true,
+      "label": null,
+      "filter": null
+    },
+    "Curated2": {
+      "allow": true,
+      "label": null,
+      "filter": null
+    },
+    "Curated3": {
+      "allow": true,
+      "label": null,
+      "filter": null
+    }
+  }
+}

@@ -21,8 +21,8 @@
             <h2 data-dojo-attach-point="editorTitle">${nls.addDrawTitle}</h2>
             <div class="content">
                 <div data-dojo-attach-point="editorToolsDiv" style="display:none;" class="edit-draw-actions">
-                    <span title="${nls.cutLabel}" class="cut blue-button" data-dojo-attach-event="onclick:cut" >&nbsp;</span>
-                    <span title="${nls.reshapeLabel}" class="reshape blue-button" data-dojo-attach-event="onclick:reshape" >&nbsp;</span>
+                    <span title="${nls.tools.cutToolTitle}" class="cut blue-button" data-dojo-attach-event="onclick:cut" >&nbsp;</span>
+                    <span title="${nls.explodeLabel}" class="explode blue-button" data-dojo-attach-event="onclick:explode" style="display:none;" data-dojo-attach-point="explodeDrawingSpan">&nbsp;</span>                    
                 </div>
 				<div data-dojo-attach-point="fieldsDiv">
 					<label>${nls.nameField}:</label>
@@ -233,6 +233,21 @@
                     </div>
                 </div>
                 <hr />
+
+                <div data-dojo-attach-point="localStorageSettingsSection" class="localstorage-section">
+                    <div data-dojo-attach-point="defaultAreaMeasure" style="height:30px;margin-bottom:7px;" >
+                        <div class="area-units-tip  jimu-float-leading">${nls.localStorage.loadOnOpenLabel}</div>
+                        <div class="jimu-float-trailing switch-toggle-group" style="height:30px;">
+                            <input data-dojo-type="dijit/form/CheckBox"
+          data-dojo-attach-point="localStorageOptionToggle"
+          data-dojo-attach-event="onChange: _localStorageOptionChange"
+          data-dojo-props="class: 'switch-toggle'"
+        title="${nls.localStorage.loadOnOpenTitle}"/>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+
             </div>
             <div class="footer section-footer">
                 <div>

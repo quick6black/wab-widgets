@@ -12,6 +12,25 @@ define([
 
     isFeatureSupported: function(featureSet){
       return featureSet.features.length > 0;
+
+      if (featureSet.features.length === 0) {
+        //bug check - is the popup showing and does it have a current record showing  
+        var pop = this.map.infoWindow;
+        if (pop.isShowing || pop.features.length > 0) {
+          var graphic = pop.getSelectedFeature(); 
+
+          if (!graphic) {
+            graphic = pop.features[0];
+          }
+
+          return true       
+        }
+
+        return false;
+      }
+      else {
+        return featureSet.features.length > 0;
+      }
     },
 
     onExecute: function(featureSet){
@@ -60,8 +79,9 @@ define([
       query.outFields = fields;
       query.returnGeometry = true;
 
-      // Create query task and execute against it - used instead of feature layer to override auto generalisation
-      var queryTask = new QueryTask(layer.url);
+      // Create query task and execute against it - used instead of feature layer to override auto generalisation.  Note also checks for dynamic layers and alters rul if found.
+      var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
+      var queryTask = new QueryTask(serviceUrl);      
       return queryTask.execute(query);
     }
 

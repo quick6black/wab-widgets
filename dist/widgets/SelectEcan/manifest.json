@@ -4,8 +4,8 @@
   "2D": true,
   "3D": false,
   "platform": "HTML",
-  "version": "0.0.1",
-  "wabVersion": "2.4",
+  "version": "2.10",
+  "wabVersion": "2.10",
   "author": "Esri R&D Center Beijing modified by Environment Canterbury GIS Team and others",
   "description": "A modified version of the standard ESRI Select widget with select by graphic capability.",
   "copyright": "",
@@ -21,7 +21,8 @@
     "hasSettingLocale": true,
     "hasSettingStyle": true,
     "IsController": false,
-    "supportMultiInstance": false
+    "supportMultiInstance": false,
+    "keepConfigAfterMapSwitched": false
   },
   "featureActions": [{
      "name": "SelectByGeometry",

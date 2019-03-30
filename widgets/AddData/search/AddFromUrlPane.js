@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ define(["dojo/_base/declare",
     "esri/layers/WMSLayer",
     "esri/layers/WMTSLayer",
     "esri/InfoTemplate",
+    "jimu/dijit/Message",
     "dijit/form/Select"
   ],
   function(declare, lang, array, on, keys, Deferred, all, domClass, win, Viewport,
@@ -52,7 +53,7 @@ define(["dojo/_base/declare",
     ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, CSVLayer,
     FeatureLayer, GeoRSSLayer, ImageParameters, KMLLayer, StreamLayer,
     VectorTileLayer, WFSLayer, WMSLayer, WMTSLayer,
-    InfoTemplate) {
+    InfoTemplate, Message) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -196,7 +197,8 @@ define(["dojo/_base/declare",
           if (lc.indexOf("/featureserver") > 0 || lc.indexOf("/mapserver") > 0) {
             loader._readRestInfo(url).then(function(info) {
               //console.warn("restInfo",info);
-              if (info && typeof info.type === "string" && info.type === "Feature Layer") {
+              if (info && typeof info.type === "string" &&
+                 (info.type === "Feature Layer" || info.type === "Table")) {
                 layer = new FeatureLayer(url, {
                   id: id,
                   outFields: ["*"],
@@ -214,6 +216,13 @@ define(["dojo/_base/declare",
                       infoTemplate: new InfoTemplate()
                     });
                     dfds.push(loader._waitForLayer(lyr));
+                  });
+                  array.forEach(info.tables, function(li) {
+                    var tbl = new FeatureLayer(url + "/" + li.id, {
+                      id: loader._generateLayerId(),
+                      outFields: ["*"]
+                    });
+                    dfds.push(loader._waitForLayer(tbl));
                   });
                   all(dfds).then(function(results) {
                     var lyrs = [];
@@ -374,38 +383,35 @@ define(["dojo/_base/declare",
 
       _waitThenAdd: function(dfd, map, type, loader, layer) {
         //console.warn("_waitThenAdd",type,layer);
-        var na;
         loader._waitForLayer(layer).then(function(lyr) {
           //console.warn("_waitThenAdd.ok",lyr);
-          //var templates = null;
           if (type === "WMS") {
             loader._setWMSVisibleLayers(lyr);
-          } else if (lyr &&
-            (lyr.declaredClass === "esri.layers.ArcGISDynamicMapServiceLayer" ||
-            lyr.declaredClass === "esri.layers.ArcGISTiledMapServiceLayer")) {
-            na = true;
-            /*
-            if (lyr.infoTemplates === null) {
-              array.forEach(lyr.layerInfos, function(lInfo) {
-                if (templates === null) {
-                  templates = {};
-                }
-                templates[lInfo.id] = {
-                  infoTemplate: new InfoTemplate()
-                };
-              });
-              if (templates) {
-                lyr.infoTemplates = templates;
-              }
-            }
-            */
+          } else if (lyr && lyr.declaredClass === "esri.layers.ArcGISDynamicMapServiceLayer") {
+            loader._setDynamicLayerInfoTemplates(lyr);
+          //} else if (lyr && lyr.declaredClass === "esri.layers.ArcGISTiledMapServiceLayer") {
           } else if (lyr && lyr.declaredClass === "esri.layers.FeatureLayer") {
             loader._setFeatureLayerInfoTemplate(lyr);
           } else if (lyr && lyr.declaredClass === "esri.layers.CSVLayer") {
             loader._setFeatureLayerInfoTemplate(lyr);
           }
           lyr.xtnAddData = true;
-          map.addLayer(lyr);
+          if (type === "KML") {
+            var mapSR = map.spatialReference, outSR = lyr._outSR;
+            var projOk = (mapSR && outSR) && (mapSR.equals(outSR) ||
+              mapSR.isWebMercator() && outSR.wkid === 4326 ||
+              outSR.isWebMercator() && mapSR.wkid === 4326);
+            if (projOk) {
+              map.addLayer(lyr);
+            } else {
+              new Message({
+                titleLabel: i18n._widgetLabel,
+                message: i18n.addFromFile.kmlProjectionMismatch
+              });
+            }
+          } else {
+            map.addLayer(lyr);
+          }
           dfd.resolve(lyr);
         }).otherwise(function(error) {
           //console.warn("_waitThenAdd.error",error);

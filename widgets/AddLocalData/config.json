@@ -1,0 +1,47 @@
+{
+  "description": "Add a CSV (.csv), Shapefile (.zip) or GPX (.gpx) to the map.",
+  "portalURL": "https://www.arcgis.com",
+  "dataTypes": [
+    {
+      "label": "CSV",
+      "fileExtension": ".csv"
+    },
+    {
+      "label": "Shapefile",
+      "fileExtension": ".zip"
+    },
+    {
+      "label": "GPX",
+      "fileExtension": ".gpx"
+    }
+  ],
+  "geometryTypes": [
+    {
+      "type": "Point"
+    },
+    {
+      "type": "Line"
+    },
+    {
+      "type": "Polygon"
+    }
+  ],
+  "coordinateSystems": [
+    {
+      "label": "WGS 84",
+      "wkid": "4326",
+      "xmin": "-180",
+      "xmax": "180",
+      "ymin": "-90",
+      "ymax": "90"
+    },
+	{
+		"label": "NZTM",
+		"wkid": "2193",
+		"xmin":"1309420", 
+		"xmax":"1692008", 
+		"ymin":"4946849", 
+		"ymax":"5362775"
+    }
+  ]
+}

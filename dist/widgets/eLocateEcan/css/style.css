@@ -155,7 +155,8 @@
   .widget-eLocate-ecan .result-div {
     font-size: 14px;
     padding-left: 10px;
-    padding-bottom: 5px; }
+    padding-bottom: 5px;
+    padding-top: 10px; }
   .widget-eLocate-ecan .eLocate-list {
     position: absolute;
     width: 100%;

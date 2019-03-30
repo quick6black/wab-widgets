@@ -4,7 +4,12 @@ define({
     selectionMode: "Interactive selection mode",
     partiallyWithin: "Partially within",
     whollyWithin: "Wholly within",
-    allowExport: "Allow to export selected features"
+    allowExport: "Allow to export selected features",
+    selectOnActivate: "Activate select tool when widget opened/activated",
+    selectedLayersMode: "Default selected layers mode",
+    allLayers: "All layers selected",
+    visibleLayers: "Visible layers selected",
+    layersOff: "No layers selected"
   }),
   "ar": 1,
   "bs": 1,
