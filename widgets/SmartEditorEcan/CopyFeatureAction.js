@@ -23,7 +23,7 @@ define([
         var layerIds = this.map.graphicsLayerIds, hasEditableLayer = false;
         array.forEach(layerIds, lang.hitch(this, function(layerId) {
           var layer = this.map.getLayer(layerId);
-          if (layer.capabilities && layer.capabilities.indexOf('Create') >= 0) {
+          if (layer.capabilities && layer.capabilities.indexOf('Create') >= 0 && layer.url !== null) {
             // Check geometry type
             if (layer.geometryType && layer.geometryType === geometryType) {
               hasEditableLayer = true;
