@@ -75,14 +75,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
       layerUtil.getLayerInfoArray(layerInfosObject).then(lang.hitch(this, function (layerInfoArray) {
         //First loaded, reset selectableLayerIds
-        this._initLayers(layerInfoArray);
+        this._initLayers(this._filterLayerInfo(layerInfoArray));
       }));
 
       this.own(on(layerInfosObject, 'layerInfosChanged', lang.hitch(this, function () {
         this.shelter.show();
 
         layerUtil.getLayerInfoArray(layerInfosObject).then(lang.hitch(this, function (layerInfoArray) {
-          this._initLayers(layerInfoArray);
+          this._initLayers(this._filterLayerInfo(layerInfoArray));
         }));
       })));
 
@@ -127,7 +127,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
     onActive: function onActive() {
       this._setSelectionSymbol();
 
-      // ECAN CHANGE - Specifiy whether select dijit should be activuated when widget activates
+      // ECAN CHANGE - Specifiy whether select dijit should be activated when widget activates
       var setActive = this.config.selectOnActivate !== undefined ? this.config.selectOnActivate : true;
 
       if (setActive && !this.selectDijit.isActive()) {
@@ -135,6 +135,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       } else if (!setActive && this.selectDijit.isActive()) {
         this.selectDijit.deactivate();
       }
+      /* END CHANGE */
     },
 
     onOpen: function onOpen() {
@@ -189,6 +190,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
               checked = this.config.selectedLayersMode === 'none' ? false : true;
             }
 
+            /* END CHANGE */
+
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
               checked: checked, //visible, -- ECAN default to not-selected initially
@@ -201,6 +204,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             this.own(on(item, 'switchToDetails', lang.hitch(this, this._switchToDetails)));
             this.own(on(item, 'stateChange', lang.hitch(this, function () {
               this.shelter.show();
+              if ('visible' in itemStatus) {
+                this.selectDijit.setDisplayLayerVisibility(itemStatus.featureLayer, itemStatus.visible);
+              }
               this.selectDijit.setFeatureLayers(this._getSelectableLayers());
               this.shelter.hide();
             })));
