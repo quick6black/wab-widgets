@@ -191,9 +191,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/array", "dojo/dom-c
       var username = context.username;
       var orgId = context.orgId;
       var considerOrg = true;
-      if (context.portal && context.portal.isPortal) {
-        considerOrg = false;
-      }
+
+      // Issue #14908
+      // if (context.portal && context.portal.isPortal) {
+      //   considerOrg = false;
+      // }
 
       if (scope === "MyContent") {
         if (typeof username === "string" && username.length > 0) {
