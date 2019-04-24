@@ -969,5 +969,17 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
   background-color: #ffffff; }
 
 /* Copy Features ends */
+.copy-features-template-popup {
+  font-size: 12px;
+  font-weight: normal;
+  color: #000; }
+  .copy-features-template-popup > .content > .multipleFeaturesMessage {
+    color: red;
+    font-style: italic;
+    padding-bottom: 10px; }
+  .copy-features-template-popup > .content > .esriTemplatePicker {
+    width: 100%;
+    height: 290px;
+    overflow-y: scroll; }
 
 /*# sourceMappingURL=style.css.map */

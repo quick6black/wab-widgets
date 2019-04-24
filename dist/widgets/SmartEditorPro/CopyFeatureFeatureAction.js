@@ -10,7 +10,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
     _viewedFeatureArr: [], // to store the feature as traversed in info-window
 
     map: null,
-    iconClass: 'icon-edit',
+    iconFormat: 'png',
 
     /**
      * This function detects whether info-window is opened, closed or in closing state
@@ -62,9 +62,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
     },
 
     /**
-     * This function detects whether to display smartEditor option in info-window or not
+     * This function detects whether to display copy feature option in info-window or not
      */
     isFeatureSupported: function isFeatureSupported(featureSet, layerParam) {
+      //check if copy feature enabled
+      if (this._getWidgetConfig() && this._config.editor.createNewFeaturesFromExisting !== true) {
+        return false;
+      }
+
       //detects if editable layerscof specific geometry type are available 
       if (!this._checkEditGeometry(featureSet, layerParam)) {
         return false;
