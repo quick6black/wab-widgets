@@ -5786,8 +5786,17 @@ function(
           if (this.map._layers.hasOwnProperty(layer)) {
             var layerObj;
             layerObj = this.map._layers[layer];
+            
+            /* BEGIN CHANGE: 2019-04-23 - Add in graphics layers as selectable layer type 
+
+            Original code
             if (layerObj.hasOwnProperty("type") &&
-              layerObj.type === "Feature Layer") {
+              layerObj.type === "Feature Layer")
+            */
+
+            if ((layerObj.hasOwnProperty("type") &&
+              layerObj.type === "Feature Layer") || (("declaredClass" in layerObj) &&
+              layerObj.declaredClass === "esri.layers.FeatureLayer")) {
               if (clearSelection) {
                 selectionMgr.clearSelection(layerObj);
                 // consider only those layer for custom select tool widget whose geometryType matches with the geometryType
