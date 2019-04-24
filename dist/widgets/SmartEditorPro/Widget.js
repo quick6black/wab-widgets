@@ -1,7 +1,7 @@
 // jscs:disable validateIndentation
 /* jshint proto: true */
 
-define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference', "dijit/focus", 'jimu/dijit/FeatureSetChooserForMultipleLayers', "./copy-features", "dojo/string"], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String) {
+define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference', "dijit/focus", 'jimu/dijit/FeatureSetChooserForMultipleLayers', "./copy-features", "dojo/string", "./copy-features-template-popup"], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String, CopyFeaturesTemplatePopup) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     name: 'SmartEditorPro',
@@ -458,6 +458,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this.map.setInfoWindowOnClick(true);
       this.shelter.hide();
     },
+
     _getPortalUrl: function _getPortalUrl(url) {
       if (url) {
         return portalUrlUtils.getStandardPortalUrl(url);
@@ -465,6 +466,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         return portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
       }
     },
+
     feature_action_select: function feature_action_select(features, featureLayer) {
       // features probably is empty.
       if (!featureLayer) {
@@ -491,6 +493,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.load_from_featureaction(featureLayer, firstFeature);
       }
     },
+
     load_from_featureaction: function load_from_featureaction(featureLayer, firstFeature) {
       //CT- Commented as now we need to clear multiple layer from multiple AI
       /* if (this.updateFeatures) {
@@ -564,6 +567,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.attrInspector.destroy();
       }
     },
+
     _traverseToSelectedFeature: function _traverseToSelectedFeature(featureLayer, feature) {
       var def = new Deferred();
       var tempFeature;
@@ -616,6 +620,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }));
       return featureIndex;
     },
+
     //Function from the feature action
     beginEditingByFeatures: function beginEditingByFeatures(features, featureLayer, viewedLayerDetails, viewedFeatureDetails) {
       //when opening selected features in Smart Editor widget
@@ -678,6 +683,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     /*jshint unused:true */
     _setTheme: function _setTheme() {
       //if (this.appConfig.theme.name === "BoxTheme" ||
@@ -709,6 +715,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     _mapClickHandler: function _mapClickHandler(create) {
       if (create === true && this._attrInspIsCurrentlyDisplayed === false) {
         this.map.setInfoWindowOnClick(false);
@@ -736,6 +743,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     destroy: function destroy() {
       this.inherited(arguments);
 
@@ -768,6 +776,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this._enableFeatureReduction();
       this.inherited(arguments);
     },
+
     onActive: function onActive() {
       if (this._userHasPrivilege === true) {
         if (domClass.contains(this.widgetActiveIndicator, "widgetNotActive")) {
@@ -794,6 +803,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     _enableFeatureReduction: function _enableFeatureReduction() {
       if (this.clusterState === false) {
         array.forEach(this.featureReductionEnabledLayers, function (layer) {
@@ -810,6 +820,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.clusterState = true;
       }
     },
+
     _disableFeatureReduction: function _disableFeatureReduction() {
       if (this.clusterState === true) {
         array.forEach(this.featureReductionEnabledLayers, function (layer) {
@@ -1009,6 +1020,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       //this.loaded_state.set("loaded", true);
       return true;
     },
+
     _addFilterEditor: function _addFilterEditor(layers) {
       if (this.config.editor.useFilterEditor === true && this.templatePicker) {
         if (this._filterEditor) {
@@ -1025,6 +1037,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     _activateEditToolbar: function _activateEditToolbar(feature) {
       var layer = feature.getLayer();
       if (this.editToolbar.getCurrentState().tool !== 0) {
@@ -1042,6 +1055,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           break;
       }
     },
+
     _polygonToPolyline: function _polygonToPolyline(polygon) {
       var polyline = new Polyline();
       array.forEach(polygon.rings, function (ring) {
@@ -1053,6 +1067,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       polyline.spatialReference = polygon.spatialReference;
       return polyline;
     },
+
     _addRelatedFeatureToLocalLayer: function _addRelatedFeatureToLocalLayer(graphic, fKeyField) {
       var newTempLayerInfos;
       var localLayerInfo = null;
@@ -1321,6 +1336,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       return fields;
     },
+
     _iterateCollection: function _iterateCollection(collection) {
       return function (f) {
         for (var i = 0; collection[i]; i++) {
@@ -1328,6 +1344,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       };
     },
+
     _cloneLayer: function _cloneLayer(layer) {
       var cloneFeaturelayer;
       var fieldsproc = this._processLayerFields(layer.fields);
@@ -1394,12 +1411,15 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this.map.addLayer(cloneFeaturelayer);
       return cloneFeaturelayer;
     },
+
     _endsWith: function _endsWith(str, suffix) {
       return str.indexOf(suffix, str.length - suffix.length) !== -1;
     },
+
     _validateEventHandler: function _validateEventHandler() {
       this._enableAttrInspectorSaveButton(this._validateAttributes());
     },
+
     _validateAttributes: function _validateAttributes(changeDefaultState) {
       //optional param to determine if no rule is found, should it reset the state.
       //Required for when a form is disabled and a rule to hide a field is required
@@ -1568,9 +1588,11 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._toggleMapNavigationButtonVisibility(isVisible);
       }), 500);
     },
+
     _recordLoadeAttInspector: function _recordLoadeAttInspector() {
       this.getConfigDefaults();
     },
+
     editGeoCheckChange: function editGeoCheckChange() {
       return function () {
         this._editGeometry(this._editGeomSwitch.checked);
@@ -1590,6 +1612,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       this._recordLoadeAttInspector();
     },
+
     _addWarning: function _addWarning() {
       if (query(".attwarning", this.attrInspector.domNode).length === 0) {
         var txt = domConstruct.create("div", { 'class': 'attwarning' });
@@ -2283,7 +2306,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _activateTemplateToolbar: function _activateTemplateToolbar(override) {
-
       var draw_type = override || null;
       var shape_type = null;
       if (this.templatePicker) {
@@ -2377,6 +2399,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         //this._lastDrawnShape = null;
       }
     },
+
     _templatePickerNeedsToBeCreated: function _templatePickerNeedsToBeCreated() {
       //if (this.templatePicker === undefined || this.templatePicker === null) {
       //  return true;
@@ -2439,8 +2462,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       };
     },
+
     _menus: {},
     drawingTool: null,
+
     _setDrawingToolbar: function _setDrawingToolbar(shapeType, drawType) {
       if (this.drawingTool === null || this.drawingTool === undefined) {
         return;
@@ -2475,8 +2500,8 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       // To activate/de-activate select tool, based on current draw type
       this._changeSelectToolState();
     },
-    _createDrawingToolbar: function _createDrawingToolbar() {
 
+    _createDrawingToolbar: function _createDrawingToolbar() {
       if (this.config.editor.hasOwnProperty("displayShapeSelector")) {
         // check the "createNewFeaturesFromExisting" property for backward compatibility
         if (this.config.editor.displayShapeSelector === true || this.config.editor.hasOwnProperty("createNewFeaturesFromExisting") && this.config.editor.createNewFeaturesFromExisting === true) {
@@ -2501,6 +2526,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     _createMenu: function _createMenu(drawingOption) {
       var menu = new DropDownMenu({
         style: "display: none;"
@@ -2533,6 +2559,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       menu.startup();
       return menu;
     },
+
     _createDrawingMenus: function _createDrawingMenus() {
       var menus = {};
       for (var property in SEDrawingOptions) {
@@ -2540,6 +2567,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return menus;
     },
+
     _createEditor: function _createEditor() {
       var selectedTemplate = null;
 
@@ -2710,6 +2738,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._createPresetTable(this.config.editor.configInfos);
       }
     },
+
     isGuid: function isGuid(value) {
       if (value[0] === "{") {
         value = value.substring(1, value.length - 1);
@@ -2717,16 +2746,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var regexGuid = /^(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}$/gi;
       return regexGuid.test(value);
     },
+
     _template_change: function _template_change() {
       this._deactivateAllTools();
       this.currentDrawType = null;
       this.currentShapeType = null;
       this._activateTemplateToolbar();
     },
+
     validateGUID: function validateGUID(value, constraints) {
       constraints = constraints;
       return this.isGuid(value);
     },
+
     _createPresetTable: function _createPresetTable(layerInfos) {
       var isAnyFieldShownInPresetTable = false;
       //to support backward compatibility
@@ -2782,6 +2814,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _presetChange: function _presetChange() {
       this._toggleUsePresetValues(true);
     },
+
     _createAutoSaveSwitch: function _createAutoSaveSwitch(defaultState) {
       if (defaultState) {
         query(".autoSaveOptionDiv")[0].style.display = "block";
@@ -2789,6 +2822,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         query(".autoSaveOptionDiv")[0].style.display = "none";
       }
     },
+
     _toggleRunTimeAutoSave: function _toggleRunTimeAutoSave() {
       if (this._autoSaveRuntime === false) {
         this._autoSaveRuntime = true;
@@ -2797,6 +2831,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       this._createAutoSaveSwitch(this.config.editor.autoSaveEdits);
     },
+
     _deleteFeature: function _deleteFeature() {
       if (!this.currentFeature) {
         return;
@@ -3218,6 +3253,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       };
     },
+
     _getEditableLayers: function _getEditableLayers(layerInfos, allLayers) {
       var layers = [];
       array.forEach(layerInfos, function (layerInfo) {
@@ -3234,6 +3270,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       return layers;
     },
+
     _getEditableLayersInfos: function _getEditableLayersInfos(layerInfos, allLayers) {
       var layers = [];
       array.forEach(layerInfos, function (layerInfo) {
@@ -3250,6 +3287,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
       return layers;
     },
+
     _getClonedRelationInfo: function _getClonedRelationInfo(relations) {
       var newRelations = [];
       for (var i = 0; i < relations.length; i++) {
@@ -3268,6 +3306,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return newRelations;
     },
+
     _getLayerInfoForLocalLayer: function _getLayerInfoForLocalLayer(localLayer) {
 
       var result = this._getLayerInfoByID(localLayer.originalLayerId);
@@ -3291,6 +3330,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return layerInfo;
     },
+
     _getSelectionSymbol: function _getSelectionSymbol(geometryType, highlight) {
       if (!geometryType || geometryType === "") {
         return null;
@@ -3327,6 +3367,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return selectionSymbol;
     },
+
     _hasPresetValueFields: function _hasPresetValueFields(layerInfos) {
       return layerInfos.some(function (layerInfo) {
         if (layerInfo.allowUpdateOnly === false) {
@@ -3378,6 +3419,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }));
       }
     },
+
     _modifyAttributesWithPresetValues: function _modifyAttributesWithPresetValues(attributes, newTempLayerInfos, copyAttrInfo, fKeyField) {
       var presetValueTable = query("#eePresetValueBody")[0];
       var presetFieldInfos = [],
@@ -3481,7 +3523,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     // to add (*) to the label of required fields
     // also add field type and domain to use in the preset values
     processConfigForRuntime: function processConfigForRuntime(configInfo) {
-
       if (!configInfo) {
         return;
       }
@@ -3563,6 +3604,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._processOnMapClick(evt);
       }
     },
+
     _attachmentsComplete: function _attachmentsComplete(featureLayer, oid, deferred) {
       return function (results) {
         var errorMsg = "";
@@ -3600,6 +3642,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         return this._completePost(featureLayer, oid, deferred);
       };
     },
+
     _selectComplete: function _selectComplete(featureLayer, deferred) {
       return function () {
         this._removeLocalLayers();
@@ -3608,6 +3651,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         deferred.resolve("success");
       };
     },
+
     _completePost: function _completePost(featureLayer, oid, deferred) {
       this._createAttributeInspector([this.currentLayerInfo]);
       var query = new Query();
@@ -3616,6 +3660,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         deferred.resolve("failed");
       }));
     },
+
     // posts the currentFeature's changes
     _postChanges: function _postChanges(feature) {
 
@@ -3652,6 +3697,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return deferred.promise;
     },
+
     _changed_feature: function _changed_feature(feature, removeOIDField) {
       var returnFeature = null;
       var type = null;
@@ -3944,6 +3990,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }));
       }
     },
+
     _attachLayerHandler: function _attachLayerHandler() {
       /*
       //CT - Commented the code as it was clearing parent features selection when moving to related feature
@@ -4010,7 +4057,6 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _promptToDelete: function _promptToDelete() {
-
       var dialog = new Popup({
         titleLabel: this.nls.deletePromptTitle,
         width: 400,
@@ -4036,6 +4082,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         onClose: lang.hitch(this, function () {})
       });
     },
+
     _promptToResolvePendingEdit: function _promptToResolvePendingEdit(switchToTemplate, evt, showClose, skipPostEvent) {
       skipPostEvent = skipPostEvent || false;
       var disable = !this._validateAttributes();
@@ -4148,6 +4195,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       //this._turnEditGeometryToggleOff();
     },
+
     _feature_removed: function _feature_removed(feature, curidx) {
       return function () {
         if (this.attrInspector._featureIdx >= curidx && curidx !== 0) {
@@ -4159,6 +4207,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         //bypass moving to the next record if the user click next and was prompted to save
       };
     },
+
     // perform validation then post the changes or formatting the UI if errors
     // no confirm dialog involved
     _saveEdit: function _saveEdit(feature, switchToTemplate, attInspectRecordOptions) {
@@ -4366,6 +4415,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._recordLoadeAttInspector();
       }
     },
+
     _createAttributeInspectorTools: function _createAttributeInspectorTools() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
         return;
@@ -4381,6 +4431,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       };
       this._attributeInspectorTools = new attributeInspectorTools(attributeInspectorToolsParams);
     },
+
     _createSmartAttributes: function _createSmartAttributes() {
       if (this.currentFeature === undefined || this.currentFeature === null) {
         return;
@@ -4408,8 +4459,8 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       };
       this._smartAttributes = new smartAttributes(smartAttParams);
     },
-    _showTemplatePicker: function _showTemplatePicker() {
 
+    _showTemplatePicker: function _showTemplatePicker() {
       // hide the attr inspector and show the main template picker div
       query(".jimu-widget-smartEditor-pro .attributeInspectorMainDiv")[0].style.display = "none";
       query(".jimu-widget-smartEditor-pro .templatePickerMainDiv")[0].style.display = "block";
@@ -4474,15 +4525,18 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._copyFeaturesObj.cancelBtnClicked();
       }
     },
+
     _setPresetValue: function _setPresetValue() {
       var sw = registry.byId("savePresetValueSwitch");
       this._usePresetValues = sw.checked;
     },
+
     _toggleUsePresetValues: function _toggleUsePresetValues(checked) {
       var sw = registry.byId("savePresetValueSwitch");
       sw.set('checked', checked === null ? !sw.checked : checked);
       this._usePresetValues = sw.checked;
     },
+
     _turnEditGeometryToggleOff: function _turnEditGeometryToggleOff() {
       //perform any edit geom switch functionality
       //only when working with main layers feature and not on related features
@@ -4504,6 +4558,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }), 2);
       }
     },
+
     _validateFeatureChanged: function _validateFeatureChanged() {
 
       if (this.currentFeature) {
@@ -4670,6 +4725,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }, this);
       return layerInfos;
     },
+
     getLayerObjectFromMapByUrl: function getLayerObjectFromMapByUrl(map, layerUrl) {
       var resultLayerObject = null;
       for (var i = 0; i < map.graphicsLayerIds.length; i++) {
@@ -4715,6 +4771,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       }
       return foundInfo;
     },
+
     getConfigDefaults: function getConfigDefaults() {
       if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
         setTimeout(lang.hitch(this, function () {
@@ -4764,6 +4821,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }, this);
     },
+
     onClose: function onClose() {
       this._worksAfterClose();
 
@@ -4793,6 +4851,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       // close method will call onDeActive automaticlly
       // so do not need to call onDeActive();
     },
+
     _update: function _update() {
       //if (this.templatePicker) {
       //comments out, this results in teh scroll bar disappearing, unsure why
@@ -4814,6 +4873,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     resize: function resize() {
       this._update();
     },
+
     onNormalize: function onNormalize() {
       setTimeout(lang.hitch(this, this._update), 100);
     },
@@ -5262,7 +5322,14 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         if (this.map._layers.hasOwnProperty(layer)) {
           var layerObj;
           layerObj = this.map._layers[layer];
-          if (layerObj.hasOwnProperty("type") && layerObj.type === "Feature Layer") {
+
+          /* BEGIN CHANGE: 2019-04-23 - Add in graphics layers as selectable layer type 
+            Original code
+          if (layerObj.hasOwnProperty("type") &&
+            layerObj.type === "Feature Layer")
+          */
+
+          if (layerObj.hasOwnProperty("type") && layerObj.type === "Feature Layer" || "declaredClass" in layerObj && layerObj.declaredClass === "esri.layers.FeatureLayer") {
             if (clearSelection) {
               selectionMgr.clearSelection(layerObj);
               // consider only those layer for custom select tool widget whose geometryType matches with the geometryType
@@ -5795,13 +5862,164 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _getInfoDetails: function _getInfoDetails(layerInfo) {
       var infoObj;
       infoObj = {};
-      array.forEach(layerInfo.fieldInfos, lang.hitch(this, function (fieldInfo) {
-        infoObj[fieldInfo.name.toLowerCase()] = {
-          name: fieldInfo.name,
-          type: fieldInfo.type
-        };
-      }));
+
+      /* BEGIN CHANGE: Add check for filed infos for non feature layer data sources */
+
+      if (layerInfo && layerInfo.fieldInfos) {
+        array.forEach(layerInfo.fieldInfos, lang.hitch(this, function (fieldInfo) {
+          infoObj[fieldInfo.name.toLowerCase()] = {
+            name: fieldInfo.name,
+            type: fieldInfo.type
+          };
+        }));
+      }
+
+      /* END CHANGE */
+
       return infoObj;
+    },
+
+    /** CUSTOM FUNCTIONALITY CODE BEGINS HERE 
+    ----------------------------------------- **/
+
+    /**
+    * Handles passing the copy feature feature action call.
+    */
+    copyFeaturesAction: function copyFeaturesAction(features, selectedTemplate) {
+      if (!features) {
+        Message({
+          message: this.nls.selectingFeatureError
+        });
+        return;
+      }
+
+      //check for a supplied feature template
+      if (!selectedTemplate) {
+        //show template selector popup
+        this._showCopyFeaturesTemplateSelector(features).then(lang.hitch(this, function (template) {
+          if (template) {
+            //update the selected template
+            this._updateSelectedTemplate(template);
+
+            //start the copy action 
+            this._updateCopyFeatures(features);
+          }
+        }));
+      } else {
+        //update the selected template
+        this._updateSelectedTemplate(selectedTemplate);
+
+        //start the copy action 
+        this._updateCopyFeatures(features);
+      }
+    },
+
+    _showCopyFeaturesTemplateSelector: function _showCopyFeaturesTemplateSelector(featureSet) {
+      var getTemplate;
+      getTemplate = new Deferred();
+
+      // Get geometry type and ensure editable layer of this geometry type is available
+      var geometryType = featureSet.geometryType;
+      if (!geometryType) {
+        geometryType = featureSet.features[0].geometry.type;
+      }
+      geometryType = editUtils.getArcGISGeometryType(geometryType);
+
+      var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+      layers = layers.filter(function (layer) {
+        return layer.geometryType && layer.geometryType === geometryType;
+      });
+
+      var copyPopup,
+          param,
+          templateSelected = false;
+      param = {
+        map: this.map,
+        nls: this.nls,
+        config: this.config,
+        featureSet: featureSet,
+        layers: layers
+      };
+
+      copyPopup = new CopyFeaturesTemplatePopup(param);
+      copyPopup.startup();
+
+      copyPopup.onOkClick = lang.hitch(this, function () {
+        templateSelected = true;
+        var template = copyPopup.getSelectedTemplate();
+        getTemplate.resolve(template);
+        copyPopup.popup.close();
+      });
+
+      copyPopup.onClose = lang.hitch(this, function () {
+        if (templateSelected) {
+          var template = copyPopup.getSelectedTemplate();
+          getTemplate.resolve(template);
+        } else {
+          getTemplate.resolve();
+        }
+      });
+
+      return getTemplate.promise;
+    },
+
+    _updateSelectedTemplate: function _updateSelectedTemplate(selectedTemplate) {
+      if (selectedTemplate !== null && this.templatePicker) {
+        var keysArr = Object.getOwnPropertyNames(this.templatePicker._itemWidgets);
+        var templateItems = [];
+        array.forEach(this.templatePicker._flItems, function (flItems) {
+          array.forEach(flItems, function (flItem) {
+            templateItems.push(flItem);
+          });
+        });
+        if (templateItems.length === keysArr.length) {
+          var itemFnd = array.some(templateItems, function (item, index) {
+            if (selectedTemplate.featureLayer.id === item.layer.id && item.template.name === selectedTemplate.template.name && item.template.drawingTool === selectedTemplate.template.drawingTool && item.template.description === selectedTemplate.template.description && item.type === selectedTemplate.type) {
+              var dom = dojo.byId(keysArr[index]);
+              on.emit(dom, "click", {
+                bubbles: true,
+                cancelable: true
+              });
+              return true;
+            }
+          }, this);
+        }
+      } else {
+        //add catch here to pick up the loaded template tool
+      }
+    },
+
+    _updateCopyFeatures: function _updateCopyFeatures(features) {
+      this.loading.show();
+      var selectedFeatures;
+
+      if (features.features) {
+        selectedFeatures = features.features;
+      } else {
+        selectedFeatures = features;
+      }
+      if (selectedFeatures.length === 0) {
+        Message({
+          message: this.nls.noFeatureSelectedMessage
+        });
+      } else {
+        //if copy features instance not found create it
+        if (!this._copyFeaturesObj) {
+          this._createCopyFeaturesInstance();
+        }
+        //Pass selected features to selectFeaturesToCopy method,
+        //and allow user to choose among selctd features
+        this._copyFeaturesObj.selectFeaturesToCopy(selectedFeatures);
+        // After selecting feature, copy feature list is created.
+        // Since this selection selects the features with default cyan color it needs to be removed or reset it.
+        // Hence, as soon as user gets the selected feature remove its selection as list is created and selected features
+        // are no longer created.
+        this._getOrClearSelectableLayers(true);
+        this._displayCopyFeatureDiv();
+        this._resetCopyFeatureListHeight();
+      }
+      this.loading.hide();
     }
+
   });
 });

@@ -25,8 +25,14 @@
     "IsController": false,
     "hasVersionManager": true
   },
-    "featureActions": [{
-    "name": "SmartEditor",
-    "uri": "SmartEditorFeatureAction"
-  }]
+    "featureActions": [
+      {
+        "name": "SmartEditor",
+        "uri": "SmartEditorFeatureAction"
+      },
+      {
+        "name": "CopyFeature",
+        "uri": "CopyFeatureFeatureAction"
+      }
+    ]
 }

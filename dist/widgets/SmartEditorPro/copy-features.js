@@ -54,7 +54,23 @@ define(['dijit/_WidgetBase', 'dijit/_TemplatedMixin', 'dojo/_base/declare', 'doj
         this.featuresByLayerId = {};
         this.featureTitlesByLayerId = {};
         //show/hide singleFeature button
+
+        /* BEGIN CHANGE: Handle non-feature layer data sources 
+          Original Code:
+        */
         this._showHideSingleFeatureButton(selectedFeatures[0]._layer.geometryType);
+
+        /*
+        var gType;
+        if (selectedFeatures[0]._layer) {
+          gType = selectedFeatures[0]._layer.geometryType;
+        } else {
+          gType = selectedFeatures[0].geometry.type;
+        }
+        this._showHideSingleFeatureButton(gType);
+        */
+        /* END CHANGE */
+
         //First show the main node in which copy features list is shown
         domClass.remove(this.mainNode, "esriCTHidden");
         //Process selected features and arrange them by layer ids

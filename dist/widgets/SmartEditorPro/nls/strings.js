@@ -2,6 +2,7 @@ define({
   root: ({
     _widgetLabel: "Smart Editor Pro",
     _featureAction_SmartEditor: "Smart Editor Pro",
+    _featureAction_CopyFeature: "Copy Feature",
     noEditPrivileges: "Your account does not have permission to create or modify data.",
     widgetActive: "Active",
     widgetNotActive: "Not Active",
@@ -62,7 +63,16 @@ define({
     selectingFeatureError: "Error while selecting features in the layer. Please try again.", // error message while selecting features
     customSelectOptionLabel: "Select features to copy", // displayed as a label for custom select tool
     noFeatureSelectedMessage: "No features selected.", // Displayed when no features are selected while using custom select tool
-    multipleFeatureSaveMessage: "All the features will be saved immediately. Do you want to proceed?"
+    multipleFeatureSaveMessage: "All the features will be saved immediately. Do you want to proceed?",
+
+    copyFeaturesPopup: {
+      ok: "OK",
+      cancel: "Cancel",
+      titleLabel: "Copy Features to Editable Layer",
+      templatePickerLabel: "Select a Feature type",
+      multipleFeaturesMessage: "Multiple features have been selected to be copied.  In this situation you cannot alter the field details prior to saving to the target layer."
+    }
+
   }),
   "ar": 1,
   "bs": 1,
