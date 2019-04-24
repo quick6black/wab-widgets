@@ -2,6 +2,7 @@ define({
   root: ({
     _widgetLabel: "Smart Editor Pro",
     _featureAction_SmartEditor: "Smart Editor Pro",
+    _featureAction_CopyFeature: "Copy Feature",
     noEditPrivileges: "Your account does not have permission to create or modify data.",
     widgetActive: "Active",
     widgetNotActive: "Not Active",

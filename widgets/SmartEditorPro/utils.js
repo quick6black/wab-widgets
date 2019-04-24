@@ -462,5 +462,34 @@ define([
       }
     }
   };
+
+  /* BEGIN CHANGE - CUSTOM TOOL FUNCTIONS */
+
+  //return the js api label for the supplied gerenal geometry type
+  mo.getArcGISGeometryType = function (geometryType) {
+    var esriGeometryType = '';
+    switch (geometryType) {
+      case 'polygon':
+        esriGeometryType = 'esriGeometryPolygon';
+        break;
+
+      case 'polyline':
+        esriGeometryType = 'esriGeometryPolyline';
+        break;
+
+      case 'point':
+        esriGeometryType = 'esriGeometryPoint';
+        break
+
+      default:
+        esriGeometryType = geometryType;
+        break;
+    }
+    return esriGeometryType;
+  };
+
+
+  /* END CHANGE */
+
   return mo;
 });
