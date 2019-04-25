@@ -1,7 +1,10 @@
 // jscs:disable validateIndentation
 /* jshint proto: true */
 
-define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference', "dijit/focus", 'jimu/dijit/FeatureSetChooserForMultipleLayers', "./copy-features", "dojo/string", "./copy-features-template-popup"], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String, CopyFeaturesTemplatePopup) {
+define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference', "dijit/focus", 'jimu/dijit/FeatureSetChooserForMultipleLayers', "./copy-features", "dojo/string",
+
+/* ADDITIONAL REQUIRES */
+"./copy-features-template-popup", 'esri/urlUtils'], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String, CopyFeaturesTemplatePopup, esriUrlUtils) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     name: 'SmartEditorPro',
@@ -2640,6 +2643,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         //this.templatePicker.domNode.appendChild(this.widgetActiveIndicator);
         //this.templatePickerNode.appendChild(this.templatePicker.domNode);
         this._addFilterEditor(layers);
+
+        /* BEGIN CHANGE: Look for and apply url parameter template filters */
+
+        this._applyURLTemplateFilter();
+
+        /* END CHANGE */
+
         // wire up events
 
         if (selectedTemplate !== null && this.templatePicker) {
@@ -5882,6 +5892,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     /** CUSTOM FUNCTIONALITY CODE BEGINS HERE 
     ----------------------------------------- **/
 
+    /* COPY FEATURE ACTION FUNCTIONS
+    ----------------------------------------- **/
+
     /**
     * Handles passing the copy feature feature action call.
     */
@@ -6019,6 +6032,83 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._resetCopyFeatureListHeight();
       }
       this.loading.hide();
+    },
+
+    /* URL PARAMETER ACTION FUNCTIONS
+    ----------------------------------------- **/
+
+    //template filter functionality
+    _applyURLTemplateFilter: function _applyURLTemplateFilter() {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var templatesQuery = urlObject.query["templates"] || urlObject.query["TEMPLATES"];
+        if (templatesQuery) {
+          var templateIDs = this._getTemplateParams(templatesQuery);
+          this._filterEditor.filterTextBox.value = templateIDs;
+          this._filterEditor._onTemplateFilterChanged();
+        }
+      }
+    },
+
+    _getTemplateParams: function _getTemplateParams(query) {
+      var templatesString = '';
+      var filterParams = query.split(',');
+      if (filterParams.length > 0) {
+        // Check layer templates for domain codes that match template urls
+        var layers = this._getEditableLayers(this.config.editor.configInfos, false);
+        var tmps = [],
+            tmpIds = [];
+        array.forEach(layers, lang.hitch(this, function (layer) {
+          if (layer.types && layer.types.length > 0) {
+            var dmVals = layer.types.map(function (item) {
+              return {
+                "id": item["id"],
+                "label": item.templates[0]["name"]
+              };
+            });
+
+            for (var i = 0, l = dmVals.length; i < l; i++) {
+              if (tmpIds.indexOf(dmVals[i].label) === -1) {
+                tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].label);
+              } else if (tmpIds.indexOf(dmVals[i].id) === -1) {
+                tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].id);
+              }
+            }
+          } else {
+            for (var i = 0, l = layer.templates.length; i < l; i++) {
+              if (tmpIds.indexOf(layer.templates[i].name) === -1) {
+                tmps.push({
+                  "id": layer.templates[i].name,
+                  "label": layer.templates[i].name
+                });
+                tmpIds.push(layer.templates[i].name);
+              }
+            }
+          }
+        }));
+
+        var templates = [];
+        array.forEach(filterParams, function (param) {
+          var paramlc = param.toLowerCase();
+          var options = tmps.filter(function (item, index) {
+            return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+          });
+
+          array.forEach(options, function (item) {
+            if (templates.indexOf(item.label) === -1) {
+              templates.push(item.label);
+            }
+          });
+        });
+        templatesString = templates.join(',');
+      }
+
+      return templatesString;
     }
 
   });

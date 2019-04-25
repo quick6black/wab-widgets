@@ -90,7 +90,9 @@ define([
   "./copy-features",
   "dojo/string",
 
-  "./copy-features-template-popup"
+  /* ADDITIONAL REQUIRES */
+  "./copy-features-template-popup",
+  'esri/urlUtils'  
 ],
 function(
     Stateful,
@@ -181,7 +183,8 @@ function(
     CopyFeatures,
     String,
 
-    CopyFeaturesTemplatePopup
+    CopyFeaturesTemplatePopup,
+    esriUrlUtils
 ) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -2965,6 +2968,13 @@ function(
           //this.templatePicker.domNode.appendChild(this.widgetActiveIndicator);
           //this.templatePickerNode.appendChild(this.templatePicker.domNode);
           this._addFilterEditor(layers);
+
+          /* BEGIN CHANGE: Look for and apply url parameter template filters */
+
+          this._applyURLTemplateFilter();
+
+          /* END CHANGE */
+
           // wire up events
 
           if (selectedTemplate !== null && this.templatePicker) {
@@ -6421,6 +6431,12 @@ function(
       /** CUSTOM FUNCTIONALITY CODE BEGINS HERE 
       ----------------------------------------- **/
 
+
+
+
+      /* COPY FEATURE ACTION FUNCTIONS
+      ----------------------------------------- **/
+
       /**
       * Handles passing the copy feature feature action call.
       */
@@ -6556,7 +6572,86 @@ function(
             this._resetCopyFeatureListHeight();
           }
           this.loading.hide();
+      },
+
+
+      /* URL PARAMETER ACTION FUNCTIONS
+      ----------------------------------------- **/
+
+      //template filter functionality
+      _applyURLTemplateFilter: function () {
+        var loc = window.location;
+        var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+        // Check for filter
+        if (urlObject.query !== null) {
+          var templatesQuery = urlObject.query["templates"] || urlObject.query["TEMPLATES"];
+          if (templatesQuery) {
+            var templateIDs = this._getTemplateParams(templatesQuery);
+            this._filterEditor.filterTextBox.value = templateIDs;
+            this._filterEditor._onTemplateFilterChanged();
+          }
+        }
+      },
+
+      _getTemplateParams: function(query) {
+        var templatesString = '';
+        var filterParams = query.split(',');
+        if (filterParams.length > 0) {
+          // Check layer templates for domain codes that match template urls
+          var layers = this._getEditableLayers(this.config.editor.configInfos, false);   
+          var tmps = [], tmpIds = [];   
+          array.forEach(layers, lang.hitch(this,function (layer) {
+            if (layer.types && layer.types.length > 0) {
+              var dmVals = layer.types.map(function (item) {
+                return {
+                  "id": item["id"],
+                  "label": item.templates[0]["name"]
+                }
+              });
+
+              for(var i = 0, l = dmVals.length;i <l;i++) {
+                if (tmpIds.indexOf(dmVals[i].label) === -1) {
+                  tmps.push(dmVals[i]);
+                  tmpIds.push(dmVals[i].label);
+                } else if (tmpIds.indexOf(dmVals[i].id) === -1) {tmps.push(dmVals[i]);
+                  tmpIds.push(dmVals[i].id);
+                }
+              }
+            } else {
+              for(var i = 0, l = layer.templates.length; i <l;i++) {
+                if (tmpIds.indexOf(layer.templates[i].name) === -1) {
+                  tmps.push({
+                    "id": layer.templates[i].name,
+                    "label": layer.templates[i].name
+                  });
+                  tmpIds.push(layer.templates[i].name);
+                }
+              }
+            }
+          }));
+
+          var templates = [];
+          array.forEach(filterParams, function (param) {
+            var paramlc = param.toLowerCase();
+            var options = tmps.filter(function (item, index) {
+              return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+            });
+
+            array.forEach(options, function (item) {
+              if (templates.indexOf(item.label) === -1) {
+                templates.push(item.label);
+              }
+            });
+
+          });
+          templatesString = templates.join(',');
+        }
+
+        return templatesString;      
       }
+
+
 
     });
 
