@@ -3080,6 +3080,12 @@ function(
           //change the value of the variable. This will make sure table is created only once
           this._isPresetTableCreated = true;
           this._createPresetTable(this.config.editor.configInfos);
+
+          /* BEGIN CHANGE: Init URL param Preset Values */
+
+          this._applyURLPresetValues(); 
+
+          /* END CHANGE */
         }
       },
 
@@ -3113,11 +3119,22 @@ function(
           Object.keys(this.config.editor.presetInfos).length > 0) {
           this._initPresetFieldsTable();
           isAnyFieldShownInPresetTable = this._fillPresetValueTable(layerInfos);
+          
+          /* BEGIN CHANGE: Hide input controls if values have been preset
+
+          Original code:
+
           if (isAnyFieldShownInPresetTable) {
             query(".presetFieldsTableDiv")[0].style.display = "block";
           } else {
             query(".presetFieldsTableDiv")[0].style.display = "none";
           }
+
+          */
+
+          query(".presetFieldsTableDiv")[0].style.display = "none";
+
+          /* END CHANGE */
         } else {
           query(".presetFieldsTableDiv")[0].style.display = "none";
         }
@@ -6594,7 +6611,7 @@ function(
         }
       },
 
-      _getTemplateParams: function(query) {
+      _getTemplateParams: function (query) {
         var templatesString = '';
         var filterParams = query.split(',');
         if (filterParams.length > 0) {
@@ -6649,7 +6666,43 @@ function(
         }
 
         return templatesString;      
+      },
+
+      //parameter preset value functionality
+      _applyURLPresetValues: function () {
+        var loc = window.location;
+        var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+        // Check for filter
+        if (urlObject.query !== null) {
+          var valuesQuery = urlObject.query["preset"];
+          if (valuesQuery) {
+            var values = this._getPresetParams(valuesQuery);
+            array.forEach(values, function (field) {
+              this._setPresetValueValue(field.name, field.value);
+            }, this);
+          }
+        }        
+      },
+
+      _getPresetParams : function (query) {
+        var presetValues = [];
+        if (query) {
+          var items = query.split(',');
+          array.forEach(items, lang.hitch(this, function (item) {
+            var itemparts = item.split(':');
+            if (itemparts.length === 2) {
+              presetValues.push({
+                name: itemparts[0],
+                value: itemparts[1]
+              });
+            }
+          }));
+        }
+        return presetValues;
       }
+
+
 
 
 
