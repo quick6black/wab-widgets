@@ -241,6 +241,14 @@ define({
       esriFieldTypeInteger: "Number",
       esriFieldTypeDate: "Date",
       esriFieldTypeGUID: "GUID"
+    },
+    operationLinksPage: {
+      operationLinksLegendLabel: "Returning URLs",
+      addLinksLabel: "Add Returning URL(s)",
+      linkTitleLabel: "Link Text",
+      linkHrefLabel: "URL Prefix",
+      linkAttributeLabel: "Linking attribute/URL Parameter Name",
+      editTagLabel: "Edit"
     }
   }),
   "ar": 1,

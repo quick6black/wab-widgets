@@ -230,7 +230,6 @@
                             <input class="check" data-dojo-attach-point="editGeometryDefault" id="editGeometryDefault"
                                 data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.geometryEditDefault}" />
                             <label class="checkLabel" for="editGeometryDefault" title="${nls.layersPage.geometryEditDefault}">${nls.layersPage.geometryEditDefault}</label>
-
                         </div>
 
                         <div class="checkOption">
@@ -238,7 +237,6 @@
                             <input class="check" data-dojo-attach-point="enableAttributeUpdates" id="enableAttributeUpdates"
                                 data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.enableAttributeUpdates}" />
                             <label class="checkLabel" for="enableAttributeUpdates" title="${nls.layersPage.enableAttributeUpdates}">${nls.layersPage.enableAttributeUpdates}</label>
-
                         </div>
 
                         <div class="checkOption" style="text-indent: 25px;">
@@ -248,13 +246,11 @@
                             <label class="checkLabel" for="enableAutomaticAttributeUpdates" title="${nls.layersPage.enableAutomaticAttributeUpdates}">${nls.layersPage.enableAutomaticAttributeUpdates}</label>
                         </div>
 
-
                         <div class="checkOption">
 
                             <input class="check" data-dojo-attach-point="enableLockingMapNavigation" id="enableLockingMapNavigation"
                                 data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.enableLockingMapNavigation}" />
                             <label class="checkLabel" for="enableLockingMapNavigation" title="${nls.layersPage.enableLockingMapNavigation}">${nls.layersPage.enableLockingMapNavigation}</label>
-
                         </div>
 
                         <div class="checkOption">
@@ -262,16 +258,13 @@
                             <input class="check" data-dojo-attach-point="enableMovingSelectedFeatureToGPS" id="enableMovingSelectedFeatureToGPS"
                                 data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.enableMovingSelectedFeatureToGPS}" />
                             <label class="checkLabel" for="enableMovingSelectedFeatureToGPS" title="${nls.layersPage.enableMovingSelectedFeatureToGPS}">${nls.layersPage.enableMovingSelectedFeatureToGPS}</label>
-
                         </div>
-
 
                         <div class="checkOption">
 
                             <input class="check" data-dojo-attach-point="enableMovingSelectedFeatureToXY" id="enableMovingSelectedFeatureToXY"
                                 data-dojo-type="dijit/form/CheckBox" title="${nls.layersPage.enableMovingSelectedFeatureToXY}" />
                             <label class="checkLabel" for="enableMovingSelectedFeatureToXY" title="${nls.layersPage.enableMovingSelectedFeatureToXY}">${nls.layersPage.enableMovingSelectedFeatureToXY}</label>
-
                         </div>
 
                         <div class="checkOption">
@@ -294,6 +287,19 @@
                           </div>
                         </div>
                     </fieldset>
+
+                    <fieldset class="esriCTFieldSet">
+                        <legend class="esriCTFieldSetLegend">${nls.operationLinksPage.operationLinksLegendLabel}</legend>
+                        
+                        <div class="checkOption">
+                            <div class="add-links">
+                                <span class="add-icon"></span>
+                                <span class="add-label" data-dojo-attach-point="addLinks">${nls.operationLinksPage.addLinksLabel}</span>
+                            </div>
+                            <div data-dojo-attach-point="linkInfos"></div> 
+                        </div>                       
+                    </fieldset>
+
                 </div>
 
                 <div class="edit-description-title" title="${nls.layersPage.editDescriptionTip}">${nls.layersPage.editDescription}</div>

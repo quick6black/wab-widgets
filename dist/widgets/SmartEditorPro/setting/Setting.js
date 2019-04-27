@@ -115,6 +115,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
       this._initsmartActionsTable();
       //init attribute actions group
       this._initAllAttributeActions();
+
+      /* BEGIN CHANGES: Operation Linsk */
+      this._initLinks();
+      /* END CHANGES */
     },
 
     /**
@@ -460,6 +464,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
             this.globalTolerance.set("value", 0);
             this.globalToleranceUnit.set("value", 'meters');
           }
+
+          /* BEGIN CHANGES: Initailise Operation Links */
+          this._setLinks();
+          /* END CHANGES */
+
           setTimeout(lang.hitch(this, function () {
             this.resize();
             //destroy loading indicator
@@ -978,6 +987,11 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
       }
       //store smartActions Group
       this.config.smartActionGroups = this._getSmartActionGroupConfig();
+
+      /* BEGIN CHANGES: Operations Links */
+      this.config.links = this._getLinks();
+      /* END CHANGES */
+
       return this.config;
     },
 
@@ -2315,6 +2329,92 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidgetS
         }));
       }
       return coordinatesOption;
+    },
+
+    /** BEGIN CHANGE - Custom Settings */
+
+    _initLinks: function _initLinks() {
+      // Create a table that contains the editable attributes for each link
+      var fields = [{
+        title: this.nls.operationLinksPage.linkTitleLabel,
+        name: 'title',
+        type: 'text',
+        editable: true
+
+      }, {
+        title: this.nls.operationLinksPage.linkHrefLabel,
+        name: 'href',
+        type: 'text',
+        editable: true
+
+      }, {
+        title: this.nls.operationLinksPage.linkAttributeLabel,
+        name: 'attr',
+        type: 'text',
+        editable: true
+
+      }, {
+        name: 'actions',
+        title: this.nls.operationLinksPage.editTagLabel,
+        type: 'actions',
+        'class': 'editable',
+        actions: ['edit', 'delete']
+      }];
+      var args = {
+        fields: fields,
+        selectable: false
+      };
+      this.linksTable = new Table(args);
+      this.linksTable.placeAt(this.linkInfos);
+      this.linksTable.startup();
+
+      // Add bindings for action buttons
+      this.own(on(this.linksTable, 'actions-edit', lang.hitch(this, function (row) {
+        this.onTableEditClick(this.linksTable, row);
+      })));
+
+      // Hook up add link button
+      on(this.addLinks, "click", lang.hitch(this, function () {
+        var data = { title: "Link Name", href: "", attr: "" };
+        this.onRowAddClick(this.linksTable, data);
+      }));
+    },
+
+    onTableEditClick: function onTableEditClick(table, row) {
+      //table.finishEditing();
+      var data = table.getRowData(row);
+      table.editRow(row, data);
+    },
+
+    onRowAddClick: function onRowAddClick(table, data) {
+      //table.finishEditing();
+      var rowAddResult = table.addRow(data, false);
+      var row = rowAddResult.tr;
+      table.editRow(row, data);
+    },
+
+    _setLinks: function _setLinks() {
+      var links = this.config.links || [];
+      array.forEach(links, lang.hitch(this, function (linkConfig) {
+        this.linksTable.addRow({
+          'title': linkConfig.title,
+          'href': linkConfig.href,
+          'attr': linkConfig.attr
+        });
+      }));
+    },
+
+    _getLinks: function _getLinks() {
+      var data = this.linksTable.getData();
+      var filteredData = array.filter(data, function (data) {
+        if (lang.trim(data.title) && lang.trim(data.href)) {
+          return true;
+        }
+      });
+      return filteredData;
     }
+
+    /* END CHANGE */
+
   });
 });

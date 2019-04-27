@@ -92,6 +92,7 @@ define([
 
   /* ADDITIONAL REQUIRES */
   "./copy-features-template-popup",
+  "./operationLink",
   'esri/urlUtils'  
 ],
 function(
@@ -184,6 +185,7 @@ function(
     String,
 
     CopyFeaturesTemplatePopup,
+    OperationLink,
     esriUrlUtils
 ) {
   //To create a widget, you need to derive from BaseWidget.
@@ -284,6 +286,13 @@ function(
               this._onCancelButtonClicked();
             }
           })));
+
+          /* BEGIN CHANGES: Initialise custom code for operation links and snap manager changes */
+
+          this._links = this.config.links || [];   
+          //this._mapAddRemoveLayerHandler(true);
+
+          /* END CHANGES */
       },
 
       _setCancelButtonText: function () {
@@ -500,6 +509,7 @@ function(
           }
         }
       },
+
       startup: function () {
         this.inherited(arguments);
         // Update the drawing options by adding the label text from nls fetched
@@ -579,6 +589,11 @@ function(
           this._addGraphicToLocalLayer(evt);
         })));
 
+        /* BEGIN CHANGES: Add in Operation Links */
+
+        this._updateOperationLinksUI();
+
+        /* END CHANGE */
 
         this.privilegeUtil = PrivilegeUtil.getInstance();
         //<div class="processing-indicator-panel"></div>
@@ -6700,7 +6715,76 @@ function(
           }));
         }
         return presetValues;
-      }
+      },
+
+      _getPresetValues: function () {
+        var values = [];
+        var presetValueTable = query("#eePresetValueBody")[0];
+        if (presetValueTable) {
+          var inputElements = query(".preset-value-editable .ee-inputField");
+          array.forEach(inputElements, lang.hitch(this, function (ele) {
+
+            if (!domClass.contains(ele, "dijitTimeTextBox")) {
+              var elem = dijit.byNode(ele);
+              if (elem !== undefined && elem !== null) {
+                values.push({
+                  "fieldName" : elem.get("name"),
+                  "value": elem.get("value")
+                });
+             }
+            }
+          }));
+        }
+        return values;
+      },
+
+
+      //operation link controls
+      _updateOperationLinksUI: function () {
+        if (!this._links || this._links.length == 0) {
+          domConstruct.destroy(this.linksDiv);
+        } else {
+          // Destroy the old links if any
+          if (this._linkControls) {
+            array.forEach(this._linkControls, lang.hitch(this, function (linkControl) {
+              linkControl.destroy();
+            }));
+          } else {
+            this._linkControls = [];
+          }
+
+          // Populate the links
+          var fieldValues = this._getPresetValues();
+
+          //Append url parameters
+          var loc = window.location;
+          var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+          // Check for filter
+          if (urlObject.query !== null) {
+            for (var key in urlObject.query) {
+              fieldValues.push({
+                "fieldName" : key,
+                "value": urlObject.query[key]
+              });
+            }
+          }
+
+          array.forEach(this._links, lang.hitch(this, function (linkConfig) {
+            var link = new OperationLink({
+              item: linkConfig,
+              fieldValues: fieldValues
+            });
+
+            link.placeAt(this.linksTableNode);
+            link.startup();
+            this._linkControls.push(link);
+          }));
+          this.resize();
+        }
+      },
+
+
 
 
 

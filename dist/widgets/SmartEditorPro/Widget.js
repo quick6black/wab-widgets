@@ -4,7 +4,7 @@
 define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base/html', 'dojo/query', 'dojo/aspect', 'dojo/i18n!esri/nls/jsapi', 'dojo/dom', 'dojo/dom-construct', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/json', 'dojo/topic', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/Message', "esri/request", "esri/dijit/editing/TemplatePicker", "esri/dijit/AttributeInspector", "esri/toolbars/draw", "esri/toolbars/edit", "esri/tasks/query", "esri/graphic", "esri/layers/FeatureLayer", "dojo/promise/all", "dojo/Deferred", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/Color", "esri/geometry/jsonUtils", "esri/geometry/Polyline", "esri/geometry/Polygon", "esri/tasks/RelationshipQuery", "dijit/registry", "./PresetAllFields", "./utils", "./presetUtils", "./smartAttributes", "./attributeInspectorTools", "./relatedTables", "dijit/form/CheckBox", "dijit/form/Button", "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'dijit/form/DateTextBox', 'dijit/form/NumberSpinner', 'dijit/form/NumberTextBox', 'dijit/form/FilteringSelect', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox', 'dijit/form/TimeTextBox', "dijit/Editor", "dijit/form/SimpleTextarea", 'dojo/store/Memory', 'dojo/date/stamp', "dojo/dom-attr", "jimu/dijit/Popup", "./AttachmentUploader", "esri/lang", "esri/renderers/jsonUtils", "dojox/html/entities", 'jimu/utils', 'jimu/portalUrlUtils', 'jimu/SelectionManager', './SEFilterEditor', './SEDrawingOptions', './PrivilegeUtil', './XYCoordinates', 'jimu/dijit/LoadingIndicator', 'esri/tasks/GeometryService', "./coordinateUtils", "./addressUtils", "./Intersection", "esri/dijit/LocateButton", "esri/geometry/Point", 'esri/SpatialReference', "dijit/focus", 'jimu/dijit/FeatureSetChooserForMultipleLayers', "./copy-features", "dojo/string",
 
 /* ADDITIONAL REQUIRES */
-"./copy-features-template-popup", 'esri/urlUtils'], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String, CopyFeaturesTemplatePopup, esriUrlUtils) {
+"./copy-features-template-popup", "./operationLink", 'esri/urlUtils'], function (Stateful, dojo, dijit, declare, lang, array, html, query, aspect, esriBundle, dom, domConstruct, domClass, domStyle, on, JSON, topic, _WidgetsInTemplateMixin, BaseWidget, LayerInfos, Message, esriRequest, TemplatePicker, AttributeInspector, Draw, Edit, Query, Graphic, FeatureLayer, all, Deferred, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, geometryJsonUtil, Polyline, Polygon, RelationshipQuery, registry, PresetAllFields, editUtils, presetUtils, smartAttributes, attributeInspectorTools, relatedTables, CheckBox, Button, DropDownButton, DropDownMenu, MenuItem, DateTextBox, NumberSpinner, NumberTextBox, FilteringSelect, TextBox, ValidationTextBox, TimeTextBox, Editor, SimpleTextarea, Memory, dojoStamp, domAttr, Popup, AttachmentUploader, esriLang, rendererJsonUtils, entities, utils, portalUrlUtils, SelectionManager, SEFilterEditor, SEDrawingOptions, PrivilegeUtil, XYCoordinates, LoadingIndicator, GeometryService, coordinateUtils, AddressUtils, Intersection, LocateButton, Point, SpatialReference, focusUtil, FeatureSetChooserForMultipleLayers, CopyFeatures, String, CopyFeaturesTemplatePopup, OperationLink, esriUrlUtils) {
   //To create a widget, you need to derive from BaseWidget.
   return declare([BaseWidget, _WidgetsInTemplateMixin], {
     name: 'SmartEditorPro',
@@ -101,6 +101,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this._onCancelButtonClicked();
         }
       })));
+
+      /* BEGIN CHANGES: Initialise custom code for operation links and snap manager changes */
+
+      this._links = this.config.links || [];
+      //this._mapAddRemoveLayerHandler(true);
+
+      /* END CHANGES */
     },
 
     _setCancelButtonText: function _setCancelButtonText() {
@@ -300,6 +307,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }
       }
     },
+
     startup: function startup() {
       this.inherited(arguments);
       // Update the drawing options by adding the label text from nls fetched
@@ -374,6 +382,12 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this.drawToolbar.deactivate();
         this._addGraphicToLocalLayer(evt);
       })));
+
+      /* BEGIN CHANGES: Add in Operation Links */
+
+      this._updateOperationLinksUI();
+
+      /* END CHANGE */
 
       this.privilegeUtil = PrivilegeUtil.getInstance();
       //<div class="processing-indicator-panel"></div>
@@ -6157,6 +6171,72 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         }));
       }
       return presetValues;
+    },
+
+    _getPresetValues: function _getPresetValues() {
+      var values = [];
+      var presetValueTable = query("#eePresetValueBody")[0];
+      if (presetValueTable) {
+        var inputElements = query(".preset-value-editable .ee-inputField");
+        array.forEach(inputElements, lang.hitch(this, function (ele) {
+
+          if (!domClass.contains(ele, "dijitTimeTextBox")) {
+            var elem = dijit.byNode(ele);
+            if (elem !== undefined && elem !== null) {
+              values.push({
+                "fieldName": elem.get("name"),
+                "value": elem.get("value")
+              });
+            }
+          }
+        }));
+      }
+      return values;
+    },
+
+    //operation link controls
+    _updateOperationLinksUI: function _updateOperationLinksUI() {
+      if (!this._links || this._links.length == 0) {
+        domConstruct.destroy(this.linksDiv);
+      } else {
+        // Destroy the old links if any
+        if (this._linkControls) {
+          array.forEach(this._linkControls, lang.hitch(this, function (linkControl) {
+            linkControl.destroy();
+          }));
+        } else {
+          this._linkControls = [];
+        }
+
+        // Populate the links
+        var fieldValues = this._getPresetValues();
+
+        //Append url parameters
+        var loc = window.location;
+        var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+        // Check for filter
+        if (urlObject.query !== null) {
+          for (var key in urlObject.query) {
+            fieldValues.push({
+              "fieldName": key,
+              "value": urlObject.query[key]
+            });
+          }
+        }
+
+        array.forEach(this._links, lang.hitch(this, function (linkConfig) {
+          var link = new OperationLink({
+            item: linkConfig,
+            fieldValues: fieldValues
+          });
+
+          link.placeAt(this.linksTableNode);
+          link.startup();
+          this._linkControls.push(link);
+        }));
+        this.resize();
+      }
     }
 
   });

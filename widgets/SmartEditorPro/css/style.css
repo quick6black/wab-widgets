@@ -968,6 +968,22 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
   left: 0;
   background-color: #ffffff; }
 
+.jimu-widget-smartEditor-pro .linksBarDiv {
+  height: 30px !important; }
+
+.jimu-widget-smartEditor-pro .links-bar {
+  text-align: right; }
+  .jimu-widget-smartEditor-pro .links-bar a {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 5px;
+    margin-right: 5px;
+    color: #196fa6;
+    text-decoration: none;
+    line-height: 20px;
+    padding: 0px 5px 5px 5px; }
+
 /* Copy Features ends */
 .copy-features-template-popup {
   font-size: 12px;
