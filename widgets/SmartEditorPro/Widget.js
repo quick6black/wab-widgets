@@ -94,6 +94,7 @@ define([
   "./copy-features-template-popup",
   "./operationLink",
   "./MergeFeatures",
+  "./ExplodeFeatures",
   'esri/geometry/geometryEngine',
   'esri/urlUtils' 
 ],
@@ -189,6 +190,7 @@ function(
     CopyFeaturesTemplatePopup,
     OperationLink,
     MergeFeatures,
+    ExplodeFeatures,
     geometryEngine,
     esriUrlUtils
 ) {
@@ -253,7 +255,7 @@ function(
       /* BEGIN CHANGE: Custom Edit Buttons */
 
       _featuresMerge: null,
-      _featureCut: null,
+      _featureExplode: null,
       _featureCut: null,
 
       /* END CHANGE */
@@ -1920,6 +1922,7 @@ function(
           /* BEGIN CHANGE: Add Custom Edit tool toggle functions */
 
           this._toggleMergeFeatureButtonVisibility(isVisible);
+          this._toggleExplodeFeatureButtonVisibility(isVisible);
 
           /* END CHANGE */
 
@@ -3458,6 +3461,7 @@ function(
         /* BEGIN CHANGE: Toggle functions for custom edit tools */
 
         this._toggleMergeFeatureButtonVisibility(checked);
+        this._toggleExplodeFeatureButtonVisibility(checked);
 
         /* END CHANGE */
       },
@@ -7089,7 +7093,7 @@ function(
         this._createMergeTool();
 
         // Prepare explode tool
-        //this._createExplodeTool();
+        this._createExplodeTool();
 
         // Prepare cut tool
         //this._createCutTool();
@@ -7261,6 +7265,210 @@ function(
               message: err.message.toString() + "\n" + err.details
             });
           }));
+      },
+
+
+      //explode features tool
+      _createExplodeTool: function () {
+        // Explode Button - construct the button
+
+        if (this._featureExplode) {
+
+            // Deactiviate the click event
+            if (this._explodeClick) {
+              this._explodeClick.remove();
+              this._explodeClick = null;
+            }
+
+            domConstruct.destroy(this._featureExplode);
+        }
+
+        this._featureExplode = domConstruct.create("div", {
+          "class": "esriCTExplodeFeatures esriCTGeometryEditor hidden",
+          "title": this.nls.tools.explodeToolTitle
+        }, this.attrInspector.deleteBtn.domNode, "after");
+      },
+
+     /**
+       * This function is used to show/hide the explode features button depending upon certain conditions
+       * @param {checked} : a state of the edit geometry checkbox. if checked show the icon else hide it
+       */
+      _toggleExplodeFeatureButtonVisibility: function (checked) {
+        //if edit checkbox is checked and geometry supports merging
+        if (!checked) {
+          this._setExplodeHandler(false,"");
+        } else {
+          // Check geometry is line or polygon
+          if (this.currentFeature.geometry.type === 'point') {
+            // Disable the explode tool and show unsupported geometry error message value
+            this._setExplodeHandler(false,"unsupported geometry");
+            return;
+          } 
+
+          // Check for multipart geometry
+          var feature = null, process = '', geometry = null, newFeatures = [];
+          feature = this.currentFeature;
+          switch (feature.geometry.type) {
+              case 'polyline':
+                  if (feature.geometry.paths.length > 0)
+                      process = 'paths';
+                  break;
+
+              case 'polygon':
+                  if (feature.geometry.rings.length > 0)
+                      process = 'rings';
+                  break;
+
+              default:
+                  break;
+          }
+
+          if (feature.geometry[process].length === 1) {
+            // Disable the explode tool and show not multipart error message value
+            this._setExplodeHandler(false,"not multipart");          
+          } else {
+            this._setExplodeHandler(true);
+          }
+        }
+      },
+
+      _setExplodeHandler: function (create, error) {
+        if (create) {
+            // Remove disable button style
+            if (domClass.contains(this._featureExplode, "hidden")) {
+              domClass.remove(this._featureExplode, "hidden");
+            }
+
+            domAttr.set(this._featureExplode, "title", this.nls.tools.explodeToolTitle);
+
+            // Apply the click event
+            if (!this._explodeClick) {
+              this._explodeClick = on(this._featureExplode, "click", lang.hitch(this, this._startExplode));
+            }
+
+
+        } else {
+            // Apply disable button style
+            if (!domClass.contains(this._featureExplode, "hidden")) {
+              domClass.add(this._featureExplode, "hidden");
+            }
+
+            // Deactiviate the click event
+            if (this._explodeClick) {
+              this._explodeClick.remove();
+              this._explodeClick = null;
+            }
+
+            switch (error) {
+              case "unsupported geometry":
+                domAttr.set(this._featureExplode, "title", this.nls.tools.explodeErrors.unsupportedGeometryError);
+                break;
+
+              case "not multipart":
+                domAttr.set(this._featureExplode, "title", this.nls.tools.explodeErrors.notMultipartError);
+                break;
+
+              default:
+                domAttr.set(this._featureExplode, "title", this.nls.tools.explodeErrors.generalError);
+                break;
+          }
+
+        }
+      },
+
+      _startExplode: function () {
+        var explodePopup, param;
+        param = {
+            map: this.map,
+            nls: this.nls,
+            config: this.config,
+            features: this.updateFeatures,
+            currentFeature: this.currentFeature
+        };
+
+        explodePopup = new ExplodeFeatures(param);
+        explodePopup.startup();
+
+        explodePopup.onOkClick = lang.hitch(this, function() {
+          this._explodeFeatures();
+          explodePopup.popup.close();
+        });
+      },
+
+      _explodeFeatures: function () {
+          // Check for multipart geometry
+          var feature = null, process = '', geometry = null, newFeatures = [];
+          feature = this.currentFeature;
+          switch (feature.geometry.type) {
+              case 'polyline':
+                  if (feature.geometry.paths.length > 0)
+                      process = 'paths';
+                  break;
+
+              case 'polygon':
+                  if (feature.geometry.rings.length > 0)
+                      process = 'rings';
+                  break;
+
+              default:
+                  break;
+          }
+
+          if (process !== '') {
+              geometry = feature.geometry;
+              for(var p=0,pl = geometry[process].length;p<pl;p++) {
+                  var newFeature = new Graphic(feature.toJson());
+                  var newGeometry = null;
+
+                  switch(process) {
+                      case 'rings':
+                          newGeometry = new Polygon({ 
+                              "rings":[
+                                  JSON.parse(JSON.stringify(geometry[process][p]))
+                              ],
+                              "spatialReference": geometry.spatialReference.toJson()
+                          });
+                          break;
+
+                      case 'paths':
+                          newGeometry = new Polyline({ 
+                              "paths":[
+                                  JSON.parse(JSON.stringify(geometry[process][p]))
+                              ],
+                              "spatialReference": geometry.spatialReference.toJson()
+                          });
+                          break;
+                  }
+                  newFeature.setGeometry(newGeometry);
+                  newFeatures.push(newFeature); 
+              }
+          } else {
+              newFeatures.push(feature);
+          }
+
+          // Apply the changes
+          var layer = this.currentFeature.getLayer();
+          layer.applyEdits(newFeatures, null, [feature],
+            lang.hitch(this, function (adds, updates, deletes) {
+              if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+                Message({
+                  message: adds[0].error.toString()
+                });
+              }
+              if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+                Message({
+                  message: deletes[0].error.toString()
+                });
+              }
+
+              // Return to templates 
+              this._showTemplate(true);
+
+            }), lang.hitch(this, function (err) {
+              Message({
+                message: err.message.toString() + "\n" + err.details
+              });
+            }));
       }
 
     });
