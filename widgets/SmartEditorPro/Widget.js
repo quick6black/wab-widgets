@@ -93,7 +93,9 @@ define([
   /* ADDITIONAL REQUIRES */
   "./copy-features-template-popup",
   "./operationLink",
-  'esri/urlUtils'  
+  "./MergeFeatures",
+  'esri/geometry/geometryEngine',
+  'esri/urlUtils' 
 ],
 function(
     Stateful,
@@ -186,6 +188,8 @@ function(
 
     CopyFeaturesTemplatePopup,
     OperationLink,
+    MergeFeatures,
+    geometryEngine,
     esriUrlUtils
 ) {
   //To create a widget, you need to derive from BaseWidget.
@@ -245,6 +249,15 @@ function(
       //    this.loaded = value;
       //  }
       //}),
+
+      /* BEGIN CHANGE: Custom Edit Buttons */
+
+      _featuresMerge: null,
+      _featureCut: null,
+      _featureCut: null,
+
+      /* END CHANGE */
+
       postMixInProperties: function () {
         this.nls = lang.mixin(this.nls, window.jimuNls.common);
       },
@@ -586,7 +599,18 @@ function(
             return;
           }
           this.drawToolbar.deactivate();
+
+          /* BEGIN CHANGES: ECan Changes - Handle edit tools using the draw tool i.e. cut, reshape 
+
+          ORIGINAL CODE:
           this._addGraphicToLocalLayer(evt);
+          */ 
+
+
+          this._addGraphicToLocalLayer(evt);
+
+          /* END CHANGE */
+
         })));
 
         /* BEGIN CHANGES: Add in Operation Links */
@@ -766,6 +790,24 @@ function(
           firstFeature = this.viewedFeatureDetails.shift();
           this._traverseToSelectedFeature(featureLayer, firstFeature);
         }
+
+        /* BEGIN CHANGE - Handle multiple selected features */
+
+        else {
+          if (firstFeature) {
+            var selFeatures = lang.isArray(firstFeature) ? firstFeature : [firstFeature];
+
+            SelectionManager.getInstance().setSelection(featureLayer, selFeatures).then(lang.hitch(this, function () {
+              var selectedFeatures = featureLayer.getSelectedFeatures();
+              this.updateFeatures = selectedFeatures;
+              if (this.updateFeatures.length > 0) {
+                this._showTemplate(false);
+              }
+            }));
+          }
+        }
+
+        /* END CHANGE */
       },
 
       _clearLayerSelection: function () {
@@ -1832,6 +1874,10 @@ function(
           this._traversal.length > 1) {
           return;
         }
+
+        /* BEGIN CHANGE: Handle Custeom Edit Tools 
+        ORIGINAL CODE: 
+
         if (disable === false && this.currentLayerInfo.featureLayer.visibleAtMapScale) {
           if (this.currentLayerInfo && this.currentLayerInfo._editFlag) {
             dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "block");
@@ -1845,6 +1891,24 @@ function(
           dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "none");
           isVisible = false;
         }
+        */
+
+        if (disable === false && this.currentLayerInfo && this.currentLayerInfo.featureLayer.visibleAtMapScale) {
+          if (this.currentLayerInfo && this.currentLayerInfo._editFlag) {
+            dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "block");
+            isVisible = true;
+          } else {
+            dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "none");
+            isVisible = false;
+          }
+        }
+        else {
+          if (this._editGeomSwitch.domNode) dojo.style(this._editGeomSwitch.domNode.parentNode, "display", "none");
+          isVisible = false;
+        }
+
+        /* END CHANGE */
+
         this._turnEditGeometryToggleOff();
         //Handle the action buttons visibility based on edit geometry switch
         setTimeout(lang.hitch(this, function () {
@@ -1852,6 +1916,13 @@ function(
           this._toggleLocateButtonVisibility(isVisible);
           this._toggleXYCoordinatesButtonVisibility(isVisible);
           this._toggleMapNavigationButtonVisibility(isVisible);
+        
+          /* BEGIN CHANGE: Add Custom Edit tool toggle functions */
+
+          this._toggleMergeFeatureButtonVisibility(isVisible);
+
+          /* END CHANGE */
+
         }), 500);
       },
 
@@ -2368,6 +2439,13 @@ function(
           }, this.attrInspector.deleteBtn.domNode, "after");
           this.own(on(this._mapNavigation, 'click',
             lang.hitch(this, this._toggleMapNavigationButtonState)));
+
+
+          /* BEGIN CHANGE - Configure feature editing tools */
+
+          this._createFeatureEditTools();
+
+          /* END CHANGE */
 
           // Button to refresh attributes on geometry change
           if (this.config.editor.enableAttributeUpdates) {
@@ -3376,6 +3454,12 @@ function(
         this._toggleLocateButtonVisibility(checked);
         this._toggleXYCoordinatesButtonVisibility(checked);
         this._toggleMapNavigationButtonVisibility(checked);
+
+        /* BEGIN CHANGE: Toggle functions for custom edit tools */
+
+        this._toggleMergeFeatureButtonVisibility(checked);
+
+        /* END CHANGE */
       },
 
       /**
@@ -4903,6 +4987,7 @@ function(
             this._createSmartAttributes();
             this._createAttributeInspectorTools();
             this._attributeInspectorTools.triggerFormValidation();
+
             //this._sytleFields(this.attrInspector);
             if (this.currentFeature && this.currentFeature.getLayer().originalLayerId) {
               this._enableAttrInspectorSaveButton(this._validateAttributes());
@@ -4910,9 +4995,20 @@ function(
               this._validateAttributes(false);
               this._enableAttrInspectorSaveButton(false);
             }
-            if (this.currentLayerInfo.isCache && this.currentLayerInfo.isCache === true) {
+
+            /* BEGIN CHANGE: Handle custom edit tools 
+            ORIGINAL CODE:
+              if (this.currentLayerInfo.isCache && this.currentLayerInfo.isCache === true) {
+                this._toggleEditGeoSwitch(false);
+              }
+            */
+
+            if (!this.currentLayerInfo || (this.currentLayerInfo.isCache && this.currentLayerInfo.isCache === true)) {
               this._toggleEditGeoSwitch(false);
             }
+
+            /* END CHANGE */
+
             else {
               this._toggleEditGeoSwitch(this.currentLayerInfo.disableGeometryUpdate ||
                 !this.currentLayerInfo.configFeatureLayer.layerAllowsUpdate ||
@@ -6289,6 +6385,7 @@ function(
        * The features are added on the map. Its object ids are fetched and this features are selected in the layer.
        * @param {*} objectIdArr object id of the features that needs to be selected.
        */
+       /* BEGIN CHANGE: Extend method to supply the target layer as a parameter
       _selectFeaturesInTheLayer: function (objectIdArr) {
         var featureLayerInfo, featureLayerObject;
         featureLayerObject = this.templatePicker.getSelected().featureLayer;
@@ -6382,6 +6479,101 @@ function(
             });
           }));
       },
+      */
+      _selectFeaturesInTheLayer: function (objectIdArr, featureLayer) {
+        var featureLayerInfo, featureLayerObject;
+        featureLayerObject = featureLayer || this.templatePicker.getSelected().featureLayer;
+        featureLayerInfo = this._getLayerInfoByID(featureLayerObject.id);
+        this.map.infoWindow.hide();
+        //Destroy all prev attributeInspectors
+        array.forEach(this._attributeInspectorCollection, function (attributeInspector) {
+          attributeInspector.destroy();
+        });
+        //reset array
+        this._traversal = [];
+        this._nodesCollection = [];
+        this._paginationNodeCollection = [];
+        this._buttonsWrapper = [];
+        this._attributeInspectorCollection = [];
+        this._relatedTablesInfo = {};
+        // recreate the attr inspector if needed
+        this._createAttributeInspector([featureLayerInfo], true, featureLayerObject);
+        var layers = this.map.getLayersVisibleAtScale().filter(lang.hitch(this, function (lyr) {
+          if (lyr.type && lyr.type === "Feature Layer" && lyr.url) {
+            return array.some(this.config.editor.configInfos, lang.hitch(this, function (configInfo) {
+              if (configInfo.layerId === lyr.id &&
+                this._hasAnyEditableLayerInRelation([configInfo])) {
+                return true;
+              } else {
+                return false;
+              }
+            }));
+          } else {
+            return false;
+          }
+        }));
+        //remove no visible layers, for some reason the function above returns true
+        layers = layers.filter(lang.hitch(this, function (lyr) {
+          try {
+            return this.map.getLayer(lyr.id).visible;
+          } catch (ex) {
+            console.log(ex + " Check for visible failed");
+            return true;
+          }
+        }));
+        var updateFeatures = [];
+        this.currentFeature = null;
+        this.geometryChanged = false;
+        this.currentLayerInfo = null;
+        // Query creation
+        var selectQuery = new Query();
+        var uniqueValue = Date.now();
+        selectQuery.objectIds = objectIdArr;
+        selectQuery.where = uniqueValue + " = " + uniqueValue;
+        selectQuery.outFields = ["*"];
+        // Selecting features in the layer
+        featureLayerObject.selectFeatures(
+          selectQuery,
+          FeatureLayer.SELECTION_NEW,
+          lang.hitch(this, function (features) {
+            var validFeatures = [];
+            array.forEach(features, function (feature) {
+              var featureValid = true;
+              feature.allowDelete = true;
+              //The below is the preferred way, but this fails on public services and the user is logged in
+              if (!featureLayerObject.getEditCapabilities({
+                feature: feature
+              }).canDelete) {
+                feature.allowDelete = false;
+              }
+              if (featureValid === true) {
+                feature.preEditAttrs = JSON.parse(JSON.stringify(feature.attributes));
+                validFeatures.push(feature);
+              }
+            }, this);
+            updateFeatures = updateFeatures.concat(validFeatures);
+            if (updateFeatures.length > 0) {
+              this.updateFeatures = updateFeatures;
+              // When 'Remove feature from selection..' is checked, attribute inspector was displayed while copying features.
+              // This won't happen when new feature is created. It stays on template picker page only.
+              // To make this same behaviour while copying feature we need to check below condition.
+              // If its false, then show attribute inspector, else stay on template picker page and clear all the existing selection.
+              if (!this.config.editor.removeOnSave) {
+                this._showTemplate(false);
+              } else {
+                if (this.templatePicker) {
+                  this.templatePicker.clearSelection();
+                }
+                this.loading.hide();
+              }
+            }
+          }), lang.hitch(this, function () {
+            Message({
+              message: this.nls.selectingFeatureError
+            });
+          }));
+      },
+
 
       /**
        * This function is used to add label to the custom select option. It is added over here,
@@ -6794,95 +6986,282 @@ function(
       /* SNAPPING MANAGER FUNCTIONS
       ----------------------------------------- **/
 
-    _mapAddRemoveLayerHandler: function (action) {
+      _mapAddRemoveLayerHandler: function (action) {
 
-      if (action) {
-        if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
-          this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+        if (action) {
+          if (this._mapAddLayer === undefined || this._mapAddLayer === null) {
+            this._mapAddLayer = on(this.map, "layer-add", lang.hitch(this, this._onMapAddLayer));
+          }
+          if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
+            this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+          }
+
+        } else {
+          if (this._mapAddLayer) {
+            this._mapAddLayer.remove();
+          }
+          if (this._mapRemoveLayer) {
+            this._mapRemoveLayer.remove();
+          }
         }
-        if (this._mapRemoveLayer === undefined || this._mapRemoveLayer === null) {
-          this._mapRemoveLayer = on(this.map, "layer-remove", lang.hitch(this, this._onMapRemoveLayer));
+      },
+
+      _onMapAddLayer: function (result) {
+        var gl = false;
+
+        switch(result.layer.declaredClass) {
+          case "esri.layers.FeatureLayer":
+          case "esri.layers.GraphicsLayer":
+          case "esri.layers.CSVLayer":
+            gl = true;
+            break;
+
+          default:
+            // Do Nothing
+            break;
         }
 
-      } else {
-        if (this._mapAddLayer) {
-          this._mapAddLayer.remove();
-        }
-        if (this._mapRemoveLayer) {
-          this._mapRemoveLayer.remove();
-        }
-      }
-    },
+        if (this.map.snappingManager && gl) {
+          // Check if layer existing in snapping manager layer infos
+          var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+            return layerInfo.layer.id === result.layer.id;
+          })).length > 0;
 
-    _onMapAddLayer: function (result) {
-      var gl = false;
-
-      switch(result.layer.declaredClass) {
-        case "esri.layers.FeatureLayer":
-        case "esri.layers.GraphicsLayer":
-        case "esri.layers.CSVLayer":
-          gl = true;
-          break;
-
-        default:
-          // Do Nothing
-          break;
-      }
-
-      if (this.map.snappingManager && gl) {
-        // Check if layer existing in snapping manager layer infos
-        var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
-          return layerInfo.layer.id === result.layer.id;
-        })).length > 0;
-
-        if (!isSnap) {
-          var layerInfos = []; 
-          array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
-            layerInfos.push(layerInfo);
-          });
-          layerInfos.push({
-            layer: result.layer
-          });
-
-          this.map.snappingManager.setLayerInfos(layerInfos);
-        }
-      }
-    },
-
-    _onMapRemoveLayer: function (result) {
-      var gl = false;
-
-      switch(result.layer.declaredClass) {
-        case "esri.layers.FeatureLayer":
-        case "esri.layers.GraphicsLayer":
-        case "esri.layers.CSVLayer":
-          gl = true;
-          break;
-
-        default:
-          // Do Nothing
-          break;
-      }
-
-      if (this.map.snappingManager && gl) {
-        // Check if layer existing in snapping manager layer infos
-        var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
-          return layerInfo.layer.id === result.layer.id;
-        })).length > 0;
-
-        if (isSnap) {
-          var layerInfos = []; 
-          array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
-            if (layerInfo.layer.id !== result.layer.id) {
+          if (!isSnap) {
+            var layerInfos = []; 
+            array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
               layerInfos.push(layerInfo);
-            }
-          });
-          this.map.snappingManager.setLayerInfos(layerInfos);
+            });
+            layerInfos.push({
+              layer: result.layer
+            });
+
+            this.map.snappingManager.setLayerInfos(layerInfos);
+          }
         }
+      },
+
+      _onMapRemoveLayer: function (result) {
+        var gl = false;
+
+        switch(result.layer.declaredClass) {
+          case "esri.layers.FeatureLayer":
+          case "esri.layers.GraphicsLayer":
+          case "esri.layers.CSVLayer":
+            gl = true;
+            break;
+
+          default:
+            // Do Nothing
+            break;
+        }
+
+        if (this.map.snappingManager && gl) {
+          // Check if layer existing in snapping manager layer infos
+          var isSnap = array.filter(this.map.snappingManager.layerInfos, lang.hitch(this,function(layerInfo) {
+            return layerInfo.layer.id === result.layer.id;
+          })).length > 0;
+
+          if (isSnap) {
+            var layerInfos = []; 
+            array.forEach(this.map.snappingManager.layerInfos,function(layerInfo) {
+              if (layerInfo.layer.id !== result.layer.id) {
+                layerInfos.push(layerInfo);
+              }
+            });
+            this.map.snappingManager.setLayerInfos(layerInfos);
+          }
+        }
+      },
+
+
+      /* CUSTOM EDIT TOOLS FUNCTIONS
+      ----------------------------------------- **/
+
+      _createFeatureEditTools: function() {
+        /*
+        if (this.currentFeature === undefined || this.currentFeature === null) {
+          return;
+        }
+        */
+
+        // Prepare merge tool
+        this._createMergeTool();
+
+        // Prepare explode tool
+        //this._createExplodeTool();
+
+        // Prepare cut tool
+        //this._createCutTool();
+      },
+
+
+      //merge features tool
+      _createMergeTool: function () {
+        // Merge Button - construct the button to verify multple features selected from a single dataset
+
+        if (this._featuresMerge) {
+
+            // Deactiviate the click event
+            if (this._mergeClick) {
+              this._mergeClick.remove();
+              this._mergeClick = null;
+            }
+
+            domConstruct.destroy(this._featuresMerge);
+        }
+
+        this._featuresMerge = domConstruct.create("div", {
+          "class": "esriCTMergeFeatures esriCTGeometryEditor hidden",
+          "title": this.nls.tools.mergeToolTitle
+        }, this.attrInspector.deleteBtn.domNode, "after");
+      },
+
+     /**
+       * This function is used to show/hide the merge features button depending upon certain conditions
+       * @param {checked} : a state of the edit geometry checkbox. if checked show the icon else hide it
+       */
+      _toggleMergeFeatureButtonVisibility: function (checked) {
+        //if edit checkbox is checked and geometry supports merging
+        if (!checked) {
+          this._setMergeHandler(false,"");
+        } else {
+          var selLayers = [];
+          array.forEach(this.updateFeatures, lang.hitch(this, function (feature) {
+            var layer = feature.getLayer();
+            if (selLayers && selLayers.indexOf(layer.id) === -1) {
+              selLayers.push(layer.id);
+            }
+          }));
+
+          if (selLayers.length !== 1) {
+            // Disable the merge tool and show multi layer error message value
+            this._setMergeHandler(false,"multiple layers");
+            return;
+          } 
+
+          // Check geometry is line or polygon
+          if (this.currentFeature.geometry.type === 'point') {
+            // Disable the merge tool and show unsupported geometry error message value
+            this._setMergeHandler(false,"unsupported geometry");
+            return;
+          }          
+
+          // Ensure multiple features
+          if (this.updateFeatures.length === 1) {
+            // Disable the merge tool and show requires two or more error message value
+            this._setMergeHandler(false, "number of features");
+          } else {
+            this._setMergeHandler(true);
+          }
+        }
+      },
+
+      _setMergeHandler: function (create, error) {
+        if (create) {
+            // Remove disable button style
+            if (domClass.contains(this._featuresMerge, "hidden")) {
+              domClass.remove(this._featuresMerge, "hidden");
+            }
+
+            domAttr.set(this._featuresMerge, "title", this.nls.tools.mergeToolTitle);
+
+            // Apply the click event
+            if (!this._mergeClick) {
+              this._mergeClick = on(this._featuresMerge, "click", lang.hitch(this, this._startMerge));
+            }
+
+
+        } else {
+            // Apply disable button style
+            if (!domClass.contains(this._featuresMerge, "hidden")) {
+              domClass.add(this._featuresMerge, "hidden");
+            }
+
+            // Deactiviate the click event
+            if (this._mergeClick) {
+              this._mergeClick.remove();
+              this._mergeClick = null;
+            }
+
+            switch (error) {
+              case "multiple layers":
+                domAttr.set(this._featuresMerge, "title", this.nls.tools.mergeErrors.multipleLayersError);
+                break;
+
+              case "unsupported geometry":
+                domAttr.set(this._featuresMerge, "title", this.nls.tools.mergeErrors.unsupportedGeometryError);
+                break;
+
+              case "number of features":
+                domAttr.set(this._featuresMerge, "title", this.nls.tools.mergeErrors.numberOfFeaturesError);
+                break;
+
+              default:
+                domAttr.set(this._featuresMerge, "title", this.nls.tools.mergeErrors.generalError);
+                break;
+          }
+
+        }
+      },
+
+      _startMerge: function () {
+        var mergePopup, param;
+        param = {
+            map: this.map,
+            nls: this.nls,
+            config: this.config,
+            features: this.updateFeatures,
+            currentFeature: this.currentFeature
+        };
+
+        mergePopup = new MergeFeatures(param);
+        mergePopup.startup();
+
+        mergePopup.onOkClick = lang.hitch(this, function() {
+          this._mergeFeatures();
+          mergePopup.popup.close();
+        });
+      },
+
+      _mergeFeatures: function () {
+        var geometries = [];
+        var removeFeatures = [];
+        for(var i=0,il=this.updateFeatures.length; i< il;i++) {
+          var feature = this.updateFeatures[i];
+          geometries.push(feature.geometry);
+
+          if (feature !== this.currentFeature) removeFeatures.push(feature);
+        }
+
+        var newGeometry = geometryEngine.union(geometries);
+        var newFeature = new Graphic(this.currentFeature.toJson());
+        newFeature.setGeometry(newGeometry);
+
+
+        // Apply the changes
+        var layer = this.currentFeature.getLayer();
+        layer.applyEdits(null, [newFeature], removeFeatures,
+          lang.hitch(this, function (adds, updates, deletes) {
+            if (updates && updates.length > 0 && updates[0].hasOwnProperty("error")) {
+              Message({
+                message: updates[0].error.toString()
+              });
+            }
+            if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+              Message({
+                message: deletes[0].error.toString()
+              });
+            }
+
+            //this.load_from_featureaction(layer, newFeature);
+            this._selectFeaturesInTheLayer([newFeature.attributes[layer.objectIdField]],layer);  
+          }), lang.hitch(this, function (err) {
+            Message({
+              message: err.message.toString() + "\n" + err.details
+            });
+          }));
       }
-    }
-
-
 
     });
 

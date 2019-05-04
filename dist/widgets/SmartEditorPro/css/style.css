@@ -998,4 +998,15 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     height: 290px;
     overflow-y: scroll; }
 
+/* Custom Edit Tools */
+.jimu-widget-smartEditor-pro .esriCTMergeFeatures {
+  height: 35px;
+  width: 35px;
+  background-size: 35px;
+  background-repeat: no-repeat;
+  background-position: center;
+  float: left;
+  background-image: url(../images/merge.png);
+  cursor: pointer; }
+
 /*# sourceMappingURL=style.css.map */
