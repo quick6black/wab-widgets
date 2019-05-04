@@ -12,6 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+/*
+MODIFIED TO INCLUDE ADDITIONAL SELECTION MODE OPTIONS 
+
+*/
+
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 // jscs:disable validateIndentation
@@ -28,6 +36,24 @@ define([
         id: "seNewSelection",
         iconClass: "seToolbarIcon seNewSelectionIcon",
         label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl
+      },
+      {
+        id: "seNewSelectionRect",
+        iconClass: "seToolbarIcon seRectangleIcon",
+        _drawType: Draw.RECTANGLE,        
+        label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_rectangleLbl
+      },
+      {
+        id: "seNewSelectionPolygon",
+        iconClass: "seToolbarIcon sePolygonIcon",
+        _drawType: Draw.POLYGON,        
+        label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_polygonLbl
+      },
+      {
+        id: "seNewSelectionPolyline",
+        iconClass: "seToolbarIcon sePolylineIcon",
+        _drawType: Draw.POLYLINE,        
+        label: window.apiNls.widgets.editor.tools.NLS_selectionNewLbl + ' ' + window.apiNls.widgets.editor.tools.NLS_polylineLbl
       }
     ],
     esriGeometryPoint: [

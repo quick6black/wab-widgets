@@ -252,12 +252,12 @@ function(
       //  }
       //}),
 
-      /* BEGIN CHANGE: Custom Edit Buttons */
+      /* BEGIN CHANGE: Custom Edit Buttons and tools */
 
       _featuresMerge: null,
       _featureExplode: null,
       _featureCut: null,
-
+      _drawToolEditMode: false,
       /* END CHANGE */
 
       postMixInProperties: function () {
@@ -607,9 +607,17 @@ function(
           ORIGINAL CODE:
           this._addGraphicToLocalLayer(evt);
           */ 
-
-
-          this._addGraphicToLocalLayer(evt);
+          if (this._drawToolEditMode) {
+            this._actionEditTool(evt);
+          } else {
+            if (this.templatePicker !== undefined && this.templatePicker !== null && this.templatePicker.getSelected() === null) {
+              // In select mode - use as select geometry
+              this._processOnMapClick(evt);
+            } else {
+              // In create feature mode - process to layers
+              this._addGraphicToLocalLayer(evt);
+            }
+          }
 
           /* END CHANGE */
 
@@ -1923,7 +1931,7 @@ function(
 
           this._toggleMergeFeatureButtonVisibility(isVisible);
           this._toggleExplodeFeatureButtonVisibility(isVisible);
-
+          this._toggleCutFeatureButtonVisibility(isVisible);
           /* END CHANGE */
 
         }), 500);
@@ -3462,6 +3470,7 @@ function(
 
         this._toggleMergeFeatureButtonVisibility(checked);
         this._toggleExplodeFeatureButtonVisibility(checked);
+        this._toggleCutFeatureButtonVisibility(isVisible);
 
         /* END CHANGE */
       },
@@ -4445,7 +4454,21 @@ function(
           // set selection symbol
           layer.setSelectionSymbol(this._getSelectionSymbol(layer.geometryType, false));
           var selectQuery = new Query();
+
+          /* BEGIN CHANGE: Altered to support polyline and polygon inputs rather than assuming just the map point
+
+          ORIGINAL CODE:
           selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+          */
+
+          if (evt.mapPoint) {
+            selectQuery.geometry = editUtils.pointToExtent(this.map, evt.mapPoint, 20);
+          } else {
+            selectQuery.geometry = evt.geometry;
+          }
+
+          /* END CODE */
+
           var deferred = layer.selectFeatures(selectQuery,
             FeatureLayer.SELECTION_NEW,
             lang.hitch(this, function (features) {
@@ -7096,8 +7119,35 @@ function(
         this._createExplodeTool();
 
         // Prepare cut tool
-        //this._createCutTool();
+        this._createCutTool();
       },
+
+
+      //edit draw tools
+      _applyEditToolButtonStyle: function (tool, active) {
+        // Update cut tool state
+        if (tool !== 'CUT' || (tool === 'CUT' && !active)) {
+          if (domClass.contains(this._featureCut, "btn-toggle")) {
+            domClass.remove(this._featureCut, "btn-toggle");
+          }
+        } else {
+          if (!domClass.contains(this._featureCut, "btn-toggle")) {
+            domClass.add(this._featureCut, "btn-toggle");
+          }        
+        }
+      },
+
+      _actionEditTool: function (evt) {
+        switch (this._drawToolEditType) {
+          case 'CUT':
+            this._cutFeatures(evt);
+            break;
+          default:
+            alert('_actionEditTool: Not finished');
+            break;
+        }
+      },
+
 
 
       //merge features tool
@@ -7469,7 +7519,182 @@ function(
                 message: err.message.toString() + "\n" + err.details
               });
             }));
-      }
+      },
+
+
+      //cut features tool
+      _createCutTool: function () {
+        // Cut Button - construct the button
+
+        if (this._featureCut) {
+
+            // Deactiviate the click event
+            if (this._cutClick) {
+              this._cutClick.remove();
+              this._cutClick = null;
+            }
+
+            domConstruct.destroy(this._featureCut);
+        }
+
+        this._featureCut = domConstruct.create("div", {
+          "class": "esriCTCutFeatures esriCTGeometryEditor hidden",
+          "title": this.nls.tools.cutToolTitle
+        }, this.attrInspector.deleteBtn.domNode, "after");
+      },
+
+     /**
+       * This function is used to show/hide the explode features button depending upon certain conditions
+       * @param {checked} : a state of the edit geometry checkbox. if checked show the icon else hide it
+       */
+      _toggleCutFeatureButtonVisibility: function (checked) {
+        //if edit checkbox is checked and geometry supports merging
+        if (!checked) {
+          this._setCutHandler(false,"");
+        } else {
+          // Check geometry is line or polygon
+          if (this.currentFeature.geometry.type === 'point') {
+            // Disable the explode tool and show unsupported geometry error message value
+            this._setCutHandler(false,"unsupported geometry");
+          } else {
+            this._setCutHandler(true);
+          }
+        }
+      },
+
+      _setCutHandler: function (create, error) {
+        if (create) {
+            // Remove disable button style
+            if (domClass.contains(this._featureCut, "hidden")) {
+              domClass.remove(this._featureCut, "hidden");
+            }
+
+            domAttr.set(this._featureCut, "title", this.nls.tools.cutToolTitle);
+
+            // Apply the click event
+            if (!this._cutClick) {
+              this._cutClick = on(this._featureCut, "click", lang.hitch(this, this._setCutMode));
+            }
+
+
+        } else {
+            // Apply disable button style
+            if (!domClass.contains(this._featureCut, "hidden")) {
+              domClass.add(this._featureCut, "hidden");
+            }
+
+            // Deactiviate the click event
+            if (this._cutClick) {
+              this._cutClick.remove();
+              this._cutClick = null;
+            }
+
+            switch (error) {
+              case "unsupported geometry":
+                domAttr.set(this._featureCut, "title", this.nls.tools.cutErrors.unsupportedGeometryError);
+                break;
+
+
+              default:
+                domAttr.set(this._featureCut, "title", this.nls.tools.cutErrors.generalError);
+                break;
+          }
+
+        }
+      },
+
+      _setCutMode: function (reset) {
+        if(reset === true|| this._drawToolEditMode && this._drawToolEditType && this._drawToolEditType === 'CUT') {
+            // Deactivate the cut tool
+            this._drawToolEditMode = false;
+            this._drawToolEditType = null;
+            this.drawToolbar.deactivate();     
+
+            this.map.setInfoWindowOnClick(true);
+
+            // Remove active style on button
+            this._applyEditToolButtonStyle('CUT', false);
+
+        } else {
+
+          // Check if another edit tool is active
+          if (this._drawToolEditType !== 'CUT') {
+            // disable this tool
+          }
+
+          // Activate the draw tool to define the cut line
+          this._drawToolEditType = 'CUT';
+          this._drawToolEditMode = true;
+          this.drawToolbar.activate(Draw.POLYLINE, null);  
+
+          this.map.setInfoWindowOnClick(false);
+
+          // Remove active style on button
+          this._applyEditToolButtonStyle('CUT', true);
+        }
+      },
+
+      _cutFeatures: function (evt) {
+        // Check for line feature
+        if (this.currentFeature && evt && evt.geometry) {
+          var cutLine = evt.geometry;
+
+          // Reset the cut tool
+          this._setCutMode(true);
+
+          if (cutLine.type !== 'polyline') {
+               Message({
+                  message: this.nls.tools.cutErrors.invalidCutGeometryError
+                });
+
+            // stop here and reset tool
+            return;
+          }
+
+          var feature = this.currentFeature;
+          var newShapes = geometryEngine.cut(feature.geometry, cutLine);
+
+          if (newShapes.length === 0) {
+               Message({
+                  message: this.nls.tools.cutErrors.noFeaturesCutError
+                });
+
+          } else {
+            // Create new records based on the original and remove the original record
+            var newFeatures = [], newGeometry = null;
+            for(var p=0,pl = newShapes.length;p<pl;p++) {
+                var newFeature = new Graphic(feature.toJson());
+                newGeometry = newShapes[p];
+                newFeature.setGeometry(newGeometry);
+                newFeatures.push(newFeature); 
+            }
+
+            var layer = feature.getLayer();
+            layer.applyEdits(newFeatures, null, [feature],
+              lang.hitch(this, function (adds, updates, deletes) {
+                if (adds && updates.length > 0 && adds[0].hasOwnProperty("error")) {
+                  Message({
+                    message: adds[0].error.toString()
+                  });
+                }
+                if (deletes && deletes.length > 0 && deletes[0].hasOwnProperty("error")) {
+                  Message({
+                    message: deletes[0].error.toString()
+                  });
+                }
+
+                // Return to templates 
+                this._showTemplate(true);
+
+              }), lang.hitch(this, function (err) {
+                Message({
+                  message: err.message.toString() + "\n" + err.details
+                });
+              }));
+
+          }
+        }
+      }      
 
     });
 
