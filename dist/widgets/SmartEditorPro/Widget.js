@@ -733,9 +733,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         } else {
           return;
         }
-        if (name !== 'GroupFilter') {
+
+        /* BEGIN CHANGE: Change to also listen for Edit Filter 
+        ORIGINAL CODE:
+          if (name !== 'GroupFilter') {
           return;
         }
+          */
+
+        if (name !== 'GroupFilter' && name !== 'EditFilter') {
+          return;
+        }
+
+        /* END CHANGE */
 
         if (data.message.hasOwnProperty("fields") && data.message.hasOwnProperty("values")) {
           array.forEach(data.message.fields, function (field) {
@@ -976,6 +986,24 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     onDeActive: function onDeActive() {
+      /* BEGIN CHANGE: Handle when widget is made inactive while edit tools are active */
+
+      if (this._attrInspIsCurrentlyDisplayed) {
+        if (this.map.infoWindow.isShowing) {
+          this.map.infoWindow.hide();
+        }
+
+        if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
+          this._promptToResolvePendingEdit(true, null, true);
+        } else {
+          this._cancelEditingFeature(true);
+        }
+
+        this._removeLayerVisibleHandler();
+      }
+
+      /* END CHANGE */
+
       if (domClass.contains(this.widgetActiveIndicator, "widgetActive")) {
         domClass.remove(this.widgetActiveIndicator, "widgetActive");
       }
@@ -2406,6 +2434,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _activateTemplateToolbar: function _activateTemplateToolbar(override) {
+
+      /* BEGIN CHANGE: Handling draw tool use by edit tools for cut, reshape */
+
+      this._drawToolEditMode = false;
+
+      /* END CHANGE */
+
       var draw_type = override || null;
       var shape_type = null;
       if (this.templatePicker) {

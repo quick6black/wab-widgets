@@ -958,9 +958,21 @@ function(
           } else {
             return;
           }
+
+          /* BEGIN CHANGE: Change to also listen for Edit Filter 
+          ORIGINAL CODE:
+
           if (name !== 'GroupFilter') {
             return;
           }
+
+          */
+
+          if (name !== 'GroupFilter' && name !== 'EditFilter') {
+            return;
+          }
+
+          /* END CHANGE */
 
           if (data.message.hasOwnProperty("fields") &&
             data.message.hasOwnProperty("values")) {
@@ -1208,6 +1220,24 @@ function(
       },
 
       onDeActive: function () {
+        /* BEGIN CHANGE: Handle when widget is made inactive while edit tools are active */
+
+        if (this._attrInspIsCurrentlyDisplayed) {
+          if (this.map.infoWindow.isShowing) {
+            this.map.infoWindow.hide();
+          }
+
+          if (this.config.editor.displayPromptOnSave && this._validateFeatureChanged()) {
+            this._promptToResolvePendingEdit(true, null, true);
+          } else {
+            this._cancelEditingFeature(true);
+          }
+
+          this._removeLayerVisibleHandler();
+        }
+
+        /* END CHANGE */
+
         if (domClass.contains(this.widgetActiveIndicator, "widgetActive")) {
           domClass.remove(this.widgetActiveIndicator, "widgetActive");
         }
@@ -2718,6 +2748,13 @@ function(
       },
 
       _activateTemplateToolbar: function (override) {
+
+        /* BEGIN CHANGE: Handling draw tool use by edit tools for cut, reshape */
+
+        this._drawToolEditMode = false;
+
+        /* END CHANGE */
+
         var draw_type = override || null;
         var shape_type = null;
         if (this.templatePicker) {
