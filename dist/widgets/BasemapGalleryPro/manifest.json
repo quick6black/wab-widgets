@@ -1,0 +1,25 @@
+{
+  "name": "BasemapGalleryPro",
+  "label": "Basemap Gallery Pro",
+  "2D": true,
+  "3D": false,
+  "platform": "HTML",
+  "version": "0.0.1",
+  "wabVersion": "2.3",
+  "author": "Environment Canterbury GIS Team and others",
+  "description": "Customised version of standard ESRI WAB Basemap Gallery with improved UI for grouping and filtering the basemaps provided to users.",
+  "copyright": "",
+  "license": "ISC",
+  "properties": {
+    "inPanel": true,
+    "hasLocale": true,
+    "hasStyle": true,
+    "hasConfig": true,
+    "hasUIFile": true,
+    "hasSettingPage": true,
+    "hasSettingUIFile": true,
+    "hasSettingLocale": true,
+    "hasSettingStyle": true,
+    "IsController": false
+  }
+}
