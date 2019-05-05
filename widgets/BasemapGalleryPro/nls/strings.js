@@ -1,7 +1,8 @@
 define({
   root: {
-    widgetTitle: 'Basemap Gallery Pro',
-    description: 'Customised version of standard ESRI WAB Basemap Gallery with improved UI for grouping and filtering the basemaps provided to users.'
+    _widgetLabel: "Basemap Gallery",
+    chooseWebScene: "Choose web scene",
+    chooseWebMap: "Choose web map"
   }
   // add supported locales below:
   // , "zh-cn": true

@@ -1,3 +1,8 @@
 {
-  "serviceUrl": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer"
+  "basemapGallery": {
+    "mode": 1,
+    "basemaps": [],
+    "useGroups": false,
+    "groups": []
+  }
 }

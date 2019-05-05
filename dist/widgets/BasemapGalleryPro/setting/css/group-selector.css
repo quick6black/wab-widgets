@@ -1,0 +1,45 @@
+.basemap-group-selector {
+  font-size: 14px; }
+  .basemap-group-selector .hidden {
+    display: none !important; }
+  .basemap-group-selector .select-tip {
+    font-family: "Avenir Light";
+    color: #161616;
+    font-size: 14px;
+    margin-bottom: 10px; }
+  .basemap-group-selector .groups-section {
+    position: absolute;
+    width: 100%; }
+  .basemap-group-selector .groups-select {
+    width: 100%;
+    height: 30px;
+    padding: 0 5px;
+    font-family: "Avenir Light";
+    color: #4A4A4A;
+    font-size: 12px; }
+  .basemap-group-selector .refresh-icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    background: url(images/reset1.png) center center no-repeat;
+    margin-top: 12px;
+    margin-left: 7px; }
+    .jimu-rtl .basemap-group-selector .refresh-icon {
+      margin-left: auto;
+      margin-right: 7px; }
+  .basemap-group-selector .search-section {
+    position: absolute;
+    width: 100%;
+    height: 45px;
+    top: 15px;
+    font-size: 12px; }
+    .basemap-group-selector .search-section .jimu-search {
+      width: 81%; }
+    .basemap-group-selector .search-section .dijitSelect {
+      box-sizing: border-box; }
+    .basemap-group-selector .search-section .restrict-select-width {
+      position: relative;
+      width: 146px;
+      top: 5px; }
+
+/*# sourceMappingURL=group-selector.css.map */
