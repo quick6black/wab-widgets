@@ -54,3 +54,7 @@ To be created
 
 - Bugfix for issue when point graphics using picture marker symbols opened selected and displayed in symbol editor, the symbol settings were not being applied in the symbol editor.  Alteration made in **Widget.js** file in the **editorSymbolChooserConfigure** method to switch the order that the **showByType** and **showBySymbol** methods are called on the editorSymbolChooser instance.  
 - User client side settings added for choosing whether to load any drawings stored in the local storage from the previous session.  New toggle button added to the **Settings** tab on the widget.  Requires that the widget have allow local storage setting in the config set to true, otherwise client toggle option is hidden. 
+
+**05 May 2019**
+
+- Port to WAB 2.12 - no changes
