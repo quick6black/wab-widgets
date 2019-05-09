@@ -34,6 +34,11 @@ define([
     'dojo/on',
     'dojo/promise/all',
     './utils',
+
+    "dijit/form/DropDownButton",
+    'dijit/DropDownMenu',
+    "dijit/MenuItem",
+
     'jimu/dijit/LoadingIndicator'
   ],
   function(
@@ -55,7 +60,12 @@ define([
     query,
     on,
     all,
-    utils) {
+    utils,
+
+    DropDownButton,
+    DropDownMenu,
+    MenuItem
+    ) {
     var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
       name: 'BasemapGalleryPro',
@@ -63,9 +73,29 @@ define([
       basemapGallery: null,
       spatialRef: null,
 
+      /* BEGIN CHANGES: Customisations */
+
+      _groups: null,
+      _groupMenu: null,
+      _groupSelector: null,
+
+      /* END CHANGES */
+
+
       startup: function() {
         /*jshint unused: false*/
         this.inherited(arguments);
+
+        /* BEGIN CHANGE: Apply Basemap Groups */
+
+        if (this.config.basemapGallery.useGroups) {
+          this._groups = {};
+          this._groupMenu = this._createGroupMenu();
+          this._createGroupSelector();
+        }
+
+        /* END CHANGE */
+
         this.initBasemaps();
       },
 
@@ -96,7 +126,7 @@ define([
         var config = lang.clone(this.config.basemapGallery);
 
         this.loadingShelter.show();
-        //load form portal or config file.
+        //load from portal or config file.
         if (config.mode === 1) {
           basemapsDef = utils._loadPortalBaseMaps(this.appConfig.portalUrl, this.map);
         } else {
@@ -248,7 +278,61 @@ define([
             }
           }
         }
+      },
+
+
+      /* BEGIN CHANGES: BASEMAPS GROUPING FUNCTIONS */
+
+      _createGroupSelector: function () {
+        this._groupSelector = new DropDownButton({
+                label: "All Basemaps",
+                name: "groupSelector",
+                id: "groupSelector",
+                dropDown: this._groupMenu
+              }, this.groupSelectorDiv);
+        this._groupSelector.startup(); 
+
+      },
+
+      _createGroupMenu: function () {
+        var menu = new DropDownMenu({
+          style: "display: none;"
+        });
+
+       this._addMenuItem({
+          "id":"all",
+          "label": "All Basemaps",
+          "tag": ""
+        }, menu);
+
+        array.forEach(this.config.basemapGallery.groups, lang.hitch(this, function (group) {
+            this._addMenuItem(group, menu);
+          })
+        );
+
+        menu.startup();
+        return menu;
+      },
+
+      /**
+       * This function is used to add the options in menuitem &
+       * menuitem into menu object
+       */
+      _addMenuItem: function (options, menu) {
+        options = lang.mixin(options, {
+          onClick: lang.hitch(this, function() { this._basemapGroupClick(options)})
+        });
+        var menuItem = new MenuItem(options);
+        menu.addChild(menuItem);
+      },
+
+      _basemapGroupClick: function (group) {
+        alert(group.label);
+        var i = 1;
       }
+
+
+      /* END CHANGES */
     });
 
     clazz.extend(a11y);//for a11y

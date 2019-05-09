@@ -2,7 +2,17 @@
   "basemapGallery": {
     "mode": 1,
     "basemaps": [],
-    "useGroups": false,
-    "groups": []
+    "useGroups": true,
+    "groups": [{
+	    	"id":"vectorBasemaps",
+	    	"tag":"Vector",
+	    	"label":"Vector basemaps"
+	    },
+		{
+	    	"id":"imageryBasemaps",
+	    	"tag":"Imagery",
+	    	"label":"Imagery basemaps"
+		}
+	]
   }
 }

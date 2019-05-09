@@ -50,7 +50,11 @@ define([
                       layers: basemapLayers,
                       title: basemapItem.title || basemapItemData.baseMap.title,
                       thumbnailUrl: thumbnailUrl,
-                      spatialReference: basemapSpatialRef
+                      spatialReference: basemapSpatialRef,
+
+                      /* BEGIN CHANGE: Add tags */
+                      tags: basemapItem.tags
+                      /* END CHANGE */
                     });
                   } else {
                     def.resolve({});

@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 'jimu/BaseWidget', 'jimu/portalUtils', 'jimu/PanelManager', 'jimu/portalUrlUtils', 'jimu/utils', "esri/dijit/Basemap", "esri/dijit/BasemapLayer", 'esri/dijit/BasemapGallery', "./a11y/Widget", 'dojo/_base/lang', 'dojo/_base/array', "dojo/_base/html", "dojo/query", 'dojo/on', 'dojo/promise/all', './utils', 'jimu/dijit/LoadingIndicator'], function (declare, _WidgetsInTemplateMixin, Deferred, BaseWidget, portalUtils, PanelManager, portalUrlUtils, jimuUtils, Basemap, BasemapLayer, BasemapGallery, a11y, lang, array, html, query, on, all, utils) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 'jimu/BaseWidget', 'jimu/portalUtils', 'jimu/PanelManager', 'jimu/portalUrlUtils', 'jimu/utils', "esri/dijit/Basemap", "esri/dijit/BasemapLayer", 'esri/dijit/BasemapGallery', "./a11y/Widget", 'dojo/_base/lang', 'dojo/_base/array', "dojo/_base/html", "dojo/query", 'dojo/on', 'dojo/promise/all', './utils', "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'jimu/dijit/LoadingIndicator'], function (declare, _WidgetsInTemplateMixin, Deferred, BaseWidget, portalUtils, PanelManager, portalUrlUtils, jimuUtils, Basemap, BasemapLayer, BasemapGallery, a11y, lang, array, html, query, on, all, utils, DropDownButton, DropDownMenu, MenuItem) {
   var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
     name: 'BasemapGalleryPro',
@@ -22,9 +22,28 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
     basemapGallery: null,
     spatialRef: null,
 
+    /* BEGIN CHANGES: Customisations */
+
+    _groups: null,
+    _groupMenu: null,
+    _groupSelector: null,
+
+    /* END CHANGES */
+
     startup: function startup() {
       /*jshint unused: false*/
       this.inherited(arguments);
+
+      /* BEGIN CHANGE: Apply Basemap Groups */
+
+      if (this.config.basemapGallery.useGroups) {
+        this._groups = {};
+        this._groupMenu = this._createGroupMenu();
+        this._createGroupSelector();
+      }
+
+      /* END CHANGE */
+
       this.initBasemaps();
     },
 
@@ -55,7 +74,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
       var config = lang.clone(this.config.basemapGallery);
 
       this.loadingShelter.show();
-      //load form portal or config file.
+      //load from portal or config file.
       if (config.mode === 1) {
         basemapsDef = utils._loadPortalBaseMaps(this.appConfig.portalUrl, this.map);
       } else {
@@ -201,7 +220,59 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
           }
         }
       }
+    },
+
+    /* BEGIN CHANGES: BASEMAPS GROUPING FUNCTIONS */
+
+    _createGroupSelector: function _createGroupSelector() {
+      this._groupSelector = new DropDownButton({
+        label: "All Basemaps",
+        name: "groupSelector",
+        id: "groupSelector",
+        dropDown: this._groupMenu
+      }, this.groupSelectorDiv);
+      this._groupSelector.startup();
+    },
+
+    _createGroupMenu: function _createGroupMenu() {
+      var menu = new DropDownMenu({
+        style: "display: none;"
+      });
+
+      this._addMenuItem({
+        "id": "all",
+        "label": "All Basemaps",
+        "tag": ""
+      }, menu);
+
+      array.forEach(this.config.basemapGallery.groups, lang.hitch(this, function (group) {
+        this._addMenuItem(group, menu);
+      }));
+
+      menu.startup();
+      return menu;
+    },
+
+    /**
+     * This function is used to add the options in menuitem &
+     * menuitem into menu object
+     */
+    _addMenuItem: function _addMenuItem(options, menu) {
+      options = lang.mixin(options, {
+        onClick: lang.hitch(this, function () {
+          this._basemapGroupClick(options);
+        })
+      });
+      var menuItem = new MenuItem(options);
+      menu.addChild(menuItem);
+    },
+
+    _basemapGroupClick: function _basemapGroupClick(group) {
+      alert(group.label);
+      var i = 1;
     }
+
+    /* END CHANGES */
   });
 
   clazz.extend(a11y); //for a11y
