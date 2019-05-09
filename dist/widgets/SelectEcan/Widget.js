@@ -422,7 +422,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       ctrlKey = ctrlKey || false;
       metaKey = metaKey || false;
 
-      this.selectDijit.drawBox.onDrawEnd(graphic, geotype, commontype, shiftKey, ctrlKey, metaKey);
+      this.shelter.show();
+
+      setTimeout(lang.hitch(this, function () {
+        this.selectDijit.drawBox.onDrawEnd(graphic, geotype, commontype, shiftKey, ctrlKey, metaKey);
+      }), 1000);
     }
 
     ///////////////////////// END OF ECAN CHANGES //////////////////////////

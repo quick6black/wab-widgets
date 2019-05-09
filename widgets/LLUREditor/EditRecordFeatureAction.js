@@ -27,7 +27,7 @@ define([
 
     isFeatureSupported: function (featureSet) {
       this._recordTemplate = null;
-      if (featureSet.features.length = 1 && 
+      if (featureSet.features.length === 1 && 
           	featureSet.features[0].geometry.type === 'polygon' &&
           	this._checkForFeatureLayers(featureSet)) {
   			var cfg = this._getThisConfig();
@@ -79,9 +79,11 @@ define([
     },
 
     _checkForFeatureLayers: function (featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }       
       }
 
       return false;

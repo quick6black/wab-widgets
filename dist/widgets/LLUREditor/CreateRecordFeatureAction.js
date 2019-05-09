@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
 
         return false;
       } else {
-        return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
+        return featureSet.features[0].geometry.type === 'polygon';
       }
     },
 
