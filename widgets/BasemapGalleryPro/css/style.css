@@ -6,6 +6,8 @@
     margin-bottom: 8px; }
     .jimu-widget-basemapgallery-pro .groupSelectContainer label {
       margin: 0 8px; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer.hidden {
+      display: none; }
     .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton {
       margin: 0;
       width: 100%;

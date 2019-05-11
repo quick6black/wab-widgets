@@ -81,6 +81,7 @@ define([
 
       /* BEGIN CHANGES: Customisations */
 
+      _useGroups: null,
       _groups: null,
       _groupMenu: null,
       _groupSelector: null,
@@ -95,7 +96,10 @@ define([
 
         /* BEGIN CHANGE: Apply Basemap Groups */
 
-        if (this.config.basemapGallery.useGroups) {
+        this._useGroups = this.config.basemapGallery.useGroups &&
+          this.config.basemapGallery.groups &&
+          this.config.basemapGallery.groups.length > 0;
+        if (this._useGroups) {
           this.initBasemapGroups();
           this._groupMenu = this._createGroupMenu();
           this._createGroupSelector();
@@ -214,7 +218,7 @@ define([
 
             /* BEGIN CHANGE: Basemaps function */
 
-            if (config.useGroups) {
+            if (this._useGroups) {
               this._addBasemapToGroups(basemaps[i]);
             }
 
@@ -233,14 +237,21 @@ define([
           */
 
           this._allBasemaps = [];
-          if (config.useGroups) {
+          if (this._useGroups) {
             array.forEach(basemapObjs, lang.hitch(this, function(basemap) {
                 this._allBasemaps.push(basemap);
               })
             );
+
+            //reorder basemaps in groups
+            for(var groupName in this._groups){
+              this._orderBasemaps(this._groups[groupName]);
+            }
+
             //check for default group
             if (config.defaultBasemapGroup && config.defaultBasemapGroup !== '' && this._groups[config.defaultBasemapGroup]) {
                 var group = this._groups[config.defaultBasemapGroup];
+
                 //use group basemaps
                 config.basemaps = group.basemaps;
 
@@ -339,7 +350,8 @@ define([
               this._groups[group.id] = {
                 "label": group.label,
                 "tag": group.tag,
-                "basemaps": []
+                "basemaps": [],
+                "includedBasemaps": group.includedBasemaps
               };
             }
          })
@@ -347,12 +359,33 @@ define([
       },
 
       _addBasemapToGroups: function (basemap) {
-        for (var group in this._groups) {
-          var group = this._groups[group];
+        for (var groupName in this._groups) {
+          var group = this._groups[groupName];
+            if (!group.includedBasemaps) group.includedBasemaps = [];
+
             //check if basemap contains this tag
-            if(basemap && basemap.tags.indexOf(group.tag) > 0) {
+            if(basemap && (
+              basemap.tags.indexOf(group.tag) > -1 || 
+              group.includedBasemaps.indexOf(basemap.title) > -1)) {
               group.basemaps.push(basemap);
+              var i = 0;
             }
+        }
+      },
+
+      _orderBasemaps: function (group) {
+        if (group.includedBasemaps && group.includedBasemaps.length > 0) {
+          var basemaps = [];
+
+          array.forEach(group.includedBasemaps, function(basemapName){
+           var basemap = group.basemaps.filter(function (basemap) {
+              return basemap.title === basemapName;
+            })[0];
+
+            if (basemap) basemaps.push(basemap);
+          });
+
+          group.basemaps = basemaps;
         }
       },
 
@@ -365,7 +398,6 @@ define([
                 dropDown: this._groupMenu
               }, this.groupSelectorDiv);
         this._groupSelector.startup(); 
-
       },
 
       _createGroupMenu: function () {
@@ -427,7 +459,11 @@ define([
             var isActive = activeMap !== null ? basemap.id === activeMap.id : false;
 
             var found = group.basemaps.filter(function(groupmap) {
-              return groupmap.title === basemap.title;
+              if (groupmap) {
+                return groupmap.title === basemap.title;
+              } else {
+                return false;
+              }
             }).length > 0;
 
             if (!found && !isActive) removes.push(basemap);
@@ -437,7 +473,11 @@ define([
         //get maps to add to gallery
         array.forEach(group.basemaps, lang.hitch(this, function (groupmap) {
             var found = current.filter(function(basemap) {
-              return groupmap.title === basemap.title;
+              if (groupmap) {
+                return groupmap.title === basemap.title;
+              } else {
+                return false;
+              }
             }).length > 0;
 
             if (!found) adds.push(groupmap);
