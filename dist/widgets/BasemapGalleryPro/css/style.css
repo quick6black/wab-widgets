@@ -1,5 +1,52 @@
 .jimu-widget-basemapgallery-pro {
   height: 100%; }
+  .jimu-widget-basemapgallery-pro .groupSelectContainer {
+    width: 100%;
+    height: auto;
+    margin-bottom: 8px; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer label {
+      margin: 0 8px; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton {
+      margin: 0;
+      width: 100%;
+      text-align: left; }
+      .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode {
+        background: transparent;
+        border: 1px solid #7EABCD;
+        padding: 4px;
+        margin-top: 2px;
+        font-weight: bold;
+        box-shadow: none;
+        border-radius: 4px;
+        text-align: left;
+        width: 100%; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitButtonContents {
+          border-color: transparent; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitInputField {
+          padding: 0 5px; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitArrowButton {
+          background: transparent;
+          border: 0; }
+          .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitArrowButton .dijitSelectFocused {
+            padding: 0; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDownArrowButton {
+      position: relative; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitArrowButtonInner {
+      position: absolute;
+      right: 8px;
+      top: 3px;
+      background-image: none; }
+      .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitArrowButtonInner:after {
+        content: "\e681";
+        font-family: 'CalciteWebCoreIcons' !important;
+        speak: none;
+        font-style: normal;
+        font-weight: bold;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale; }
 
 .jimu-widget-basemapgallery-pro .esriBasemapGalleryNode:hover {
   color: #51B1FE; }

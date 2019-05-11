@@ -1,5 +1,79 @@
 .jimu-widget-basemapgallery-pro {
   height: 100%;
+
+  .groupSelectContainer {
+    width: 100%;
+    height: auto;
+    margin-bottom: 8px;
+
+    label {
+      margin: 0 8px;
+    }
+
+    .dijitDropDownButton {
+      margin: 0;
+      width: 100%;
+      text-align: left;
+    
+      .dijitButtonNode {
+        background: transparent;
+        border: 1px solid #7EABCD;
+        padding: 4px;
+        margin-top: 2px;
+        font-weight: bold;
+        box-shadow: none;
+        border-radius: 4px;
+        text-align: left;
+        width: 100%;
+
+        .dijitButtonContents {
+          border-color: transparent;
+        }
+
+        .dijitInputField {
+          padding: 0 5px;
+        }
+
+        .dijitArrowButton {
+          background: transparent;
+          border: 0;
+
+          .dijitSelectFocused {
+            padding: 0;
+          }
+        }
+
+      }
+
+    }
+
+    .dijitDownArrowButton {
+      position: relative;
+    }
+
+    .dijitArrowButtonInner {
+      position: absolute;
+      right: 8px;
+      top: 3px;
+      background-image: none;
+
+      &:after {
+        content: "\e681";
+        font-family: 'CalciteWebCoreIcons' !important;
+        speak: none;
+        font-style: normal;
+        font-weight: bold;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+    }
+
+
+  }
 }
 
 .jimu-widget-basemapgallery-pro .esriBasemapGalleryNode:hover{

@@ -14,7 +14,7 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 'jimu/BaseWidget', 'jimu/portalUtils', 'jimu/PanelManager', 'jimu/portalUrlUtils', 'jimu/utils', "esri/dijit/Basemap", "esri/dijit/BasemapLayer", 'esri/dijit/BasemapGallery', "./a11y/Widget", 'dojo/_base/lang', 'dojo/_base/array', "dojo/_base/html", "dojo/query", 'dojo/on', 'dojo/promise/all', './utils', "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'jimu/dijit/LoadingIndicator'], function (declare, _WidgetsInTemplateMixin, Deferred, BaseWidget, portalUtils, PanelManager, portalUrlUtils, jimuUtils, Basemap, BasemapLayer, BasemapGallery, a11y, lang, array, html, query, on, all, utils, DropDownButton, DropDownMenu, MenuItem) {
+define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 'jimu/BaseWidget', 'jimu/portalUtils', 'jimu/PanelManager', 'jimu/portalUrlUtils', 'jimu/utils', "esri/dijit/Basemap", "esri/dijit/BasemapLayer", 'esri/dijit/BasemapGallery', "./a11y/Widget", 'dojo/_base/lang', 'dojo/_base/array', "dojo/_base/html", "dojo/query", 'dojo/on', 'dojo/promise/all', './utils', 'dojo/dom-class', 'dojo/dom-style', "dijit/form/DropDownButton", 'dijit/DropDownMenu', "dijit/MenuItem", 'jimu/dijit/LoadingIndicator'], function (declare, _WidgetsInTemplateMixin, Deferred, BaseWidget, portalUtils, PanelManager, portalUrlUtils, jimuUtils, Basemap, BasemapLayer, BasemapGallery, a11y, lang, array, html, query, on, all, utils, domClass, domStyle, DropDownButton, DropDownMenu, MenuItem) {
   var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
     name: 'BasemapGalleryPro',
@@ -27,6 +27,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
     _groups: null,
     _groupMenu: null,
     _groupSelector: null,
+    _allBasemaps: null,
 
     /* END CHANGES */
 
@@ -37,9 +38,10 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
       /* BEGIN CHANGE: Apply Basemap Groups */
 
       if (this.config.basemapGallery.useGroups) {
-        this._groups = {};
+        this.initBasemapGroups();
         this._groupMenu = this._createGroupMenu();
         this._createGroupSelector();
+        domClass.remove(this.groupSelectContainer, "hidden");
       }
 
       /* END CHANGE */
@@ -149,13 +151,50 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
             // }
           }
           basemapObjs.push(new Basemap(basemaps[i]));
+
+          /* BEGIN CHANGE: Basemaps function */
+
+          if (config.useGroups) {
+            this._addBasemapToGroups(basemaps[i]);
+          }
+
+          /* END CHANGE */
         }
 
         config.map = this.map;
         if (this.appConfig.portalUrl) {
           config.portalUrl = this.appConfig.portalUrl;
         }
+
+        /* BEGIN CHANGE: Basemap groups functions 
+        ORIGINAL CODE:
         config.basemaps = basemapObjs;
+        */
+
+        this._allBasemaps = [];
+        if (config.useGroups) {
+          array.forEach(basemapObjs, lang.hitch(this, function (basemap) {
+            this._allBasemaps.push(basemap);
+          }));
+          //check for default group
+          if (config.defaultBasemapGroup && config.defaultBasemapGroup !== '' && this._groups[config.defaultBasemapGroup]) {
+            var group = this._groups[config.defaultBasemapGroup];
+            //use group basemaps
+            config.basemaps = group.basemaps;
+
+            //update title on group selector
+            this._groupSelector.set('label', group.label);
+          } else {
+            //use all basemaps
+            config.basemaps = basemapObjs;
+          }
+        } else {
+          //use all basemaps
+          config.basemaps = basemapObjs;
+        }
+
+        /* END CHANGE */
+
         config.showArcGISBasemaps = false;
         config.bingMapsKey = result.portalSelf.bingKey;
         this.basemapGallery = new BasemapGallery(config, this.basemapGalleryDiv);
@@ -224,9 +263,35 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
 
     /* BEGIN CHANGES: BASEMAPS GROUPING FUNCTIONS */
 
+    initBasemapGroups: function initBasemapGroups() {
+      this._groups = {};
+
+      //add unique groups to list
+      array.forEach(this.config.basemapGallery.groups, lang.hitch(this, function (group) {
+        if (!this._groups.hasOwnProperty(group.id)) {
+          this._groups[group.id] = {
+            "label": group.label,
+            "tag": group.tag,
+            "basemaps": []
+          };
+        }
+      }));
+    },
+
+    _addBasemapToGroups: function _addBasemapToGroups(basemap) {
+      for (var group in this._groups) {
+        var group = this._groups[group];
+        //check if basemap contains this tag
+        if (basemap && basemap.tags.indexOf(group.tag) > 0) {
+          group.basemaps.push(basemap);
+        }
+      }
+    },
+
     _createGroupSelector: function _createGroupSelector() {
       this._groupSelector = new DropDownButton({
-        label: "All Basemaps",
+        label: this.nls.allBasemapsLabel,
+        tooltip: this.nls.basemapGroupChooserTooltip,
         name: "groupSelector",
         id: "groupSelector",
         dropDown: this._groupMenu
@@ -241,13 +306,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
 
       this._addMenuItem({
         "id": "all",
-        "label": "All Basemaps",
+        "label": this.nls.allBasemapsLabel,
         "tag": ""
       }, menu);
 
-      array.forEach(this.config.basemapGallery.groups, lang.hitch(this, function (group) {
+      for (var groupid in this._groups) {
+        var group = this._groups[groupid];
         this._addMenuItem(group, menu);
-      }));
+      }
 
       menu.startup();
       return menu;
@@ -268,8 +334,59 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
     },
 
     _basemapGroupClick: function _basemapGroupClick(group) {
-      alert(group.label);
-      var i = 1;
+      this._setBasemapGroup(group);
+    },
+
+    _setBasemapGroup: function _setBasemapGroup(group) {
+      if (group && group.hasOwnProperty("basemaps") && group.basemaps.length > 0) {
+        this._groupSelector.set('label', group.label);
+        this._updateBasemaps(group);
+      } else {
+        //default to show all basemaps
+        this._groupSelector.set('label', this.nls.allBasemapsLabel);
+        this._updateBasemaps();
+      }
+    },
+
+    _updateBasemaps: function _updateBasemaps(group) {
+      if (!group) {
+        group = { "basemaps": this._allBasemaps };
+      }
+
+      var adds = [],
+          removes = [],
+          current = this.basemapGallery.basemaps,
+          activeMap = this.basemapGallery.getSelected();
+
+      //get maps to remove from gallery
+      array.forEach(current, lang.hitch(this, function (basemap) {
+        var isActive = activeMap !== null ? basemap.id === activeMap.id : false;
+
+        var found = group.basemaps.filter(function (groupmap) {
+          return groupmap.title === basemap.title;
+        }).length > 0;
+
+        if (!found && !isActive) removes.push(basemap);
+      }));
+
+      //get maps to add to gallery
+      array.forEach(group.basemaps, lang.hitch(this, function (groupmap) {
+        var found = current.filter(function (basemap) {
+          return groupmap.title === basemap.title;
+        }).length > 0;
+
+        if (!found) adds.push(groupmap);
+      }));
+
+      //remove unneeded basemaps
+      array.forEach(removes, lang.hitch(this, function (basemap) {
+        this.basemapGallery.remove(basemap.id);
+      }));
+
+      //add new basemaps
+      array.forEach(adds, lang.hitch(this, function (basemap) {
+        this.basemapGallery.add(basemap);
+      }));
     }
 
     /* END CHANGES */
