@@ -42,6 +42,9 @@
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    position: relative;
+    
+    /*
     position: absolute;
     bottom: 0;
     top: 115px;
@@ -49,6 +52,10 @@
     &.mode-online {
       top: 70px;
     }
+    */
+    height: calc(100% - 230px);
+    margin-bottom: 15px;
+
 
     .import-tip, .nomap-tip {
       text-align: center;
@@ -132,5 +139,24 @@
   .btn-warn {
     border: 1px solid #C21712;
     color: #C21712;
+  }
+
+  .groups-section {
+    font-family: "Avenir Light";
+    font-size: 14px;
+    color: #000000;
+
+    > div {
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    input {
+      margin: 2px;
+    }
+
+    label {
+      margin: 0 8px;
+    }
   }
 }

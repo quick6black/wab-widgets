@@ -30,8 +30,16 @@ define([
     '../utils',
     './GroupSelector',
     '../BasemapItem',
+
+    'dojo/dom',
+    'dojo/dom-construct',
+    'dojo/dom-class',
+
+    'jimu/dijit/SimpleTable',
+
     'jimu/dijit/LoadingIndicator',
     'dijit/form/RadioButton'
+
   ],
   function(
     declare,
@@ -47,7 +55,15 @@ define([
     Edit,
     utils,
     GroupSelector,
-    BasemapItem) {
+    BasemapItem,
+
+    dom, 
+    domConstruct,
+    domClass,
+
+    SimpleTable
+
+    ) {
     var RESPECT_ONLINE = 1, CUSTOM_BASEMAP = 2;
 
     return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
@@ -83,6 +99,12 @@ define([
             html.addClass(this.baseMapsDiv, 'mode-online');
             this.clearBaseMapsDiv();
             this.loadDefaultBasemaps();
+
+            /* BEGIN CHANGE: Groups visibility */
+
+            html.setStyle(this.groupsSection, 'display', 'block');
+
+            /* END CHANGE */
           }
         })));
         this.own(on(this.customRaido, 'click', lang.hitch(this, function(){
@@ -92,8 +114,29 @@ define([
             html.removeClass(this.baseMapsDiv, 'mode-online');
             this.clearBaseMapsDiv();
             this._createMapItems();
+
+            /* BEGIN CHANGE: Groups visibility */
+
+            html.setStyle(this.groupsSection, 'display', 'none');
+
+            /* END CHANGE */
           }
         })));
+
+        /* BEGIN CHANGE: Group option functions */
+
+        this.own(on(this.useGroupsRadio, 'click', lang.hitch(this, function(){
+          if (this.useGroupsRadio.get('checked')) {
+            //html.setStyle(this.groupsSection, 'display', 'block');
+          }
+        })));
+        this.own(on(this.singleListRadio, 'click', lang.hitch(this, function(){
+          if (this.singleListRadio.get('checked')) {
+            //html.setStyle(this.groupsSection, 'display', 'none');
+          }
+        })));
+
+        /* END CHANGE */
       },
 
       startup: function() {
@@ -137,6 +180,22 @@ define([
           this.clearBaseMapsDiv();
           this.loadDefaultBasemaps();
         }
+
+          /* BEGIN CHANGES: Basemap Groups Functions */
+
+          if (config.basemapGallery.useGroups &&
+            config.basemapGallery.mode === RESPECT_ONLINE) {
+            this.useGroupsRadio.set('checked', true);
+            domStyle.set(this.groupsSection, 'display', 'block');
+          } else {
+            this.singleListRadio.set('checked', true);
+            domStyle.set(this.groupsSection, 'display', 'none');
+          }
+
+          this.createTableObject(config.basemapGallery.groups);
+
+          /* END CHANGES */
+
       },
 
       getConfig: function() {
@@ -146,6 +205,13 @@ define([
           this.config.basemapGallery.mode = CUSTOM_BASEMAP;
         }
         this.config.basemapGallery.basemaps = this.basemaps;
+        
+        /* BEGIN CHANGE: Basemap groups function */
+
+        this.config.basemapGallery.useGroups = this.useGroupsRadio.get('checked');
+
+        /* END CHANGE */
+
         return this.config;
       },
 
@@ -409,6 +475,101 @@ define([
           this._createMapItem(basemap, BasemapItem.MODE_EDIT);
           this.basemaps.push(basemap);
         }, this);
+      },
+
+      /* BEGIN CHANGES: Custom Group Functions */
+
+      createTableObject: function(pParam) {
+        var fields = null;
+        fields = [{
+          name: "id",
+          title: this.nls.tables.group,
+          "class": "label",
+          type: "text",
+          width: "100px",
+          editable: true
+        }, {
+          name: "label",
+          title: this.nls.tables.label,
+          "class": "label",
+          type: "text",
+          width: "150px",
+          editable: true
+        }, {
+          name: "tag",
+          title: this.nls.tables.tag,
+          "class": "label",
+          type: "text",
+          width: "100px",
+          editable: true
+        }, {
+          name: "includedBasemaps",
+          title: this.nls.tables.tag,
+          "class": "label",
+          type: "empty",
+          width: "200px"
+        }, {
+          name: "actions",
+          title: this.nls.tables.action,
+          type: "actions",
+          actions: ["edit","delete"],
+          width: "50px"
+        }, {
+          name : 'dataTypeCol',
+          type : 'empty',
+          hidden : true,
+          width : 0
+        }];
+
+        var args = {
+          fields: fields,
+          'class': 'layer-tables'
+        };
+        var groupTable = new SimpleTable(args);
+        groupTable.placeAt(dom.byId('grpDiv'));
+        groupTable.startup();
+
+        this.own(on(groupTable,'actions-edit', lang.hitch(this, function (row) {
+            //this.
+        })));
+
+
+        if(typeof(pParam) !== 'undefined' && pParam !== null) {
+          array.forEach(pParam, lang.hitch(this, function(group) {
+            this.addGroupRow(groupTable, group);
+          }));
+        } else {
+          this.addGroupRow(groupTable, pParam);
+        }
+
+        //this.createLayerSelection();
+      },
+
+      addGroupRow: function(pBlock, pParam) {
+        var result = pBlock.addRow(pParam);
+        if (result.success && result.tr) {
+          var tr = result.tr;
+          
+          /*
+          this.createGroupSelection(tr, pParam, numPart);
+
+          var valueRadio = tr.cells[2].childNodes[0];
+          var radioState = valueRadio.checked;
+          this.own(on(valueRadio, "click", lang.hitch(this, function() {
+            if(radioState) {
+              valueRadio.checked = false;
+              radioState = false;
+            } else {
+              valueRadio.checked = true;
+              radioState = true;
+            }
+          })));
+          */
+        }
       }
+
+
+      /* END CHANGES */
+
     });
   });

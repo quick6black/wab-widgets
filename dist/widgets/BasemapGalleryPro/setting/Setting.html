@@ -9,9 +9,6 @@
       <label data-dojo-attach-point="customLabel" for="basemapSettingCustom">${nls.customBasemap}</label>
     </div>
   </div>
-  <div class="groups-section" data-dojo-attach-point="groupsSection">
-    
-  </div>
   <div class="custom-section" data-dojo-attach-point="customBasemapSection">
     <div class="jimu-btn btn btn-normal" data-dojo-attach-event="onclick: onChooseFromOnlineClick">
       ${nls.importBasemap}
@@ -26,6 +23,19 @@
       <div class="no-basemaptip">${nls.noBasemaps}</div>
       <div class="search-none-tip">${nls.noBasemapAvailable}</div>
     </div>
+  </div>
+    <div class="groups-section" data-dojo-attach-point="groupsSection" style="display:none;">
+    <div>
+      <input data-dojo-type="dijit/form/RadioButton" data-dojo-attach-point="singleListRadio" id="basemapNoGroups" name="groupsRadio"/>
+      <label data-dojo-attach-point="singleListLabel" for="basemapNoGroups">${nls.singleList}</label>
+    </div>
+    <div>
+      <input data-dojo-type="dijit/form/RadioButton" data-dojo-attach-point="useGroupsRadio" id="basemapGroupsUse" name="groupsRadio"/>
+      <label data-dojo-attach-point="useGroupsLabel" for="basemapGroupsUse">${nls.useGroups}</label>
+    </div>
+
+    <div data-dojo-attach-point="groupsTable" id="grpDiv"></div>
+
   </div>
   <div data-dojo-type="jimu/dijit/LoadingIndicator" data-dojo-attach-point="loadingShelter" data-dojo-props='hidden:true'></div>
 </div>

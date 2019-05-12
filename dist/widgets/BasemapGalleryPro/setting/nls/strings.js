@@ -33,6 +33,18 @@ define({
     defaultOrgGroup: "Organization default",
     warningTitle: "Warning",
     confirmDelete: "Do you want to delete selected basemaps?",
-    noBasemapAvailable: "There are no basemaps available because all basemaps have different spatial reference or tiling scheme from the current map."
+    noBasemapAvailable: "There are no basemaps available because all basemaps have different spatial reference or tiling scheme from the current map.",
+    singleList: "Show all basemaps in one list.",
+    useGroups: "Use basemaps groups.",
+    tables : {
+      group : "Group",
+      groupTip: "Name of the group of basemaps.",
+      label : "Label",
+      labelTip: "Name that will be displayed in the group selection tool.",
+      tag: "Item tag",
+      tagTip:"Specific tag value on the webmap items for basemap to be included in the group.",
+      action : "Delete",
+      actionTip: "Remove layer from the filter set."
+    },
   })
 });
