@@ -62,14 +62,14 @@ define([
               this._queryForFeatures(featureSet)
                 .then(
                   function(results) {
-                    myWidget.copyFeatureSet(results);
+                    setTimeout(function() {myWidget.copyFeatureSet(results);},1000);                    
                   }, 
                   function (error) {
                     alert(error);
                   }
                 );
           } else {
-            myWidget.copyFeatureSet(featureSet);
+            setTimeout(function() {myWidget.copyFeatureSet(featureSet);},1000);
           }       
         })
       );
