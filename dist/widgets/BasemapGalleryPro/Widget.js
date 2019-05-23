@@ -245,7 +245,21 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
       if (this.map.getNumLevels() > 0) {
         // Set scale to nearest level of current basemap layer
         var basemap = this.basemapGallery.getSelected();
+
+        /* BEGIN CHANGE: check for vector basemaps 
+        // Original Code: 
         var layers = basemap.getLayers();
+         */
+
+        var layers;
+        if (basemap.layers) {
+          layers = basemap.layers;
+        } else {
+          layers = basemap.getLayers();
+        }
+
+        /* END CHANGE */
+
         var currentLod = this.map.__tileInfo.lods[this.map.getLevel()];
         var layer, tileInfo;
 
