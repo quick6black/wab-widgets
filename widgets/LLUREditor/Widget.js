@@ -674,8 +674,8 @@ function(
                     this._saveStatementRequest(newGraphic);
                 } else {
                     this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
-                })
-            );
+                }
+            }));
 
             requestPopup.popup.close();
             requestPopup.destroy();
@@ -840,7 +840,7 @@ function(
             } else {
                 this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
             }
-        ));
+        }));
     },
 
     //abandon the current edit session and reset the tools
