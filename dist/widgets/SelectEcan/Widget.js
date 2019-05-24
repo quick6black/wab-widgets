@@ -186,7 +186,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             // ECAN CHANGE - Configure initial state of selected check box to override visible state
 
             var checked = visible;
-            if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
+
+            if (this.config.selectedLayersMode === null) {
+              checked = false;
+            } else if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
               checked = this.config.selectedLayersMode === 'none' ? false : true;
             }
 
@@ -201,8 +204,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
               map: this.map,
               nls: this.nls
             });
+
             this.own(on(item, 'switchToDetails', lang.hitch(this, this._switchToDetails)));
-            this.own(on(item, 'stateChange', lang.hitch(this, function () {
+            this.own(on(item, 'stateChange', lang.hitch(this, function (itemStatus) {
               this.shelter.show();
               if ('visible' in itemStatus) {
                 this.selectDijit.setDisplayLayerVisibility(itemStatus.featureLayer, itemStatus.visible);
