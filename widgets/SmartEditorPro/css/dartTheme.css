@@ -1,0 +1,105 @@
+﻿.jimu-widget-smartEditor-pro .esriTemplatePicker * {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+/*
+.jimu-widget-smartEditor-pro .templatePicker * {
+    background-color: transparent !important;
+}
+*/
+
+.jimu-widget-smartEditor-pro .ee-presetValueHeaderTable {
+    color: #ffffff !important;
+    background-color: darkgray !important;
+}
+
+.claro .dijitDateTextBox .dijitArrowButton:before {
+    content: none !important;
+}
+
+.jimu-widget-smartEditor-pro .dijitEditorIFrameContainer {
+    background-color: transparent !important;
+}
+
+.jimu-widget-smartEditor-pro .dijitEditorIFrame {
+    background-color: transparent !important;
+}
+
+.jimu-widget-smartEditor-pro .attwarning {
+    color: brown;
+}
+
+.jimu-widget-sefilterEditor .flDropDown {
+    background-color: transparent !important;
+    color: white !important;
+}
+
+.jimu-widget-sefilterEditor .flDropDown option {
+    background-color: #4c4c4c !important;
+    color: white !important;
+}
+
+.jimu-widget-sefilterEditor .searchtextbox {
+    background-color: transparent !important;
+    color: white !important;
+}
+
+.widgetIndicator {
+    left: -15px !important;
+    width: 125% !important;
+}
+
+
+/* dropdown */
+
+.drawingOptionsDiv .dijitDropDownButton .dijitButtonNode {
+    border: 1px solid #7EABCD!important;
+}
+
+
+/* Images for dart theme in white color */
+
+.jimu-widget-smartEditor-pro .itemTitleUpArrow, .jimu-widget-smartEditor-pro .itemTitleNextArrow {
+    background-image: url(../images/upArrow-white.png);
+}
+
+.jimu-widget-smartEditor-pro .itemTitleDownArrow {
+    background-image: url(../images/downArrow-white.png);
+}
+
+.jimu-widget-smartEditor-pro .itemTitleCreateNew {
+    background-image: url(../images/newFeature-white.png);
+}
+
+.jimu-widget-smartEditor-pro .refreshAttributes {
+    background-image: url(../images/refresh-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTAutoUpdateOnMode {
+    background-image: url(../images/auto-update-on-mode-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTAutoUpdateOffMode {
+    background-image: url(../images/auto-update-off-mode-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTMapNavigationLocked {
+    background-image: url(../images/map-navigation-locked-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTMapNavigationUnLocked {
+    background-image: url(../images/map-navigation-unlocked-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTLocateButtonContainer {
+    background-image: url(../images/locate-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTXYCoordinates {
+    background-image: url(../images/xy-coordinates-white.png);
+}
+
+.jimu-widget-smartEditor-pro .esriCTCopyFeaturesMainDiv {
+    background-color: #4c4c4c;
+}

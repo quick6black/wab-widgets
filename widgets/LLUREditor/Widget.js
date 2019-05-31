@@ -660,16 +660,23 @@ function(
             var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            var userName = portal.user !== null ? portal.user.email : 'Unknown';
+            var user = portal.getUser().then(lang.hitch(this, function (details) {
+                if (details && details.email) {
+                    var userName = details.email;
 
-            var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
-            newAttributes["EnquirerName"] = userName;
-            newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
-            newAttributes["SearchRadius"] = searchRadius || 0;
-            var newGraphic = new Graphic(shape, null, newAttributes);
-            newGraphic._extent = newGraphic.geometry.getExtent();
+                    var newAttributes = lang.clone(enquiryTemplate.templates[0].prototype.attributes);
+                    newAttributes["EnquirerName"] = userName;
+                    newAttributes["NatureOfEnquiry"] = "Self Service Statement Request";
+                    newAttributes["SearchRadius"] = searchRadius || 0;
+                    var newGraphic = new Graphic(shape, null, newAttributes);
+                    newGraphic._extent = newGraphic.geometry.getExtent();
 
-            this._saveStatementRequest(newGraphic);
+                    this._saveStatementRequest(newGraphic);
+                } else {
+                    this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
+                }
+            }));
+
             requestPopup.popup.close();
             requestPopup.destroy();
         });
@@ -725,107 +732,115 @@ function(
         var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
         var portal = jimuPortalUtils.getPortal(portalUrl);
 
-        var userName = portal.user !== null ? portal.user.email : 'Unknown';
-        var now = this._getUTCDatestamp();
+        var user = portal.getUser().then(lang.hitch(this, function (details) {
+            if (details && details.email) {
+                var userName = details.email;
 
-        //Check is this update or new record
-        if (editRecord && editRecord.attributes["ID"] !== null) {
-            this._changeEditToolState(false, "Starting Update Process");
+                var now = this._getUTCDatestamp();
 
-            //confirm the current record exists and get the current model
-            /*
-            this._requestLLUREntity(apiRecord).then(
-                    lang.hitch(this, function (response) {
-                        //if valid record found
-                        if (response.data !== null) {
-            */
-                            //generate a shape dto to send through as an update
-                            var shapeDto = null;
-                            var entType = null;
-                            if (typeof editRecord.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
-                            if (typeof editRecord.attributes["Category"] !== 'undefined') entType = 'SIT';
-                            if (typeof editRecord.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
-                            if (typeof editRecord.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
-                            if (typeof editRecord.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
+                //Check is this update or new record
+                if (editRecord && editRecord.attributes["ID"] !== null) {
+                    this._changeEditToolState(false, "Starting Update Process");
 
-                            switch(entType) {
-                                //case 'INV':
-                                //    shapeDto = automapperUtil.map('graphic','invShapeDto', editRecord);
-                                //    break;
+                    //confirm the current record exists and get the current model
+                    /*
+                    this._requestLLUREntity(apiRecord).then(
+                            lang.hitch(this, function (response) {
+                                //if valid record found
+                                if (response.data !== null) {
+                    */
+                                    //generate a shape dto to send through as an update
+                                    var shapeDto = null;
+                                    var entType = null;
+                                    if (typeof editRecord.attributes["ActivityType"] !== 'undefined') entType = 'ACT';
+                                    if (typeof editRecord.attributes["Category"] !== 'undefined') entType = 'SIT';
+                                    if (typeof editRecord.attributes["InvestigationType"] !== 'undefined') entType = 'INV';
+                                    if (typeof editRecord.attributes["EnquiryType"] !== 'undefined') entType = 'ENQ';
+                                    if (typeof editRecord.attributes["CommunicationType"] !== 'undefined') entType = 'COM';
 
-                                default:
-                                    shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
-                                    break;
+                                    switch(entType) {
+                                        //case 'INV':
+                                        //    shapeDto = automapperUtil.map('graphic','invShapeDto', editRecord);
+                                        //    break;
+
+                                        default:
+                                            shapeDto = automapperUtil.map('graphic','shapeDto', editRecord);
+                                            break;
+                                    }
+
+                                    shapeDto.modifiedByEmail = userName;
+                                    shapeDto.modifiedDate = now;
+
+                                    this._putExistingAPIEntity(shapeDto)
+                                        .then(
+                                            lang.hitch(this, 
+                                                function (result) { 
+                                                    this._postGISFeatureChanges(editRecord, false);
+                                                    this._postGeometryChanges(editRecord, false);
+                                                }),
+                                            lang.hitch(this, 
+                                                function (error) {
+                                                    if (error) {
+                                                        console.error(error);
+                                                        this.showMessage(error.message,"error");
+                                                    } else {
+                                                        this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error","error");
+                                                    }
+
+                                                    this._changeEditToolState(true);
+                                                })
+                                        );
+                                /*}
+                            }),
+                            lang.hitch(this, function (error) {
+                                console.error(error);
+                                this._changeEditToolState(true);
+                            })
+                        );*/
+                } else {
+                    this._changeEditToolState(false, "Starting Save New Record Process");
+
+                    //update user and time on record
+                    apiRecord.createdByEmail = userName;
+                    apiRecord.createdDate = now;
+
+                    apiRecord.modifiedByEmail = userName;
+                    apiRecord.modifiedDate = now;            
+
+                    //get the template for the rec type - match against configured layer settings
+                    var template = null;
+                    arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+                        function (recordTemplate) {
+                            if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
+                                template = recordTemplate;
                             }
+                        })
+                    );
 
-                            shapeDto.modifiedByEmail = userName;
-                            shapeDto.modifiedDate = now;
+                    //post entity to api and await response
+                    this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
+                        .then(
+                            lang.hitch(this, function (result) {
+                                var resultData = result.data;
+                                if (resultData.id) {
+                                    editRecord.attributes["ID"] = resultData.id;
+                                    editRecord.attributes["EntType_ID"] = resultData.entTypeId;
+                                }
 
-                            this._putExistingAPIEntity(shapeDto)
-                                .then(
-                                    lang.hitch(this, 
-                                        function (result) { 
-                                            this._postGISFeatureChanges(editRecord, false);
-                                            this._postGeometryChanges(editRecord, false);
-                                        }),
-                                    lang.hitch(this, 
-                                        function (error) {
-                                            if (error) {
-                                                console.error(error);
-                                                this.showMessage(error.message,"error");
-                                            } else {
-                                                this.showMessage("LLUR Edit Widget: Save Changes putExistingAPIEntity Error","error");
-                                            }
+                                this._postGISFeatureChanges(editRecord, true);
+                                this._postGeometryChanges(editRecord, true);
+                            }),
+                            lang.hitch(this, function (error) {
+                                this.showMessage(error.message,"error");
+                                this._changeEditToolState(true);
+                            })
+                        );
+                }
 
-                                            this._changeEditToolState(true);
-                                        })
-                                );
-                        /*}
-                    }),
-                    lang.hitch(this, function (error) {
-                        console.error(error);
-                        this._changeEditToolState(true);
-                    })
-                );*/
-        } else {
-            this._changeEditToolState(false, "Starting Save New Record Process");
-
-            //update user and time on record
-            apiRecord.createdByEmail = userName;
-            apiRecord.createdDate = now;
-
-            apiRecord.modifiedByEmail = userName;
-            apiRecord.modifiedDate = now;            
-
-            //get the template for the rec type - match against configured layer settings
-            var template = null;
-            arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
-                function (recordTemplate) {
-                    if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
-                        template = recordTemplate;
-                    }
-                })
-            );
-
-            //post entity to api and await response
-            this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
-                .then(
-                    lang.hitch(this, function (result) {
-                        var resultData = result.data;
-                        if (resultData.id) {
-                            editRecord.attributes["ID"] = resultData.id;
-                            editRecord.attributes["EntType_ID"] = resultData.entTypeId;
-                        }
-
-                        this._postGISFeatureChanges(editRecord, true);
-                        this._postGeometryChanges(editRecord, true);
-                    }),
-                    lang.hitch(this, function (error) {
-                        this.showMessage(error.message,"error");
-                        this._changeEditToolState(true);
-                    })
-                );
-        }
+            } else {
+                this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
+            }
+        }));
     },
 
     //abandon the current edit session and reset the tools
@@ -1037,16 +1052,22 @@ function(
             var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
             var portal = jimuPortalUtils.getPortal(portalUrl);
 
-            var userName = portal.user !== null ? portal.user.email : 'Unknown';
-            var currentDate = new Date().valueOf();
+            var user = portal.getUser().then(lang.hitch(this, function (details) {
+                if (details && details.email) {
+                    var userName = details.email;
+                    var currentDate = new Date().valueOf();
 
-            if (rec.attributes["CREATEDBY"] === null){
-                rec.attributes["CREATEDBY"] = userName;
-                rec.attributes["CREATEDDATE"] = currentDate;
-            }
+                    if (rec.attributes["CREATEDBY"] === null){
+                        rec.attributes["CREATEDBY"] = userName;
+                        rec.attributes["CREATEDDATE"] = currentDate;
+                    }
 
-            rec.attributes["MODIFIEDBY"] = userName;
-            rec.attributes["MODIFIEDDATE"] = currentDate;
+                    rec.attributes["MODIFIEDBY"] = userName;
+                    rec.attributes["MODIFIEDDATE"] = currentDate;
+                } else {
+                    this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
+                }
+            }));                    
         }
     },
 
@@ -1404,106 +1425,113 @@ function(
         var portalUrl = jimuPortalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
         var portal = jimuPortalUtils.getPortal(portalUrl);
 
-        var userName = portal.user !== null ? portal.user.email : 'Unknown';
-        var now = this._getUTCDatestamp();
+        var user = portal.getUser().then(lang.hitch(this, function (details) {
+            if (details && details.email) {
+                var userName = details.email;
+                var now = this._getUTCDatestamp();
 
-        apiRecord.createdByEmail = userName;
-        apiRecord.createdDate = now;
+                apiRecord.createdByEmail = userName;
+                apiRecord.createdDate = now;
 
-        apiRecord.modifiedByEmail = userName;
-        apiRecord.modifiedDate = now;            
+                apiRecord.modifiedByEmail = userName;
+                apiRecord.modifiedDate = now;            
 
-        //get the template for the enquiry rec type - match against configured layer settings
-        var template = null;
-        arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
-            function (recordTemplate) {
-                if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
-                    template = recordTemplate;
+                //get the template for the enquiry rec type - match against configured layer settings
+                var template = null;
+                arrayUtils.forEach( this.recordTemplateLayers, lang.hitch(this, 
+                    function (recordTemplate) {
+                        if (recordTemplate.apiSettings.mappingClass === apiRecord.entTypeId) {
+                            template = recordTemplate;
+                        }
+                    })
+                );
+
+                //post entity to api and await response
+                this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
+                    .then(
+                        lang.hitch(this, function (result) {
+                            var resultData = result.data;
+                            if (resultData.id) {
+                                newGraphic.attributes["ID"] = resultData.id;
+                                newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
+                            }
+                            this._changeEditToolState(false, "Updating GIS");
+                            this._postGISFeatureChanges(newGraphic, true);
+                            if (this._geometryLayer) {
+                                var feature = new Graphic(newGraphic.toJson()), 
+                                    newAttributes = automapperUtil.map('graphic','llurGeoFeature', newGraphic);
+
+                                //update feature roperties
+                                feature.setAttributes(newAttributes);
+                                feature.setSymbol(null);
+                                this._updateGeometryProperties(feature);
+                                this._updateUserProperties(feature);
+
+                                var inserts =  [feature], updates = null, deletes = null;
+
+                                //send edits to geometry layer
+                                this._geometryLayer.applyEdits(inserts, updates, deletes, 
+                                    lang.hitch(this, 
+                                        function (results) {
+                                            //call the notify process to request an email
+                                            if (!updates) {
+                                                updates = [];
+                                            }
+
+                                            var feature = updates.concat(inserts)[0];
+                                            var id = feature.attributes["ID"];
+                                            var enttype = feature.attributes["EntType_ID"];
+
+                                            this._changeEditToolState(false, "Requesting Document");
+                                            this._postNotifyAPIEntity(id, userName).then(
+                                                lang.hitch(this,
+                                                    function (result) {
+                                                        var buttons = [
+                                                            {
+                                                                label: this.nls.messagesDialog.gotoLLUR,
+                                                                onClick: lang.hitch(this,function () {
+                                                                    var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
+                                                                    window.open(url, '_blank');                                                            
+                                                                })
+                                                            },{
+                                                                label: this.nls.messagesDialog.confirmOk,
+                                                            }
+                                                        ];
+
+
+
+
+                                                        this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.", null, buttons);
+                                                        this._changeEditToolState(true);    
+                                                        this.tabContainer.selectTab(this.nls.tabs.create);                                       
+                                                    }),
+                                                lang.hitch(this,
+                                                    function (error) {
+                                                        console.error(error);
+                                                        this.showMessage("An error has occured while requesting the statement document.  Your reference ID is ENQ" + id + ".  Please contact the LLUR system administrator if this problem persists using this reference ID.","error");
+                                                        this._changeEditToolState(true);                                                
+                                                    })
+                                                );
+                                        }),
+                                    lang.hitch(this,
+                                        function (error) {
+                                            this.showMessage(error.message,"error");
+                                            this._changeEditToolState(true);
+
+                                        })
+                                    );
+                            }
+                        }),
+                        lang.hitch(this, function (error) {
+                            this.showMessage(error.message,"error");
+                            this._changeEditToolState(true);
+                        })
+                    );
+                } else {
+                    this.showMessage("This function requires the user is fully logged into ECan Maps with a valid email. Restart ECan Maps and try again, and contact admin if issue persists.", "error");
                 }
             })
         );
-
-        //post entity to api and await response
-        this._postNewAPIEntity(apiRecord, template.apiSettings.controller)
-            .then(
-                lang.hitch(this, function (result) {
-                    var resultData = result.data;
-                    if (resultData.id) {
-                        newGraphic.attributes["ID"] = resultData.id;
-                        newGraphic.attributes["EntType_ID"] = resultData.entTypeId;
-                    }
-                    this._changeEditToolState(false, "Updating GIS");
-                    this._postGISFeatureChanges(newGraphic, true);
-                    if (this._geometryLayer) {
-                        var feature = new Graphic(newGraphic.toJson()), 
-                            newAttributes = automapperUtil.map('graphic','llurGeoFeature', newGraphic);
-
-                        //update feature roperties
-                        feature.setAttributes(newAttributes);
-                        feature.setSymbol(null);
-                        this._updateGeometryProperties(feature);
-                        this._updateUserProperties(feature);
-
-                        var inserts =  [feature], updates = null, deletes = null;
-
-                        //send edits to geometry layer
-                        this._geometryLayer.applyEdits(inserts, updates, deletes, 
-                            lang.hitch(this, 
-                                function (results) {
-                                    //call the notify process to request an email
-                                    if (!updates) {
-                                        updates = [];
-                                    }
-
-                                    var feature = updates.concat(inserts)[0];
-                                    var id = feature.attributes["ID"];
-                                    var enttype = feature.attributes["EntType_ID"];
-
-                                    this._changeEditToolState(false, "Requesting Document");
-                                    this._postNotifyAPIEntity(id, userName).then(
-                                        lang.hitch(this,
-                                            function (result) {
-                                                var buttons = [
-                                                    {
-                                                        label: this.nls.messagesDialog.gotoLLUR,
-                                                        onClick: lang.hitch(this,function () {
-                                                            var url = this.config.llurApplication.appBaseURL + this.config.llurApplication.appRecordTypeEndpoints[enttype] + id;
-                                                            window.open(url, '_blank');                                                            
-                                                        })
-                                                    },{
-                                                        label: this.nls.messagesDialog.confirmOk,
-                                                    }
-                                                ];
-
-
-
-
-                                                this.showMessage("Your request has been logged as ENQ" + id + ". Details on how to download the statement will be emailed to you within a short period of time.  If you do not receive this email, please contact the LLUR system administrator.", null, buttons);
-                                                this._changeEditToolState(true);    
-                                                this.tabContainer.selectTab(this.nls.tabs.create);                                       
-                                            }),
-                                        lang.hitch(this,
-                                            function (error) {
-                                                console.error(error);
-                                                this.showMessage("An error has occured while requesting the statement document.  Your reference ID is ENQ" + id + ".  Please contact the LLUR system administrator if this problem persists using this reference ID.","error");
-                                                this._changeEditToolState(true);                                                
-                                            })
-                                        );
-                                }),
-                            lang.hitch(this,
-                                function (error) {
-                                    this.showMessage(error.message,"error");
-                                    this._changeEditToolState(true);
-
-                                })
-                            );
-                    }
-                }),
-                lang.hitch(this, function (error) {
-                    this.showMessage(error.message,"error");
-                    this._changeEditToolState(true);
-                })
-            );
     },
 
 

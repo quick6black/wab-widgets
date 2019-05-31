@@ -32,6 +32,25 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", 
         var v = this.searchPane.wabWidget.appConfig.theme.name;
         this.tooltipDialog.domNode.className += " " + v;
       })));
+
+      this.own(on(this.mapServiceToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
+      this.own(on(this.featureServiceToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
+      this.own(on(this.imageServiceToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
+      this.own(on(this.vectorTileServiceToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
+      this.own(on(this.kmlToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
+      this.own(on(this.wmsToggle, 'change', lang.hitch(this, function () {
+        this.search();
+      })));
     },
 
     getOptionWidgets: function getOptionWidgets() {
@@ -39,7 +58,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", 
     },
 
     optionClicked: function optionClicked() {
-      this.search();
+      // was working for digit/form/CheckBox but it is not fored for jimu/dijit/CheckBox
+      //this.search();
     },
 
     /* SearchComponent API ============================================= */

@@ -1,0 +1,88 @@
+.jimu-widget-basemapgallery-pro {
+  height: 100%; }
+  .jimu-widget-basemapgallery-pro .groupSelectContainer {
+    width: 100%;
+    height: auto;
+    margin-bottom: 8px; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer label {
+      margin: 0 8px; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer.hidden {
+      display: none; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton {
+      margin: 0;
+      width: 100%;
+      text-align: left; }
+      .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode {
+        background: transparent;
+        border: 1px solid #7EABCD;
+        padding: 4px;
+        margin-top: 2px;
+        font-weight: bold;
+        box-shadow: none;
+        border-radius: 4px;
+        text-align: left;
+        width: 100%; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitButtonContents {
+          border-color: transparent; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitInputField {
+          padding: 0 5px; }
+        .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitArrowButton {
+          background: transparent;
+          border: 0; }
+          .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDropDownButton .dijitButtonNode .dijitArrowButton .dijitSelectFocused {
+            padding: 0; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitDownArrowButton {
+      position: relative; }
+    .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitArrowButtonInner {
+      position: absolute;
+      right: 8px;
+      top: 3px;
+      background-image: none; }
+      .jimu-widget-basemapgallery-pro .groupSelectContainer .dijitArrowButtonInner:after {
+        content: "\e681";
+        font-family: 'CalciteWebCoreIcons' !important;
+        speak: none;
+        font-style: normal;
+        font-weight: bold;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryNode:hover {
+  color: #51B1FE; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryThumbnail {
+  border: 1px solid #fff;
+  margin: 1px;
+  -moz-box-shadow: 0px 0px 0px #000;
+  -webkit-box-shadow: 0px 0px 0px #000;
+  box-shadow: 0px 0px 7px #000; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGallerySelectedNode {
+  /*background-color: #D9DDE0;*/
+  color: #51B1FE; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryLabelContainer {
+  padding-top: 2px; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryThumbnail {
+  width: 100px;
+  height: 67px; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGallerySelectedNode .esriBasemapGalleryThumbnail {
+  border-color: #51B1FE !important; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryNode {
+  width: 85px;
+  margin: 5px 10px 0 10px; }
+
+.jimu-rtl .jimu-widget-basemapgallery-pro .esriBasemapGalleryNode {
+  float: right; }
+
+.jimu-widget-basemapgallery-pro .esriBasemapGalleryThumbnail {
+  display: block;
+  margin: 1px auto; }
+
+/*# sourceMappingURL=style.css.map */

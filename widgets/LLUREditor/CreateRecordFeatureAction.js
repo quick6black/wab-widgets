@@ -39,8 +39,7 @@ define([
         return false;
       }
       else {
-        return featureSet.features.length > 0 && 
-          featureSet.features[0].geometry.type === 'polygon';
+        return featureSet.features[0].geometry.type === 'polygon';
       }
     },
 
@@ -58,22 +57,22 @@ define([
       wm.triggerWidgetOpen(this.widgetId)
         .then(lang.hitch(this, function (myWidget) {
           wm.activateWidget(myWidget);
-            if (this._checkForFeatureLayers(featureSet)) {
-                // Query the source layer to get the ungeneralised version of the feature
-                this._queryForFeatures(featureSet)
-                  .then(
-                    function(results) {
-                      myWidget.copyFeatureSet(results);
-                    }, 
-                    function (error) {
-                      alert(error);
-                    }
-                  );
-            } else {
-              myWidget.copyFeatureSet(featureSet);
-            }       
-          })
-        );
+          if (this._checkForFeatureLayers(featureSet)) {
+              // Query the source layer to get the ungeneralised version of the feature
+              this._queryForFeatures(featureSet)
+                .then(
+                  function(results) {
+                    setTimeout(function() {myWidget.copyFeatureSet(results);},1000);                    
+                  }, 
+                  function (error) {
+                    alert(error);
+                  }
+                );
+          } else {
+            setTimeout(function() {myWidget.copyFeatureSet(featureSet);},1000);
+          }       
+        })
+      );
     },
 
     _checkForFeatureLayers: function (featureSet) {

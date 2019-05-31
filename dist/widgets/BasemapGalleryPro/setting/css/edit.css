@@ -1,0 +1,67 @@
+.jimu-basemapgallery-Edit {
+  height: 100%;
+  overflow-y: auto; }
+  .jimu-basemapgallery-Edit .setting-content-div {
+    overflow: auto; }
+  .jimu-basemapgallery-Edit .error-massage-div {
+    border: 0px solid;
+    /*width: 200px;
+    height: 20px;*/
+    font-size: 11px;
+    color: red;
+    margin-left: 126px; }
+  .jimu-basemapgallery-Edit .edit-section {
+    margin-bottom: 20px;
+    position: relative; }
+    .jimu-basemapgallery-Edit .edit-section .add-layer-url {
+      position: absolute;
+      height: 20px;
+      cursor: pointer;
+      border: 1px solid #CCCCCC;
+      font-family: Avenir Medium;
+      font-size: 12px;
+      color: #666666;
+      top: 0;
+      right: 0;
+      line-height: 20px;
+      padding: 0 10px; }
+      .jimu-basemapgallery-Edit .edit-section .add-layer-url:hover {
+        background: #EEEEEE; }
+      .jimu-rtl .jimu-basemapgallery-Edit .edit-section .add-layer-url {
+        right: auto;
+        left: 0; }
+    .jimu-basemapgallery-Edit .edit-section .input-url {
+      width: 98%;
+      margin-top: 10px; }
+      .jimu-basemapgallery-Edit .edit-section .input-url .delete-layer-url {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        vertical-align: bottom;
+        cursor: pointer;
+        margin: 5px;
+        background-repeat: no-repeat;
+        background-position: center; }
+      .jimu-basemapgallery-Edit .edit-section .input-url .delete-layer-url {
+        background-image: url(images/Delete.svg); }
+    .jimu-basemapgallery-Edit .edit-section div.input {
+      margin-top: 10px; }
+    .jimu-basemapgallery-Edit .edit-section input {
+      font-size: 12px;
+      font-family: "Avenir Light";
+      color: #898989; }
+    .jimu-basemapgallery-Edit .edit-section .header {
+      font-family: "Avenir Medium";
+      font-size: 14px;
+      color: #161616;
+      margin-bottom: 10px; }
+    .jimu-basemapgallery-Edit .edit-section .img-chooser {
+      width: 135px;
+      height: 90px; }
+    .jimu-basemapgallery-Edit .edit-section .thumbnail-tip {
+      font-family: "Avenir Light";
+      font-style: italic;
+      font-size: 12px;
+      color: #353535; }
+
+/*# sourceMappingURL=edit.css.map */

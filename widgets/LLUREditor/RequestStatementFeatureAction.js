@@ -33,7 +33,7 @@ define([
         return false;
       }
       else {
-        return featureSet.features.length > 0 && 
+        return  
           featureSet.features[0].geometry.type === 'polygon';
       }
     },
@@ -57,23 +57,30 @@ define([
                 this._queryForFeatures(featureSet)
                   .then(
                     function(results) {
-                      myWidget.requestStatement(results);
+                      setTimeout(function() {
+                        myWidget.requestStatement(results);                        
+                      },1000);
+                      
                     }, 
                     function (error) {
                       alert(error);
                     }
                   );
             } else {
-              myWidget.requestStatement(featureSet);
+              setTimeout(function() {
+                myWidget.requestStatement(featureSet);
+              },1000);
             }       
           })
         );
     },
 
     _checkForFeatureLayers: function (featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }       
       }
 
       return false;

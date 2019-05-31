@@ -1,0 +1,20 @@
+{
+  "basemapGallery": {
+    "mode": 1,
+    "basemaps": [],
+    "useGroups": true,
+    "defaultBasemapGroup": "vectorBasemaps",
+    "groups": [{
+        "id":"vectorBasemaps",
+        "tag":"",
+        "label":"Vector basemaps",
+        "includedBasemaps":["Colour Streets","Dark Gray","Dark Gray Base","No Title"]
+      },
+    {
+        "id":"imageryBasemaps",
+        "tag":"Imagery",
+        "label":"Imagery basemaps"
+    }
+  ]
+  }
+}

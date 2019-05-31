@@ -88,6 +88,8 @@
     padding-left: 5px; }
   .jimu-widget-map-filter .userInputNormal {
     width: 95%; }
+  .jimu-widget-map-filter .tdConjunction {
+    width: 75px; }
   .jimu-widget-map-filter .conjuncSelect {
     width: 70px; }
   .jimu-widget-map-filter .tdRemove {

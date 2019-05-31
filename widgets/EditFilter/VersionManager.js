@@ -29,6 +29,14 @@ function(BaseVersionManager) {
         newConfig.persistOnClose = true;
         return newConfig;
       }
+    },{
+      version: '2.12',
+      upgrader: function(oldConfig){
+        var newConfig = oldConfig;
+        newConfig.persistOnClose = true;
+        newConfig.showEditButton = false;
+        return newConfig;
+      }
     }];
   }
 

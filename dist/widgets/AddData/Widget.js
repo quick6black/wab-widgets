@@ -180,6 +180,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/aspect", "dojo
       var portal = portalUtils.getPortal(this.appConfig.portalUrl);
       this.isPortal = portal.isPortal;
       searchContext.portal = portal;
+
+      // Issue #14908
+      if (portal.isPortal) {
+        searchContext.orgId = portal.id;
+      }
+
       if (user) {
         if (typeof user.orgId === "string" && user.orgId.length > 0) {
           searchContext.orgId = user.orgId;

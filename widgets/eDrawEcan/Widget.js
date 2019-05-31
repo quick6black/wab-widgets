@@ -4156,7 +4156,8 @@ function(
                 clonedGraphic.symbol = symbol;
 
                 // Set default attributes
-                graphicName = graphic.attributes['name'] || '';
+                graphicName = graphic.attributes['name'] || 
+                    graphic.attributes['title'] || '';
                 graphicDescription = graphic.attributes['description'] || '';
                 if (featureSet.displayFieldName) {
                     nameValue = graphic.attributes[featureSet.displayFieldName];
