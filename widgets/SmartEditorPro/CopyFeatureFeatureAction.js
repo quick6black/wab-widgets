@@ -123,7 +123,9 @@ define([
               .then(
                 lang.hitch(this, function (results) {
                   this._applyLayerDetails(results, layer);
-                  smartEditor.copyFeaturesAction(results);
+                  setTimeout(lang.hitch(this, function() {
+                    smartEditor.copyFeaturesAction(results);
+                  }),500);
                 }), 
                 function (error) {
                   alert(error);
@@ -131,7 +133,9 @@ define([
               );
         } else {
           this._applyLayerDetails(featureSet, layer);
-          smartEditor.copyFeaturesAction(featureSet);
+          setTimeout(lang.hitch(this, function() {
+            smartEditor.copyFeaturesAction(featureSet);
+          }),500);
         }       
       }));
       return def.promise;

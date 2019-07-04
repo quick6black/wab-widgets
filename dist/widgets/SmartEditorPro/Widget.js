@@ -751,6 +751,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           array.forEach(data.message.fields, function (field) {
             this._setPresetValueValue(field, data.message.values[0]);
           }, this);
+
+          /* BEGIN CHANGE: save message in case the widget has not fully loaded so it can be processed as part of the widget setup */
+          this._filterData = data;
+          /* END CHANGE */
         }
       }
     },
@@ -2918,7 +2922,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         isAnyFieldShownInPresetTable = this._fillPresetValueTable(layerInfos);
 
         /* BEGIN CHANGE: Hide input controls if values have been preset
-          Original code:
+          //Original code:
           if (isAnyFieldShownInPresetTable) {
           query(".presetFieldsTableDiv")[0].style.display = "block";
         } else {
@@ -3555,6 +3559,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var bodyTable = domConstruct.create("table", { "class": "ee-presetValueBodyTable" }, bodyDiv);
 
       domConstruct.create("tbody", { "class": "ee-presetValueBody", "id": "eePresetValueBody" }, bodyTable, "first");
+
+      /* BEGIN CHANGE: Load groupfilter/editfilter values oif they have been provided */
+      setTimeout(lang.hitch(this, function () {
+        if (this._filterData && this._filterData.message.hasOwnProperty("fields") && this._filterData.message.hasOwnProperty("values")) {
+          array.forEach(this._filterData.message.fields, function (field) {
+            this._setPresetValueValue(field, this._filterData.message.values[0]);
+          }, this);
+        }
+      }), 500);
+      /* END CHANGE */
     },
 
     _setPresetValueValue: function _setPresetValueValue(fieldName, value) {
@@ -3581,6 +3595,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             //}
           }
         }));
+
+        /* BEGIN CHANGES: Update Operation Links */
+        this._updateOperationLinksUI();
+        /* END CHANGE */
       }
     },
 
@@ -4576,7 +4594,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this._createAttributeInspectorTools();
           this._attributeInspectorTools.triggerFormValidation();
 
-          //this._sytleFields(this.attrInspector);
+          this._updateAttributeEditorFields();
+          this._hidePresetFields();
+
           if (this.currentFeature && this.currentFeature.getLayer().originalLayerId) {
             this._enableAttrInspectorSaveButton(this._validateAttributes());
           } else {
@@ -6167,6 +6187,95 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     /** CUSTOM FUNCTIONALITY CODE BEGINS HERE 
     ----------------------------------------- **/
 
+    /* ATTRIBUTE INSPECTOR FORMAT FUNCTIONS
+    ----------------------------------------- **/
+
+    //update the attribute editor field visibility 
+    _updateAttributeEditorFields: function _updateAttributeEditorFields() {
+      if (this.attrInspector) {
+        //get the field infos of the only layer in the application
+        var infos = this.attrInspector.layerInfos[0].fieldInfos;
+
+        var atiNodes = query(".atiLabel");
+
+        array.forEach(atiNodes, lang.hitch(this, function (atiNode) {
+          var fieldIDAttr = atiNode.attributes["data-fieldname"];
+          if (fieldIDAttr && fieldIDAttr.value) {
+            var fieldName = fieldIDAttr.value;
+
+            array.forEach(infos, lang.hitch(this, function (info) {
+              if (info.fieldName === fieldName && !info.visible) {
+                //get row
+                var row = atiNode.parentNode; //info.dijit.domNode.parentNode.parentNode;
+
+                //hide row
+                domStyle.set(row, "display", "none");
+              }
+            }));
+          }
+        }));
+      }
+    },
+
+    _hidePresetFields: function _hidePresetFields() {
+      var attTable = query("td.atiLabel", this.attrInspector.domNode);
+      var presets = this._getPresetValues();
+      array.forEach(presets, lang.hitch(this, function (preset) {
+        if (attTable !== undefined && attTable !== null) {
+          var fieldName = preset.fieldName;
+          var row = dojo.filter(attTable, lang.hitch(this, function (row) {
+            if (row.childNodes) {
+              if (row.childNodes.length > 0) {
+
+                if (row.hasAttribute("data-fieldname")) {
+                  return row.getAttribute("data-fieldname") === fieldName;
+                } else {
+                  return row.childNodes[0].data === fieldName;
+                }
+              }
+              return false;
+            }
+          }));
+
+          var nl = null;
+          if (row !== null) {
+            if (row.length > 0) {
+              var rowInfo = this._getRowInfo(row[0]);
+
+              var valueCell = rowInfo[0];
+              var valueCell2 = rowInfo[4];
+              var parent = rowInfo[1];
+              var widget = rowInfo[2];
+              domClass.add(parent, "hideField");
+            }
+          }
+        }
+      }));
+    },
+
+    _getRowInfo: function _getRowInfo(row) {
+      var valueCell = row.parentNode.childNodes[1].childNodes[0];
+      var valueCell2 = null;
+      if (row.parentNode.childNodes[1].childNodes.length > 1) {
+        valueCell2 = row.parentNode.childNodes[1].childNodes[1];
+      }
+      var label;
+      if (this.useFieldName === true) {
+        if (row.hasAttribute("data-fieldname")) {
+          label = row.getAttribute("data-fieldname");
+        } else {
+          label = row.childNodes[0].data;
+        }
+      } else {
+        label = row.childNodes[0].data;
+      }
+
+      var parent = row.parentNode;
+      var widget = registry.getEnclosingWidget(valueCell);
+
+      return [valueCell, parent, widget, label, valueCell2];
+    },
+
     /* COPY FEATURE ACTION FUNCTIONS
     ----------------------------------------- **/
 
@@ -6810,7 +6919,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       */
     _toggleExplodeFeatureButtonVisibility: function _toggleExplodeFeatureButtonVisibility(checked) {
       //if edit checkbox is checked and geometry supports merging
-      if (!checked) {
+      if (!checked || !this.currentFeature) {
         this._setExplodeHandler(false, "");
       } else {
         // Check geometry is line or polygon
@@ -7006,7 +7115,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       */
     _toggleCutFeatureButtonVisibility: function _toggleCutFeatureButtonVisibility(checked) {
       //if edit checkbox is checked and geometry supports merging
-      if (!checked) {
+      if (!checked || !this.currentFeature) {
         this._setCutHandler(false, "");
       } else {
         // Check geometry is line or polygon

@@ -133,30 +133,43 @@ define([
           items = this._origGetItemsFromLayerFunc.apply(this._templatePicker, arguments);
           var filterText = this.filterTextBox.value;
           if (filterText) {
+
+            /* BEGIN: Ecan Changes - Include multiple filter options for "OR" filter */
+            var filterVals = filterText.split(',');
+
             items = array.filter(items, function (item) {
               var match = false;
-              var regex = new RegExp(filterText, "ig");
-              // Search using item label
-              if (item.hasOwnProperty("label")) {
-                if (item.label.match(regex)) {
-                  if (item.label.match(regex).length > 0) {
-                    match = true;
+
+              array.forEach(filterVals, function (filterValText) {
+                if (filterValText.length > 1) {
+                  var regex = new RegExp(filterValText, "ig");
+                  // Search using item label
+                  if (item.hasOwnProperty("label")) {
+                    if (item.label.match(regex)) {
+                      if (item.label.match(regex).length > 0) {
+                        match = true;
+                      }
+                    }
                   }
-                }
-              }
-              // Search using the name from the
-              // item template property
-              if (item.hasOwnProperty("template")) {
-                if (item.template.hasOwnProperty("name")) {
-                  if (item.template.name.match(regex)) {
-                    if (item.template.name.match(regex).length > 0) {
-                      match = true;
+                  // Search using the name from the
+                  // item template property
+                  if (item.hasOwnProperty("template")) {
+                    if (item.template.hasOwnProperty("name")) {
+                      if (item.template.name.match(regex)) {
+                        if (item.template.name.match(regex).length > 0) {
+                          match = true;
+                        }
+                      }
                     }
                   }
                 }
-              }
+              });
+
               return match;
             });
+
+            /* END: Ecan Changes */
+   
           }
 
           if (items.length === 0) {
