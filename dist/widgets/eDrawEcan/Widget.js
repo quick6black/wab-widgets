@@ -2839,8 +2839,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
             if (isPolygon) {
                 result.area = wkid == 4326 || wkid == 3857 ? geometryEngine.geodesicArea(geometry, areaUnit) : geometryEngine.planarArea(geometry, areaUnit);
-                var polyline = this._getPolylineOfPolygon(geometry);
-                result.length = wkid == 4326 || wkid == 3857 ? geometryEngine.geodesicLength(polyline, lengthUnit) : geometryEngine.planarLength(polyline, lengthUnit);
+                result.length = wkid == 4326 || wkid == 3857 ? geometryEngine.geodesicLength(geometry, lengthUnit) : geometryEngine.planarLength(geometry, lengthUnit);
             } else {
                 result.length = wkid == 4326 || wkid == 3857 ? geometryEngine.geodesicLength(geometry, lengthUnit) : geometryEngine.planarLength(geometry, lengthUnit);
             }
