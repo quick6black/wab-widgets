@@ -983,6 +983,8 @@ div[dijitpopupparent="drawingTool"] .dijitMenuItemIconCell {
     text-decoration: none;
     line-height: 20px;
     padding: 0px 5px 5px 5px; }
+  .jimu-widget-smartEditor-pro .links-bar > .link-btn {
+    margin: 0 5px; }
 
 /* Copy Features ends */
 .copy-features-template-popup {

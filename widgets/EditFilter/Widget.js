@@ -1758,10 +1758,32 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
     launchEditor: function (e) {
       var wm = WidgetManager.getInstance();
 
-      var editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
-      if (editConfig) {
-        wm.triggerWidgetOpen(editConfig.id);
+      var editConfig = this._findWidgetConfigInstance("SmartEditorPro");
+      
+      if (!editConfig) {
+        editConfig = this._findWidgetConfigInstance("SmartEditorPro");
       }
+
+      if (!editConfig) {
+        editConfig = this._findWidgetConfigInstance("SmartEditor");
+      }
+
+      if (editConfig) {
+        if (!wm.getWidgetById(editConfig.id)) {
+          this._updateEditorWidget(wm,editConfig);
+        } else {
+          wm.loadWidget(editConfig).then(lang.hitch(this, function() {
+            this._updateEditorWidget(wm,editConfig);
+          }));
+        }
+      }
+    },
+
+    _updateEditorWidget: function(wm, editConfig) {
+      wm.triggerWidgetOpen(editConfig.id).then(lang.hitch(this, function() {
+        //reapply the layer definition in order to trigger the edit widget preset values filter
+        this.setFilterLayerDef();
+      }));
     },
 
     _findWidgetConfigInstance: function(widgetType) {

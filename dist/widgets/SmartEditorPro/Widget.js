@@ -69,6 +69,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _featureExplode: null,
     _featureCut: null,
     _drawToolEditMode: false,
+
+    _copyTemplate: null,
+
     /* END CHANGE */
 
     postMixInProperties: function postMixInProperties() {
@@ -751,6 +754,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           array.forEach(data.message.fields, function (field) {
             this._setPresetValueValue(field, data.message.values[0]);
           }, this);
+
+          /* BEGIN CHANGE: save message in case the widget has not fully loaded so it can be processed as part of the widget setup */
+          this._filterData = data;
+          /* END CHANGE */
         }
       }
     },
@@ -1249,10 +1256,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       if (this.templatePicker === undefined || this.templatePicker === null) {
         return;
       }
-      if (!this.templatePicker.getSelected()) {
-        return;
-      }
+
+      /* BEGIN CHANGE - Handle copy option from popup menu
+      // Original code
+      if (!this.templatePicker.getSelected()) { return; }
       var selectedTemp = this.templatePicker.getSelected();
+      */
+
+      var selectedTemp = this._getSelectedTemplate();
+      /* END CHANGE */
+
       var newTempLayerInfos;
       var localLayerInfo = null;
 
@@ -1267,7 +1280,13 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this._removeLocalLayers();
       // preparation for a new attributeInspector for the local layer
 
+      /* BEGIN CHANGE 
+      // Original code
       this.cacheLayer = this._cloneLayer(this.templatePicker.getSelected().featureLayer);
+      */
+      this.cacheLayer = this._cloneLayer(selectedTemp.featureLayer);
+      /* END CHANGE */
+
       var cacheLayerHandler = on(this.cacheLayer, "load", lang.hitch(this, function () {
         cacheLayerHandler.remove();
 
@@ -1276,7 +1295,12 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         localLayerInfo = this._getLayerInfoForLocalLayer(this.cacheLayer);
         newTempLayerInfos = [localLayerInfo]; //this._converConfiguredLayerInfos([localLayerInfo]);
 
+        /* BEGIN CHANGE 
+        // Original code
         this._createAttributeInspector([localLayerInfo], true, this.templatePicker.getSelected().featureLayer);
+        */
+        this._createAttributeInspector([localLayerInfo], true, selectedTemp.featureLayer);
+        /* END CHANGE */
 
         if (this.config.editor.hasOwnProperty("editGeometryDefault") && this.config.editor.editGeometryDefault === true) {
           //perform any edit geom switch functionality
@@ -2900,6 +2924,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       this.currentDrawType = null;
       this.currentShapeType = null;
       this._activateTemplateToolbar();
+
+      /* BEGIN CHANGE */
+      this._copyTemplate = null;
+      /* END CHANGE */
     },
 
     validateGUID: function validateGUID(value, constraints) {
@@ -2918,7 +2946,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         isAnyFieldShownInPresetTable = this._fillPresetValueTable(layerInfos);
 
         /* BEGIN CHANGE: Hide input controls if values have been preset
-          Original code:
+          //Original code:
           if (isAnyFieldShownInPresetTable) {
           query(".presetFieldsTableDiv")[0].style.display = "block";
         } else {
@@ -3290,9 +3318,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     },
 
     _getLayerInfoByID: function _getLayerInfoByID(id) {
+      /* BEGIN CHANGE
+      // Original code
       if (id.indexOf("_lfl") > 0) {
         id = id.replace("_lfl", "");
       }
+      */
+
+      if (id && id.indexOf("_lfl") > 0) {
+        id = id.replace("_lfl", "");
+      }
+
+      /* END CHANGE */
+
       //if user is seeing related tables details get it from relationShip info
       //else  get the details from layerInfos directly
       if (this._traversal && this._traversal.length > 0) {
@@ -3555,6 +3593,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var bodyTable = domConstruct.create("table", { "class": "ee-presetValueBodyTable" }, bodyDiv);
 
       domConstruct.create("tbody", { "class": "ee-presetValueBody", "id": "eePresetValueBody" }, bodyTable, "first");
+
+      /* BEGIN CHANGE: Load groupfilter/editfilter values oif they have been provided */
+      setTimeout(lang.hitch(this, function () {
+        if (this._filterData && this._filterData.message.hasOwnProperty("fields") && this._filterData.message.hasOwnProperty("values")) {
+          array.forEach(this._filterData.message.fields, function (field) {
+            this._setPresetValueValue(field, this._filterData.message.values[0]);
+          }, this);
+        }
+      }), 500);
+      /* END CHANGE */
     },
 
     _setPresetValueValue: function _setPresetValueValue(fieldName, value) {
@@ -3581,6 +3629,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
             //}
           }
         }));
+
+        /* BEGIN CHANGES: Update Operation Links */
+        this._updateOperationLinksUI();
+        /* END CHANGE */
       }
     },
 
@@ -4576,7 +4628,9 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           this._createAttributeInspectorTools();
           this._attributeInspectorTools.triggerFormValidation();
 
-          //this._sytleFields(this.attrInspector);
+          this._updateAttributeEditorFields();
+          this._hidePresetFields();
+
           if (this.currentFeature && this.currentFeature.getLayer().originalLayerId) {
             this._enableAttrInspectorSaveButton(this._validateAttributes());
           } else {
@@ -5651,7 +5705,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         // graphic object of a single layer
         var singleFeatureObj = this._createSingleGeometry(allSelectedFeatures);
         // update single feature
+
+        /* BEGIN CHANGE - 10-10-2019 Handle when copy from popup menu doesn't trigger selected template update
+        // orginal code
         var featureLayerObject = this.templatePicker.getSelected().featureLayer;
+        */
+
+        var featureLayerObject = this._getSelectedTemplate().featureLayer;
+
+        /* END CHANGE */
+
         var featureLayerInfo = this._getLayerInfoByID(featureLayerObject.id);
         var singleFeature = this._updateAllSelectedGeometries([singleFeatureObj.graphic], featureLayerInfo, singleFeatureObj.layerObj)[0];
         // if feature selection found
@@ -5675,7 +5738,14 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           //else add all copied features and then show them in AI
           if (allSelectedGeometries.length === 1) {
             // single feature creation
+
+            /* BEGIN CHANGE
+            // Original Code
             var featureLayerObject = this.templatePicker.getSelected().featureLayer;
+            */
+            var featureLayerObject = this._getSelectedTemplate().featureLayer;
+            /* END CHANGE */
+
             var featureLayerInfo = this._getLayerInfoByID(featureLayerObject.id);
             var singleFeature = this._updateAllSelectedGeometries(allSelectedGeometries, featureLayerInfo)[0];
             this._addGraphicToLocalLayer(singleFeature, singleFeature.attributes);
@@ -5689,6 +5759,19 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
         this._onCopyFeatureCancelButtonClicked();
       })));
       this._copyFeaturesObj.startup();
+    },
+
+    /*
+    * return the current selceted template from either the template picker or the _copy
+    */
+    _getSelectedTemplate: function _getSelectedTemplate() {
+      if (this.templatePicker && this.templatePicker.getSelected()) {
+        return this.templatePicker.getSelected();
+      } else if (this._copyTemplate) {
+        return this._copyTemplate;
+      } else {
+        return;
+      }
     },
 
     /**
@@ -5721,10 +5804,22 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
     _addSelectedFeatureInTheLayer: function _addSelectedFeatureInTheLayer(allSelectedGeometries) {
       var selectedFeatureArr = [];
       // While adding features in the layer, attribute must be added and it should be fetched from template-picker
+
+      /* BEGIN CHANGE
+      // Original code
       var selectedTemp = this.templatePicker.getSelected();
       var deferredArray;
       deferredArray = [];
       var featureLayerObject = this.templatePicker.getSelected().featureLayer;
+      */
+
+      var selectedTemp = this._getSelectedTemplate();
+      var deferredArray;
+      deferredArray = [];
+      var featureLayerObject = selectedTemp.featureLayer;
+
+      /* END CHANGE */
+
       var featureLayerInfo = this._getLayerInfoByID(featureLayerObject.id);
       allSelectedGeometries = this._updateAllSelectedGeometries(allSelectedGeometries, featureLayerInfo);
       array.forEach(allSelectedGeometries, lang.hitch(this, function (selectedFeatureDetail) {
@@ -5749,8 +5844,56 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           selectedFeatureArr.push(newGraphic);
         }));
       }));
+
+      /* BEGIN CHANGE
+      // Original Code
       all(deferredArray).then(lang.hitch(this, function () {
-        this.templatePicker.getSelected().featureLayer.applyEdits(selectedFeatureArr, null, null, lang.hitch(this, function (results) {
+        this.templatePicker.getSelected().featureLayer.applyEdits(selectedFeatureArr, null, null,
+          lang.hitch(this, function (results) {
+            var featureAddingFailed, objectIdArr, failedCountString;
+            featureAddingFailed = 0;
+            objectIdArr = [];
+            array.forEach(results, lang.hitch(this, function (result) {
+              if (result.success) {
+                objectIdArr.push(result.objectId);
+              } else {
+                featureAddingFailed++;
+              }
+            }));
+            if (featureAddingFailed > 0) {
+              failedCountString = String.substitute(this.nls.addingFeatureErrorCount, {
+                copyFeatureErrorCount: featureAddingFailed
+              });
+            }
+            if (objectIdArr.length === 0 && featureAddingFailed > 0) {
+              this.loading.hide();
+              Message({
+                message: this.nls.addingFeatureError + " " + failedCountString
+              });
+            } else if (objectIdArr.length > 0 && featureAddingFailed > 0) {
+              Message({
+                message: failedCountString
+              });
+              this._selectFeaturesInTheLayer(objectIdArr);
+            } else {
+              this._selectFeaturesInTheLayer(objectIdArr);
+            }
+          }), lang.hitch(this, function (error) {
+            this.loading.hide();
+            Message({
+              message: this.nls.addingFeatureError + " " + error.message
+            });
+          }));
+      }), lang.hitch(this, function (error) {
+        this.loading.hide();
+        Message({
+          message: this.nls.addingFeatureError + " " + error.message
+        });
+      }));
+      */
+
+      all(deferredArray).then(lang.hitch(this, function () {
+        this._getSelectedTemplate().featureLayer.applyEdits(selectedFeatureArr, null, null, lang.hitch(this, function (results) {
           var featureAddingFailed, objectIdArr, failedCountString;
           featureAddingFailed = 0;
           objectIdArr = [];
@@ -5791,6 +5934,8 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
           message: this.nls.addingFeatureError + " " + error.message
         });
       }));
+
+      /* END CHANGE */
     },
 
     /**
@@ -5996,9 +6141,10 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
        }));
     },
     */
+
     _selectFeaturesInTheLayer: function _selectFeaturesInTheLayer(objectIdArr, featureLayer) {
       var featureLayerInfo, featureLayerObject;
-      featureLayerObject = featureLayer || this.templatePicker.getSelected().featureLayer;
+      featureLayerObject = featureLayer || this._getSelectedTemplate().featureLayer;
       featureLayerInfo = this._getLayerInfoByID(featureLayerObject.id);
       this.map.infoWindow.hide();
       //Destroy all prev attributeInspectors
@@ -6148,14 +6294,16 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       var infoObj;
       infoObj = {};
 
-      /* BEGIN CHANGE: Add check for filed infos for non feature layer data sources */
+      /* BEGIN CHANGE: Add check for field infos for non feature layer data sources */
 
       if (layerInfo && layerInfo.fieldInfos) {
         array.forEach(layerInfo.fieldInfos, lang.hitch(this, function (fieldInfo) {
-          infoObj[fieldInfo.name.toLowerCase()] = {
-            name: fieldInfo.name,
-            type: fieldInfo.type
-          };
+          if (fieldInfo && fieldInfo.name) {
+            infoObj[fieldInfo.name.toLowerCase()] = {
+              name: fieldInfo.name,
+              type: fieldInfo.type
+            };
+          }
         }));
       }
 
@@ -6166,6 +6314,95 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     /** CUSTOM FUNCTIONALITY CODE BEGINS HERE 
     ----------------------------------------- **/
+
+    /* ATTRIBUTE INSPECTOR FORMAT FUNCTIONS
+    ----------------------------------------- **/
+
+    //update the attribute editor field visibility 
+    _updateAttributeEditorFields: function _updateAttributeEditorFields() {
+      if (this.attrInspector) {
+        //get the field infos of the only layer in the application
+        var infos = this.attrInspector.layerInfos[0].fieldInfos;
+
+        var atiNodes = query(".atiLabel");
+
+        array.forEach(atiNodes, lang.hitch(this, function (atiNode) {
+          var fieldIDAttr = atiNode.attributes["data-fieldname"];
+          if (fieldIDAttr && fieldIDAttr.value) {
+            var fieldName = fieldIDAttr.value;
+
+            array.forEach(infos, lang.hitch(this, function (info) {
+              if (info.fieldName === fieldName && !info.visible) {
+                //get row
+                var row = atiNode.parentNode; //info.dijit.domNode.parentNode.parentNode;
+
+                //hide row
+                domStyle.set(row, "display", "none");
+              }
+            }));
+          }
+        }));
+      }
+    },
+
+    _hidePresetFields: function _hidePresetFields() {
+      var attTable = query("td.atiLabel", this.attrInspector.domNode);
+      var presets = this._getPresetValues();
+      array.forEach(presets, lang.hitch(this, function (preset) {
+        if (attTable !== undefined && attTable !== null) {
+          var fieldName = preset.fieldName;
+          var row = dojo.filter(attTable, lang.hitch(this, function (row) {
+            if (row.childNodes) {
+              if (row.childNodes.length > 0) {
+
+                if (row.hasAttribute("data-fieldname")) {
+                  return row.getAttribute("data-fieldname") === fieldName;
+                } else {
+                  return row.childNodes[0].data === fieldName;
+                }
+              }
+              return false;
+            }
+          }));
+
+          var nl = null;
+          if (row !== null) {
+            if (row.length > 0) {
+              var rowInfo = this._getRowInfo(row[0]);
+
+              var valueCell = rowInfo[0];
+              var valueCell2 = rowInfo[4];
+              var parent = rowInfo[1];
+              var widget = rowInfo[2];
+              domClass.add(parent, "hideField");
+            }
+          }
+        }
+      }));
+    },
+
+    _getRowInfo: function _getRowInfo(row) {
+      var valueCell = row.parentNode.childNodes[1].childNodes[0];
+      var valueCell2 = null;
+      if (row.parentNode.childNodes[1].childNodes.length > 1) {
+        valueCell2 = row.parentNode.childNodes[1].childNodes[1];
+      }
+      var label;
+      if (this.useFieldName === true) {
+        if (row.hasAttribute("data-fieldname")) {
+          label = row.getAttribute("data-fieldname");
+        } else {
+          label = row.childNodes[0].data;
+        }
+      } else {
+        label = row.childNodes[0].data;
+      }
+
+      var parent = row.parentNode;
+      var widget = registry.getEnclosingWidget(valueCell);
+
+      return [valueCell, parent, widget, label, valueCell2];
+    },
 
     /* COPY FEATURE ACTION FUNCTIONS
     ----------------------------------------- **/
@@ -6253,28 +6490,55 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
 
     _updateSelectedTemplate: function _updateSelectedTemplate(selectedTemplate) {
       if (selectedTemplate !== null && this.templatePicker) {
-        var keysArr = Object.getOwnPropertyNames(this.templatePicker._itemWidgets);
+        this._copyTemplate = selectedTemplate;
+
+        /* 
+        var keysArr = [];
+          array.forEach(registry.toArray(), function (regwidget) {
+          if (regwidget.id && regwidget.id.startsWith("tpick-surface-")) {
+            keysArr.push(regwidget);
+          }
+        });
+        */
+
+        //var keysArr = Object.getOwnPropertyNames(this.templatePicker._itemWidgets);
+
         var templateItems = [];
         array.forEach(this.templatePicker._flItems, function (flItems) {
           array.forEach(flItems, function (flItem) {
             templateItems.push(flItem);
           });
         });
-        if (templateItems.length === keysArr.length) {
-          var itemFnd = array.some(templateItems, function (item, index) {
-            if (selectedTemplate.featureLayer.id === item.layer.id && item.template.name === selectedTemplate.template.name && item.template.drawingTool === selectedTemplate.template.drawingTool && item.template.description === selectedTemplate.template.description && item.type === selectedTemplate.type) {
-              var dom = dojo.byId(keysArr[index]);
-              on.emit(dom, "click", {
-                bubbles: true,
-                cancelable: true
-              });
-              return true;
-            }
-          }, this);
-        }
+        //if (templateItems.length === keysArr.length) {
+        var itemFnd = array.some(templateItems, function (item, index) {
+          if (selectedTemplate.featureLayer.id === item.layer.id && item.template.name === selectedTemplate.template.name && item.template.drawingTool === selectedTemplate.template.drawingTool && item.template.description === selectedTemplate.template.description && item.type === selectedTemplate.type) {
+            //var dom = dojo.byId(keysArr[index]);
+            var templatewidget = this._getTemplateWidget(item.template);
+            var dom = dojo.byId(templatewidget.id);
+            on.emit(dom, "click", {
+              bubbles: true,
+              cancelable: true
+            });
+            return true;
+          }
+        }, this);
+        //}
       } else {
-        //add catch here to pick up the loaded template tool
-      }
+          //add catch here to pick up the loaded template tool
+        }
+    },
+
+    _getTemplateWidget: function _getTemplateWidget(template) {
+      var widget;
+      array.forEach(registry.toArray(), function (regwidget) {
+        if (regwidget.id && regwidget.id.startsWith("tpick-surface-")) {
+          itemTemplate = regwidget.template;
+          if (itemTemplate.name === template.name && itemTemplate.drawingTool === template.drawingTool) {
+            widget = regwidget;
+          }
+        }
+      });
+      return widget;
     },
 
     _updateCopyFeatures: function _updateCopyFeatures(features) {
@@ -6810,7 +7074,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       */
     _toggleExplodeFeatureButtonVisibility: function _toggleExplodeFeatureButtonVisibility(checked) {
       //if edit checkbox is checked and geometry supports merging
-      if (!checked) {
+      if (!checked || !this.currentFeature) {
         this._setExplodeHandler(false, "");
       } else {
         // Check geometry is line or polygon
@@ -7006,7 +7270,7 @@ define(["dojo/Stateful", 'dojo', 'dijit', 'dojo/_base/declare', 'dojo/_base/lang
       */
     _toggleCutFeatureButtonVisibility: function _toggleCutFeatureButtonVisibility(checked) {
       //if edit checkbox is checked and geometry supports merging
-      if (!checked) {
+      if (!checked || !this.currentFeature) {
         this._setCutHandler(false, "");
       } else {
         // Check geometry is line or polygon

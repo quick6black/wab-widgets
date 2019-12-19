@@ -119,7 +119,19 @@ define([
             //Get layerinfo by id
             layer = this.layerInfosObj.getLayerInfoById(layerId);
             //Get the layer title
+
+            /* BEGIN CHANGE
+            // Original Code
             layerName = layer.title ? layer.title : layer.name;
+            */
+            if (layer) {
+              layerName = layer.title ? layer.title : layer.name;
+            } else {
+              layerName = "Graphics Layer";
+            }
+
+            /* END CHANGE */
+
             //Create a node for this layer and it's features
             groupNode = domConstruct.create('div', {}, this.layerListTable);
             //Create layer(parent) node

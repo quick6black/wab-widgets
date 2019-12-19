@@ -90,13 +90,17 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(lang.hitch(this, function (results) {
             this._applyLayerDetails(results, layer);
-            smartEditor.copyFeaturesAction(results);
+            setTimeout(lang.hitch(this, function () {
+              smartEditor.copyFeaturesAction(results);
+            }), 500);
           }), function (error) {
             alert(error);
           });
         } else {
           this._applyLayerDetails(featureSet, layer);
-          smartEditor.copyFeaturesAction(featureSet);
+          setTimeout(lang.hitch(this, function () {
+            smartEditor.copyFeaturesAction(featureSet);
+          }), 500);
         }
       }));
       return def.promise;

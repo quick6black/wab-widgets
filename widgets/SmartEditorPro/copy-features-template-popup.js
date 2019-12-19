@@ -8,7 +8,9 @@ define([
   "jimu/dijit/Popup",
   "dojo/dom-construct",
   'dojo/dom-style',
-  'esri/dijit/editing/TemplatePicker'
+  'esri/dijit/editing/TemplatePicker',
+  './SEFilterEditor',  
+  'esri/urlUtils'   
 ], function (
   declare,
   BaseWidgetSetting,
@@ -19,7 +21,9 @@ define([
   Popup,
   domConstruct,
   domStyle,
-  TemplatePicker
+  TemplatePicker,
+  SEFilterEditor,
+  esriUrlUtils
 ) {
   // to create a widget, derive it from BaseWidget.
   return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
@@ -57,6 +61,10 @@ define([
             this.popup.disableButton(0);
           }
         }));
+
+        this._addFilterEditor(this.layers);
+        this._applyURLTemplateFilter();
+
       }
     },
     postCreate: function () {
@@ -101,6 +109,97 @@ define([
       });
       //Setting default state of ok button as disabled
       this.popup.disableButton(0);
+    },
+
+    _addFilterEditor: function (layers) {
+      if (this.config.editor.useFilterEditor === true && this.templatePicker) {
+        if (this._filterEditor) {
+          this._filterEditor.setTemplatePicker(this.templatePicker, layers);
+        }
+        else {
+          this._filterEditorNode = domConstruct.create("div", {});
+          this.divTemplatePicker.insertBefore(this._filterEditorNode,
+            this.divTemplatePicker.firstChild);
+          this._filterEditor = new SEFilterEditor({
+            _templatePicker: this.templatePicker,
+            _layers: layers,
+            map: this.map,
+            nls: this.nls
+          }, this._filterEditorNode);
+        }
+      }
+    },
+
+    _applyURLTemplateFilter: function () {
+      var loc = window.location;
+      var urlObject = esriUrlUtils.urlToObject(loc.href);
+
+      // Check for filter
+      if (urlObject.query !== null) {
+        var templatesQuery = urlObject.query["templates"] || urlObject.query["TEMPLATES"];
+        if (templatesQuery) {
+          var templateIDs = this._getTemplateParams(templatesQuery);
+          this._filterEditor.filterTextBox.value = templateIDs;
+          this._filterEditor._onTemplateFilterChanged();
+        }
+      }
+    },
+
+    _getTemplateParams: function (query) {
+      var templatesString = '';
+      var filterParams = query.split(',');
+      if (filterParams.length > 0) {
+        // Check layer templates for domain codes that match template urls
+        var layers = this.layers; 
+        var tmps = [], tmpIds = [];   
+        array.forEach(layers, lang.hitch(this,function (layer) {
+          if (layer.types && layer.types.length > 0) {
+            var dmVals = layer.types.map(function (item) {
+              return {
+                "id": item["id"],
+                "label": item.templates[0]["name"]
+              }
+            });
+
+            for(var i = 0, l = dmVals.length;i <l;i++) {
+              if (tmpIds.indexOf(dmVals[i].label) === -1) {
+                tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].label);
+              } else if (tmpIds.indexOf(dmVals[i].id) === -1) {tmps.push(dmVals[i]);
+                tmpIds.push(dmVals[i].id);
+              }
+            }
+          } else {
+            for(var i = 0, l = layer.templates.length; i <l;i++) {
+              if (tmpIds.indexOf(layer.templates[i].name) === -1) {
+                tmps.push({
+                  "id": layer.templates[i].name,
+                  "label": layer.templates[i].name
+                });
+                tmpIds.push(layer.templates[i].name);
+              }
+            }
+          }
+        }));
+
+        var templates = [];
+        array.forEach(filterParams, function (param) {
+          var paramlc = param.toLowerCase();
+          var options = tmps.filter(function (item, index) {
+            return item.id.toLowerCase() === paramlc || item.label.toLowerCase() === paramlc;
+          });
+
+          array.forEach(options, function (item) {
+            if (templates.indexOf(item.label) === -1) {
+              templates.push(item.label);
+            }
+          });
+
+        });
+        templatesString = templates.join(',');
+      }
+
+      return templatesString;      
     },
 
     getSelectedTemplate: function () {
