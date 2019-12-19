@@ -6,7 +6,7 @@
   "type": "widget",
   "platform": "HTML",
   "version": "2.5.1",
-  "wabVersion": "2.9",
+  "wabVersion": "2.12",
   "author": "Original widget by Robert Scheitlin, Modifications by Environment Canterbury",
   "description": "This widget allows you to geocode and address, reverse geocode, and locate based on coordinates.  Modifications made to support non-web mercator based coordinates and New Zealand mapping grid formats.",
   "copyright": "2017",

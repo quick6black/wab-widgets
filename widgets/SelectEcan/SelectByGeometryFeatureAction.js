@@ -39,7 +39,7 @@ define([
         return false;
       }
       else {
-        return featureSet.features.length > 0;
+        return true;
       }
     },
 
@@ -55,22 +55,24 @@ define([
 
       var wm = WidgetManager.getInstance();
       wm.triggerWidgetOpen(this.widgetId)
-      .then(function(myWidget) {
-        if (this._checkForFeatureLayers(featureSet)) {
-            // Query the source layer to get the ungeneralised version of the feature
+        .then(lang.hitch(this, function(myWidget) {
+          wm.activateWidget(myWidget);
+          if (this._checkForFeatureLayers(featureSet)) {
+              // Query the source layer to get the ungeneralised version of the feature
             this._queryForFeatures(featureSet)
               .then(
                 function(results) {
-                  myWidget.selectByFeature(featureSet);
+                  myWidget.selectByFeature(results);
                 }, 
                 function (error) {
                   alert(error);
                 }
               );
-        } else {
-          myWidget.selectByFeature(featureSet);
-        }       
-      });
+          } else {
+            myWidget.selectByFeature(featureSet);
+          }       
+        })
+      );
     },
 
     _checkForFeatureLayers: function (featureSet) {

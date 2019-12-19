@@ -12,7 +12,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         }
         return false;
       } else {
-        return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
+        return;
+        featureSet.features[0].geometry.type === 'polygon';
       }
     },
 
@@ -32,20 +33,26 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            myWidget.requestStatement(results);
+            setTimeout(function () {
+              myWidget.requestStatement(results);
+            }, 1000);
           }, function (error) {
             alert(error);
           });
         } else {
-          myWidget.requestStatement(featureSet);
+          setTimeout(function () {
+            myWidget.requestStatement(featureSet);
+          }, 1000);
         }
       }));
     },
 
     _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {
-      var layer = featureSet.features[0].getLayer();
-      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-        return true;
+      if (featureSet && featureSet.features && featureSet.features.length > 0) {
+        var layer = featureSet.features[0].getLayer();
+        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+          return true;
+        }
       }
 
       return false;

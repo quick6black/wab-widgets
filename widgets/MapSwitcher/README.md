@@ -5,6 +5,10 @@ This widget allows users of to change to search for and load another web map fro
 
 Much of the code and function is based on the standard ESRI Add Data widget [https://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm](https://doc.arcgis.com/en/web-appbuilder/create-apps/widget-add-data.htm").
 
+## Known Issues :
+When configured to work with ArcGIS Enterprise Portals, the widget should be configured to not include the ArcGIS Online group option as the viewer load map mechanism does not have capability to load maps that are not hosted on the portal. 
+
+
 ## Installation :
 Add MapSwitcher folder in your web AppBuilder client\stemapp\widgets folder.
 Download Release here : 
@@ -64,4 +68,10 @@ To be created
 
 
 - Initial development based on WAB 2.6 framework
+
+
+**14 April 2019**
+
+
+- Port to WAB 2.12 framework 
  

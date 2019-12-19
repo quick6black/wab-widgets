@@ -1158,7 +1158,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       var Atts = {
         content: locResult.content,
         title: locResult.title,
-        gid: parseInt(locResult.id.replace('id_', ''))
+        gid: parseInt(locResult.id.replace('id_', '')),
+        name: locResult.content.replace(/(<([^>]+)>)/ig, "")
       };
       ptGraphic.attributes = Atts;
       this.graphicsLayer.add(ptGraphic);

@@ -12,11 +12,13 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     grpSelect: null,
     groupCounter: 0,
     groupCurrVal: null,
+    groupMatrix: [],
     defaultDef: null,
     runTimeConfig: null,
     useDomain: null,
     useDate: null,
     useValue: null,
+    useCaseSearch: null,
     runInitial: false,
     graphicsHolder: null,
     slAppendChoice: null,
@@ -65,6 +67,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.chkPersistDef.set('checked', this.persistOnClose);
       }
 
+      this.populateGroupState();
+
       this.createMapLayerList();
 
       //BEGIN: Ecan Changes
@@ -87,6 +91,25 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         }
     },
     */
+
+    populateGroupState: function populateGroupState() {
+      // if checkbox to append to exisitng filters is enabled, then this group matrix ensures
+      // repeated changes to a group overides and not continously appends.
+      this.groupMatrix = [];
+      array.map(this.config.groups, lang.hitch(this, function (grp) {
+        var layerGroup = [];
+        array.forEach(grp.layers, function (lyr) {
+          layerGroup.push({
+            "id": lyr.layer,
+            "expression": ""
+          });
+        });
+        this.groupMatrix.push({
+          "name": grp.name,
+          "layers": layerGroup
+        });
+      }));
+    },
 
     btnNewRowAction: function btnNewRowAction() {
       var defaultVal = this.checkDefaultValue(this.config.groups[0]);
@@ -261,7 +284,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
       this.grpSelect.startup();
       this.own(on(this.grpSelect, "change", lang.hitch(this, function (val) {
-        this.resetLayerDef({ group: this.groupCurrVal });
+        if (!this.config.webmapAppendMode) {
+          this.resetLayerDef({ group: this.groupCurrVal });
+        }
         this.removeAllRows();
         this.checkDomainUse({ group: val });
         this.checkDateUse({ group: val });
@@ -289,7 +314,9 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
 
         /* END: CHANGE ECAN */
 
-        setTimeout(lang.hitch(this, this.setFilterLayerDef), 1000);
+        if (!this.config.webmapAppendMode) {
+          setTimeout(lang.hitch(this, this.setFilterLayerDef), 1000);
+        }
       })));
       this.checkDomainUse({ group: this.grpSelect.value });
       this.checkDateUse({ group: this.grpSelect.value });
@@ -499,13 +526,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               if (layer.newSubLayers.length > 0) {
                 array.forEach(this.msLayersDesc, lang.hitch(this, function (msLayer) {
                   array.forEach(msLayer.children, lang.hitch(this, function (child) {
-                    //console.log(child.id);
                     if (child.id === grpLayer.layer) {
                       if (holder !== child.id) {
                         if (grpLayer.useDomain === true) {
                           var newFL = new FeatureLayer(child.url);
                           this.own(on(newFL, "load", lang.hitch(this, function () {
-                            this._callFilterDijit(grpLayer, pValue, child.url, newFL, parts, filter, pDijit);
+                            this._callFilterDijit(grpLayer, pValue, child.url, newFL.toJson().layerDefinition, parts, filter, pDijit);
                           })));
                         }
                       }
@@ -516,7 +542,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               } else {
                 if (grpLayer.layer === layer.id) {
                   if (grpLayer.useDomain === true) {
-                    this._callFilterDijit(grpLayer, pValue, layer.layerObject.url, layer.layerObject, parts, filter, pDijit);
+                    this._callFilterDijit(grpLayer, pValue, layer.layerObject.url, layer.layerObject.toJson().layerDefintion, parts, filter, pDijit);
                   }
                 }
               }
@@ -741,6 +767,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     formatDate: function formatDate(value) {
       // see also parseDate()
       // to bypass the locale dependent connector character format date and time separately
+      value = new Date(value);
       var s1 = locale.format(value, {
         datePattern: "yyyy-MM-dd",
         selector: "date"
@@ -918,7 +945,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
               if (typeof group.appendSameLayer !== 'undefined' && group.appendSameLayer === true) {
                 if (layerHolder !== grpLayer.layer) {
                   if (expr !== "") {
-                    this.setupFilterToApply(layer, filterType, expr, msExpr);
+                    this.setupFilterToApply(layer, filterType, expr, msExpr, group);
                     expr = '';
                   }
                 } else {
@@ -1051,13 +1078,12 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                   msExpr[msSubs[1]] = expr.trim();
                 }
               } else {}
-
               layerHolder = grpLayer.layer;
               if (typeof group.appendSameLayer !== 'undefined' && group.appendSameLayer === false) {
                 this.setupFilterToApply(layer, filterType, expr, msExpr);
               } else {
                 if (i === group.layers.length - 1) {
-                  this.setupFilterToApply(layer, filterType, expr, msExpr);
+                  this.setupFilterToApply(layer, filterType, expr, msExpr, group);
                 }
               }
             }));
@@ -1069,7 +1095,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       }));
     },
 
-    setupFilterToApply: function setupFilterToApply(layer, filterType, expr, msExpr) {
+    setupFilterToApply: function setupFilterToApply(layer, filterType, expr, msExpr, group) {
       //if(expr !== "" || msExpr.length > 0) {
       if (filterType === "FeatureLayer") {
         if (expr !== "") {
@@ -1086,6 +1112,35 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
           else {
           */
           // layer.layerObject.setDefinitionExpression(expr.trim());
+          var newExp = expr.trim();
+          if (this.chkAppendToDef.checked) {
+            newExp = "";
+            array.forEach(this.groupMatrix, lang.hitch(this, function (grp) {
+              if (grp.name === group.name) {
+                array.forEach(grp.layers, lang.hitch(this, function (glyr, index) {
+                  if (glyr.id === layer.id) {
+                    glyr.expression = expr.trim();
+                  }
+                }));
+              }
+            }));
+            var onlyfilteredGroups = [];
+            array.forEach(this.groupMatrix, lang.hitch(this, function (grp) {
+              onlyfilteredGroups = onlyfilteredGroups.concat(array.filter(grp.layers, lang.hitch(this, function (glayer) {
+                return glayer.expression !== "" && glayer.id === layer.id;
+              })));
+            }));
+            array.forEach(onlyfilteredGroups, lang.hitch(this, function (grp, index) {
+              if (grp.expression !== "") {
+                if (index < onlyfilteredGroups.length - 1) {
+                  newExp = newExp + " (" + grp.expression + ") " + this.slAppendChoice.value + " ";
+                } else {
+                  newExp = newExp + " (" + grp.expression + ") ";
+                }
+              }
+            }));
+          }
+          console.log(layer.title + " filter: " + newExp);
           this._applyFilter(layer.layerObject, expr.trim(), false);
           //}
           //layer.layerObject.setVisibility(true);
@@ -1094,11 +1149,17 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         if (msExpr.length > 0) {
           if (this.chkAppendToDef.checked) {
             array.forEach(this.defaultDef, lang.hitch(this, function (def) {
+              var mapFilterExist = false;
+              var idNum = -1;
               if (def.layer === layer.id) {
                 for (slot in msExpr) {
                   for (var key in def.definition) {
                     if (slot === key) {
-                      msExpr[slot] = "(" + def.definition[key] + ") " + this.slAppendChoice.value + " " + expr;
+                      mapFilterExist = true;
+                      idNum = key;
+                      //msExpr[slot] = "(" + def.definition[key] + ") "  +
+                      //this.slAppendChoice.value +  " " + expr;
+                      //msExpr[slot] = "(" + def.definition[key] + ") ";
                     } else {
                       if (msExpr[slot] === "") {
                         msExpr[slot] = expr;
@@ -1106,6 +1167,35 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
                     }
                   }
                 }
+                this.newMSExprForAppend(group, layer, msExpr);
+                var onlyfilteredGroups = [];
+                array.forEach(this.groupMatrix, lang.hitch(this, function (grp) {
+                  onlyfilteredGroups = onlyfilteredGroups.concat(array.filter(grp.layers, lang.hitch(this, function (glayer) {
+                    return glayer.expression !== "" && glayer.id.indexOf(layer.id) > -1;
+                  })));
+                }));
+                var newExp = [];
+                array.forEach(onlyfilteredGroups, lang.hitch(this, function (grp, index) {
+                  if (grp.expression !== "") {
+                    var splitId = grp.id.split(".");
+                    if (typeof newExp[splitId[1]] !== "undefined") {
+                      if (mapFilterExist && splitId[1] === idNum) {
+                        newExp[splitId[1]] = "(" + def.definition[key] + ") " + this.slAppendChoice.value + " " + newExp[splitId[1]] + " " + this.slAppendChoice.value + " (" + grp.expression + ") ";
+                      } else {
+                        newExp[splitId[1]] = newExp[splitId[1]] + " " + this.slAppendChoice.value + " (" + grp.expression + ") ";
+                      }
+                    } else {
+                      if (mapFilterExist && splitId[1] === idNum) {
+                        newExp[splitId[1]] = "(" + def.definition[key] + ") " + this.slAppendChoice.value + " " + grp.expression;
+                      } else {
+                        newExp[splitId[1]] = grp.expression;
+                      }
+                    }
+                    msExpr = newExp;
+                  }
+                }));
+                //console.log(newExp);
+
                 layer.layerObject.setLayerDefinitions(msExpr);
                 this._zoomOnFilter(layer.layerObject);
               }
@@ -1121,15 +1211,32 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         //do nothing, not a valid service
 
         //}
-
     },
-
+    newMSExprForAppend: function newMSExprForAppend(group, layer, expr) {
+      array.forEach(this.groupMatrix, lang.hitch(this, function (grp) {
+        if (grp.name === group.name) {
+          array.forEach(grp.layers, lang.hitch(this, function (glyr, index) {
+            if (glyr.id.indexOf(layer.id) > -1) {
+              array.forEach(layer.layerObject.layerInfos, lang.hitch(this, function (lyrInfo) {
+                var msSubId = layer.id + "." + lyrInfo.id;
+                if (glyr.id === msSubId) {
+                  glyr.expression = expr[lyrInfo.id];
+                }
+              }));
+            }
+          }));
+        }
+      }));
+    },
     resetLayerDef: function resetLayerDef(pParam) {
       if (typeof pParam.group === 'undefined') {
         pParam.group = this.grpSelect.value;
       }
+      this.populateGroupState();
       array.forEach(this.config.groups, lang.hitch(this, function (group) {
         if (group.name === pParam.group) {
+
+          /* BEGIN CHANGE: ECAN */
 
           if (group.displayPreset) {
             //domStyle.set(this.filterBlock, "display", "none");
@@ -1138,6 +1245,8 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             if (!domClass.contains(this.filterBlock, "hide-items")) domClass.add(this.filterBlock, "hide-items");
             //domStyle.set(this.filterBlock, "display", "");
           }
+
+          /* END CHANGE */
 
           array.forEach(group.layers, lang.hitch(this, function (grpLayer) {
             array.forEach(this.layerList, lang.hitch(this, function (layer) {
@@ -1213,6 +1322,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
             query(".saveContainer").style("display", "none");
             query(".groupContainer").style("display", "block");
             query(".buttonContainer").style("display", "block");
+            domClass.replace("refreshDiv", "refresh-icon", "refresh-done-icon");
           }
         }
       }
@@ -1309,7 +1419,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       if (this.slAppendChoice.value === "AND") {
         howAppend = true;
       }
-      FilterManager.getInstance().applyWidgetFilter(layer.id, this.id, exp, this.chkAppendToDef.checked, howAppend);
+      FilterManager.getInstance().applyWidgetFilter(layer.id, this.id, exp, this.chkAppendToDef.checked, howAppend, this.config.zoomMode);
       if (!destory) {
         this._zoomOnFilter(layer);
       }
@@ -1397,7 +1507,6 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         var newMinX = this.filterExt.xmin < newExt.xmin ? this.filterExt.xmin : newExt.xmin;
         var newMaxY = this.filterExt.ymax > newExt.ymax ? this.filterExt.ymax : newExt.ymax;
         var newMinY = this.filterExt.ymin < newExt.ymin ? this.filterExt.ymin : newExt.ymin;
-
         newExt = newExt.update(newMinX, newMinY, newMaxX, newMaxY, newExt.spatialReference);
         if (results.extent.spatialReference.wkid !== 102100 && results.extent.spatialReference.wkid !== 102113 && results.extent.spatialReference.wkid !== 3857 && results.extent.spatialReference.wkid !== 4326) {
           newExt = geometryEngine.buffer(newExt, 200, 9002, false).getExtent();
@@ -1464,19 +1573,32 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     launchEditor: function launchEditor(e) {
       var wm = WidgetManager.getInstance();
 
-      var editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
-      if (editConfig) {
-        wm.triggerWidgetOpen(editConfig.id);
+      var editConfig = this._findWidgetConfigInstance("SmartEditorPro");
+
+      if (!editConfig) {
+        editConfig = this._findWidgetConfigInstance("SmartEditorPro");
       }
 
-      //"widgets_SmartEditorEcan_Widget_23"
+      if (!editConfig) {
+        editConfig = this._findWidgetConfigInstance("SmartEditor");
+      }
 
-      //var editWidget = wm.getWidgetByLabel("Smart Editor Ecan");
-      //if (editWidget) {
-      //wm.closeWidget(editWidget);
-      //} else {
-      //  console.log('btnLaunchEditor: No Editor Found');
-      //}
+      if (editConfig) {
+        if (!wm.getWidgetById(editConfig.id)) {
+          this._updateEditorWidget(wm, editConfig);
+        } else {
+          wm.loadWidget(editConfig).then(lang.hitch(this, function () {
+            this._updateEditorWidget(wm, editConfig);
+          }));
+        }
+      }
+    },
+
+    _updateEditorWidget: function _updateEditorWidget(wm, editConfig) {
+      wm.triggerWidgetOpen(editConfig.id).then(lang.hitch(this, function () {
+        //reapply the layer definition in order to trigger the edit widget preset values filter
+        this.setFilterLayerDef();
+      }));
     },
 
     _findWidgetConfigInstance: function _findWidgetConfigInstance(widgetType) {
@@ -1512,6 +1634,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
         this.onLayerUpdate();
       }
     },
+
     onActive: function onActive() {
       if (!this.firstOpen) {
         if (!this.bypassActive) {
@@ -1535,20 +1658,20 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
     },
 
     onMinimize: function onMinimize() {
-      console.log('onMinimize');
+      //console.log('onMinimize');
     },
 
     onMaximize: function onMaximize() {
-      console.log('onMaximize');
+      //console.log('onMaximize');
     },
 
     onSignIn: function onSignIn(credential) {
       /* jshint unused:false*/
-      console.log('onSignIn');
+      //console.log('onSignIn');
     },
 
     onSignOut: function onSignOut() {
-      console.log('onSignOut');
+      //console.log('onSignOut');
     }
   });
 });

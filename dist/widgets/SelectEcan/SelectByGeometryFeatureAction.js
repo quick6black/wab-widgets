@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
 
         return false;
       } else {
-        return featureSet.features.length > 0;
+        return true;
       }
     },
 
@@ -33,18 +33,19 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       }
 
       var wm = WidgetManager.getInstance();
-      wm.triggerWidgetOpen(this.widgetId).then(function (myWidget) {
+      wm.triggerWidgetOpen(this.widgetId).then(lang.hitch(this, function (myWidget) {
+        wm.activateWidget(myWidget);
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            myWidget.selectByFeature(featureSet);
+            myWidget.selectByFeature(results);
           }, function (error) {
             alert(error);
           });
         } else {
           myWidget.selectByFeature(featureSet);
         }
-      });
+      }));
     },
 
     _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {

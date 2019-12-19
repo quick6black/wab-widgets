@@ -75,14 +75,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
 
       layerUtil.getLayerInfoArray(layerInfosObject).then(lang.hitch(this, function (layerInfoArray) {
         //First loaded, reset selectableLayerIds
-        this._initLayers(layerInfoArray);
+        this._initLayers(this._filterLayerInfo(layerInfoArray));
       }));
 
       this.own(on(layerInfosObject, 'layerInfosChanged', lang.hitch(this, function () {
         this.shelter.show();
 
         layerUtil.getLayerInfoArray(layerInfosObject).then(lang.hitch(this, function (layerInfoArray) {
-          this._initLayers(layerInfoArray);
+          this._initLayers(this._filterLayerInfo(layerInfoArray));
         }));
       })));
 
@@ -127,7 +127,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
     onActive: function onActive() {
       this._setSelectionSymbol();
 
-      // ECAN CHANGE - Specifiy whether select dijit should be activuated when widget activates
+      // ECAN CHANGE - Specifiy whether select dijit should be activated when widget activates
       var setActive = this.config.selectOnActivate !== undefined ? this.config.selectOnActivate : true;
 
       if (setActive && !this.selectDijit.isActive()) {
@@ -135,6 +135,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       } else if (!setActive && this.selectDijit.isActive()) {
         this.selectDijit.deactivate();
       }
+      /* END CHANGE */
     },
 
     onOpen: function onOpen() {
@@ -185,9 +186,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             // ECAN CHANGE - Configure initial state of selected check box to override visible state
 
             var checked = visible;
-            if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
+
+            if (this.config.selectedLayersMode === null) {
+              checked = false;
+            } else if (this.config.selectedLayersMode && this.config.selectedLayersMode !== 'visible') {
               checked = this.config.selectedLayersMode === 'none' ? false : true;
             }
+
+            /* END CHANGE */
 
             var item = new SelectableLayerItem({
               layerInfo: layerInfo,
@@ -198,9 +204,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
               map: this.map,
               nls: this.nls
             });
+
             this.own(on(item, 'switchToDetails', lang.hitch(this, this._switchToDetails)));
-            this.own(on(item, 'stateChange', lang.hitch(this, function () {
+            this.own(on(item, 'stateChange', lang.hitch(this, function (itemStatus) {
               this.shelter.show();
+              if ('visible' in itemStatus) {
+                this.selectDijit.setDisplayLayerVisibility(itemStatus.featureLayer, itemStatus.visible);
+              }
               this.selectDijit.setFeatureLayers(this._getSelectableLayers());
               this.shelter.hide();
             })));
@@ -416,7 +426,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
       ctrlKey = ctrlKey || false;
       metaKey = metaKey || false;
 
-      this.selectDijit.drawBox.onDrawEnd(graphic, geotype, commontype, shiftKey, ctrlKey, metaKey);
+      this.shelter.show();
+
+      setTimeout(lang.hitch(this, function () {
+        this.selectDijit.drawBox.onDrawEnd(graphic, geotype, commontype, shiftKey, ctrlKey, metaKey);
+      }), 1000);
     }
 
     ///////////////////////// END OF ECAN CHANGES //////////////////////////
