@@ -2,6 +2,7 @@
 Enhanced draw widget for Web AppBuilder for ArcGIS.
 
 This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
+Also see [https://community.esri.com/thread/122331](https://community.esri.com/thread/122331)
 
 ## Improvements :
 #### Changes made include:  
