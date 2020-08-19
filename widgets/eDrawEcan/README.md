@@ -37,6 +37,17 @@ Add eDrawEcan folder in your Web AppBuilder client\stemapp\widgets folder.
 Download Release here:  
 [https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest](https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest)
 
+
+## Future improvements :
+- Add function to be able to convert/export one or more of the current drawings (user selected) to a different file format (intially shapefile or gpx format). Use FME server to handle conversion (widget calls the fme rest api and resurns the results as a downloadable file). 
+- All settings to be configurable throuh settings widget
+- Continuous add mode - Toggle for drawing tools so that user does not have to click the drawing template after adding a feature if the want to create a bunch of features with the same drawing properties.
+- Add text filter/search for drawings saved to portal similar to add data widget 
+- Share drawing with other users (portal mode only).  User can choose to share a drawing saved to portal with a Portal group.  UI to be altered to be able to look through and load their own drawings or other drawings shared with a group that the user has permissions to contribute to.  Update of saved drawing files is limited to owned drawings and UI should reflect this.   Drawings will need to be tagged appropriately to ensure they are identifiable as shared drawings.  
+- Hide/obfuscate existing drawing shapes when using geometry editing tools - orignal geometry and symbology is confusing users while they make changes.   Replace with undo/redo functionality??
+- Clip tool - trim lines or clip polygons to the overlapped area of another selected feature
+
+
 ## Demo :
 To be created
 
