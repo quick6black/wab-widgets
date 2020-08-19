@@ -46,8 +46,7 @@ This widget can be set to open automatically when an app starts. To enable this 
 
 ## Use :
 
-1. 
-2. On the **Search** tab, choose the scope you want to search and click **Open** on a specific item to change to use that map.  Click **Details** to get information about the layer.
+1. On the **Search** tab, choose the scope you want to search and click **Open** on a specific item to change to use that map.  Click **Details** to get information about the layer.
 
 	> **Caution:**  
 	> If the app is shared publicly, do not enable **Allow My Organzation** or **Allow My Content** as the search will only execute against the public items.
