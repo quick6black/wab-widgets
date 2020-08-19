@@ -1,6 +1,6 @@
 # Add Local Data Widget for ArcGIS Web AppBuilder
 
-**Customised version of Add Local Data widget developed by Shaun Weston [Source](https://github.com/WestonSF/ArcGISWebAppBuilderAddLocalDataWidget)**
+_Customised version of Add Local Data widget developed by Shaun Weston [Source](https://github.com/WestonSF/ArcGISWebAppBuilderAddLocalDataWidget)_
 
 Adds local data to a map - CSV, shapefiles and GPX.
 
