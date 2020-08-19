@@ -25,6 +25,23 @@ The following are changes that are still needed to be implemented:
 To be deployed in the future
 
 
+## Basemap Gallery Pro Widget (ECan Variant)
+Modified version of the standard Basemap Gallery widget for Web AppBuilder for ArcGIS.
+
+#### Changes made include:  
+
+- Basemaps in the gallery can be displayed in one or more groups which can be changed by selecting an option from a dropdown list.  This function currenly only works when using basemaps from an arcgis portal or arcgis online organisation.  The groups can be configured by either adding a named tag to the the webmap item that is part of the group, or by adding a list of the basemap names that should be included in the group to the group config.  The name displayed for a group can be specified in the config file.  When using the basemap title method to populate the groups, the base maps are displayed in the order they are listed in the config file.  A default group of basemaps can be specified in the config file - if a default group is not specified, the "All Basemaps" group is used.  
+
+#### Notes
+The following are changes that are still needed to be implemented:
+
+- Bug - If webmap ustilises a basemaps that the widget has not been configured with, the basemap gallery does not fully load and users cannot change basemaps.
+
+#### Demo
+To be deployed in the future
+
+
+
 ## eDraw Ecan Widget
 This is a customised variant of the eDraw widget [https://github.com/magis-nc/esri-webappbuilder-widget-eDraw](https://github.com/magis-nc/esri-webappbuilder-widget-eDraw "https://github.com/magis-nc/esri-webappbuilder-widget-eDraw") developed by MAGIS.
 
