@@ -135,3 +135,19 @@ Much of the code and function is based on the standard ESRI Add Data widget [htt
 
 #### Demo
 To be deployed in the future
+
+
+## Add Local Data Widget for ArcGIS Web AppBuilder
+Adds local data to a map - CSV, shapefiles and GPX.
+
+#### Changes made include:  
+
+- None
+
+#### Notes
+
+* Customised version of Add Local Data widget developed by Shaun Weston [Source](https://github.com/WestonSF/ArcGISWebAppBuilderAddLocalDataWidget)
+
+
+#### Demo
+To be deployed in the future
