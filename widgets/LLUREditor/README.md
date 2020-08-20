@@ -12,7 +12,7 @@ Download Release here :
 https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest
 
 ## Requirements :
-The widget requires the custom LLUR proxy page application )not part of this repository).
+The widget requires the custom LLUR proxy page application (not part of this repository).
 
 ## Configuration :
 This widget does not have a configurable setting tools for use in the Web AppBuilder and must be configured manually by editing the widget config json file.
