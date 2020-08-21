@@ -18,3 +18,8 @@ Users must be registered within the LLUR system to be able to request statements
 
 ## Configuration :
 This widget does not have a configurable setting tools for use in the Web AppBuilder and must be configured manually by editing the widget config json file.
+
+
+## Changes :
+
+- *16 Apr 2019* - Port to WAB 2.12 Framework.  Not chnages required. 
