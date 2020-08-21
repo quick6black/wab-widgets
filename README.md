@@ -168,3 +168,23 @@ Adds local data to a map - CSV, shapefiles and GPX.
 
 #### Demo
 To be deployed in the future
+
+
+## LLUR Editor Widget
+LLUR Editor Widget for Web AppBuilder for ArcGIS.
+
+This widget is a custom tool designed to work specifically with the Environment Canterbury Listed Land Use Register database application.
+
+#### Known Issues :
+None at this time.
+
+#### Installation :
+Add LLUREditor folder in your web AppBuilder client\stemapp\widgets folder.
+Download Release here : 
+https://github.com/CanterburyRegionalCouncil/wab-widgets/releases/latest
+
+#### Requirements :
+The widget requires the custom LLUR proxy page application (not part of this repository) - refer to EcanMaps.Applications Repo ArcGISPortalApps.Viewer project [https://github.com/CanterburyRegionalCouncil/ECanMaps.Applications/tree/master/ArcGISPortalApps.Viewer](https://github.com/CanterburyRegionalCouncil/ECanMaps.Applications/tree/master/ArcGISPortalApps.Viewer) 
+
+#### Configuration :
+This widget does not have a configurable setting tools for use in the Web AppBuilder and must be configured manually by editing the widget config json file.
