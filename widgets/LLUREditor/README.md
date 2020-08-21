@@ -22,4 +22,10 @@ This widget does not have a configurable setting tools for use in the Web AppBui
 
 ## Changes :
 
-- *16 Apr 2019* - Port to WAB 2.12 Framework.  Not chnages required. 
+- **16 Apr 2019** - Port to WAB 2.12 Framework.  Not chnages required. 
+
+
+## Future development :
+
+- Enhance editing tools - Add in tools to be cut, clip, merge, explode and reshape (simiar to editor tool)
+- Ensure user is logged into portal before allowing submit to LLUR API so email details can be correctly extracted.
