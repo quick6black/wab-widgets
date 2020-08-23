@@ -1,20 +1,17 @@
-#Changes from Existing Select Widget
+## Select Ecan Widget
+This is a customised variant of the standard Select widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-select.htm) developed by ESRI.
 
-*Based off ESRI Select Widget from WAB Developer Edition v2.9*  
+#### Changes made include:  
+
+- Custom feature action **SelectByGeometryFeatureAction** added to widget that adds functionality to pass the geometry of a feature/featureSet to the Select widget to perform a search as though the user had drawn the shape.  A **Select By Geometry** option is added to the popup action menu for any valid featureSet option in the WAB framework e.g. on popup windows for feature layers, in the options off the select and query widgets, etc.  
+- Default selected layer checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
+- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
 
 
+#### Demo
+To be deployed in the future
 
 ### Changes
-
-**5 Aug 2018** 
-
-
-- Ported to WAB 2.9 framework
-- Removal of custom layer selection state toggle code which is replaced with functions now standard in ESRI version of widget.
-- Default selection state checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
-- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
-- Settings page updated to include options for the new config settings.     
-
 
 **23 May 2017**     
 
@@ -32,8 +29,24 @@
 - Addition to the **manifest.json** file of the SelectbyGeometry details to the feature actions object array.  This registers the feature action with the WAB framework for this widget.
 - Addition of **selectbygeometry\_default.png** and **selectbygeometry\_hover.png** file to images folder of the widget folder.
 - Addition of **\_featureAction_SelectByGeometry** entry to the **strings.js** file for the display name to appear on the Select By Geometry feature action.
-  
+
+
+**5 Aug 2018** 
+
+
+- Ported to WAB 2.9 framework
+- Removal of custom layer selection state toggle code which is replaced with functions now standard in ESRI version of widget.
+- Default selection state checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
+- Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
+- Settings page updated to include options for the new config settings.     
+
+ 
 **21 Nov 2018** 
 
 
 - Merged in changes from WAB 2.10 version of Select widget
+
+
+**24 May 2019**
+
+- Bug fix for initial selectable state of layers when widget is opened. The make all non-selected settings was not being applied correctly. Bug fix for layer item state change missing item status parameter that was causing long delay when refreshing visible status for map service layers after scale change.
