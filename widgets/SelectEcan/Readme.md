@@ -7,6 +7,11 @@ This is a customised variant of the standard Select widget [http://doc.arcgis.co
 - Default selected layer checkbox values can be overriden with config setting to make all either checked on (i.e. as though layer is visible), checked off (layer not visible).  If config value is not supplied, uses standard functionality.
 - Change to make option to activate the select dijit a configurable option so that admin can determine if the widget auto starts when opened/activated.
 
+### Known Bugs and Future Improvements
+
+- When triggered, the custom feature action "Select By Geometry" needs a check to ensure that at least one layer is selected in the layer list, otherwise the tool goes into a infinite wait loop and is not able to be used again until then session is refreshed.
+
+
 
 #### Demo
 To be deployed in the future
