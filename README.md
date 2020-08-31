@@ -95,7 +95,7 @@ The following are changes that are still needed to be implemented:
 #### Demo
 To be deployed in the future
 
-## Smart Editor Widget
+## Smart Editor Pro Widget
 This is a customised variant of the standard Smart Editor widget [http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm](http://doc.arcgis.com/en/web-appbuilder/create-apps/widget-smart-editor.htm) developed by ESRI.
 
 #### Changes made include:  
@@ -105,7 +105,7 @@ This is a customised variant of the standard Smart Editor widget [http://doc.arc
 - **Cut tool** added for breaking line or polygon features into multiple parts.  Requires a single line or polygon feature be selected to be enabled.
 - **Merge tool** added for combining two or more selected editable line or polygon features from the same editable layer into a single feature.  The attributes of the feature that has focus in the attribute inspector are preserved. If any point features are selected, the tool is disabled.  If features from more than one editable layer are selected, the tool is disabled.
 - **Explode multi-part feature tool** added for breaking multipart features into multiple single part features (lines and polygons only). **NOTE - THIS IS A SIMPLE EXPLODE ONLY AND DOES NOT SUPPORT COMPLEX GEOMETRY SUCH DONUT FEATURES - USING IT IN SUCH SITUATIONS MAY RESULT IN UNEXPECTED OUTCOMES.** 
-
+- **Copy feature action** added to allow user to copy a feature from an existing feature collection or feature layer into a layer with equivalent geometry type using the Smart Editors copy functionality.  
 
 #### Notes
 The following are changes that are still needed to be implemented:
@@ -113,6 +113,7 @@ The following are changes that are still needed to be implemented:
 - Requires option for calling on open of widget if it is closed
 - Reset should apply default values from parameters again if they have been changed
 - Developed in conjunction with the Edit Filter widget and should accept filter values from that widget or the standard Group Filter widget. 
+- Should be reviewed with each release of Smart Editor to support any new functionality where possible.
 
 #### Demo
 To be deployed in the future
