@@ -3,18 +3,50 @@
     "mode": 1,
     "basemaps": [],
     "useGroups": true,
-    "defaultBasemapGroup": "vectorBasemaps",
-    "groups": [{
-        "id":"vectorBasemaps",
-        "tag":"",
-        "label":"Vector basemaps",
-        "includedBasemaps":["Colour Streets","Dark Gray","Dark Gray Base","No Title"]
+    "defaultBasemapGroup": "standardBasemaps",
+    "groups": [
+      {
+        "id": "standardBasemaps",
+        "tag": "",
+        "label": "Standard basemaps",
+        "includedBasemaps": [
+          "Latest Imagery",
+          "Latest Imagery - labelled",
+          "Topo",
+          "Colour - labelled",
+		  "Colour",
+          "Dark Grey - labelled",
+		  "Dark Grey",
+          "Light Grey - labelled",
+		  "Light Grey"
+        ]
       },
-    {
-        "id":"imageryBasemaps",
-        "tag":"Imagery",
-        "label":"Imagery basemaps"
-    }
-  ]
+      {
+        "id": "imageryBasemaps",
+        "tag": "",
+        "label": "Imagery basemaps",
+        "includedBasemaps": [
+          "Latest Imagery",
+          "Latest Imagery - labelled",
+          "Imagery 1925 - 1929",
+          "Imagery 1935 - 1939",
+          "Imagery 1940 - 1944",
+          "Imagery 1945 - 1949",
+          "Imagery 1950 - 1954",
+          "Imagery 1955 - 1959",
+          "Imagery 1960 - 1964",
+          "Imagery 1965 - 1969",
+          "Imagery 1970 - 1974",
+          "Imagery 1975 - 1979",
+          "Imagery 1980 - 1984",
+          "Imagery 1985 - 1989",
+          "Imagery 1990 - 1994",
+          "Imagery 1995 - 1999",
+          "Imagery 2000 - 2004",
+          "Imagery 2004 - 2010",
+          "Imagery 2010 - 2015"
+        ]
+      }
+    ]
   }
 }

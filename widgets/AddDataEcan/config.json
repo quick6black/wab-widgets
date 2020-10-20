@@ -1,71 +1,72 @@
 {
- "CMapsVersion": {
-    "allow": false
+  "CMapsVersion": {
+    "allow": true
   },
   "numPerPage": 30,
   "scopeOptions": {
     "MyContent": {
-      "allow": true,
+      "allow": false,
       "label": null
     },
     "MyOrganization": {
-      "allow": true,
+      "allow": false,
       "label": null
     },
     "Curated1": {
       "allow": true,
-      "label": null,
-      "filter": null
+      "label": "Canterbury Maps",
+      "filter": "owner:canterburymaps"
     },
     "Curated2": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated3": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated4": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated5": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated6": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated7": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated8": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated9": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "Curated10": {
-      "allow": true,
+      "allow": false,
       "label": null,
       "filter": null
     },
     "ArcGISOnline": {
       "allow": true,
       "label": null
-    }
+    },
+    "defaultScope": "Curated1"
   },
   "addFromUrl": {
     "allow": true

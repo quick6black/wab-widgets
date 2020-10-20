@@ -1,7 +1,15 @@
 {
   "selectionColor": "#00FFFF",
   "selectionMode": "partial",
-  "selectOnActivate":false,
+  "selectedLayersMode": null,
   "allowExport": false,
-  "selectedLayersMode": "visible"
+  "selectOnActivate": false,
+  "geometryTypes": [
+    "POINT",
+    "POLYLINE",
+    "EXTENT",
+    "CIRCLE",
+    "POLYGON",
+    "FREEHAND_POLYGON"
+  ]
 }
