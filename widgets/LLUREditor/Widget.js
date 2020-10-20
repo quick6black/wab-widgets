@@ -2169,6 +2169,11 @@ function(
 
     _getWKT: function (geometry) {
         if (geometry) {
+            // check for self intersecting feature
+            if(geometry.isSelfIntersecting(geometry)) {
+                geometry = geometryEngine.simplify(geometry);
+            }
+
             var arcgisJson = geometry.toJson();
 
             var tPrim = window.Terraformer.ArcGIS.parse(geometry.toJson());
