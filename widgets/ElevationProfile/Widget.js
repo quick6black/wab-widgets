@@ -827,7 +827,7 @@ define([
 
           // GAIN/LOSS DETAILS //
           var detailsNumberFormat = {
-            places: 0
+            places: this.chartRenderingOptions.elevationTipDecimalPlaces
           };
           var elevFirst = this.elevationData[0].y;
           var elevLast = this.elevationData[this.elevationData.length - 1].y;
