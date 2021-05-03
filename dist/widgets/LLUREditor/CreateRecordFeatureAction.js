@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
 
         return false;
       } else {
-        return featureSet.features[0].geometry.type === 'polygon';
+        return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
       }
     },
 
@@ -38,16 +38,12 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            setTimeout(function () {
-              myWidget.copyFeatureSet(results);
-            }, 1000);
+            myWidget.copyFeatureSet(results);
           }, function (error) {
             alert(error);
           });
         } else {
-          setTimeout(function () {
-            myWidget.copyFeatureSet(featureSet);
-          }, 1000);
+          myWidget.copyFeatureSet(featureSet);
         }
       }));
     },

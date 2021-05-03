@@ -188,8 +188,14 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', "dojo/Deferred", 
           if (config.defaultBasemapGroup && config.defaultBasemapGroup !== '' && this._groups[config.defaultBasemapGroup]) {
             var group = this._groups[config.defaultBasemapGroup];
 
-            //use group basemaps
-            config.basemaps = group.basemaps;
+            //create new array of basemaps for this group - prevents a byref link to array which was clearing out the default group objects basemap array when a new group is chosen. 
+            var grpbasemaps = [];
+            array.forEach(group.basemaps, lang.hitch(this, function (basemap) {
+              grpbasemaps.push(basemap);
+            }));
+
+            //use group's basemaps
+            config.basemaps = grpbasemaps;
 
             //update title on group selector
             this._groupSelector.set('label', group.label);

@@ -2,10 +2,10 @@
   "name": "AddLocalData",
   "label": "Add Local Data",
   "platform": "HTML",
-  "version": "1.0",
-  "wabVersion": "2.12",
+  "version": "2.17",
+  "wabVersion": "2.17",
   "author": "Shaun Weston",
-  "description": "Adds local data to the map.  Ported to WAB 2.12 by Environemnt Canterbury GIS Team.  No code changes.",
+  "description": "Adds local data to the map.  Ported to WAB 2.12 by Environment Canterbury GIS Team.  No code changes.",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

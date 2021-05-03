@@ -1,0 +1,394 @@
+<div>
+	<form data-dojo-attach-point="settingsForm" data-dojo-type="dijit/form/Form">
+
+		<div class="row">
+	    <div class="left-cell">
+	      <label for="${id}_numPerPage">${nls.numPerPage}</label>
+	    </div>
+	    <input id="${id}_numPerPage" type="text" class="numbox"
+	      data-dojo-attach-point="numPerBageBox"
+	      data-dojo-type="dijit/form/NumberTextBox"
+	      data-dojo-props="constraints:{min:1,max:100,places:0}" />
+	  </div>
+
+		<div class="row">
+		  <div class="left-cell">
+			  <input id="${id}_MyContent" type="checkbox"
+			    data-dojo-attach-point="MyContentCheckBox"
+			    data-dojo-type="dijit/form/CheckBox"/>
+			  <label for="${id}_MyContent" class="fixedlen">${nls.scopeOptions.MyContent}</label>
+		  </div>
+		  <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+		    data-dojo-attach-point="MyContentTextBox"
+		    data-dojo-type="dijit/form/ValidationTextBox"
+		    data-dojo-props="maxLength: 24" />
+			<div class="default-scope" data-scope="MyContent"></div>
+		</div>
+
+	  <div class="row">
+	    <div class="left-cell">
+		    <input id="${id}_MyOrganization" type="checkbox"
+		      data-dojo-attach-point="MyOrganizationCheckBox"
+		      data-dojo-type="dijit/form/CheckBox"/>
+		    <label for="${id}_MyOrganization" class="fixedlen">${nls.scopeOptions.MyOrganization}</label>
+		  </div>
+	    <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+	      data-dojo-attach-point="MyOrganizationTextBox"
+	      data-dojo-type="dijit/form/ValidationTextBox"
+	      data-dojo-props="maxLength: 24" />
+			<div class="default-scope" data-scope="MyOrganization"></div>
+	  </div>
+
+	  <div class="row">
+	    <div class="left-cell">
+		    <input id="${id}_ArcGISOnline" type="checkbox"
+		      data-dojo-attach-point="ArcGISOnlineCheckBox"
+		      data-dojo-type="dijit/form/CheckBox"/>
+		    <label for="${id}_ArcGISOnline" class="fixedlen">${nls.scopeOptions.ArcGISOnline}</label>
+	    </div>
+	    <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+	      data-dojo-attach-point="ArcGISOnlineTextBox"
+	      data-dojo-type="dijit/form/ValidationTextBox"
+	      data-dojo-props="maxLength: 24" />
+			<div class="default-scope" data-scope="ArcGISOnline"></div>
+	  </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated1" type="checkbox"
+                       data-dojo-attach-point="Curated1CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated1" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated1TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated1"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated1Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated1Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated1FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated2" type="checkbox"
+                       data-dojo-attach-point="Curated2CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated2" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated2TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated2"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated2Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated2Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated2FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated3" type="checkbox"
+                       data-dojo-attach-point="Curated3CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated3" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated3TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated3"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated3Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated3Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated3FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated4" type="checkbox"
+                       data-dojo-attach-point="Curated4CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated4" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated4TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated4"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated4Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated4Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated4FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated5" type="checkbox"
+                       data-dojo-attach-point="Curated5CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated5" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated5TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated5"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated5Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated5Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated5FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated6" type="checkbox"
+                       data-dojo-attach-point="Curated6CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated6" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated6TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated6"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated6Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated6Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated6FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated7" type="checkbox"
+                       data-dojo-attach-point="Curated7CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated5" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated7TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated7"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated7Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated7Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated7FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated8" type="checkbox"
+                       data-dojo-attach-point="Curated8CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated8" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated8TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated8"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated8Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated8Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated8FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated9" type="checkbox"
+                       data-dojo-attach-point="Curated9CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated9" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated9TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated9"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated9Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated9Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated9FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <input id="${id}_Curated10" type="checkbox"
+                       data-dojo-attach-point="Curated10CheckBox"
+                       data-dojo-type="dijit/form/CheckBox" />
+                <label for="${id}_Curated10" class="fixedlen">${nls.scopeOptions.Curated}</label>
+            </div>
+            <input type="text" placeholder="${nls.scopeOptions.labelPlaceholder}"
+                   data-dojo-attach-point="Curated10TextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox"
+                   data-dojo-props="maxLength: 24" />
+            <div class="default-scope" data-scope="Curated10"></div>
+        </div>
+
+        <div class="row">
+            <div class="left-cell">
+                <label for="${id}_Curated10Filter" class="fixedlen indent">${nls.scopeOptions.CuratedFilter}</label>
+            </div>
+            <input id="${id}_Curated10Filter" type="text" class="wide"
+                   data-dojo-attach-point="Curated10FilterTextBox"
+                   data-dojo-type="dijit/form/ValidationTextBox" />
+            <div>
+                <div class="left-cell"></div>
+                <span class="example">${nls.scopeOptions.livingAtlasExample}</span>
+            </div>
+            <div>
+                <div class="left-cell"></div>
+                <span class="example indent">group:c755678be14e4a0984af36a15f5b643e</span>
+            </div>
+        </div>
+
+		<div class="row">
+			<div class="left-cell">
+				<input id="${id}_addFromUrl" type="checkbox"
+					data-dojo-attach-point="addFromUrlCheckBox"
+					data-dojo-type="dijit/form/CheckBox"/>
+				<label for="${id}_addFromUrl">${nls.addFromUrl.caption}</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="left-cell">
+				<input id="${id}_addFromFile" type="checkbox"
+					data-dojo-attach-point="addFromFileCheckBox"
+					data-dojo-type="dijit/form/CheckBox"/>
+				<label for="${id}_addFromFile">${nls.addFromFile.caption}</label>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="left-cell">
+				<input id="${id}_isCMaps" type="checkbox"
+					data-dojo-attach-point="isCMapsCheckBox"
+					data-dojo-type="dijit/form/CheckBox"/>
+				<label for="${id}_isCMaps">Show CMaps Downloads</label>
+			</div>
+		</div>
+
+	</form>
+</div>
