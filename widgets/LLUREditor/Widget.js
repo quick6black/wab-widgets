@@ -2026,9 +2026,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/html', 'dojo/_base/
             }
         },
 
-        _getWKT: function _getWKT(geometry) {
-            if (geometry) {
-                var arcgisJson = geometry.toJson();
+    _getWKT: function (geometry) {
+        if (geometry) {
+            // check for self intersecting feature
+            if(geometry.isSelfIntersecting(geometry)) {
+                geometry = geometryEngine.simplify(geometry);
+            }
+
+            var arcgisJson = geometry.toJson();
 
                 var tPrim = window.Terraformer.ArcGIS.parse(geometry.toJson());
                 var wkt = window.Terraformer.WKT.convert(tPrim);
