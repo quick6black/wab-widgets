@@ -1761,7 +1761,7 @@ function(declare, _WidgetsInTemplateMixin, BaseWidget, dijit, FilterParameters, 
       var editConfig = this._findWidgetConfigInstance("SmartEditorPro");
       
       if (!editConfig) {
-        editConfig = this._findWidgetConfigInstance("SmartEditorPro");
+        editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
       }
 
       if (!editConfig) {

@@ -1,0 +1,33 @@
+CHANGES MADE
+
+
+1. ADDED NEW BOTSTRAP CSS (non min)
+
+2. IN CSS found location for BODY TAG -- removed font as was causing issues. c below
+
+body {
+  /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333;
+  background-color: #fff;
+}
+
+
+3. Adjusted the WIdget.js to reflect the new css file.
+
+define([
+		'dojo/_base/declare', 
+		'dojo/_base/event',
+		'dojo/_base/lang',
+		'dojo/on',
+		'dojo/dom-class',
+		'jimu/BaseWidget', 
+		'esri/config',
+		'./widgets/Home/widget',
+		'./js/SearchParameters',
+		'./widgets/ItemParameters/Widget',
+		'xstyle/css!./css/bootstrap3_3_7.css'
+
+		
+

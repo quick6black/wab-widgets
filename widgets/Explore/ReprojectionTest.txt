@@ -1,0 +1,20 @@
+Web Mercator to NZTM
+Open web mercator map:
+http://localhost:3344/webappbuilder/stemapp/?webmap=646cdbc44324439b80ffa45e18ca2580
+
+Get coordinates:
+&extent=19209398.96192669,-5358021.076968597,19215513.924189664,-5356774.197944662,102100
+
+Open NZTM map and pass in NZTM cooridnates:
+http://test.canterburymaps.govt.nz/webapps/mapviewer/?webmap=423abafb7edb4790b0081fdec97fb2e3&extent=19209398.96192669,-5358021.076968597,19215513.924189664,-5356774.197944662,102100
+
+
+NZTM to Web Mercator
+Open NZTM Map:
+http://localhost:3344/webappbuilder/stemapp/?webmap=423abafb7edb4790b0081fdec97fb2e3
+
+Get coordinates:
+&extent=1563143.1877035475,5204524.609130461,1569916.5345835746,5206583.071580719,2193
+
+Open Web Mercator Map and pass in NZTM coordainates
+http://localhost:3344/webappbuilder/stemapp/?webmap=646cdbc44324439b80ffa45e18ca2580&extent=1563143.1877035475,5204524.609130461,1569916.5345835746,5206583.071580719,2193
