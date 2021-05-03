@@ -1,6 +1,6 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/Color', 'dojo/_base/lang', 'dojo/aspect', 'dojo/dom', 'dojo/html', 'dojo/dom-attr', 'dojo/dom-class', 'dojo/dom-construct', 'dojo/dom-style', 'dojo/number', 'dojo/on', 'dojo/query', 'dojox/lang/functional', 'dijit/_TemplatedMixin', 'dijit/_WidgetBase', 'dijit/_WidgetsInTemplateMixin', 'dijit/form/HorizontalRule', 'dijit/form/HorizontalRuleLabels', 'esri/config', 'esri/geometry/Extent', 'esri/geometry/Point', 'esri/geometry/Polygon', 'esri/geometry/Polyline', 'esri/geometry/scaleUtils', 'esri/graphic', 'esri/renderers/SimpleRenderer', 'esri/request', 'esri/symbols/CartographicLineSymbol', 'esri/symbols/Font', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/TextSymbol', 'esri/tasks/LengthsParameters', 'esri/tasks/PrintParameters', 'esri/tasks/PrintTask', 'esri/tasks/PrintTemplate', 'esri/units', 'dojo/text!./templates/PrintPlus.html', 'dojo/text!./templates/PrintResult.html', 'jimu/dijit/LoadingShelter', 'jimu/dijit/Message', 'jimu/portalUrlUtils',
+define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/Color', 'dojo/_base/lang', 'dojo/aspect', 'dojo/dom', 'dojo/html', 'dojo/dom-attr', 'dojo/dom-class', 'dojo/dom-construct', 'dojo/dom-style', 'dojo/number', 'dojo/on', 'dojo/query', 'dojox/lang/functional', 'dijit/_TemplatedMixin', 'dijit/_WidgetBase', 'dijit/_WidgetsInTemplateMixin', 'dijit/form/HorizontalRule', 'dijit/form/HorizontalRuleLabels', 'esri/config', 'esri/geometry/Extent', 'esri/geometry/Point', 'esri/geometry/Polygon', 'esri/geometry/Polyline', 'esri/geometry/scaleUtils', 'esri/graphic', 'esri/renderers/SimpleRenderer', 'esri/request', 'esri/symbols/CartographicLineSymbol', 'esri/symbols/Font', 'esri/symbols/SimpleFillSymbol', 'esri/symbols/SimpleMarkerSymbol', 'esri/symbols/TextSymbol', 'esri/tasks/LengthsParameters', 'esri/tasks/PrintParameters', 'esri/tasks/PrintTask', 'esri/tasks/PrintTemplate', 'esri/units', 'dojo/text!./templates/PrintPlus.html', 'dojo/text!./templates/PrintResult.html', 'jimu/dijit/LoadingShelter', 'jimu/dijit/Message', 'jimu/portalUrlUtils', 'jimu/portalUtils', 'dojo/cookie', "dojo/json",
 // These classes are used only in PrintPlus.html and/or PrintResult.html
-'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/form/DropDownButton', 'dijit/form/Form', 'dijit/form/HorizontalSlider', 'dijit/form/NumberTextBox', 'dijit/form/RadioButton', 'dijit/form/Select', 'dijit/form/ValidationTextBox', 'dijit/ProgressBar', 'dijit/TooltipDialog'], function (declare, array, Color, lang, aspect, dom, html, domAttr, domClass, domConstruct, domStyle, number, on, query, functional, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, HorizontalRule, HorizontalRuleLabels, esriConfig, Extent, Point, Polygon, Polyline, scaleUtils, Graphic, SimpleRenderer, esriRequest, CartographicLineSymbol, Font, SimpleFillSymbol, SimpleMarkerSymbol, TextSymbol, LengthsParameters, PrintParameters, PrintTask, PrintTemplate, Units, printTemplate, printResultTemplate, LoadingShelter, Message, portalUrlUtils) {
+'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/form/DropDownButton', 'dijit/form/Form', 'dijit/form/HorizontalSlider', 'dijit/form/NumberTextBox', 'dijit/form/RadioButton', 'dijit/form/Select', 'dijit/form/ValidationTextBox', 'dijit/ProgressBar', 'dijit/TooltipDialog'], function (declare, array, Color, lang, aspect, dom, html, domAttr, domClass, domConstruct, domStyle, number, on, query, functional, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, HorizontalRule, HorizontalRuleLabels, esriConfig, Extent, Point, Polygon, Polyline, scaleUtils, Graphic, SimpleRenderer, esriRequest, CartographicLineSymbol, Font, SimpleFillSymbol, SimpleMarkerSymbol, TextSymbol, LengthsParameters, PrintParameters, PrintTask, PrintTemplate, Units, printTemplate, printResultTemplate, LoadingShelter, Message, portalUrlUtils, portalUtils, cookie, dojoJSON) {
 
   // Main print dijit
   var PrintDijit = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -151,6 +151,31 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/Color', 'dojo/_bas
     },
 
     printDefInspector: function printDefInspector(printDef) {
+
+      /* Change 2021-03-31 - fix token missing and logged into a portal */
+      var portal = portalUtils.getPortal(this.appConfig.portalUrl);
+      if (portal && portal.credential) {
+
+        //var portal_url = new URL(this.appConfig.portalUrl);
+        //var base_url = portal_url.protocol + "//" + portal_url.hostname;
+
+        // Temp fix while working out IE compatable alternative
+        var base_url = "https://ecanmaps.ecan.govt.nz";
+
+        var c = cookie("esri_auth");
+        var token = dojoJSON.parse(c, true).token;
+
+        array.forEach(printDef.operationalLayers, lang.hitch(this, function (printDefLayer) {
+          //check layer object in ma for token
+          var layerid = printDefLayer.id;
+          var layer = this.map.getLayer(layerid);
+          if (layer && layer.url.startsWith(base_url)) {
+            printDefLayer.token = token;
+          }
+        }));
+      }
+      /* End change */
+
       return printDef;
     },
 

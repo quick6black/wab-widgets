@@ -1,0 +1,6 @@
+{
+  "portalApiUri": "http://portalapi.canterburymaps.govt.nz/Umbraco/Api/CanterburyMapsApi",
+  "description": "Search Canterbury Maps for interactive maps and story based applications.",
+  "pageSize": 6,
+  "itemDetailsUrl": "https://canterburymaps.govt.nz/map"
+}

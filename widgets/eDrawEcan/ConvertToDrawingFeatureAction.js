@@ -115,7 +115,8 @@ define([
       query.objectIds = objectIds;
       query.outFields = fields;
       query.returnGeometry = true;
-
+      query.outSpatialReference = layer.getMap().spatialReference;      
+      
       // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
       var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0,layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
       var queryTask = new QueryTask(serviceUrl);      

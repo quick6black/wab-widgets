@@ -1576,7 +1576,7 @@ define(['dojo/_base/declare', 'dijit/_WidgetsInTemplateMixin', 'jimu/BaseWidget'
       var editConfig = this._findWidgetConfigInstance("SmartEditorPro");
 
       if (!editConfig) {
-        editConfig = this._findWidgetConfigInstance("SmartEditorPro");
+        editConfig = this._findWidgetConfigInstance("SmartEditorEcan");
       }
 
       if (!editConfig) {

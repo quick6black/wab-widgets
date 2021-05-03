@@ -52,7 +52,6 @@ define([
   'jimu/BaseFeatureAction',
   'jimu/dijit/FeatureActionPopupMenu',
   'jimu/CSVUtils',
-  'jimu/dijit/Message',
   'esri/layers/GraphicsLayer',
   './SegmentChooser',
   'jimu/WidgetManager',
@@ -67,7 +66,7 @@ define([
     Graphic, FeatureSet, LinearUnit, geodesicUtils, webMercatorUtils, Units, jimuUtils,
     Measurement, html, ProgressBar, TabContainer, Message, domConstruct,
     gfxUtils, esriConfig, ProjectParameters, SpatialReference, BaseFeatureAction,
-    PopupMenu, CSVUtils, Message, GraphicsLayer, SegmentChooser, WidgetManager,
+    PopupMenu, CSVUtils, GraphicsLayer, SegmentChooser, WidgetManager,
     PanelManager) {
     return declare([BaseWidget, _OnDijitClickMixin, _WidgetsInTemplateMixin, Evented], {
 
