@@ -26,6 +26,7 @@ define([
         'esri/graphic',
         'esri/symbols/SimpleMarkerSymbol',
         'esri/symbols/PictureMarkerSymbol',
+        'esri/geometry/Point',
         'esri/geometry/Polyline',
         'esri/symbols/SimpleLineSymbol',
         'esri/geometry/Polygon',
@@ -47,6 +48,7 @@ define([
         'jimu/SpatialReference/utils',
         'esri/geometry/geodesicUtils',
         'esri/geometry/geometryEngine',
+        'esri/SpatialReference',        
         'dojo/_base/lang',
         'dojo/_base/html',
         'dojo/sniff',
@@ -98,6 +100,7 @@ function(
     Graphic, 
     SimpleMarkerSymbol, 
     PictureMarkerSymbol,
+    Point,
     Polyline, 
     SimpleLineSymbol, 
     Polygon, 
@@ -119,6 +122,7 @@ function(
     SRUtils, 
     geodesicUtils, 
     geometryEngine, 
+    SpatialReference,     
     lang, 
     html, 
     has, 
@@ -3400,6 +3404,11 @@ function(
                     this.moveDrawingGraphic(label_index, measure_index + 1);
             }
 
+            // Call for refresh to drawings list - settimeout used as hack to make sure all actions complete before updating list
+            setTimeout(lang.hitch(this, function () {
+                this.listGenerateDrawTable()
+            }, 500));
+
             //Reference
             labelGraphic.measureParent = graphic;
             graphic.measure = {
@@ -3475,15 +3484,18 @@ function(
                     this._getGeometryService();
                     var params = new ProjectParameters();
                     params.geometries = [geometry];
-                    params.outSR = {wkid:4326};
-                    this._gs.project(params).then(lang.hitch(function(evt){
+                    params.outSR = new SpatialReference({wkid:4326});
+
+                    this._gs.project(params,lang.hitch(this, function(evt){
                         var coords = this._prepareLonLat(evt.geometries[0], this.pointUnitSelect.value == "DMS");
                         var existingMeasureGraphic =
                                 (graphic.measure && graphic.measure.graphic && graphic.measure.graphic.measureParent)
                                 ? graphic.measure.graphic
                                 : false;
                         this._setMeasureTextGraphic(graphic, coords, existingMeasureGraphic);
-                    }));
+                    }), function(e){
+                        if (e) console.log(e);
+                    });
                     return;
                 }
 

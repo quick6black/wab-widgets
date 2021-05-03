@@ -1,22 +1,18 @@
-define([
-  'dojo/_base/declare',
-  'jimu/BaseWidgetSetting'
-],
-function(declare, BaseWidgetSetting) {
+define(['dojo/_base/declare', 'jimu/BaseWidgetSetting'], function (declare, BaseWidgetSetting) {
 
   return declare([BaseWidgetSetting], {
     baseClass: 'llur-editor-setting',
 
-    postCreate: function(){
+    postCreate: function postCreate() {
       //the config object is passed in
       this.setConfig(this.config);
     },
 
-    setConfig: function(config){
+    setConfig: function setConfig(config) {
       this.textNode.value = config.serviceUrl;
     },
 
-    getConfig: function(){
+    getConfig: function getConfig() {
       //WAB will get config object through this method
       return {
         serviceUrl: this.textNode.value
