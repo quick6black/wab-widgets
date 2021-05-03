@@ -50,11 +50,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
     },
 
     _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {
-      if (featureSet && featureSet.features && featureSet.features.length > 0) {
-        var layer = featureSet.features[0].getLayer();
-        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-          return true;
-        }
+      var layer = featureSet.features[0].getLayer();
+      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+        return true;
       }
 
       return false;

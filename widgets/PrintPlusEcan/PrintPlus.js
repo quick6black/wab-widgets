@@ -43,6 +43,9 @@ define([
   'jimu/dijit/LoadingShelter',
   'jimu/dijit/Message',
   'jimu/portalUrlUtils',
+  'jimu/portalUtils',
+  'dojo/cookie',
+  "dojo/json",  
   // These classes are used only in PrintPlus.html and/or PrintResult.html
   'dijit/form/Button',
   'dijit/form/CheckBox',
@@ -99,8 +102,11 @@ define([
   printResultTemplate,
   LoadingShelter,
   Message,
-  portalUrlUtils
-) {
+  portalUrlUtils,
+  portalUtils,
+  cookie,
+  dojoJSON
+  ) {
 
   // Main print dijit
   var PrintDijit = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -189,6 +195,7 @@ define([
       if (this.printTask._createOperationalLayers) {
         aspect.after(this.printTask, '_createOperationalLayers', lang.hitch(this, '_excludeInvalidLegend'));
       }
+      
     },
     
     _getPrintTaskInfo: function(handle) {
@@ -265,6 +272,33 @@ define([
     },
 
     printDefInspector: function(printDef) {
+
+     /* Change 2021-03-31 - fix token missing and logged into a portal */
+      var portal = portalUtils.getPortal(this.appConfig.portalUrl);
+      if (portal && portal.credential) {
+
+        //var portal_url = new URL(this.appConfig.portalUrl);
+        //var base_url = portal_url.protocol + "//" + portal_url.hostname;
+
+        // Temp fix while working out IE compatable alternative
+        var base_url = "https://ecanmaps.ecan.govt.nz";
+
+
+        var c = cookie("esri_auth");
+        var token = dojoJSON.parse(c, true).token;
+
+        array.forEach(printDef.operationalLayers, lang.hitch(this, function(printDefLayer) {
+          //check layer object in ma for token
+          var layerid = printDefLayer.id;
+          var layer = this.map.getLayer(layerid);
+          if (layer && layer.url.startsWith(base_url)) {
+            printDefLayer.token = token;
+          }
+
+        }));
+      }
+      /* End change */
+
       return printDef;
     },
 

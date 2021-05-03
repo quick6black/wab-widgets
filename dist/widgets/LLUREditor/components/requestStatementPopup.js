@@ -21,7 +21,7 @@ define(["dojo/_base/declare", "jimu/BaseWidgetSetting", "dijit/_WidgetsInTemplat
 
         var values = radiusField.domain.codedValues;
         var defValue = arrayUtils.filter(values, function (value) {
-          return value.code === 0;
+          return value.code === 0 || value.code === "0";
         })[0];
 
         //create a new dropdown for the search radius types

@@ -1,0 +1,22 @@
+<div data-dojo-attach-point="searchFormNode">
+	<div class="gallery-content">
+		<p data-dojo-attach-point="searchDescriptionNode"></p>
+	</div>
+	<div>
+		<FORM data-dojo-event="onSubmit: searchText" data-dojo-type="dijit/form/FORM" data-dojo-attach-point="form" method="submit">
+			<div class="input-group">
+				<input data-dojo-attach-point="searchInputNode" class="form-control" autofocus type="text" placeholder="Search">
+				<div class="input-group-btn">
+					<button class="btn btn-default" type="submit"
+						data-dojo-attach-event="onClick:searchText">
+						<i class="glyphicon glyphicon-search"></i>
+					</button>
+				</div>
+			</div>
+		</FORM>
+	</div>
+	<div class="gallery-search-options">
+		<a class="btn btn-xs btn-default" href="#" data-dojo-attach-event="click:searchByCategory">Categories</a>
+		<a class="btn btn-xs btn-default" href="#" data-dojo-attach-event="click:searchByOrganisation">Districts</a>
+	</div>
+</div>

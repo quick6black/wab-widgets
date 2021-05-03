@@ -157,6 +157,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'dojo/Defer
       query.objectIds = objectIds;
       query.outFields = fields;
       query.returnGeometry = true;
+      query.outSpatialReference = layer.getMap().spatialReference;
 
       // Create query task and execute against it - used instead of feature layer to override auto generalisation.  Note also checks for dynamic layers and alters url if found.
       var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0, layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;

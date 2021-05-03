@@ -12,8 +12,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         }
         return false;
       } else {
-        return;
-        featureSet.features[0].geometry.type === 'polygon';
+        return featureSet.features.length > 0 && featureSet.features[0].geometry.type === 'polygon';
       }
     },
 
@@ -33,26 +32,20 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
         if (this._checkForFeatureLayers(featureSet)) {
           // Query the source layer to get the ungeneralised version of the feature
           this._queryForFeatures(featureSet).then(function (results) {
-            setTimeout(function () {
-              myWidget.requestStatement(results);
-            }, 1000);
+            myWidget.requestStatement(results);
           }, function (error) {
             alert(error);
           });
         } else {
-          setTimeout(function () {
-            myWidget.requestStatement(featureSet);
-          }, 1000);
+          myWidget.requestStatement(featureSet);
         }
       }));
     },
 
     _checkForFeatureLayers: function _checkForFeatureLayers(featureSet) {
-      if (featureSet && featureSet.features && featureSet.features.length > 0) {
-        var layer = featureSet.features[0].getLayer();
-        if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
-          return true;
-        }
+      var layer = featureSet.features[0].getLayer();
+      if (layer.capabilities && layer.capabilities.indexOf("Query") >= 0 && layer.url !== null) {
+        return true;
       }
 
       return false;
@@ -86,6 +79,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dojo/_base/lang', 'jimu/BaseF
       query.objectIds = objectIds;
       query.outFields = fields;
       query.returnGeometry = true;
+      query.outSpatialReference = layer.getMap().spatialReference;
 
       // CHANGE 2019-02-18 : Check for dynamic layer service and alter layer url if found 
       var serviceUrl = layer.url.indexOf('dynamicLayer') < 0 ? layer.url : layer.url.substring(0, layer.url.lastIndexOf("Server/") + 7) + layer.source.mapLayerId;
