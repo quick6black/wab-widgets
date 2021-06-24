@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ define(["dojo/_base/declare",
 
       i18n: i18n,
       templateString: template,
+
+      /* ECAN CHANGES: BEGIN */
+
       curated1Filter: null,
       curated2Filter: null,
       curated3Filter: null,
@@ -38,6 +41,8 @@ define(["dojo/_base/declare",
       curated8Filter: null,
       curated9Filter: null,
       curated10Filter: null,
+
+      /* ECAN CHANGES : END */
 
       postCreate: function() {
         this.inherited(arguments);
@@ -62,6 +67,9 @@ define(["dojo/_base/declare",
         var hasUsername = (typeof context.username === "string" && context.username.length > 0);
         //var hasOrgId = (typeof context.orgId === "string" && context.orgId.length > 0);
         var options = this.getConfig().scopeOptions;
+
+        /* ECAN CHANGES: BEGIN */
+
         this.curated1Filter = options.Curated1.filter;
         this.curated2Filter = options.Curated2.filter;
         this.curated3Filter = options.Curated3.filter;
@@ -72,6 +80,9 @@ define(["dojo/_base/declare",
         this.curated8Filter = options.Curated8.filter;
         this.curated9Filter = options.Curated9.filter;
         this.curated10Filter = options.Curated10.filter;
+
+        /* ECAN CHANGES: END */
+
         var activeNode = null;
 
         var initOption = function(name, node) {
@@ -92,6 +103,9 @@ define(["dojo/_base/declare",
             node.style.display = "none";
           }
         };
+
+        /* ECAN CHANGES: BEGIN */
+
         initOption("MyContent", this.MyContentToggle);
         initOption("MyOrganization", this.MyOrganizationToggle);
         initOption("Curated1", this.Curated1Toggle);
@@ -135,6 +149,9 @@ define(["dojo/_base/declare",
             activeNode = this.MyContentToggle;
           }
         }
+
+        /* ECAN CHANGES: END */
+
         if (activeNode) {
           domClass.add(activeNode, "active");
           this.scopePlaceholderText.innerHTML = activeNode.innerHTML;
@@ -186,6 +203,9 @@ define(["dojo/_base/declare",
         //console.warn("scope",scope);
 
         var q = null;
+
+        /* ECAN CHANGES: BEGIN */
+
         var curated1Filter = this.curated1Filter;
         var curated2Filter = this.curated2Filter;
         var curated3Filter = this.curated3Filter;
@@ -271,6 +291,8 @@ define(["dojo/_base/declare",
             task.scopeIsArcGISOnline = true;
           }
         }
+
+        /* ECAN CHANGES: END */
 
         if (q !== null && q.length > 0) {
           q = "(" + q + ")";

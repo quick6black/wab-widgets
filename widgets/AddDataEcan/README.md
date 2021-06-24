@@ -10,8 +10,7 @@ This is a customised variant of the standard Add Data widget [http://doc.arcgis.
 #### Notes
 The following are changes that are still needed to be implemented:
 
-- The Open Data details option is currently hard coded for "http://opendata.canterburymaps.govt.nz/datasets/" - this should be updated at some point to be made a configurable item.
-- Hard coding in the widget related to the namespace means that this widget must be deployed over the top of the standard AddData widget as opposed to side by side.   
+- The Open Data details option is currently hard coded for "https://opendata.canterburymaps.govt.nz/datasets/" - this should be updated at some point to be made a configurable item.
 
 #### Demo
 To be deployed in the future
@@ -27,3 +26,8 @@ To be deployed in the future
 **16 April 2019**
 
 -  **Upgraded to WAB 2.12 code.** Merged changes with base v2.12 Add Data widget.
+
+
+**23 June 2021**
+
+-  **Upgraded to WAB 2.20 code.** Merged changes with base v2.20 Add Data widget.  These changes include support for adding in WMTS OGC web services. 

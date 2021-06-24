@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ define(["dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/_base/array",
     "dojo/promise/all",
+    "dojo/_base/connect",
     "dojo/Deferred",
     "dojo/json",
     "dojo/i18n!../nls/strings",
@@ -35,9 +36,14 @@ define(["dojo/_base/declare",
     "esri/layers/LayerDrawingOptions",
     "esri/layers/MosaicRule",
     "esri/layers/RasterFunction",
+    "esri/layers/TileInfo",
     "esri/layers/VectorTileLayer",
+    "esri/layers/WFSLayer",
     "esri/layers/WMSLayer",
     "esri/layers/WMSLayerInfo",
+    "esri/layers/WMTSLayer",
+    "esri/layers/WMTSLayerInfo",
+    "esri/layers/WebTiledLayer",
     "esri/dijit/PopupTemplate",
     "esri/InfoTemplate",
     "esri/renderers/jsonUtils",
@@ -45,10 +51,12 @@ define(["dojo/_base/declare",
     "esri/SpatialReference",
     "jimu/utils"
   ],
-  function(declare, lang, array, all, Deferred, djJson, i18n, util, esriLang, esriRequest, agsUtils,
+  function(declare, lang, array, connection, all, Deferred, djJson, i18n, util,
+    esriLang, esriRequest, agsUtils,
     ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer,
     DynamicLayerInfo, FeatureLayer, ImageParameters, ImageServiceParameters, KMLLayer,
-    LayerDrawingOptions, MosaicRule, RasterFunction, VectorTileLayer, WMSLayer, WMSLayerInfo,
+    LayerDrawingOptions, MosaicRule, RasterFunction, TileInfo, VectorTileLayer,
+    WFSLayer, WMSLayer, WMSLayerInfo, WMTSLayer, WMTSLayerInfo, WebTiledLayer,
     PopupTemplate, InfoTemplate, jsonRendererUtils, Extent, SpatialReference, jimuUtils) {
 
     return declare(null, {
@@ -81,8 +89,12 @@ define(["dojo/_base/declare",
           return this._addMapService();
         } else if (item.type === "Vector Tile Service") {
           return this._addVectorTileService();
+        } else if (item.type === "WFS") {
+          return this._addWFS();
         } else if (item.type === "WMS") {
           return this._addWMS();
+        } else if (item.type === "WMTS") {
+          return this._addWMTS();
         } else {
           // TODO reject
           console.warn("Unsupported item type: ", item.type);
@@ -247,12 +259,49 @@ define(["dojo/_base/declare",
         return dfd;
       },
 
+      _addWFS: function() {
+        var self = this,
+          dfd = new Deferred();
+        self._readItemJsonData().then(function(result) {
+          var itemData = result || {};
+          return self._newWFSLayer(itemData);
+        }).then(function(layer) {
+          if (layer) {
+            layer.title = self.item.title;
+          }
+          self._addLayer(layer);
+          dfd.resolve(layer);
+        }).otherwise(function(error) {
+          console.log("Error adding WFS",error)
+          dfd.reject(error);
+        });
+        return dfd;
+      },
+
       _addWMS: function() {
         var self = this,
           dfd = new Deferred();
         self._readItemJsonData().then(function(result) {
           var itemData = result || {};
           return self._newWMSLayer(itemData);
+        }).then(function(layer) {
+          if (layer) {
+            layer.title = self.item.title;
+          }
+          self._addLayer(layer);
+          dfd.resolve(layer);
+        }).otherwise(function(error) {
+          dfd.reject(error);
+        });
+        return dfd;
+      },
+
+      _addWMTS: function() {
+        var self = this,
+          dfd = new Deferred();
+        self._readItemJsonData().then(function(result) {
+          var itemData = result || {};
+          return self._newWMTSLayer(itemData);
         }).then(function(layer) {
           if (layer) {
             layer.title = self.item.title;
@@ -542,19 +591,9 @@ define(["dojo/_base/declare",
           if (layerObject.layerDefinition && layerObject.layerDefinition.definitionExpression) {
             layer.setDefinitionExpression(layerObject.layerDefinition.definitionExpression, true);
           }
-
-          /* BEGIN CHANGE: ECAN - Enable popups for Imargey service layers.  Original ESRI code was commented out by them */
-
-          //  setInfoTemplate
           if (!layerObject.disablePopup && layerObject.popupInfo) {
-            var jsonPopInfo, infoTemplate;
-            jsonPopInfo = djJson.parse(djJson.stringify(layerObject.popupInfo));
-            infoTemplate = new PopupTemplate(jsonPopInfo);
-            layer.setInfoTemplate(infoTemplate);
-          }
-
-          /* END CHANGE */
-
+            layer.setInfoTemplate(new PopupTemplate(layerObject.popupInfo));
+          }          
           /*
           rasterUtil.populateLayerWROInfo(layer,true).then(
             function(){dfd.resolve(layer);},
@@ -852,6 +891,82 @@ define(["dojo/_base/declare",
         return dfd;
       },
 
+      _newWFSLayer: function(itemData) {
+        var dfd = new Deferred();
+        try {
+          var wfsJSON;
+          var id = this._generateLayerId();
+          if (itemData && itemData.wfsInfo && itemData.layerDefinition) {
+            wfsJSON = {
+              id: id,
+              mode: itemData.mode,
+              showLabels: true,
+              title: itemData.title,
+              url: this._checkMixedContent(itemData.url),
+              // visible: itemData.visibility,
+              customParameters: itemData.wfsInfo.customParameters,
+              maxFeatures: itemData.wfsInfo.maxFeatures,
+              name: itemData.wfsInfo.name,
+              swapXY: itemData.wfsInfo.swapXY,
+              version: itemData.wfsInfo.version,
+              geometryType: itemData.layerDefinition.geometryType,
+              labelingInfo: itemData.layerDefinition.drawingInfo.labelingInfo,
+              //wkid: itemData.layerDefinition.spatialReference.wkid
+            };
+          } else {
+            var serviceUrl = this.serviceUrl;
+            if (serviceUrl) {
+              util.loadWFSByUrl(dfd,map,this,serviceUrl,id,false);
+            } else {
+              dfd.reject(new Error("Error adding WFS, no URL"));
+            }
+            return dfd;
+          }
+
+          var layer = new WFSLayer();
+          var h1 = layer.on("error", function(layerError) {
+            if (h1) h1.remove();
+            var error = layerError.error;
+            dfd.reject(error);
+          });
+          layer.fromJson(wfsJSON, function() {
+            try {
+              if (h1) h1.remove();
+              if (itemData && itemData.wfsInfo && itemData.layerDefinition) {
+                if (esriLang.isDefined(itemData.opacity)) {
+                  layer.setOpacity(itemData.opacity);
+                }
+                if (esriLang.isDefined(itemData.visibility)) {
+                  layer.setVisibility(itemData.visibility);
+                }
+                if (itemData.minScale || itemData.maxScale) {
+                  layer.setScaleRange(itemData.minScale, itemData.maxScale);
+                }
+                var drawingInfo = itemData.layerDefinition.drawingInfo;
+                if (drawingInfo && drawingInfo.renderer) {
+                  layer.renderer = jsonRendererUtils.fromJson(
+                    drawingInfo.renderer,
+                    {geometryType: wfsJSON.geometryType}
+                  );
+                }
+                var ignorePopups = false;
+                if (!ignorePopups && itemData.popupInfo) {
+                  layer.setInfoTemplate(new PopupTemplate(itemData.popupInfo));
+                }
+              }
+              dfd.resolve(layer);
+            } catch(ex2) {
+              console.error("Error adding WFS",ex2);
+              dfd.reject(ex);
+            }
+          });
+        } catch(ex) {
+          console.error("Error adding WFS",ex);
+          dfd.reject(ex);
+        }
+        return dfd;
+      },
+
       _newWMSLayer: function(itemData) {
         var self = this;
         var item = this.item;
@@ -929,6 +1044,41 @@ define(["dojo/_base/declare",
           }
         });
         return dfd;
+      },
+
+      _newWMTSLayer: function(itemData) {
+        //console.log("_newWMTSLayer.itemData",itemData)
+        if (itemData) {
+
+          var layer = new WebTiledLayer(itemData.templateUrl, {
+            id: this._generateLayerId(),
+            visible: (itemData.visibility !== null) ? itemData.visibility : true,
+            opacity: itemData.opacity,
+            copyright: itemData.copyright,
+            fullExtent: itemData.fullExtent && new Extent(itemData.fullExtent),
+            initialExtent: itemData.fullExtent && new Extent(itemData.fullExtent),
+            subDomains: itemData.subDomains,
+            tileInfo: itemData.tileInfo ? new TileInfo(itemData.tileInfo) : null,
+            refreshInterval: itemData.refreshInterval,
+            wmtsInfo: itemData.wmtsInfo
+          });
+
+          if (esriLang.isDefined(itemData.minScale) || esriLang.isDefined(itemData.maxScale)) {
+            if (layer.loaded) {
+              layer.setScaleRange(itemData.minScale, itemData.maxScale);
+            } else {
+              connection.connect(layer, "onLoad", function () {
+                layer.setScaleRange(itemData.minScale, itemData.maxScale);
+              });
+            }
+          }
+
+          return this._waitForLayer(layer);
+        } else {
+          var dfd = new Deferred();
+          dfd.resolve();
+          return dfd;
+        }
       },
 
       _processFeatureLayer: function(featureLayer, item, itemData) {

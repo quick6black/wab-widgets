@@ -3,8 +3,8 @@
   "platform": "HTML",
   "author": "Esri, with Modifications by Environment Canterbury GIS Team",
   "description": "Modified version of the standard ESRI WAB AddData widget, modified to customise certains actions, such as the location opened when the layer details link is clicked, and additional currated groups",
-  "version": "2.17",
-  "wabVersion": "2.17",
+  "version": "2.20",
+  "wabVersion": "2.20",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {

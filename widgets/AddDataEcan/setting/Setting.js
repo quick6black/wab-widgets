@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2015 Esri. All Rights Reserved.
+// Copyright © Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -118,7 +118,8 @@ define(["dojo/_base/declare",
         setOption(options,"ArcGISOnline",
           this.ArcGISOnlineCheckBox,this.ArcGISOnlineTextBox);
 		
-		//ECan
+		    /* ECAN CHANGE: BEGIN */ 
+        
         setOption(options, "Curated1",
             this.Curated1CheckBox, this.Curated1TextBox);
         options.Curated1.filter = getStr(this.Curated1FilterTextBox);
@@ -149,13 +150,18 @@ define(["dojo/_base/declare",
         setOption(options, "Curated10",
             this.Curated10CheckBox, this.Curated10TextBox);
         options.Curated10.filter = getStr(this.Curated10FilterTextBox);
-		//
+        
+        /* ECAN CHANGE: END */ 
+
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);
 		
-		//ECan
-		setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
-		//
+        /* ECAN CHANGE: BEGIN */ 
+
+		    setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
+
+        /* ECAN CHANGE: END */ 
+
 
         this.config.addFromFile.maxRecordCount = 1000;
         /*
@@ -238,7 +244,9 @@ define(["dojo/_base/declare",
           this.MyOrganizationCheckBox,this.MyOrganizationTextBox,true);
         setOption(options,"ArcGISOnline",
           this.ArcGISOnlineCheckBox,this.ArcGISOnlineTextBox,true);
-		 //ECan
+
+        /* ECAN CHANGE: BEGIN */ 
+
         setOption(options, "Curated1",
             this.Curated1CheckBox, this.Curated1TextBox, true);
         setStr(options.Curated1.filter, this.Curated1FilterTextBox);
@@ -269,14 +277,17 @@ define(["dojo/_base/declare",
         setOption(options, "Curated10",
             this.Curated10CheckBox, this.Curated10TextBox, true);
         setStr(options.Curated10.filter, this.Curated10FilterTextBox);
-		//
+
+        /* ECAN CHANGE: END */ 
+
         setOption(this.config,"addFromUrl",this.addFromUrlCheckBox);
         setOption(this.config,"addFromFile",this.addFromFileCheckBox);
 		
-		//ECan
-		setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
-		//
-		  
+        /* ECAN CHANGE: BEGIN */ 
+
+    		setOption(this.config,"CMapsVersion",this.isCMapsCheckBox);  
+
+        /* ECAN CHANGE: END */ 
 
         /*
         this.maxRecordBox.set("value",1000);

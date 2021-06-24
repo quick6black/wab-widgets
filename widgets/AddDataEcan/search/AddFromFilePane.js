@@ -90,7 +90,10 @@ define(["dojo/_base/declare",
             "url": "images/filetypes/csv.svg"
           },{
             "type": "kml",
-            "url": "images/filetypes/kml.svg"
+            "url": "images/filetypes/kml.svg",
+          },{
+            "type": "geojson",
+            "url": "images/filetypes/geojson.svg"
           }];
         }
         this.inherited(arguments);
@@ -132,6 +135,12 @@ define(["dojo/_base/declare",
             if (fileInfo.ok) {
               self._execute(fileInfo);
             }
+            /*
+            [Web AppBuilder for ArcGIS] [Widget][REG]ENU[Safari/Edge/Chrome]:
+            Supported file cannot be added again after it has been removed on
+            Add Data widget. #18517
+            */
+            self.fileNode.value = null;
           }
         }));
 
@@ -208,6 +217,7 @@ define(["dojo/_base/declare",
                 '<li>' + i18n.addFromFile.types.Shapefile + '</li>' +
                 '<li>' + i18n.addFromFile.types.CSV + '</li>' +
                 '<li>' + i18n.addFromFile.types.KML + '</li>' +
+                '<li>' + i18n.addFromFile.types.GeoJSON + '</li>' +
                 '<li><span class="note">' + i18n.addFromFile.maxFeaturesAllowedPattern
                           .replace("{count}", this.maxRecordCount) + '</span></li>' +
               '</ul>' +
@@ -246,10 +256,13 @@ define(["dojo/_base/declare",
           }
           loader._setFeatureLayerInfoTemplate(featureLayer,null,null);
           if (featureLayer.fullExtent) {
-            if (!fullExtent) {
-              fullExtent = featureLayer.fullExtent;
-            } else {
-              fullExtent = fullExtent.union(featureLayer.fullExtent);
+            var extentCenter = featureLayer.fullExtent.getCenter();
+            if(extentCenter.x && extentCenter.y) {
+              if (!fullExtent) {
+                fullExtent = featureLayer.fullExtent;
+              } else {
+                fullExtent = fullExtent.union(featureLayer.fullExtent);
+              }
             }
           }
           layers.push(featureLayer);
@@ -349,7 +362,14 @@ define(["dojo/_base/declare",
         var fileName = fileInfo.fileName;
         var self = this, formData = new FormData();
         formData.append("file",fileInfo.file);
-        self._analyze(job,formData).then(function(){
+        self._analyze(job,formData).then(function(response){
+          if(response && response.publishParameters && response.publishParameters.locationType && 
+            response.publishParameters.locationType === "unknown") {
+            new Message({
+              titleLabel: i18n._widgetLabel,
+              message: i18n.addFromFile.featureLocationsCouldNotBeFound
+            });
+          }
           return self._generateFeatures(job,formData);
         }).then(function(response){
           //console.warn("Generated",response);

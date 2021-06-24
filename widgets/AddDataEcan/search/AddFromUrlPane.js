@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,19 +40,19 @@ define(["dojo/_base/declare",
     "esri/layers/KMLLayer",
     "esri/layers/StreamLayer",
     "esri/layers/VectorTileLayer",
-    "esri/layers/WFSLayer",
     "esri/layers/WMSLayer",
     "esri/layers/WMTSLayer",
     "esri/InfoTemplate",
     "jimu/dijit/Message",
-    "dijit/form/Select"
+    "dijit/form/Select",
+    "dijit/form/ValidationTextBox"
   ],
   function(declare, lang, array, on, keys, Deferred, all, domClass, win, Viewport,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
     LayerLoader, util, ArcGISDynamicMapServiceLayer,
     ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, CSVLayer,
     FeatureLayer, GeoRSSLayer, ImageParameters, KMLLayer, StreamLayer,
-    VectorTileLayer, WFSLayer, WMSLayer, WMTSLayer,
+    VectorTileLayer, WMSLayer, WMTSLayer,
     InfoTemplate, Message) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -68,7 +68,8 @@ define(["dojo/_base/declare",
         this.inherited(arguments);
         this._updateExamples("ArcGIS");
         //this._restore();
-
+        this.urlTextBox.set('invalidMessage', i18n.addFromUrl.invalidURL);
+        
         var self = this;
         this.own(on(this.urlTextBox, "keyup", function(evt) {
           if (evt.keyCode === keys.ENTER) {
@@ -120,7 +121,7 @@ define(["dojo/_base/declare",
         var type = this.typeSelect.get("value");
         var url = lang.trim(this.urlTextBox.value);
         if (url.length > 0) {
-          if (url.indexOf("http://") === 0 || url.indexOf("https://") === 0) {
+          if (url) { //(url.indexOf("http://") === 0 || url.indexOf("https://") === 0) {
             ok = true;
           }
         }
@@ -304,14 +305,9 @@ define(["dojo/_base/declare",
           layer = new WMTSLayer(url, {
             id: id
           });
-        } else if (type === "WFS") {
-          layer = new WFSLayer({
-            id: id,
-            url: url,
-            infoTemplate: new InfoTemplate()
-          });
           this._waitThenAdd(dfd, map, type, loader, layer);
-          console.warn("WFSLayer", layer);
+        } else if (type === "WFS") {
+          util.loadWFSByUrl(dfd,map,loader,url,id,true);
         } else if (type === "KML") {
           layer = new KMLLayer(url, {
             id: id

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2018 Esri. All Rights Reserved.
+// Copyright © Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ define(["dojo/_base/declare",
       },
 	  
   	  openDataUrl: function (item) {
-        var url = "http://opendata.canterburymaps.govt.nz/datasets/" + encodeURIComponent(item.id);
+        var url = "https://opendata.canterburymaps.govt.nz/datasets/" + encodeURIComponent(item.id);
 
         // Check url to see if it is a feature layer 
         var urlParts = item.url.split("/");
